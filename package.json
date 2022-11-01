@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build:base": "vue-cli-service build",
+    "build": "vue-cli-service build",
     "prepare": "husky install",
     "lint": "eslint --fix",
     "lint-staged": "lint-staged",
