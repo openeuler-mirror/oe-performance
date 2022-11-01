@@ -30,9 +30,13 @@
   
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus'
 
-import { userlogin } from '@/api/user'
+import { useUserInfo } from '@/stores/userInfo'
+
+const userInfoStore = useUserInfo()
+const router = useRouter()
 
 const loginType = ref('username')
 
@@ -42,9 +46,10 @@ const loginForm = reactive({
 })
 
 const loginRequest = () => {
-  userlogin(loginForm.username, loginForm.password)
-    .then((res) => {
-      console.log(res)
+  userInfoStore.userLogin(loginForm.username, loginForm.password)
+    .then(() => {
+      ElMessage.success('登陆成功')
+      router.push('/index')
     }).catch((err) => {
       ElMessage.error(err.message)
     })

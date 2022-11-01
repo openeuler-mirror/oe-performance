@@ -9,9 +9,8 @@ const login = (options) => {
 
   return createResponseBody(
     {
-      data: {
-        token: '1234qwer'
-      }
+      username: 'admin',
+      token: '1234qwer'
     },
     '登录成功',
     200,
@@ -19,4 +18,11 @@ const login = (options) => {
   );
 };
 
+const logout = () => {
+  return createResponseBody(
+    {}, '登出成功', 200, {'Custom-Header': Mock.mock('@guid')}
+  )
+}
+
 Mock.mock(/\/test\/login/, 'post', login);
+Mock.mock(/\/test\/logout/, 'post', logout);
