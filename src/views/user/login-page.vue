@@ -15,7 +15,7 @@
                 <el-input v-model="loginForm.password" show-password/>
               </el-form-item>
               <el-form-item>
-                <el-button class="login-btn" type="primary">登录</el-button>
+                <el-button class="login-btn" type="primary" @click="loginRequest">登录</el-button>
               </el-form-item>
             </el-form>
           </el-tab-pane>
@@ -30,6 +30,9 @@
   
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
+import { ElMessage } from 'element-plus'
+
+import { userlogin } from '@/api/user'
 
 const loginType = ref('username')
 
@@ -37,6 +40,15 @@ const loginForm = reactive({
   username: '',
   password: ''
 })
+
+const loginRequest = () => {
+  userlogin(loginForm.username, loginForm.password)
+    .then((res) => {
+      console.log(res)
+    }).catch((err) => {
+      ElMessage.error(err.message)
+    })
+}
 </script>
   
 <style lang="scss" scoped>
@@ -71,11 +83,11 @@ const loginForm = reactive({
       top: 30vh;
       left: 50%;
       margin-left: -150px;
+      :deep(.el-tabs__header) {
+        padding-left: 40px;
+      }
       :deep(.el-tabs__nav-wrap:after) {
         display: none;
-      }
-      :deep(.el-tabs__nav-scroll) {
-        padding-left: 40px;
       }
       .username-login-form {
         margin-top:20px;
