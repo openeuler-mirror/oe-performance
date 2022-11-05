@@ -62,6 +62,24 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         meta: {
           title: 'normalBaseline'
         }
+      },
+      {
+        path: '/comparativeSearch',
+        name: 'comparativeSearch',
+        component: RouteView,
+        meta: {
+          title: 'comparativeSearch'
+        },
+        children: [
+          {
+            path: 'basicPerformance',
+            name: 'basicPerformance',
+            component: () => import('@/views/compare/basic-performance.vue'),
+            meta: {
+              title: 'basicPerformance'
+            }
+          }
+        ]
       }
     ]
   },
