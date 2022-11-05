@@ -33,7 +33,7 @@
             <template #title>
               <span>基础性能基线</span>
             </template>
-            <el-menu-item index="2-1">CPU</el-menu-item>
+            <router-link to="/normalBaseline/detail"><el-menu-item index="2-1">CPU</el-menu-item></router-link>
             <el-menu-item index="2-2">内存</el-menu-item>
             <el-menu-item index="2-3">存储</el-menu-item>
             <el-menu-item index="2-4">网络</el-menu-item>

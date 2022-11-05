@@ -56,12 +56,30 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         ]
       },
       {
-        path: 'normalBaseline',
+        path: '/normalBaseline',
         name: 'normalBaseline',
-        component: () => import('@/views/template-page.vue'),
+        component: RouteView,
         meta: {
           title: 'normalBaseline'
-        }
+        },
+        children: [
+          {
+            path: '/normalBaseline/detail',
+            name: 'detail',
+            component: () => import('@/views/detail/baseline-detail.vue'),
+            meta: {
+              title: 'detail'
+            }
+          },
+          {
+            path: '/normalBaseline/workLoadDetail',
+            name: 'workLoadDetail',
+            component: () => import('@/views/detail/work-load-detail.vue'),
+            meta: {
+              title: 'workLoadDetail'
+            }
+          }
+        ]
       }
     ]
   },
