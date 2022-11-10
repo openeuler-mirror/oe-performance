@@ -339,7 +339,11 @@
 </template>
   
 <script setup lang="ts">
+import { onMounted } from 'vue'
+
 const cardStyle = { padding: '0' }
+
+onMounted(() => {})
 </script>
   
 <style lang="scss" scoped>

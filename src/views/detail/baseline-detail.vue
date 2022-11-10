@@ -1,6 +1,11 @@
 <template>
   <div>
-    <el-card class="baseline-detail" v-loading="loading">
+    <div
+      v-show="loading"
+      class="loading-box"
+      v-loading="loading"
+      element-loading-text="加载中..."></div>
+    <el-card class="baseline-detail" v-show="!loading">
       <div class="main-title">
         <span>unixbench信息总览 >> UUID: test324802348</span>
       </div>
@@ -695,7 +700,7 @@
                   class="sub-item"
                   shadow="never"
                   :body-style="cardStyle">
-                  <span class="item-title">操作系统版本（待开发）</span>
+                  <span class="item-title">操作系统版本</span>
                   <el-tooltip
                     effect="dark"
                     content="操作系统版本"
@@ -1367,13 +1372,19 @@ onMounted(async () => {
   console.log(res.data)
   const { code, results } = res.data
   if (code === 200) {
-    state.detailInfo = results[0] 
+    state.detailInfo = results[0]
     loading.value = false
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.loading-box {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+}
 .baseline-detail {
   /* 顶部标题 */
   .main-title {
@@ -1413,7 +1424,10 @@ onMounted(async () => {
         }
         .item-detail {
           background-color: var(--oe-perf-bg-layout);
-          padding-left: 50px;
+          padding-left: 40px;
+          .item-title {
+            font-weight: normal;
+          }
         }
         .bottom-item {
           border-left: none;
@@ -1437,7 +1451,7 @@ onMounted(async () => {
               padding: var(--oe-perf-padding);
             }
             /* 去除折叠面板自带的下边框 */
-            .collapse-item ::v-deep {
+            .collapse-item :deep {
               .el-collapse-item__header {
                 border: none;
                 font-size: var(--oe-perf-font-size-header);
