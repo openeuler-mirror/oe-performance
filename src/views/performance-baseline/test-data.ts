@@ -42,53 +42,88 @@ export const allColumns = () => {
     }
   ]
 }
-
+const temp = [
+  {
+    index: 0,
+    check: false,
+    testCase: '用例一',
+    missionName: '任务一',
+    dataSource: 'openEuler',
+    tester: 'chen',
+    serverModel: 'Taishang200',
+    dataState: '待审核',
+    cpuNums: '8',
+    cpuMHz: '2000',
+    pageTableSize: '4k',
+    memoryModel: '312*32GB 2R DDR4 2933',
+    describe: 'openEuler',
+    testCaseName: 'TPC-DS'
+  },
+  {
+    index: 1,
+    check: false,
+    testCase: '用例二',
+    missionName: '任务二',
+    dataSource: 'Windows',
+    tester: 'zilanser',
+    serverModel: 'Taishang200',
+    dataState: '审核中',
+    cpuNums: '8',
+    cpuMHz: '2000',
+    pageTableSize: '4k',
+    memoryModel: '312*32GB 2R DDR4 2933',
+    describe: 'openEuler',
+    testCaseName: 'TPC-DS'
+  },
+  {
+    index: 2,
+    check: false,
+    testCase: '用例四',
+    missionName: '任务四',
+    dataSource: 'Windows',
+    tester: 'zilanser',
+    serverModel: 'Taishang200',
+    dataState: '审核中',
+    cpuNums: '8',
+    cpuMHz: '2000',
+    pageTableSize: '4k',
+    memoryModel: '312*32GB 2R DDR4 2933',
+    describe: 'openEuler',
+    testCaseName: 'TPC-DS'
+  },
+  {
+    index: 3,
+    check: false,
+    testCase: '用例三',
+    missionName: '任务三',
+    dataSource: 'Windows',
+    tester: 'chd',
+    serverModel: 'Taishang200',
+    dataState: '审核中',
+    cpuNums: '8',
+    cpuMHz: '2000',
+    pageTableSize: '4k',
+    memoryModel: '312*32GB 2R DDR4 2933',
+    describe: 'openEuler',
+    testCaseName: 'TPC-DS'
+  },
+  {
+    index: 4,
+    check: false,
+    testCase: '用例五',
+    missionName: '任务五',
+    dataSource: 'Windows',
+    tester: 'zilanser',
+    serverModel: 'Taishang200',
+    dataState: '审核中',
+    cpuNums: '8',
+    cpuMHz: '2000',
+    pageTableSize: '4k',
+    memoryModel: '312*32GB 2R DDR4 2933',
+    describe: 'openEuler',
+    testCaseName: 'TPC-DS'
+  }
+]
 export const tableDatas = () => {
-  return [
-    {
-      check: true,
-      testCase: '用例一',
-      missionName: '任务一',
-      dataSource: 'openEuler',
-      tester: 'chen',
-      serverModel: 'Taishang200',
-      dataState: '待审核',
-      cpuNums: '8',
-      cpuMHz: '2000',
-      pageTableSize: '4k',
-      memoryModel: '312*32GB 2R DDR4 2933',
-      describe: 'openEuler',
-      testCaseName: 'TPC-DS'
-    },
-    {
-      check: false,
-      testCase: '用例四',
-      missionName: '任务四',
-      dataSource: 'Windows',
-      tester: 'zilanser',
-      serverModel: 'Taishang200',
-      dataState: '审核中',
-      cpuNums: '8',
-      cpuMHz: '2000',
-      pageTableSize: '4k',
-      memoryModel: '312*32GB 2R DDR4 2933',
-      describe: 'openEuler',
-      testCaseName: 'TPC-DS'
-    },
-    {
-      check: false,
-      testCase: '用例二',
-      missionName: '任务二',
-      dataSource: 'Centos',
-      tester: 'chd',
-      serverModel: 'Taishang200',
-      dataState: '已审核',
-      cpuNums: '8',
-      cpuMHz: '2000',
-      pageTableSize: '4k',
-      memoryModel: '312*32GB 2R DDR4 2933',
-      describe: 'openEuler',
-      testCaseName: 'TPC-DS'
-    }
-  ]
+  return temp
 }

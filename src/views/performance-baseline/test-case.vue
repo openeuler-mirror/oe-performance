@@ -3,7 +3,9 @@
     <div class="handle-wrapper">
       <div>
         <el-button>数据状态变更</el-button>
-        <el-button type="primary" class="button">对比</el-button>
+        <el-button type="primary" class="button" :disabled="contrastDisable"
+          >对比</el-button
+        >
         <el-button type="primary" class="button">导出</el-button>
       </div>
       <el-input
@@ -25,11 +27,11 @@
           </el-select>
         </template>
         <template #append>
-          <el-button :icon="Search" @click="handleSearch(selectedOption)"/>
+          <el-button :icon="Search" @click="handleSearch(selectedOption)" />
         </template>
       </el-input>
       <div>
-        <el-button :icon="RefreshLeft" class="button">刷新</el-button>
+        <el-button :icon="RefreshLeft" :loading="reFreshLodaing" class="button" @click="handleReFresh">刷新</el-button>
         <el-popover placement="bottom" :width="400" trigger="click">
           <template #reference>
             <el-button :icon="Setting" type="primary" class="button"
@@ -80,7 +82,7 @@
         >数据所用"测试用例名称"一致可以进行对比操作(最多勾选5条)，可以导出当前所选数据。</span
       >
     </div>
-    <el-table :data="tableData">
+    <el-table :data="tableData" :header-cell-style="{background: 'rgb(243,243,243)'}">
       <el-table-column fixed="left" width="150">
         <template #header>
           <el-checkbox v-model="checkAllItems" @change="handleCheckedAllItems">
@@ -88,7 +90,7 @@
           </el-checkbox>
         </template>
         <template #default="scope">
-          <el-checkbox v-model="scope.row.check">
+          <el-checkbox v-model="scope.row.check" @change="handleCheckedItem(scope)">
             {{ scope.row.dataSource }}
           </el-checkbox>
         </template>
@@ -102,15 +104,27 @@
       </el-table-column>
       <el-table-column prop="detail" label="详细数据" fixed="right">
         <template #default>
-          <router-link to="">查看</router-link>
+          <el-button link="" type="primary">查看</el-button>
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      class="pagination"
+      v-model:currentPage="currentPage"
+      v-model:page-size="pageSize"
+      :page-sizes="[10, 20, 30, 40]"
+      :small="small"
+      :disabled="disabled"
+      :background="background"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="10"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
+import { ref, toRaw, watchEffect } from 'vue'
 import {
   Search,
   Setting,
@@ -126,14 +140,11 @@ export interface Column {
 }
 
 const input = ref('')
-const selectedOption = ref('')
-const selectedCase = ref(0)
-const tableData = ref<any>([])
-const tableColumn = ref<Column[]>([])
-const checkAllColumn = ref(true)
-const isIndeterminate = ref(true)
-const checkAllItems = ref(false)
 
+const contrastDisable = ref(true)
+const reFreshLodaing = ref(false)
+
+const selectedOption = ref('')
 const selectOptions = [
   {
     label: '测试用例',
@@ -149,10 +160,25 @@ const selectOptions = [
   }
 ]
 
+const selectedCase = ref(0)
+const tableData = ref<any[]>([])
+const tableColumn = ref<Column[]>([])
+const checkAllColumn = ref(true)
+
+let selectedContrastList = <any[]>[]
+
+const isIndeterminate = ref(true)
+const checkAllItems = ref(false)
+
+const currentPage = ref(1)
+const pageSize = ref(5)
+const small = ref(false)
+const background = ref(false)
+const disabled = ref(false)
+
 const allColumn = allColumns()
 tableData.value = tableDatas()
-const copy = ref<any>([])
-copy.value = tableDatas()
+const copy = JSON.parse(JSON.stringify(tableData.value))
 
 tableColumn.value = allColumn
 const handlecheckAllColumn = (val: boolean) => {
@@ -167,30 +193,57 @@ const handleCheckedTableCloumn = (value: object[]) => {
 }
 
 const handleCheckedAllItems = (val: boolean) => {
+  tableData.value.forEach((element: any) => {
+    element.check = val
+  })
   if (val) {
-    tableData.value.forEach((element: any) => {
-      element.check = true
-    })
+    copy.forEach((element: any) => {
+      selectedContrastList.push(element)
+    });
   } else {
-    tableData.value.forEach((element: any) => {
-      element.check = false
-    })
+    selectedContrastList = []
   }
 }
 
-const handleSearch = (key: keyof typeof tableData) => {
-  if (input.value === '') {
+const handleCheckedItem = (value: any) => {
+  const index = selectedContrastList.findIndex(item => item.index === value.row.index)
+  if ( index === -1) {
+    selectedContrastList.push(toRaw(value.row))
+  } else {
+    selectedContrastList.splice(index, 1)
+  }
+  checkAllItems.value = selectedContrastList.length === copy.length
+}
+
+const handleSearch = (key: any) => {
+  if (selectedOption.value === '') {
+    ElMessage('请选择搜索条件！')
+  } else if (input.value === '') {
     ElMessage('请输入搜索内容！')
   } else {
-    tableData.value = copy.value.filter((item: any)=> item[key] === input.value)
+    tableData.value = copy.value.filter(
+      (item: any) => item[key] === input.value
+    )
   }
+}
+
+const handleSizeChange = (val: number) => {
+  console.log(`${val} items per page`)
+}
+const handleCurrentChange = (val: number) => {
+  console.log(`current page: ${val}`)
+}
+
+const handleReFresh = () => {
+  reFreshLodaing.value = !reFreshLodaing.value
 }
 
 watchEffect(() => {
   if (input.value === '') {
-    tableData.value = copy.value
+    tableData.value = copy
   }
 })
+
 </script>
 
 <style scoped lang="scss">
@@ -233,5 +286,8 @@ watchEffect(() => {
     font-size: 14px;
     text-align: center;
   }
+}
+.pagination {
+  margin-top: 30px;
 }
 </style>

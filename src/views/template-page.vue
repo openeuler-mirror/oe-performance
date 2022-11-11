@@ -1,6 +1,6 @@
 <template>
   <div class="oe-perf-section">
-    template1
+    <test-component></test-component>
   </div>
   <div class="oe-perf-section">
     <test-case-vue></test-case-vue>
@@ -9,6 +9,7 @@
 
 <script setup lang="ts">
 import testCaseVue from './performance-baseline/test-case.vue';
+import TestComponent from './performance-baseline/test-component.vue'
 </script>
 
 <style>

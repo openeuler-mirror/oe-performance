@@ -43,54 +43,52 @@
     </el-container>
   </el-container>
 </template>
-<script setup lang="ts">
-
-</script>
+<script setup lang="ts"></script>
 <style scoped lang="scss">
-  $header-height: 56px;
-  $breadcrumb-nav-height: 32px;
-  .basic-layout-header {
+$header-height: 56px;
+$breadcrumb-nav-height: 32px;
+.basic-layout-header {
+  display: flex;
+  height: $header-height;
+  line-height: $header-height;
+  background: var(--oe-perf-color-primary);
+  color: var(--oe-perf-font-color);
+  .header-left {
     display: flex;
-    height: $header-height;
-    line-height: $header-height;
-    background: var(--oe-perf-color-primary);
-    color: var(--oe-perf-font-color);
-    .header-left {
-      display: flex;
-      .logo {
-        width: 250px;
-        font-size: 24px;
-        padding-left: 50px;
-      }
-    }
-    .header-nav {
-      display: flex;
-      align-items: center;
-      padding-left: var(--oe-perf-padding);
-      .nav-item {
-        height: 36px;
-        line-height: 36px;
-        cursor: pointer;
-        &:not(:first-child) {
-          margin-left: 20px;
-        }
-        &.active {
-          border-bottom: 2px solid var(--oe-perf-font-color);
-        }
-      }
+    .logo {
+      width: 250px;
+      font-size: 24px;
+      padding-left: 50px;
     }
   }
-  .breadcrumb-nav {
-    height: $breadcrumb-nav-height;
-    line-height: $breadcrumb-nav-height;
+  .header-nav {
+    display: flex;
+    align-items: center;
     padding-left: var(--oe-perf-padding);
+    .nav-item {
+      height: 36px;
+      line-height: 36px;
+      cursor: pointer;
+      &:not(:first-child) {
+        margin-left: 20px;
+      }
+      &.active {
+        border-bottom: 2px solid var(--oe-perf-font-color);
+      }
+    }
   }
-  .el-main {
-    padding: 0;
-  }
-  .basic-layout-content {
-    height: calc(100vh - $header-height - $breadcrumb-nav-height);
-    background: var(--oe-perf-bg-layout);
-    padding: var(--oe-perf-padding);
-  }
+}
+.breadcrumb-nav {
+  height: $breadcrumb-nav-height;
+  line-height: $breadcrumb-nav-height;
+  padding-left: var(--oe-perf-padding);
+}
+.el-main {
+  padding: 0;
+}
+.basic-layout-content {
+  height: calc(100vh - $header-height - $breadcrumb-nav-height);
+  background: var(--oe-perf-bg-layout);
+  padding: var(--oe-perf-padding);
+}
 </style>
