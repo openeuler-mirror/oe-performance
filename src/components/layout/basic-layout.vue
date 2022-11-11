@@ -126,7 +126,7 @@ const userLogout = () => {
     padding: 0;
   }
   .basic-layout-content {
-    height: calc(100vh - $header-height - $breadcrumb-nav-height);
+    // height: calc(100vh - $header-height - $breadcrumb-nav-height);
     background: var(--oe-perf-bg-layout);
     padding: var(--oe-perf-padding);
   }
