@@ -82,3 +82,16 @@ export interface BaselineDetail {
     'container_file': null
 
 }
+
+export interface tableInfo {
+    id: number,
+    leftAttribute: string,
+    leftName: string,
+    leftValue: string,
+    rightAttribute?: string,
+    rightName?: string,
+    rightValue?: string,
+    leftIconInfo?: string,
+    isDetail?: boolean,
+    collapse?: number
+}
