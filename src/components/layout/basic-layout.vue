@@ -9,7 +9,14 @@
           <div class="nav-item">提交测试</div>
         </div>
       </div>
-      <div class="header-right"></div>
+      <div class="header-right">
+        {{userInfoStore.userInfo.username}}
+        <el-popconfirm title="登出系统？" @confirm="userLogout">
+          <template #reference>
+            <el-icon class="logout-btn"><SwitchButton /></el-icon>
+          </template>
+        </el-popconfirm>
+      </div>
     </el-header>
     <el-container>
       <el-aside width="250px">
@@ -43,7 +50,23 @@
     </el-container>
   </el-container>
 </template>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { useUserInfo } from '@/stores/userInfo'
+import { ElMessage } from 'element-plus';
+
+const router = useRouter()
+const userInfoStore = useUserInfo()
+
+const userLogout = () => {
+  userInfoStore.userLogout().then(() => {
+    router.push('/user/login')
+  }).catch(err => {
+    ElMessage.error(err.message)
+  })
+}
+
+</script>
 <style scoped lang="scss">
 $header-height: 56px;
 $breadcrumb-nav-height: 32px;
@@ -55,10 +78,42 @@ $breadcrumb-nav-height: 32px;
   color: var(--oe-perf-font-color);
   .header-left {
     display: flex;
-    .logo {
-      width: 250px;
-      font-size: 24px;
-      padding-left: 50px;
+    height: $header-height;
+    line-height: $header-height;
+    background: var(--oe-perf-color-primary);
+    color: var(--oe-perf-font-color);
+    justify-content: space-between;
+    .header-left {
+      display: flex;
+      .logo {
+        width: 250px;
+        font-size: 24px;
+        padding-left: 50px;
+      }
+    }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      padding-left: var(--oe-perf-padding);
+      .nav-item {
+        height: 36px;
+        line-height: 36px;
+        cursor: pointer;
+        &:not(:first-child) {
+          margin-left: 20px;
+        }
+        &.active {
+          border-bottom: 2px solid var(--oe-perf-font-color);
+        }
+      }
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      .logout-btn {
+        margin-left: 10px;
+        cursor: pointer;
+      }
     }
   }
   .header-nav {
