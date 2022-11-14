@@ -62,7 +62,33 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         meta: {
           title: 'normalBaseline'
         }
-      }
+      },
+      {
+        path: '/submitTest',
+        name: 'submitTest',
+        component: RouteView,
+        meta: {
+          title: 'submitTest'
+        },
+        children: [
+          {
+            path: '/submitTest/testTask',
+            name: 'testTask',
+            component: () => import('@/views/test/TestTask.vue'),
+            meta: {
+              title: 'testTask'
+            }
+          },
+          {
+            path: '/submitTest/resultDetails',
+            name: 'resultDetails',
+            component: () => import('@/views/test/ResultDetails.vue'),
+            meta: {
+              title: 'resultDetails'
+            }
+          },
+        ]
+      },
     ]
   },
   {
