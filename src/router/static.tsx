@@ -32,7 +32,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
       {
         path: '/index',
         name: '/index',
-        component: () => import('@/views/template-page.vue'),
+        component: () => import('@/views/performance-baseline/index.vue'),
         meta: {
           title: 'index'
         }
@@ -48,7 +48,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: '/solutionBaseline/bigData',
             name: 'bigData',
-            component: () => import('@/views/template-page.vue'),
+            component: () => import('@/views/performance-baseline/index.vue'),
             meta: {
               title: 'bigData'
             }
@@ -58,7 +58,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
       {
         path: 'normalBaseline',
         name: 'normalBaseline',
-        component: () => import('@/views/template-page.vue'),
+        component: () => import('@/views/performance-baseline/index.vue'),
         meta: {
           title: 'normalBaseline'
         }

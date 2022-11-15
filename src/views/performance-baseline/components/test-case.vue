@@ -1,6 +1,6 @@
 <template>
-  <div class="wrapper">
-    <div class="handle-wrapper">
+  <div class="performance-baseline-test-table">
+    <div class="handle-pannel">
       <div>
         <el-button>数据状态变更</el-button>
         <el-button type="primary" class="button" :disabled="contrastDisable"
@@ -31,7 +31,13 @@
         </template>
       </el-input>
       <div>
-        <el-button :icon="RefreshLeft" :loading="reFreshLodaing" class="button" @click="handleReFresh">刷新</el-button>
+        <el-button
+          :icon="RefreshLeft"
+          :loading="reFreshLodaing"
+          class="button"
+          @click="handleReFresh"
+          >刷新</el-button
+        >
         <el-popover placement="bottom" :width="400" trigger="click">
           <template #reference>
             <el-button :icon="Setting" type="primary" class="button"
@@ -82,7 +88,9 @@
         >数据所用"测试用例名称"一致可以进行对比操作(最多勾选5条)，可以导出当前所选数据。</span
       >
     </div>
-    <el-table :data="tableData" :header-cell-style="{background: 'rgb(243,243,243)'}">
+    <el-table
+      :data="tableData"
+      :header-cell-style="{ background: 'rgb(243,243,243)' }">
       <el-table-column fixed="left" width="150">
         <template #header>
           <el-checkbox v-model="checkAllItems" @change="handleCheckedAllItems">
@@ -90,7 +98,9 @@
           </el-checkbox>
         </template>
         <template #default="scope">
-          <el-checkbox v-model="scope.row.check" @change="handleCheckedItem(scope)">
+          <el-checkbox
+            v-model="scope.row.check"
+            @change="handleCheckedItem(scope)">
             {{ scope.row.dataSource }}
           </el-checkbox>
         </template>
@@ -124,7 +134,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, toRaw, watchEffect } from 'vue'
+import { PropType, ref, toRaw, watchEffect } from 'vue'
 import {
   Search,
   Setting,
@@ -132,12 +142,21 @@ import {
   MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
-import { allColumns, tableDatas } from './test-data'
+import { allColumns } from '../test-data'
 import { ElMessage } from 'element-plus'
 export interface Column {
   label: string
   prop: string
 }
+export interface TableItem {
+  [key: string]: any
+}
+const props = defineProps({
+  dataList: {
+    type: Array as PropType<any[]>,
+    default: () => []
+  }
+})
 
 const input = ref('')
 
@@ -177,10 +196,31 @@ const background = ref(false)
 const disabled = ref(false)
 
 const allColumn = allColumns()
-tableData.value = tableDatas()
 const copy = JSON.parse(JSON.stringify(tableData.value))
 
 tableColumn.value = allColumn
+
+const handleTableData = <T extends object>(data: T[]) => {
+  data.forEach((Element: any) => {
+    tableData.value.push(flattenObj(Element))
+  })
+}
+
+const flattenObj = (ob: any) => {
+  let result = <TableItem>{}
+  for (const i in ob) {
+    if (typeof ob[i] === 'object' && !Array.isArray(ob[i])) {
+      const temp = flattenObj(ob[i])
+      for (const j in temp) {
+        result[i + '_' + j] = temp[j]
+      }
+    } else {
+      result[i] = ob[i]
+    }
+  }
+  return result
+}
+
 const handlecheckAllColumn = (val: boolean) => {
   tableColumn.value = val ? allColumn : []
   isIndeterminate.value = false
@@ -199,15 +239,17 @@ const handleCheckedAllItems = (val: boolean) => {
   if (val) {
     copy.forEach((element: any) => {
       selectedContrastList.push(element)
-    });
+    })
   } else {
     selectedContrastList = []
   }
 }
 
 const handleCheckedItem = (value: any) => {
-  const index = selectedContrastList.findIndex(item => item.index === value.row.index)
-  if ( index === -1) {
+  const index = selectedContrastList.findIndex(
+    item => item.index === value.row.index
+  )
+  if (index === -1) {
     selectedContrastList.push(toRaw(value.row))
   } else {
     selectedContrastList.splice(index, 1)
@@ -244,10 +286,14 @@ watchEffect(() => {
   }
 })
 
+watchEffect(() => {
+  handleTableData(props.dataList)
+  console.log(tableData.value)
+})
 </script>
 
 <style scoped lang="scss">
-.handle-wrapper {
+.handle-pannel {
   display: flex;
   justify-content: space-between;
   align-items: center;
