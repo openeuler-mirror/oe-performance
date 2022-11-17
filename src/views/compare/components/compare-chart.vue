@@ -2,19 +2,14 @@
   <div ref="chartContainer" style="width: 100%; height: 400px"></div>
 </template>
   
-<script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue'
+<script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import Chart from '../utils/chart'
-export default defineComponent({
-  setup () {
-    const chartContainer = ref<any>(null)
 
-    onMounted(() => {
-      Chart(chartContainer.value)
-    })
+const chartContainer = ref<any>(null)
 
-    return { chartContainer }
-  }
+onMounted(() => {
+  Chart(chartContainer.value)
 })
 </script>
   

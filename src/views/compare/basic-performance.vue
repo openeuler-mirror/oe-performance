@@ -56,49 +56,36 @@
   </div>
 </template>
   
-<script lang="ts">
+<script setup lang="ts">
 import CompareChart from './components/compare-chart.vue'
 import { getDetail } from '@/api/detail'
-import { defineComponent, reactive, ref } from 'vue'
-export default defineComponent({
-  components: {
-    CompareChart
+import { reactive, ref } from 'vue'
+
+let modalVisible = ref(false)
+let selectedOSBase = ref('1')
+let tableData = reactive<any[]>([])
+let tableData2 = reactive([
+  {
+    core: '多核',
+    item1: 13020.83,
+    item2: 13491.08,
+    vs: '-3.49%'
   },
-  setup () {
-    let modalVisible = ref(false)
-    let selectedOSBase = ref('1')
-    let tableData = reactive<any[]>([])
-    let tableData2 = reactive([
-      {
-        core: '多核',
-        item1: 13020.83,
-        item2: 13491.08,
-        vs: '-3.49%'
-      },
-      {
-        core: '单核',
-        item1: 1942.41,
-        item2: 1884.2,
-        vs: '3.09%'
-      }
-    ])
-
-    getDetail(3)
-      .then(res => {
-        res.data.results.forEach((item:any) => {
-          const obj = Object.assign(item['os'], item['case_result'], item['product'])
-          tableData.push(obj)
-        })
-      })
-
-    return {
-      modalVisible,
-      selectedOSBase,
-      tableData,
-      tableData2
-    }
+  {
+    core: '单核',
+    item1: 1942.41,
+    item2: 1884.2,
+    vs: '3.09%'
   }
-})
+])
+
+getDetail(3)
+  .then(res => {
+    res.data.results.forEach((item:any) => {
+      const obj = Object.assign(item['os'], item['case_result'], item['product'])
+      tableData.push(obj)
+    })
+  })
 </script>
   
 <style lang="scss" scoped>
