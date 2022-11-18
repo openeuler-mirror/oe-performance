@@ -26,13 +26,12 @@
     </el-row>
     <el-table :data="tableData" style="width: 100%">
     <el-table-column type="expand">
-      <template #default="props">
-        {{props}}
+      <!-- ="props" -->
+      <template #default>
         <div m="4" class="expand-table">
           <el-table :data="tableData">
             <el-table-column type="expand">
               <template #default>
-                {{props}}
                 <div m="2" class="expand-table">
                   <el-table :data="tableData">
                     <el-table-column prop="suite" width="430">

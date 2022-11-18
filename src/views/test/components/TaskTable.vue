@@ -42,9 +42,9 @@
      >
        <el-table-column type="selection"/>
        <el-table-column width="58">
-         <template #default="scope">
-           <el-icon><Star /></el-icon>
-           {{scope}}
+         <template #default>
+          <el-icon size="20px" @click="changeStar"><Star /></el-icon>
+          <!-- <el-icon size="20px"><StarFilled /></el-icon> -->
          </template>
        </el-table-column>
        <el-table-column label="Task ID">
@@ -52,27 +52,46 @@
            <el-button link type="primary">{{ scope.row.date }}</el-button>
          </template>
        </el-table-column>
-       <el-table-column prop="name" label="Task Name" />
+       <el-table-column prop="name" label="Task Name" show-overflow-tooltip/>
        <el-table-column
-             prop="name"
              label="审批状态"
+             width="100"
              :filters="[
            { text: 'Am', value: 'Am' },
            { text: 'Tm', value: 'Tm' },
            { text: '2016-05-03', value: '2016-05-03' },
            { text: '2016-05-04', value: '2016-05-04' },
          ]"
-         :filter-method="filterHandler"/>
+         :filter-method="filterHandler">
+         <template #default="scope">
+          <el-row>
+           <el-col :span="21" :class="scope.row.approval">
+            {{scope.row.approval}}
+           </el-col>
+           <el-col :span="3">
+            <span v-if="scope.row.approval=='Pending'">
+              <el-tooltip
+                class="box-item"
+                effect="dark"
+                content="Top Center prompts info"
+                placement="top">
+                <el-icon size="15px"><QuestionFilled /></el-icon>
+              </el-tooltip>
+            </span>
+           </el-col>
+          </el-row>
+        </template>
+       </el-table-column>
        <el-table-column
-       prop="date"
-       label="测试类型"
-       :filters="[
-     { text: 'Am', value: 'Am' },
-     { text: 'Tm', value: 'Tm' },
-     { text: '2016-05-03', value: '2016-05-03' },
-     { text: '2016-05-04', value: '2016-05-04' },
-   ]"
-   :filter-method="filterHandler"/>
+          prop="date"
+          label="测试类型"
+          :filters="[
+          { text: 'Am', value: 'Am' },
+          { text: 'Tm', value: 'Tm' },
+          { text: '2016-05-03', value: '2016-05-03' },
+          { text: '2016-05-04', value: '2016-05-04' },
+        ]"
+        :filter-method="filterHandler"/>
        <el-table-column prop="name" :formatter="formatter" width="140">
          <template #header>
            总计/成功/失败
@@ -86,9 +105,15 @@
          </template>
        </el-table-column>
        <el-table-column prop="address" label="所属项目" show-overflow-tooltip />
-       <el-table-column prop="date" label="创建人" show-overflow-tooltip />
-       <el-table-column prop="date" sortable label="创建时间" show-overflow-tooltip />
-       <el-table-column prop="date" sortable label="完成时间" show-overflow-tooltip />
+       <el-table-column prop="date" label="创建人" />
+       <el-table-column prop="date" sortable label="创建时间"/>
+       <el-table-column prop="date" sortable label="完成时间">
+        <template #default="scope">
+          <div>
+            {{scope.row.date}}
+          </div>
+         </template>
+       </el-table-column>
        <el-table-column prop="detail" label="操作" fixed="right">
          <template #default>
            <el-button link type="primary">重跑</el-button>
@@ -129,7 +154,7 @@ const number = ref('423')
 const searchInput = ref('')
 
 const selectRadio = (label: string) => {
-  console.log(label)
+  console.log(label, '切换任务类型的处理')
 }
 // , column: TableColumnCtx<User>
 const formatter = (row: User) => {
@@ -152,9 +177,14 @@ const handleSelectionChange = (val: User[]) => {
   
 }
 
+
+const changeStar = () => {
+  console.log('点击收藏处理')
+}
+
 // 分页
 const currentPage = ref(1)
-const pageSize = ref(5)
+const pageSize = ref(10)
 const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
@@ -168,37 +198,65 @@ const tableData: User[] = [
   {
     date: '2016-05-03',
     name: 'Tm',
+    approval: 'Fail',
     address: 'No. 189, Grove St, Los Angeles',
   },
   {
     date: '2016-05-02',
     name: 'TA',
+    approval: 'Fail',
     address: 'No. 189, Grove St, Los Angeles',
   },
   {
     date: '2016-05-04',
     name: 'Am',
+    approval: 'Complete',
     address: 'No. 189, Grove St, Los Angeles',
   },
   {
     date: '2016-05-01',
     name: 'IC',
+    approval: 'Pending',
     address: 'No. 189, Grove St, Los Angeles',
   },
   {
     date: '2016-05-08',
     name: 'Tc',
+    approval: 'Fail',
     address: 'No. 189, Grove St, Los Angeles',
   },
   {
     date: '2016-05-06',
     name: 'cm',
+    approval: 'Complete',
     address: 'No. 189, Grove St, Los Angeles',
   },
   {
     date: '2016-05-07',
     name: 'bm',
+    approval: 'Pending',
     address: 'No. 189, Grove St, Los Angeles',
   },
 ]
 </script>
+
+<style lang="scss" scoped>
+.Fail {
+  background-color: rgb(232, 7, 7);
+  color: rgb(214, 209, 209);
+  border-radius: 5px;
+  text-align: center;
+}
+.Complete {
+  background-color: rgb(116, 208, 65);
+  color: rgb(249, 247, 247);
+  border-radius: 5px;
+  text-align: center;
+}
+.Pending {
+  background-color: rgb(244, 244, 244);
+  border-radius: 5px;
+  border: 1px solid rgb(223, 223, 223);
+  text-align: center;
+}
+</style>
