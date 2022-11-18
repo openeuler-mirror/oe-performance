@@ -74,7 +74,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'basicPerformance',
             name: 'basicPerformance',
-            component: () => import('@/views/compare/basic-performance.vue'),
+            component: () => import('@/views/compare/comparation-basic-performance.vue'),
             meta: {
               title: 'basicPerformance'
             }
