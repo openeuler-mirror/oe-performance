@@ -33,11 +33,11 @@
             <template #title>
               <span>基础性能基线</span>
             </template>
-            <el-menu-item index="2-1">CPU</el-menu-item>
-            <el-menu-item index="2-2">内存</el-menu-item>
-            <el-menu-item index="2-3">存储</el-menu-item>
-            <el-menu-item index="2-4">网络</el-menu-item>
-            <el-menu-item index="2-5">基础库</el-menu-item>
+            <el-menu-item index="/normalBaseline/detail">CPU</el-menu-item>
+            <el-menu-item index="/normalBaseline/list">内存</el-menu-item>
+            <el-menu-item index="/normalBaseline/list">存储</el-menu-item>
+            <el-menu-item index="/normalBaseline/list">网络</el-menu-item>
+            <el-menu-item index="/normalBaseline/list">基础库</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="3">
             <template #title>

@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
+import { RouteRecordRaw, RouterView } from 'vue-router'
 
 // import RouteView from '@/components/layout/route-view.vue'
 
@@ -56,12 +56,38 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         ]
       },
       {
-        path: 'normalBaseline',
+        path: '/normalBaseline',
         name: 'normalBaseline',
-        component: () => import('@/views/performance-baseline/index.vue'),
+        component: RouterView,
         meta: {
           title: 'normalBaseline'
-        }
+        },
+        children: [
+          {
+            path: '/normalBaseline/list',
+            name: 'normalBaseline-list',
+            component: () => import('@/views/performance-baseline/index.vue'),
+            meta: {
+              title: 'normalBaseline'
+            }
+          },
+          {
+            path: '/normalBaseline/detail',
+            name: 'detail',
+            component: () => import('@/views/detail/baseline-detail.vue'),
+            meta: {
+              title: 'detail'
+            }
+          },
+          {
+            path: '/normalBaseline/workLoadDetail',
+            name: 'workLoadDetail',
+            component: () => import('@/views/detail/work-load-detail.vue'),
+            meta: {
+              title: 'workLoadDetail'
+            }
+          }
+        ]
       },
       {
         path: '/comparativeSearch',
