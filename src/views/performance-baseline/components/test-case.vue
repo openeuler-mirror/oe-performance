@@ -212,7 +212,7 @@ const flattenObj = (ob: any) => {
     if (typeof ob[i] === 'object' && !Array.isArray(ob[i])) {
       const temp = flattenObj(ob[i])
       for (const j in temp) {
-        result[i + '_' + j] = temp[j]
+        result[`${i}_${j}`] = temp[j]
       }
     } else {
       result[i] = ob[i]

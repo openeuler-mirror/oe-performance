@@ -20,7 +20,7 @@
     </el-header>
     <el-container>
       <el-aside width="250px">
-        <el-menu>
+        <el-menu router>
           <el-sub-menu index="1">
             <template #title>
               <span>解决方案性能基线</span>
@@ -38,6 +38,13 @@
             <el-menu-item index="2-3">存储</el-menu-item>
             <el-menu-item index="2-4">网络</el-menu-item>
             <el-menu-item index="2-5">基础库</el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu index="3">
+            <template #title>
+              <span>对比检索</span>
+            </template>
+            <el-menu-item index="/comparativeSearch/basicPerformance">基础性能</el-menu-item>
+            <el-menu-item index="3-2">解决方案</el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-aside>
@@ -142,7 +149,7 @@ $breadcrumb-nav-height: 32px;
   padding: 0;
 }
 .basic-layout-content {
-  height: calc(100vh - $header-height - $breadcrumb-nav-height);
+  min-height: calc(100vh - $header-height - $breadcrumb-nav-height);
   background: var(--oe-perf-bg-layout);
   padding: var(--oe-perf-padding);
 }
