@@ -688,23 +688,27 @@ onMounted(async () => {
       padding-top: var(--oe-perf-padding);
       padding-bottom: var(--oe-perf-padding);
       overflow: hidden;
-      :deep .el-descriptions__cell {
+
+      :deep(.el-descriptions__cell) {
         padding: var(--oe-perf-padding);
         background-color: #fff;
       }
-      :deep .el-descriptions__label {
+
+      :deep(.el-descriptions__label) {
         width: 20%;
       }
-      :deep .el-descriptions__content {
+
+      :deep(.el-descriptions__content) {
         width: 30%;
       }
-      :deep .sub-item {
+
+      :deep(.sub-item) {
         background-color: var(--oe-perf-bg-layout);
         .label {
           padding-left: var(--oe-perf-padding);
         }
       }
-      :deep .col-value {
+      :deep(.col-value) {
         width: 80%;
       }
 
