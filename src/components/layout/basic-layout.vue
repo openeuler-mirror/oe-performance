@@ -39,6 +39,17 @@
             <el-menu-item index="2-4">网络</el-menu-item>
             <el-menu-item index="2-5">基础库</el-menu-item>
           </el-sub-menu>
+          <el-sub-menu index="3">
+            <template #title>
+              <span>提交测试</span>
+            </template>
+            <router-link to="/submitTest/testTask" style="text-decoration: none;">
+              <el-menu-item index="3-1">测试任务</el-menu-item>
+            </router-link>
+            <router-link to="/submitTest/resultDetails" style="text-decoration: none;">
+              <el-menu-item index="3-2">测试结果</el-menu-item>
+            </router-link>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
       <el-main>

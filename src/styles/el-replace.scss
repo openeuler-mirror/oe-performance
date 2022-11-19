@@ -27,3 +27,13 @@
     background: var(--oe-perf-color-primary);
   }
 }
+
+//input
+.input-with-select {
+  .el-input-group__append {
+    background-color: var(--el-fill-color-blank);
+  }
+  .el-input-group__prepend {
+    background-color: var(--el-fill-color-blank);
+  }
+}
