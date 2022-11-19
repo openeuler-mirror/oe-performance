@@ -145,14 +145,14 @@
     }
     .main-item {
       margin-bottom: 50px;
-      :deep .el-descriptions__cell {
+      :deep(.el-descriptions__cell) {
         padding: var(--oe-perf-padding);
         background-color: #fff;
       }
-      :deep .el-descriptions__label {
+      :deep(.el-descriptions__label) {
         width: 20%;
       }
-      :deep .el-descriptions__content {
+      :deep(.el-descriptions__content) {
         width: 30%;
       }
       .sub-title {
