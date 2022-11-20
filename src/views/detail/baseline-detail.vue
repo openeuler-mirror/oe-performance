@@ -76,8 +76,9 @@
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
                 </span>
-                <span
-class="arrowIcon" @click="handlerCollapse('cpu')" 
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('cpu')"
                 v-if="state.detailInfo.product.cpu_detail !== null">
                   <el-icon v-show="cpuCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!cpuCollpase"><ArrowDownBold /></el-icon>
@@ -140,8 +141,10 @@ class="arrowIcon" @click="handlerCollapse('cpu')"
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
                 </span>
-                <span
-class="arrowIcon" @click="handlerCollapse('memory')"
+                
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('memory')"
                 v-if="state.detailInfo.product.memory_detail !== null">
                   <el-icon v-show="memoryCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!memoryCollpase"><ArrowDownBold /></el-icon>
@@ -185,8 +188,9 @@ class="arrowIcon" @click="handlerCollapse('memory')"
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
                 </span>
-                <span
-class="arrowIcon" @click="handlerCollapse('disk')"
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('disk')"
                 v-if="state.detailInfo.product.disk_detail !== null">
                   <el-icon v-show="diskCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!diskCollpase"><ArrowDownBold /></el-icon>
@@ -231,8 +235,9 @@ class="arrowIcon" @click="handlerCollapse('disk')"
             <el-descriptions-item :span="2">
               <template #label>
                 <span>{{ '网卡' }}</span>
-                <span
-class="arrowIcon" @click="handlerCollapse('nic')"
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('nic')"
                 v-if="state.detailInfo.product.nic_detail !== null">
                   <el-icon v-show="nicCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!nicCollpase"><ArrowDownBold /></el-icon>
@@ -244,8 +249,9 @@ class="arrowIcon" @click="handlerCollapse('nic')"
             <el-descriptions-item :span="2">
               <template #label>
                 <span>{{ '电源' }}</span>
-                <span
-class="arrowIcon" @click="handlerCollapse('psu')"
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('psu')"
                 v-if="state.detailInfo.product.psu_detail !== null">
                   <el-icon v-show="psuCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!psuCollpase"><ArrowDownBold /></el-icon>
@@ -257,8 +263,9 @@ class="arrowIcon" @click="handlerCollapse('psu')"
             <el-descriptions-item :span="2">
               <template #label>
                 <span>{{ '单板' }}</span>
-                <span
-class="arrowIcon" @click="handlerCollapse('board')"
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('board')"
                 v-if="state.detailInfo.product.board_detail !== null">
                   <el-icon v-show="boardCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!boardCollpase"><ArrowDownBold /></el-icon>
@@ -284,8 +291,9 @@ class="arrowIcon" @click="handlerCollapse('board')"
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
                 </span>
-                <span
-class="arrowIcon" @click="handlerCollapse('bios')"
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('bios')"
                 v-if="state.detailInfo.product.bios_detail !== null">
                   <el-icon v-show="biosCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!biosCollpase"><ArrowDownBold /></el-icon>
