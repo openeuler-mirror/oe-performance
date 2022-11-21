@@ -72,19 +72,27 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         },
         children: [
           {
-            path: '/userCenter/allApplication',
-            name: 'allApplication',
-            component: () => import('@/views/user-center/application/all-application.vue'),
+            path: '/userCenter/application/applicationList',
+            name: 'applicationList',
+            component: () => import('@/views/user-center/application/application-list.vue'),
             meta: {
-              title: 'allApplication'
+              title: 'applicationList'
             }
           },
           {
-            path: '/userCenter/allApproval',
-            name: 'allApproval',
-            component: () => import('@/views/user-center/approval/all-approval.vue'),
+            path: '/userCenter/application/applicationProgress',
+            name: 'applicationProgress',
+            component: () => import('@/views/user-center/application/progress/application-progress.vue'),
             meta: {
-              title: 'allApproval'
+              title: 'applicationProgress'
+            }
+          },
+          {
+            path: '/userCenter/approveList',
+            name: 'approveList',
+            component: () => import('@/views/user-center/approval/approve-list.vue'),
+            meta: {
+              title: 'approveList'
             }
           },
           {

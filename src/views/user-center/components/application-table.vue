@@ -21,7 +21,7 @@
        <el-table-column prop="name" label="审批状态" />
        <el-table-column prop="detail" label="操作" fixed="right">
          <template #default>
-           <el-button link type="primary">查看</el-button>
+           <el-button link type="primary" @click="pushView()">查看</el-button>
            <el-button link type="primary">删除</el-button>
          </template>
        </el-table-column>
@@ -31,7 +31,11 @@
 import { ref } from 'vue'
 import { ElTable } from 'element-plus'
 import { User } from '../interface'
-
+import {defineEmits} from 'vue'
+const emit = defineEmits<{
+  (e:'pushView'):void // 设置自定义函数名称，参数类型与返回值类型
+  // 可在此设置第二个自定义函数
+}>()
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 const multipleSelection = ref<User[]>([])
 
@@ -47,4 +51,8 @@ const tableData: User[] = [
     address: 'No. 189, Grove St, Los Angeles',
   }
 ]
+ 
+function pushView() {
+  emit('pushView')
+}
 </script>
