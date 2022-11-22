@@ -20,6 +20,11 @@ const resetUserInfo = () => {
   userInfo.role = ''
 }
 
+const loadUserInfo = () => {
+  userInfo.token = cookie.get('token')
+  userInfo.username = cookie.get('user_name')
+}
+
 export const useUserInfo = defineStore('user', () => {
   const userLogin = (username: string, password: string) => {
     return new Promise((resolve, reject) => {
@@ -59,5 +64,5 @@ export const useUserInfo = defineStore('user', () => {
     })
   }
 
-  return { userInfo, userLogin, userLogout, resetUserInfo }
+  return { userInfo, userLogin, userLogout, resetUserInfo, loadUserInfo }
 })

@@ -1,10 +1,16 @@
 import { createRouter, createWebHistory, RouteRecordName } from 'vue-router'
 import cookie from 'js-cookie'
+
+import pinia from '@/stores'
+import { useUserInfo } from '@/stores/userInfo'
+
 import { staticRoutes, asyncRoutes } from './static'
 
 const allowList:RouteRecordName[] = ['login']
 const loginRoute = '/user/login'
 const indexRoute = '/index'
+
+const { userInfo, loadUserInfo } = useUserInfo(pinia)
 
 const router = createRouter({
   history: createWebHistory(),
@@ -19,6 +25,9 @@ router.beforeEach((to, from, next) => {
       next({ path: indexRoute });
     } else {
       // todo:获取存在cookie中的用户信息到store
+      if (userInfo.username === '') {
+        loadUserInfo()
+      }
       next()
     }
   } else {

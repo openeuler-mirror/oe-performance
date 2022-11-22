@@ -1,7 +1,5 @@
 import { RouteRecordRaw, RouterView } from 'vue-router'
 
-// import RouteView from '@/components/layout/route-view.vue'
-
 declare module 'vue-router' {
   interface RouteMeta {
     title: string
@@ -19,7 +17,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'indexLayout',
     redirect: '/index',
-    component: () => import('@/components/layout/basic-layout.vue'),
+    component: () => import('@/layout/basic-layout.vue'),
     children: [
       /*
        * todo: 待确定布局方案。
