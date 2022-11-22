@@ -106,6 +106,14 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         },
         children: [
           {
+            path: '/submitTest/cpuTest',
+            name: 'cpuTest',
+            component: () => import('@/views/test/CpuTest.vue'),
+            meta: {
+              title: 'cpuTest'
+            }
+          },
+          {
             path: '/submitTest/testTask',
             name: 'testTask',
             component: () => import('@/views/test/TestTask.vue'),

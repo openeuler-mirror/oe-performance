@@ -49,6 +49,9 @@
             <router-link to="/submitTest/resultDetails" style="text-decoration: none;">
               <el-menu-item index="3-2">测试结果</el-menu-item>
             </router-link>
+            <router-link to="/submitTest/cpuTest" style="text-decoration: none;">
+              <el-menu-item index="3-3">CPU</el-menu-item>
+            </router-link>
           </el-sub-menu>
         </el-menu>
       </el-aside>
