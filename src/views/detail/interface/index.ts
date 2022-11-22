@@ -21,18 +21,12 @@ export interface BaselineDetail {
         'nic_brief': string,
         'psu_brief': string,
         'board_brief': string,
-        'cpu_detail': {
-        },
-        'memory_detail': {
-        },
-        'disk_detail': {
-        },
-        'nic_detail': {
-        },
-        'psu_detail': {
-        },
-        'board_detail': {
-        },
+        'cpu_detail': {},
+        'memory_detail': {},
+        'disk_detail': {},
+        'nic_detail': {},
+        'psu_detail': {},
+        'board_detail': {},
         'bios_version': string,
         'bmc_version': string,
         'bios_detail': {
