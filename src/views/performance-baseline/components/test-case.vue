@@ -90,6 +90,7 @@
     </div>
     <el-table
       :data="tableData"
+      row-key="guid"
       :header-cell-style="{ background: 'rgb(243,243,243)' }">
       <el-table-column fixed="left" width="150">
         <template #header>
@@ -122,19 +123,19 @@
       class="pagination"
       v-model:currentPage="currentPage"
       v-model:page-size="pageSize"
-      :page-sizes="[10, 20, 30, 40]"
+      :page-sizes="pageSizes"
       :small="small"
       :disabled="disabled"
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="10"
+      :total="total"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, toRaw, watchEffect } from 'vue'
+import { onMounted, PropType, ref, toRaw, watchEffect } from 'vue'
 import {
   Search,
   Setting,
@@ -167,7 +168,7 @@ const selectedOption = ref('')
 const selectOptions = [
   {
     label: '测试用例',
-    value: 'testCase'
+    value: 'guid'
   },
   {
     label: '任务名称',
@@ -175,35 +176,50 @@ const selectOptions = [
   },
   {
     label: '测试人',
-    value: 'tester'
+    value: 'tested_by'
   }
 ]
 
 const selectedCase = ref(0)
-const tableData = ref<any[]>([])
-const tableColumn = ref<Column[]>([])
+const tableData = ref<TableItem[]>([])
+let copy: TableItem[] = []
+
+const allColumn = allColumns()
+const tableColumn = ref(allColumn)
 const checkAllColumn = ref(true)
 
-let selectedContrastList = <any[]>[]
+let selectedContrastList: TableItem[] = []
 
 const isIndeterminate = ref(true)
 const checkAllItems = ref(false)
 
 const currentPage = ref(1)
-const pageSize = ref(5)
+const pageSize = ref(1)
+const pageSizes = ref([] as number[])
+const total = ref(1)
 const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
 
-const allColumn = allColumns()
-const copy = JSON.parse(JSON.stringify(tableData.value))
+onMounted(() => {
+  total.value = Math.ceil(props.dataList.length / 5)
+  for (let i = 0; total.value > i * 10; i++) {
+    pageSizes.value.push((i + 1) * 10)
+  }
+  console.log(pageSizes.value)
+  handleTableData(1)
+})
 
-tableColumn.value = allColumn
-
-const handleTableData = <T extends object>(data: T[]) => {
-  data.forEach((Element: any) => {
-    tableData.value.push(flattenObj(Element))
-  })
+const handleTableData = (page: number) => {
+  let start = (page - 1) * 5
+  let end =
+    props.dataList.length <= start + 5 ? props.dataList.length : start + 5
+  const temp = []
+  for (let i = start; i < end; i++) {
+    temp.push(flattenObj(props.dataList[i]))
+  }
+  tableData.value = temp
+  copy = JSON.parse(JSON.stringify(tableData.value))
 }
 
 const flattenObj = (ob: any) => {
@@ -258,22 +274,22 @@ const handleCheckedItem = (value: any) => {
 }
 
 const handleSearch = (key: any) => {
+  console.log(copy)
   if (selectedOption.value === '') {
     ElMessage('请选择搜索条件！')
   } else if (input.value === '') {
     ElMessage('请输入搜索内容！')
   } else {
-    tableData.value = copy.value.filter(
-      (item: any) => item[key] === input.value
-    )
+    tableData.value = copy.filter(item => item[key] === input.value)
   }
+  console.log(tableData.value)
 }
 
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
 const handleCurrentChange = (val: number) => {
-  console.log(`current page: ${val}`)
+  handleTableData(val)
 }
 
 const handleReFresh = () => {
@@ -284,11 +300,6 @@ watchEffect(() => {
   if (input.value === '') {
     tableData.value = copy
   }
-})
-
-watchEffect(() => {
-  handleTableData(props.dataList)
-  console.log(tableData.value)
 })
 </script>
 
