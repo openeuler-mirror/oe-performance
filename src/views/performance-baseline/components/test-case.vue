@@ -113,8 +113,12 @@
         width="150">
       </el-table-column>
       <el-table-column prop="detail" label="详细数据" fixed="right">
-        <template #default>
-          <el-button link="" type="primary">查看</el-button>
+        <template #default="scope">
+             <router-link :to="`/normalBaseline/detail/${scope.row.guid}`">
+                <el-button link="" type="primary">
+                <span>查看</span>
+              </el-button>
+            </router-link>
         </template>
       </el-table-column>
     </el-table>
@@ -293,11 +297,14 @@ watchEffect(() => {
 </script>
 
 <style scoped lang="scss">
+a {
+  text-decoration: none !important;
+}
 .handle-pannel {
+
   display: flex;
   justify-content: space-between;
   align-items: center;
-
   .button {
     min-width: 90px;
   }
