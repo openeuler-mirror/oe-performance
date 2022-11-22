@@ -1,20 +1,22 @@
 <template>
   <div class="comparation-basic-performance">
     <el-card shadow="hover" header="基础性能" style="margin-bottom: 20px">
-      <div style="margin-bottom: 10px;">请选择OS:</div>
-      <el-radio-group v-model="selectedOSBase">
-        <el-radio :label="item['os_release']" size="large" v-for="item in tableData" :key="item['os_release']">
-          {{ item['os_release'] }}
-        </el-radio>
-      </el-radio-group>
-      <div style="display: flex; justify-content: end"><el-button type="primary">对比</el-button></div>
+      <div v-loading="componentVisible">
+        <div style="margin-bottom: 10px;">请选择OS:</div>
+        <el-radio-group v-model="selectedOSBase">
+          <el-radio :label="item['os_release']" size="large" v-for="item in tableData" :key="item['os_release']">
+            {{ item['os_release'] }}
+          </el-radio>
+        </el-radio-group>
+        <div style="display: flex; justify-content: end"><el-button type="primary">对比</el-button></div>
+      </div>
     </el-card>
     <el-card shadow="hover" style="margin-bottom: 20px; padding: 10px;">
       <div class="header-info">
         <div class="decorate-bar"></div>
         <span class="bar-title">技术规格</span>
       </div>
-      <el-table :data="tableData" border style="width: 100%">
+      <el-table :data="tableData" border style="width: 100%" v-loading="componentVisible">
         <el-table-column prop="model" label="CPU型号" align="center"/>
         <el-table-column prop="os_release" label="操作系统" align="center"/>
         <el-table-column prop="os_kernel" label="内核版本" align="center"/>
@@ -28,16 +30,16 @@
         <div class="decorate-bar"></div>
         <span class="bar-title">总比</span>
       </div>
-      <el-table :data="tableData2" border style="width: 100%">
+      <el-table :data="tableData2" border style="width: 100%" v-loading="componentVisible">
         <el-table-column prop="core" label="" width="120" align="center"/>
         <el-table-column prop="item1" label="22.03(LTS-Next)"/>
         <el-table-column prop="item2" label="AnolisOS-8.4"/>
         <el-table-column prop="vs" label="22.03(LTS-Next) vs AnolisOS-8.4"/>
-      </el-table>    
+      </el-table>  
     </el-card>
     <el-card shadow="hover" header="图表展示" style="margin-bottom: 20px">
       <compare-chart/>
-    </el-card>  
+    </el-card>
     <div class="modal">
       <el-dialog :model-value="modalVisible" width="35%" >
         <template #header>
@@ -61,8 +63,9 @@
 <script setup lang="ts">
 import CompareChart from './components/compare-chart.vue'
 import { getDetail } from '@/api/detail'
-import { reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 
+let componentVisible = ref(true)
 let modalVisible = ref(false)
 let selectedOSBase = ref('1')
 let tableData = reactive<any[]>([])
@@ -81,13 +84,16 @@ let tableData2 = reactive([
   }
 ])
 
-getDetail(3)
-  .then(res => {
-    res.data.results.forEach((item:any) => {
-      const obj = Object.assign(item['os'], item['case_result'], item['product'])
-      tableData.push(obj)
+onMounted(() => {
+  getDetail(3)
+    .then(res => {
+      res.data.results.forEach((item:any) => {
+        const obj = Object.assign(item['os'], item['case_result'], item['product'])
+        tableData.push(obj)
+      })
+      componentVisible.value = false
     })
-  })
+})
 </script>
   
 <style lang="scss" scoped>
