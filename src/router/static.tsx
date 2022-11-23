@@ -70,7 +70,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             }
           },
           {
-            path: '/normalBaseline/detail/:guid/',
+            path: '/normalBaseline/detail/:guid',
             name: 'detail',
             component: () => import('@/views/detail/baseline-detail.vue'),
             meta: {
