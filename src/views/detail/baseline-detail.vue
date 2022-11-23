@@ -552,7 +552,7 @@
             <el-descriptions-item label="case result id">
               <router-link
                 class="work-load-detail"
-                to="/normalBaseline/workloadDetail"
+                :to="{ name:'workloadDetail' }"
                 ><span>查看详情</span>
               </router-link>
             </el-descriptions-item>
