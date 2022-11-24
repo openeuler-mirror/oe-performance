@@ -78,7 +78,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             }
           },
           {
-            path: '/normalBaseline/workloadDetail',
+            path: '/normalBaseline/detail/:guid/workloadDetail',
             name: 'workloadDetail',
             component: () => import('@/views/detail/workload-detail.vue'),
             meta: {

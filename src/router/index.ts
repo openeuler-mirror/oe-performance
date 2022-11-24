@@ -14,7 +14,8 @@ const { userInfo, loadUserInfo } = useUserInfo(pinia)
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: [...staticRoutes, ...asyncRoutes]
+  routes: [...staticRoutes, ...asyncRoutes],
+  scrollBehavior: ()=>{ return { top: 0 }},
 })
 // todo，加载路由后，根据用户role进行过滤
 
