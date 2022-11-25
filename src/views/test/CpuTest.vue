@@ -16,14 +16,30 @@
       </el-radio-group>
     </el-row>
     <el-row>
-        选择用例：<el-button type="primary" @click="openDrawer()">选择用例</el-button>
+        选择用例：<el-button type="primary" @click="drawer = true">选择用例</el-button>
         <exampleDrawer
         :drawer="drawer"
-        @get-child-data="changeDrawer"></exampleDrawer>
+        @changeDrawer="closeDrawer"
+        @selectedExample="selectedExample"></exampleDrawer>
     </el-row>
-    <el-row>
+    <el-row style="margin-left: 20px;">
       <div style="width: 100%;">
-        <exampleTable/>
+        <div class="demo-collapse">
+          <el-collapse v-model="activeNames">
+            单核:
+            <el-collapse-item title="hackbench" name="1">
+              <div v-for="(item, index) in state.selectedExample" :key="index">
+                {{item}}
+              </div>
+            </el-collapse-item>
+            多核:
+            <el-collapse-item title="hackbench" name="1">
+              <div v-for="(item, index) in state.selectedExample" :key="index">
+                {{item}}
+              </div>
+            </el-collapse-item>
+          </el-collapse>
+        </div>
       </div>
     </el-row>
   </el-card>
@@ -45,7 +61,7 @@
         选择OS镜像版本:
       </el-col>
       <el-col :span="21" style="margin-left: -24px;">
-        <el-cascader :options="options" clearable style="200%"/>
+        <el-cascader v-model="selectedVersion" :options="imageVersion" clearable style="200%"/>
       </el-col> 
     </el-row>
   </el-card>
@@ -87,31 +103,47 @@
         </el-radio-group>
       </el-row>
   </el-card>
+  <el-card shadow="always" style="margin-bottom: 20px;">
+    <div style="float: right;">
+      <el-button>取消</el-button>
+      <el-button type="primary" @click="submitTest">提交</el-button>
+    </div>
+  </el-card>
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue'
-import exampleTable from './components/exampleTable.vue'
 import exampleDrawer from './components/exampleDrawer.vue'
+
 const radioModule = ref('unixbench')
+
+// 选择用例
+const drawer = ref(false)
+const state = ref([] as any);
+const selectedExample = (selectedExample: any) => {
+  state.value = selectedExample
+  console.log('获取到了选择了的测试用例', state.value);
+}
+
 const radioMirror = ref('公共镜像')
 const selectRadio = (label: string) => {
   console.log(label, '切换任务类型的处理')
 }
 
-// 选择用例
-const drawer = ref(false)
-const openDrawer = () => {
-  drawer.value = true
-  console.log(drawer.value);
-}
-const changeDrawer = (Drawer: boolean) => {
-  drawer.value = Drawer
+const selectedVersion = ref('')
+
+
+
+const closeDrawer = () => {
+  drawer.value = false
 }
 
+const activeNames = ref(['1'])
 
 
 
-const options = [
+
+
+const imageVersion = [
   {
     value: 'guide',
     label: 'Guide',
@@ -180,10 +212,29 @@ const radioSpecification = ref('通用计算增强型')
 const specification1 = ref('C6')
 const specification2 = ref('8核')
 const specification3 = ref('32G')
+
+
+function submitTest() {
+  const test = {
+    radioModule: radioModule,
+    testExample: state.value,
+    radioMirror: radioMirror,
+    imageVersion: selectedVersion,
+    radioFramework:radioFramework,
+    radioSpecification:radioSpecification,
+    specification1:specification1,
+    specification2:specification2,
+    specification3:specification3,
+  }
+  console.log(test);
+}
 </script>
 
 <style lang="scss" scoped>
 .el-row {
   margin-bottom: 20px;
+}
+.el-card {
+  margin-bottom: 6px;
 }
 </style>
