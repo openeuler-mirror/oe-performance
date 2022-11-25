@@ -1,34 +1,35 @@
 <template>
   <div class="oe-perf-section">
-    <test-subassembly></test-subassembly>
+    <search-pannel @search="getAllData"></search-pannel>
   </div>
   <div class="oe-perf-section">
-    <test-case :dataList="Data"></test-case>
+    <testment-table :dataList="data"></testment-table>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import testCase from './components/test-case.vue';
-import TestSubassembly from './components/test-subassembly.vue';
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+
+import TestmentTable from './components/testment-table.vue';
+import SearchPannel from './components/search-pannel.vue';
 
 import { getPerformanceData } from '@/api/performance'
-import { getDetail } from '@/api/detail'
+// import { getDetail } from '@/api/detail'
 
-const Data = ref<any[]>([])
-onMounted(() => {
-  getDetail(10).then((res) => {
-    Data.value = res.data.results
-  })
-  // getSubmitId()
+const data = ref<any[]>([])
+
+const getAllData = (params: searchParams) => {
+  console.log(params)
+
   // 获取unixbench下的submitID list
   getPerformanceData({
     'index': 'jobs',
     'query': {
       'query': {
         'term': {
-          'suite': 'unixbench'
+          'suite': params.suite
+          // 其他查询条件应该是放在这里
         }
       },
       'aggs': {
@@ -40,19 +41,24 @@ onMounted(() => {
         }
       }
     },
+  }).then((res) => {
+    // todo: 数据为空的异常处理
+    data.value = res.data.aggregations.jobs_terms.buckets
+      .map((item: any) => { return { submit_id: item.key }})
+  }).catch((err) => {
+    ElMessage({
+      message: err.message,
+      type: 'error'
+    })
   })
-  // 根据submitId获取它的jobs
-  getPerformanceData({
-    'index': 'jobs',
-    'query': {
-      'size': 10000,  // 取全量
-      'query': {
-        'term': {
-          'submit_id': '005c5966-1f49-4452-a239-30c5ac1b8d72'
-        }
-      }
-    },
-  })
+}
+
+onMounted(() => {
+  // getDetail(10).then((res) => {
+  //   data.value = res.data.results
+  // })
+
+  
 })
 
 const getSubmitId = () => {

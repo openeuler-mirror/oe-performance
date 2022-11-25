@@ -4,8 +4,12 @@ export const allColumns = () => {
 
 const columnsData = [
   {
-    label: 'g编号',
-    prop: 'guid'
+    label: 'submit_id',
+    prop: 'submit_id'
+  },
+  {
+    label: '提交时间',
+    prop: 'submit_time'
   },
   {
     label: '创建人',

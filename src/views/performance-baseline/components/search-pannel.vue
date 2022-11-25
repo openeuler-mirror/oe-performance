@@ -5,11 +5,11 @@
         ><span class="general-font-style">测试组件:</span></el-col
       >
       <el-col :span="8">
-        <el-button-group class="ml-4">
-          <el-button>Spark</el-button>
-          <el-button>Hice</el-button>
-          <el-button>Hbase</el-button>
-        </el-button-group>
+        <el-radio-group v-model="selectedSuite" class="ml-4">
+          <el-radio-button label="unixbench" />
+          <el-radio-button label="lmbench3" />
+          <el-radio-button label="iperf" />
+        </el-radio-group>
       </el-col>
     </el-row>
     <el-row :gutter="25">
@@ -191,7 +191,7 @@
     </el-row>
     <el-row :gutter="20" justify="center">
       <el-col :span="2"><el-button>重置</el-button></el-col>
-      <el-col :span="2"><el-button type="primary">搜索</el-button></el-col>
+      <el-col :span="2"><el-button type="primary" @click="handleSearch">搜索</el-button></el-col>
     </el-row>
   </div>
 </template>
@@ -199,11 +199,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const selectedSuite = ref('unixbench')
 const value = ref([])
-
-const hChange = (value: any) => {
-  console.log(value)
-}
 
 const options = [
   {
@@ -223,6 +220,22 @@ const options = [
     ]
   }
 ]
+
+const hChange = (value: any) => {
+  console.log(value)
+}
+
+const emit = defineEmits<{
+  // 在此处收集查询菜单中的查询条件，整理后去请求全量的submit_id列表
+  // 如果用户选择了机器配置类的条件，则需要先根据机器配置去获取对应的主机列表。
+  // 然后通过主机列表和其他条件去查询submit_id列表
+  (event: 'search', params:searchParams): void
+}>()
+
+const handleSearch = () => {
+  emit('search', { os: 'openEuler', suite: selectedSuite.value})
+}
+
 </script>
 
 <style scoped lang="scss">

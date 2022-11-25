@@ -90,6 +90,7 @@
     </div>
     <el-table
       :data="tableData"
+      v-loading="tableLoading" 
       :header-cell-style="{ background: 'rgb(243,243,243)' }">
       <el-table-column fixed="left" width="150">
         <template #header>
@@ -124,21 +125,19 @@
     </el-table>
     <el-pagination
       class="pagination"
-      v-model:currentPage="currentPage"
-      v-model:page-size="pageSize"
+      v-model:currentPage="pagination.currentPage"
+      v-model:page-size="pagination.pageSize"
       :page-sizes="[10, 20, 30, 40]"
       :small="small"
       :disabled="disabled"
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="10"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange" />
+      :total="pagination.total" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, toRaw, watchEffect } from 'vue'
+import { PropType, ref, toRaw, watchEffect, reactive, watch } from 'vue'
 import {
   Search,
   Setting,
@@ -148,6 +147,9 @@ import {
 } from '@element-plus/icons-vue'
 import { allColumns } from '../test-data'
 import { ElMessage } from 'element-plus'
+
+import { getPerformanceData } from '@/api/performance'
+
 export interface Column {
   label: string
   prop: string
@@ -183,9 +185,9 @@ const selectOptions = [
   }
 ]
 
-const selectedCase = ref(0)
 const tableData = ref<any[]>([])
 const tableColumn = ref<Column[]>([])
+const selectedCase = ref(0)
 const checkAllColumn = ref(true)
 
 let selectedContrastList = <any[]>[]
@@ -193,8 +195,12 @@ let selectedContrastList = <any[]>[]
 const isIndeterminate = ref(true)
 const checkAllItems = ref(false)
 
-const currentPage = ref(1)
-const pageSize = ref(5)
+const pagination = reactive({
+  currentPage: 1,
+  pageSize: 10,
+  total: 0
+})
+
 const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
@@ -204,26 +210,26 @@ const copy = JSON.parse(JSON.stringify(tableData.value))
 
 tableColumn.value = allColumn
 
-const handleTableData = <T extends object>(data: T[]) => {
-  data.forEach((Element: any) => {
-    tableData.value.push(flattenObj(Element))
-  })
-}
-
-const flattenObj = (ob: any) => {
-  let result = <TableItem>{}
-  for (const i in ob) {
-    if (typeof ob[i] === 'object' && !Array.isArray(ob[i])) {
-      const temp = flattenObj(ob[i])
-      for (const j in temp) {
-        result[`${i}_${j}`] = temp[j]
-      }
-    } else {
-      result[i] = ob[i]
-    }
-  }
-  return result
-}
+// const handleTableData = <T extends object>(data: T[]) => {
+//   data.forEach((Element: any) => {
+//     tableData.value.push(flattenObj(Element))
+//   })
+// }
+// 
+// const flattenObj = (ob: any) => {
+//   let result = <TableItem>{}
+//   for (const i in ob) {
+//     if (typeof ob[i] === 'object' && !Array.isArray(ob[i])) {
+//       const temp = flattenObj(ob[i])
+//       for (const j in temp) {
+//         result[`${i}_${j}`] = temp[j]
+//       }
+//     } else {
+//       result[i] = ob[i]
+//     }
+//   }
+//   return result
+// }
 
 const handlecheckAllColumn = (val: boolean) => {
   tableColumn.value = val ? allColumn : []
@@ -273,12 +279,12 @@ const handleSearch = (key: any) => {
   }
 }
 
-const handleSizeChange = (val: number) => {
-  console.log(`${val} items per page`)
-}
-const handleCurrentChange = (val: number) => {
-  console.log(`current page: ${val}`)
-}
+// const handleSizeChange = (val: number) => {
+//   console.log(`${val} items per page`)
+// }
+// const handleCurrentChange = (val: number) => {
+//   console.log(`current page: ${val}`)
+// }
 
 const handleReFresh = () => {
   reFreshLodaing.value = !reFreshLodaing.value
@@ -290,10 +296,62 @@ watchEffect(() => {
   }
 })
 
+const requestCount = ref(0) // 记录请求总是
+const tableLoading = ref(false)
+// 合并jobs的逻辑
+const getAllJobsData = (idList:any) => {
+  const tempArr = reactive(Object.assign([], idList))
+  // todo: 每次遍历请求前，应取消之前所有未完成的请求
+  idList.forEach((idObj:any, idx:number) => {
+    // 根据submitId获取它的jobs
+    requestCount.value += 1
+    tableLoading.value = true
+    getPerformanceData({
+      'index': 'jobs',
+      'query': {
+        'size': 10000,  // 取全量
+        'query': {
+          'term': {
+            'submit_id': idObj.submit_id
+          }
+        }
+      },
+    }).then((res) => {
+      tempArr[idx] = combineJobs(res.data.hits.hits)
+    }).catch((err) => {
+      ElMessage({
+        message: err.message,
+        type: 'error'
+      })
+    }).finally(() => {
+      requestCount.value -= 1
+      if (requestCount.value === 0) {
+        tableLoading.value = false
+      }
+    })
+  })
+
+  return tempArr
+}
+
+const combineJobs = (jobList: any) => {
+  // 在这里实现jobs的混合和映射逻辑，生成完整的一条submit_id对象
+  return jobList[0]._source
+}
+
+const idList = ref(<any>[])
+
 watchEffect(() => {
-  handleTableData(props.dataList)
-  console.log(tableData.value)
+  const startIndex = (pagination.currentPage -1) * pagination.pageSize
+  // 数据分页
+  idList.value = props.dataList.slice(startIndex, startIndex + pagination.pageSize)
+  pagination.total = props.dataList.length
 })
+
+watch(idList, () => {
+  tableData.value = getAllJobsData(idList.value)
+})
+
 </script>
 
 <style scoped lang="scss">
