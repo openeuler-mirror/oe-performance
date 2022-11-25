@@ -143,7 +143,7 @@ import {
   MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
-import { allColumns } from '../test-data'
+import { allColumns } from '../config-data'
 import { ElMessage } from 'element-plus'
 export interface Column {
   label: string
@@ -282,7 +282,6 @@ const handleSearch = (key: any) => {
   } else {
     tableData.value = copy.filter(item => item[key] === input.value)
   }
-  console.log(tableData.value)
 }
 
 const handleSizeChange = (val: number) => {

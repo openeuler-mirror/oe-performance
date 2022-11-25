@@ -1,7 +1,3 @@
-export const allColumns = () => {
-  return columnsData
-}
-
 const columnsData = [
   {
     label: 'g编号',
@@ -396,3 +392,195 @@ const columnsData = [
     prop: 'container_file'
   }
 ]
+
+const optionData = [
+  [
+    {
+      title: '测试模型版本',
+      tag: 'case',
+      options: [
+        {
+          value: 'guide',
+          label: 'Guide',
+          children: [
+            {
+              value: 'disciplines',
+              label: 'Disciplines'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: '服务器型号',
+      tag: 'system',
+      options: [
+        {
+          value: 'model',
+          label: 'Model',
+          children: [
+            {
+              value: 'di',
+              label: 'Di'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: 'CPU配置',
+      tag: 'system',
+      options: [
+        {
+          value: 'gu',
+          label: 'Gu',
+          children: [
+            {
+              value: 'dis',
+              label: 'Dis'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: '内存配置',
+      tag: 'system',
+      options: [
+        {
+          value: 'g',
+          label: 'G',
+          children: [
+            {
+              value: 'disc',
+              label: 'Disc'
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  [
+    {
+      title: '硬件配置',
+      tag: 'system',
+      options: [
+        {
+          value: 'gsd',
+          label: 'Gsd',
+          children: [
+            {
+              value: 'discipl',
+              label: 'Discipl'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: 'Raid卡',
+      tag: 'system',
+      options: [
+        {
+          value: 'gui',
+          label: 'Gui',
+          children: [
+            {
+              value: 'discip',
+              label: 'Disciplines'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: '组网配置',
+      tag: 'system',
+      options: [
+        {
+          value: 'cpu',
+          label: 'Cpu',
+          children: [
+            {
+              value: 'discipl',
+              label: 'Discipl'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: '测试用例',
+      tag: 'case',
+      options: [
+        {
+          value: 'system',
+          label: 'Ssytem',
+          children: [
+            {
+              value: 'disc',
+              label: 'Disc'
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  [
+    {
+      title: '测试工具版本',
+      tag: 'case',
+      options: [
+        {
+          value: 'ui',
+          label: 'Ui',
+          children: [
+            {
+              value: 'discipl',
+              label: 'Discipl'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: '操作系统',
+      tag: 'system',
+      options: [
+        {
+          value: 'po',
+          label: 'Po',
+          children: [
+            {
+              value: 'yebfghj',
+              label: 'yebfghj'
+            }
+          ]
+        }
+      ]
+    },
+    {
+      title: '数据来源',
+      tag: 'case',
+      options: [
+        {
+          value: 'gfe',
+          label: 'Gfe',
+          children: [
+            {
+              value: 'jkyhiotjh',
+              label: 'jkyhiotjh'
+            }
+          ]
+        }
+      ]
+    }
+  ]
+]
+export const allColumns = () => {
+  return columnsData
+}
+
+export const criteriaQuery = () => {
+  return optionData
+}
