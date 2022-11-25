@@ -7,10 +7,10 @@ The repository of the lastest version of openEuler Performance Test website
 
 ```
 # install dependencies
-1.  npm install
+1.  pnpm install
 
 # serve with hot reload at localhost:8080
-2.  npm run serve
+2.  pnpm run serve
 ```
 
 #### 参与贡献
