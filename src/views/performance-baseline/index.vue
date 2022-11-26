@@ -3,7 +3,7 @@
     <search-pannel @search="getAllData"></search-pannel>
   </div>
   <div class="oe-perf-section">
-    <testment-table :dataList="data"></testment-table>
+    <testment-table :dataList="data" :submitDataLoading="submitDataLoading"></testment-table>
   </div>
 </template>
 
@@ -18,9 +18,11 @@ import { getPerformanceData } from '@/api/performance'
 // import { getDetail } from '@/api/detail'
 
 const data = ref<any[]>([])
+const submitDataLoading = ref(false)
 
 const getAllData = (params: searchParams) => {
   console.log(params)
+  submitDataLoading.value = true
 
   // 获取unixbench下的submitID list
   getPerformanceData({
@@ -50,6 +52,8 @@ const getAllData = (params: searchParams) => {
       message: err.message,
       type: 'error'
     })
+  }).finally(() => {
+    submitDataLoading.value = false
   })
 }
 
