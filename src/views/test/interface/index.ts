@@ -11,3 +11,7 @@ export interface Result {
   startTime:string
   endTime: string
 }
+export interface Example {
+  singleduo: string
+  double: string
+}
