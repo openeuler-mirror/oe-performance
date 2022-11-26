@@ -68,7 +68,7 @@
         </span>
       </template>
     </el-dialog>
-    <application-table></application-table>
+    <application-table @pushView="intoView"></application-table>
   </el-card>
 </template>
 
@@ -76,7 +76,10 @@
 import { ref,reactive } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox,UploadProps, UploadUserFile } from 'element-plus'
-import  ApplicationTable  from './components/application-table.vue'
+import { useRouter } from 'vue-router'
+import  ApplicationTable  from '../components/application-table.vue'
+
+const router = useRouter()
 
 const select = ref('')
 const value = ref('')
@@ -90,6 +93,11 @@ const handleChange = (value) => {
   console.log(value)
 }
 
+function intoView() {
+  router.push({
+    path: '/userCenter/application/applicationProgress'
+  })
+}
 const fileList = ref<UploadUserFile[]>([])
 
 const handleRemove: UploadProps['onRemove'] = (file, uploadFiles) => {
