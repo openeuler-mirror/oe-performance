@@ -76,7 +76,10 @@
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
                 </span>
-                <span class="arrowIcon" @click="handlerCollapse('cpu')">
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('cpu')"
+                v-if="state.detailInfo.product.cpu_detail !== null">
                   <el-icon v-show="cpuCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!cpuCollpase"><ArrowDownBold /></el-icon>
                 </span>
@@ -138,7 +141,11 @@
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
                 </span>
-                <span class="arrowIcon" @click="handlerCollapse('memory')">
+                
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('memory')"
+                v-if="state.detailInfo.product.memory_detail !== null">
                   <el-icon v-show="memoryCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!memoryCollpase"><ArrowDownBold /></el-icon>
                 </span>
@@ -181,7 +188,10 @@
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
                 </span>
-                <span class="arrowIcon" @click="handlerCollapse('disk')">
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('disk')"
+                v-if="state.detailInfo.product.disk_detail !== null">
                   <el-icon v-show="diskCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!diskCollpase"><ArrowDownBold /></el-icon>
                 </span>
@@ -225,7 +235,10 @@
             <el-descriptions-item :span="2">
               <template #label>
                 <span>{{ '网卡' }}</span>
-                <span class="arrowIcon" @click="handlerCollapse('nic')">
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('nic')"
+                v-if="state.detailInfo.product.nic_detail !== null">
                   <el-icon v-show="nicCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!nicCollpase"><ArrowDownBold /></el-icon>
                 </span>
@@ -236,7 +249,10 @@
             <el-descriptions-item :span="2">
               <template #label>
                 <span>{{ '电源' }}</span>
-                <span class="arrowIcon" @click="handlerCollapse('psu')">
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('psu')"
+                v-if="state.detailInfo.product.psu_detail !== null">
                   <el-icon v-show="psuCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!psuCollpase"><ArrowDownBold /></el-icon>
                 </span>
@@ -247,7 +263,10 @@
             <el-descriptions-item :span="2">
               <template #label>
                 <span>{{ '单板' }}</span>
-                <span class="arrowIcon" @click="handlerCollapse('board')">
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('board')"
+                v-if="state.detailInfo.product.board_detail !== null">
                   <el-icon v-show="boardCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!boardCollpase"><ArrowDownBold /></el-icon>
                 </span>
@@ -272,7 +291,10 @@
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
                 </span>
-                <span class="arrowIcon" @click="handlerCollapse('bios')">
+                <span 
+                class="arrowIcon" 
+                @click="handlerCollapse('bios')"
+                v-if="state.detailInfo.product.bios_detail !== null">
                   <el-icon v-show="biosCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!biosCollpase"><ArrowDownBold /></el-icon>
                 </span>
@@ -530,7 +552,7 @@
             <el-descriptions-item label="case result id">
               <router-link
                 class="work-load-detail"
-                to="/normalBaseline/workLoadDetail"
+                :to="{ name:'workloadDetail' }"
                 ><span>查看详情</span>
               </router-link>
             </el-descriptions-item>
@@ -611,9 +633,19 @@
 </template>
 
 <script setup lang="ts">
-import { getDetail } from '@/api/detail'
 import { onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { BaselineDetail } from './interface'
+
+import { usePerformanceData } from '@/stores/performanceData'
+
+import { getDetail } from '@/api/detail'
+
+const router = useRouter()
+const { performanceData } = usePerformanceData()
+
+let detailData = reactive({})
+
 let state = reactive({
   detailInfo: {} as BaselineDetail
 })
@@ -658,7 +690,12 @@ const handlerCollapse = (flag: string) => {
 }
 
 onMounted(async () => {
+  // todo: 当获取不到Detail时（用户直接通过submit_id进入详情页），需要根据submit_id获取一下jobs并组织。
+  detailData = performanceData[router.currentRoute.value.params.submit_id]
+  console.log(detailData, detailData && detailData.arch) // 测试是否能拿到数据
+  
   loading.value = true
+  // todo: 请替换成真实数据
   let res = await getDetail(10)
   const { code, results } = res.data
   if (code === 200) {

@@ -1,7 +1,5 @@
 import { RouteRecordRaw, RouterView } from 'vue-router'
 
-// import RouteView from '@/components/layout/route-view.vue'
-
 declare module 'vue-router' {
   interface RouteMeta {
     title: string
@@ -19,7 +17,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'indexLayout',
     redirect: '/index',
-    component: () => import('@/components/layout/basic-layout.vue'),
+    component: () => import('@/layout/basic-layout.vue'),
     children: [
       /*
        * todo: 待确定布局方案。
@@ -72,19 +70,19 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             }
           },
           {
-            path: '/normalBaseline/detail',
+            path: '/normalBaseline/detail/:submit_id',
             name: 'detail',
-            component: () => import('@/views/detail/baseline-detail.vue'),
+            component: () => import('@/views/performance-detail/index.vue'),
             meta: {
               title: 'detail'
             }
           },
           {
-            path: '/normalBaseline/workLoadDetail',
-            name: 'workLoadDetail',
-            component: () => import('@/views/detail/work-load-detail.vue'),
+            path: '/normalBaseline/detail/:submit_id/workloadDetail',
+            name: 'workloadDetail',
+            component: () => import('@/views/performance-detail/workload-detail.vue'),
             meta: {
-              title: 'workLoadDetail'
+              title: 'workloadDetail'
             }
           }
         ]
@@ -100,7 +98,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'basicPerformance',
             name: 'basicPerformance',
-            component: () => import('@/views/compare/comparation-basic-performance.vue'),
+            component: () => import('@/views/performance-comparation/index.vue'),
             meta: {
               title: 'basicPerformance'
             }
