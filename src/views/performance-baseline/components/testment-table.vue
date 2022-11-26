@@ -6,6 +6,7 @@
           type="primary"
           class="button"
           :disabled="selectedTableRows.length < 2 || selectedTableRows.length > 5"
+          @click="handleComaration"
         >对比</el-button
         >
         <el-button type="primary" class="button">导出</el-button>
@@ -131,6 +132,8 @@
 
 <script setup lang="ts">
 import { PropType, ref, toRaw, watchEffect, reactive, watch } from 'vue'
+import { useRouter } from 'vue-router'
+
 import {
   Search,
   Setting,
@@ -138,12 +141,13 @@ import {
   MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
-import { allColumns } from '../test-data'
 import { ElMessage } from 'element-plus'
 
-import {  usePerformanceData } from '@/stores/performanceData'
+import { usePerformanceData } from '@/stores/performanceData'
 
 import { getPerformanceData } from '@/api/performance'
+
+import { allColumns } from '../test-data'
 
 export interface Column {
   label: string
@@ -164,6 +168,7 @@ const props = defineProps({
 })
 
 const performanceStore = usePerformanceData()
+const router = useRouter()
 
 const input = ref('')
 
@@ -190,7 +195,7 @@ const tableColumn = ref<Column[]>([])
 // const selectedCase = ref(0)
 const checkAllColumn = ref(true)
 
-const selectedTableRows = ref([])
+const selectedTableRows = ref(<{}[]>[])
 
 // let selectedContrastList = <any[]>[]
 
@@ -367,6 +372,12 @@ watchEffect(() => {
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
 })
+
+// 对比
+const handleComaration = () => {
+  performanceStore.setComparationList(selectedTableRows.value)
+  router.push({ name: 'basicPerformance' })
+}
 
 </script>
 

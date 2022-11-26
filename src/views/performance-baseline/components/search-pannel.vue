@@ -4,7 +4,7 @@
       <el-col :span="2"
         ><span class="general-font-style">测试组件:</span></el-col
       >
-      <el-col :span="8">
+      <el-col :span="22">
         <el-radio-group v-model="selectedSuite" class="ml-4">
           <el-radio-button label="unixbench" />
           <el-radio-button label="lmbench3" />
