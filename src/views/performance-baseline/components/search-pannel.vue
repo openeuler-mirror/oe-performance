@@ -6,9 +6,7 @@
       >
       <el-col :span="22">
         <el-radio-group v-model="selectedSuite" class="ml-4">
-          <el-radio-button label="unixbench" />
-          <el-radio-button label="lmbench3" />
-          <el-radio-button label="iperf" />
+          <el-radio-button v-for="(item, index) in testSubassembly" :key="index" :label="item" />
         </el-radio-group>
       </el-col>
     </el-row>
@@ -20,7 +18,7 @@
         <div class="filter-criteria">
           <el-row
             :gutter="8"
-            v-for="(options, index) in optionData"
+            v-for="(options, index) in filterCriteria"
             :key="index">
             <el-col
               :span="6"
@@ -39,18 +37,33 @@
     </el-row>
     <el-row :gutter="20" justify="center">
       <el-col :span="2"><el-button>重置</el-button></el-col>
-      <el-col :span="2"><el-button type="primary" @click="handleSearch">搜索</el-button></el-col>
+      <el-col :span="2"
+        ><el-button type="primary" @click="handleSearch"
+          >搜索</el-button
+        ></el-col
+      >
     </el-row>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { TableItem } from '../components/test-case.vue'
-import { criteriaQuery } from '../config-data'
+import { ref, watchEffect } from 'vue'
+import { TableItem } from '../components/testment-table.vue'
 import { queryBySystemParam, queryCriteria } from '@/api/detail'
+import { config } from '../config-file'
+import { useSceneConfig } from '@/stores/performanceData'
 
-const optionData = criteriaQuery()
+const emit = defineEmits<{
+  // 在此处收集查询菜单中的查询条件，整理后去请求全量的submit_id列表
+  // 如果用户选择了机器配置类的条件，则需要先根据机器配置去获取对应的主机列表。
+  // 然后通过主机列表和其他条件去查询submit_id列表
+  (event: 'search', params: searchParams): void
+}>()
+
+const sceneConfigStore = useSceneConfig()
+const testSubassembly = ref([] as string[])
+const filterCriteria = ref([] as any[])
+
 const systemParams = [] as any[]
 const caseParams = [] as any[]
 const filterData = ref([] as TableItem[])
@@ -72,6 +85,7 @@ const handleCriteriaChange = (value: any) => {
       caseParams.splice(index, 1)
     }
   }
+  console.log(caseParams, systemParams)
 }
 const handleQueryCriteria = () => {
   const submitCaseParams = [] as any[]
@@ -98,21 +112,14 @@ const handleQueryCriteria = () => {
 }
 const selectedSuite = ref('unixbench')
 
-const hChange = (value: any) => {
-  console.log(value)
-}
-
-const emit = defineEmits<{
-  // 在此处收集查询菜单中的查询条件，整理后去请求全量的submit_id列表
-  // 如果用户选择了机器配置类的条件，则需要先根据机器配置去获取对应的主机列表。
-  // 然后通过主机列表和其他条件去查询submit_id列表
-  (event: 'search', params:searchParams): void
-}>()
-
 const handleSearch = () => {
-  emit('search', { os: 'openEuler', suite: selectedSuite.value})
+  emit('search', { os: 'openEuler', suite: selectedSuite.value })
 }
 
+watchEffect(() => {
+  testSubassembly.value = config[sceneConfigStore.currentScene].testSubassembly || []
+  filterCriteria.value = config[sceneConfigStore.currentScene].filterCriteria || []
+})
 </script>
 
 <style scoped lang="scss">

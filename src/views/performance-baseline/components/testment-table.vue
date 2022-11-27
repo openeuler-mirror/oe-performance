@@ -30,7 +30,7 @@
           </el-select>
         </template>
         <template #append>
-          <el-button :icon="Search" @click="handleSearch(selectedOption)" />
+          <el-button :icon="Search" @click="handleSearchTable" />
         </template>
       </el-input>
       <div>
@@ -98,7 +98,7 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column fixed="left" width="150" label="数据来源" prop="submit_id">
+      <el-table-column fixed="left" width="150" label="数据来源" prop="job_origin">
       </el-table-column>
       <el-table-column
         v-for="(item, index) in tableColumn"
@@ -126,16 +126,13 @@
       :disabled="disabled"
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="total"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange" />
+      :total="total"/>
   </div>
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, toRaw, watchEffect, reactive, watch, onMounted } from 'vue'
+import { PropType, ref, watchEffect, reactive, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-
 import {
   Search,
   Setting,
@@ -143,11 +140,10 @@ import {
   MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
-import { allColumns } from '../config-data'
+import { config } from '../config-file'
+import { useSceneConfig } from '@/stores/performanceData'
 import { ElMessage } from 'element-plus'
-
 import { usePerformanceData } from '@/stores/performanceData'
-
 import { getPerformanceData } from '@/api/performance'
 
 export interface Column {
@@ -157,6 +153,7 @@ export interface Column {
 export interface TableItem {
   [key: string]: any
 }
+
 const props = defineProps({
   dataList: {
     type: Array as PropType<any[]>,
@@ -168,18 +165,16 @@ const props = defineProps({
   }
 })
 
+const sceneConfigStore = useSceneConfig()
 const performanceStore = usePerformanceData()
 const router = useRouter()
 
 const input = ref('')
-
-const reFreshLodaing = ref(false)
-
 const selectedOption = ref('')
 const selectOptions = [
   {
     label: '测试用例',
-    value: 'guid'
+    value: 'submit_id'
   },
   {
     label: '任务名称',
@@ -187,118 +182,109 @@ const selectOptions = [
   },
   {
     label: '测试人',
-    value: 'tested_by'
+    value: 'my_account'
   }
 ]
 
-// const selectedCase = ref(0)
 const tableData = ref<TableItem[]>([])
-let copy: TableItem[] = []
+let originData: TableItem[] = []
 
-const allColumn = allColumns()
-const tableColumn = ref(allColumn)
+let allColumn = ref([] as Column[])
+const tableColumn = ref([] as Column[])
+const isIndeterminate = ref(true)
 const checkAllColumn = ref(true)
 
 const selectedTableRows = ref(<{}[]>[])
 
-const isIndeterminate = ref(true)
-// const checkAllItems = ref(false)
-
-const pagination = reactive({
-  currentPage: 1,
-  pageSize: 10,
-  total: 0
-})
-
 const currentPage = ref(1)
-const pageSize = ref(1)
+const pageSize = ref(10)
 const pageSizes = ref([] as number[])
 const total = ref(1)
 const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
 
+const requestCount = ref(0) // 记录请求总是
+const reFreshLodaing = ref(false)
+const tableLoading = ref(false)
+
 onMounted(() => {
-  total.value = Math.ceil(props.dataList.length / 5)
-  for (let i = 0; total.value > i * 10; i++) {
-    pageSizes.value.push((i + 1) * 10)
-  }
-  console.log(pageSizes.value)
-  handleTableData(1)
+  // handleTableData(1)
 })
 
-const handleTableData = (page: number) => {
-  let start = (page - 1) * 5
-  let end =
-    props.dataList.length <= start + 5 ? props.dataList.length : start + 5
-  const temp = []
-  for (let i = start; i < end; i++) {
-    temp.push(flattenObj(props.dataList[i]))
-  }
-  tableData.value = temp
-  copy = JSON.parse(JSON.stringify(tableData.value))
-}
+watchEffect(() => {
+  allColumn.value = config[sceneConfigStore.currentScene].column
+  tableColumn.value = allColumn.value
+})
+// 数据扁平化，便于table展示
 
-const flattenObj = (ob: any) => {
-  let result = <TableItem>{}
-  for (const i in ob) {
-    if (typeof ob[i] === 'object' && !Array.isArray(ob[i])) {
-      const temp = flattenObj(ob[i])
-      for (const j in temp) {
-        result[`${i}_${j}`] = temp[j]
-      }
-    } else {
-      result[i] = ob[i]
-    }
-  }
-  return result
-}
+// const handleTableData = (page: number) => {
+//   let start = (page - 1) * 5
+//   let end =
+//     props.dataList.length <= start + 5 ? props.dataList.length : start + 5
+//   const temp = []
+//   for (let i = start; i < end; i++) {
+//     temp.push(flattenObj(props.dataList[i]))
+//   }
+//   tableData.value = temp
+//   originData = JSON.parse(JSON.stringify(tableData.value))
+// }
+
+// const flattenObj = (ob: any) => {
+//   let result = <TableItem>{}
+//   for (const i in ob) {
+//     if (typeof ob[i] === 'object' && !Array.isArray(ob[i])) {
+//       const temp = flattenObj(ob[i])
+//       for (const j in temp) {
+//         result[`${i}_${j}`] = temp[j]
+//       }
+//     } else {
+//       result[i] = ob[i]
+//     }
+//   }
+//   return result
+// }
 
 const handlecheckAllColumn = (val: boolean) => {
-  tableColumn.value = val ? allColumn : []
+  tableColumn.value = val ? allColumn.value : []
   isIndeterminate.value = false
 }
 // 
 const handleCheckedTableCloumn = (value: object[]) => {
   const checkedCount = value.length
-  checkAllColumn.value = checkedCount === allColumn.length
-  isIndeterminate.value = checkedCount > 0 && checkedCount < allColumn.length
+  checkAllColumn.value = checkedCount === allColumn.value.length
+  isIndeterminate.value = checkedCount > 0 && checkedCount < allColumn.value.length
 }
 
 const handleSelectionChange = (selectedRow: any) => {
   selectedTableRows.value = selectedRow
+  console.log(selectedTableRows.value)
 }
 
-const handleSearch = (key: any) => {
-  console.log(copy)
+const handleSearchTable = () => {
+  console.log(originData)
   if (selectedOption.value === '') {
     ElMessage('请选择搜索条件！')
   } else if (input.value === '') {
     ElMessage('请输入搜索内容！')
   } else {
-    tableData.value = copy.filter(item => item[key] === input.value)
+    tableData.value = originData.filter(
+      (data) =>
+        !input.value ||
+        data[selectedOption.value].toLowerCase().includes(input.value.toLowerCase())
+    )
   }
 }
-
-const handleSizeChange = (val: number) => {
-  console.log(`${val} items per page`)
-}
-const handleCurrentChange = (val: number) => {
-  handleTableData(val)
-}
+watchEffect(() => {
+  if (input.value === '') {
+    tableData.value = originData
+  }
+})
 
 const handleReFresh = () => {
   reFreshLodaing.value = !reFreshLodaing.value
 }
 
-// watchEffect(() => {
-//   if (input.value === '') {
-//     tableData.value = copy
-//   }
-// })
-
-const requestCount = ref(0) // 记录请求总是
-const tableLoading = ref(false)
 // 获取并合并jobs的逻辑
 // todo: 这段逻辑可以考虑一直store中
 const getAllJobsData = (idList:any) => {
@@ -339,7 +325,6 @@ const getAllJobsData = (idList:any) => {
       }
     })
   })
-
   return tempArr
 }
 
@@ -352,15 +337,20 @@ const idList = ref(<any>[])
 
 // 自动分页
 watchEffect(() => {
-  const startIndex = (pagination.currentPage -1) * pagination.pageSize
+  const startIndex = (currentPage.value -1) * pageSize.value
   // 数据分页
-  idList.value = props.dataList.slice(startIndex, startIndex + pagination.pageSize)
-  pagination.total = props.dataList.length
+  idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
+  total.value = props.dataList.length
+  for (let i = 0; total.value > i * 10; i++) {
+    pageSizes.value.push((i + 1) * 10)
+  }
 })
 
 // 当前页数据变化时，获取jobs数据
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
+  originData = JSON.parse(JSON.stringify(tableData.value))
+  console.log(tableData.value)
 })
 
 // 对比
