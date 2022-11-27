@@ -9,7 +9,7 @@
           @click="handleComaration"
         >对比</el-button
         >
-        <el-button type="primary" class="button">导出</el-button>
+        <el-button type="primary" class="button" @click="handleExportCsv">导出</el-button>
       </div>
       <el-input
         v-model="input"
@@ -97,7 +97,7 @@
       :header-cell-style="{ background: 'rgb(243,243,243)' }"
       @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="55" />
+      <el-table-column type="selection" width="30" />
       <el-table-column fixed="left" width="150" label="数据来源" prop="submit_id">
       </el-table-column>
       <el-table-column
@@ -109,11 +109,7 @@
       </el-table-column>
       <el-table-column prop="detail" label="详细数据" fixed="right">
         <template #default="scope">
-             <router-link :to="`/normalBaseline/detail/${scope.row.submit_id}`">
-                <el-button link="" type="primary">
-                <span>查看</span>
-              </el-button>
-            </router-link>
+          <router-link :to="`/normalBaseline/detail/${scope.row.submit_id}`">查看</router-link>
         </template>
       </el-table-column>
     </el-table>
@@ -131,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, toRaw, watchEffect, reactive, watch } from 'vue'
+import { PropType, ref, watchEffect, reactive, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import {
@@ -148,6 +144,7 @@ import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 
 import { allColumns } from '../test-data'
+import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 
 export interface Column {
   label: string
@@ -195,8 +192,7 @@ const tableColumn = ref<Column[]>([])
 // const selectedCase = ref(0)
 const checkAllColumn = ref(true)
 
-const selectedTableRows = ref(<{}[]>[])
-
+const selectedTableRows = ref<any[]>([])
 // let selectedContrastList = <any[]>[]
 
 const isIndeterminate = ref(true)
@@ -311,8 +307,8 @@ const requestCount = ref(0) // 记录请求总是
 const tableLoading = ref(false)
 // 获取并合并jobs的逻辑
 // todo: 这段逻辑可以考虑一直store中
-const getAllJobsData = (idList:any) => {
-  const tempArr = reactive(Object.assign([], idList))
+const getAllJobsData = (idList:any[]) => {
+  const tempArr:any[] = reactive([])
   // todo: 每次遍历请求前，应取消之前所有未完成的请求
   idList.forEach((idObj:any, idx:number) => {
     // 如果之前已经获得过数据则不再重复请求
@@ -323,6 +319,7 @@ const getAllJobsData = (idList:any) => {
     // 根据submitId获取它的jobs
     requestCount.value += 1
     tableLoading.value = true
+    performanceStore.changeLoadingStatus(true)
     getPerformanceData({
       'index': 'jobs',
       'query': {
@@ -346,6 +343,7 @@ const getAllJobsData = (idList:any) => {
       requestCount.value -= 1
       if (requestCount.value === 0) {
         tableLoading.value = false
+        performanceStore.changeLoadingStatus(false)
       }
     })
   })
@@ -353,9 +351,12 @@ const getAllJobsData = (idList:any) => {
   return tempArr
 }
 
-const combineJobs = (jobList: any) => {
+const combineJobs = (jobList:any[]) => {
   // 在这里实现jobs的混合和映射逻辑，生成完整的一条submit_id对象
-  return jobList[0]._source
+  // 暂时取第一条数据,不做整理
+  const item = jobList[0]._source
+  item['submit_time'] = new Date(item['submit_time']).toLocaleString()  
+  return item
 }
 
 const idList = ref(<any>[])
@@ -378,7 +379,36 @@ const handleComaration = () => {
   performanceStore.setComparationList(selectedTableRows.value)
   router.push({ name: 'basicPerformance' })
 }
-
+// 导出
+const handleExportCsv = () => {
+  if (selectedTableRows.value.length === 0) {
+    ElMessage({
+      message: '请先选择要导出的数据',
+      type: 'warning'
+    })
+  } else {
+    const data = []
+    // 这里要深拷贝,不然影响列的字段
+    const titleData:any[] = JSON.parse(JSON.stringify(allColumns()))
+    titleData.splice(0, 0, { label: '数据来源', prop: 'submit_id' })
+    const title = titleData.map<string>((item:any) => item.label).join(',')
+    const keys = titleData.map<string>((item:any) => item.prop)
+    data.push(`${title}\r\n`)
+    selectedTableRows.value.forEach((item:any) => {
+      const temp:string[] = []
+      keys.forEach((key:string) => {
+        temp.push(item[key])
+      })
+      const tmpStr = temp.join(',')
+      data.push(`${tmpStr}\r\n`)
+    })
+    const dataString = data.join('')
+    const blob = new Blob([`\uFEFF${dataString}`],{
+      type: 'text/csv;charset=utf-8'
+    }) 
+    downloadBlobFile(blob,'导出.csv')
+  }
+}
 </script>
 
 <style scoped lang="scss">

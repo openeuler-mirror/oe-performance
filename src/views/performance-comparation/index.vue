@@ -69,7 +69,6 @@ import { usePerformanceData } from '@/stores/performanceData'
 import { getDetail } from '@/api/detail'
 
 const performanceStore= usePerformanceData()
-const camparationList = ref([])
 
 let componentVisible = ref(true)
 let modalVisible = ref(false)
