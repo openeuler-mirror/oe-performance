@@ -5,10 +5,12 @@ import responseInterceptor from './handlers/responseInterceptor'
 import errorHandler from './handlers/errorHandler'
 
 function createAxios(axiosConfig: AxiosRequestConfig){
+
   const request = axios.create({
     // process.env.APP_API_BASE_URL, 在环境变量中可以配置不同请求地址
     baseURL: '/api',
-    timeout: 10000
+    timeout: 10000,
+    withCredentials: false // 表示跨域请求时是否需要使用凭证
   })
 
   // 请求拦截器
