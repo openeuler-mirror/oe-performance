@@ -7268,7 +7268,7 @@ packages:
     resolution: {integrity: sha512-yioayjNbHn6z1/Bywyb2Y4s3yvDAeXGOyxqD+LnVOinq6Mdmd++SW2wUNVzavyyHxd6+DxzWGIuosg6P1Rj8uA==}
     engines: {node: '>=6.0.0'}
     dependencies:
-      picocolors: registry.npmmirror.com/picocolors/0.2.1
+      picocolors: 0.2.1
       source-map: registry.npmmirror.com/source-map/0.6.1
     dev: true
 
@@ -10079,6 +10079,7 @@ packages:
     version: 2.7.1
     engines: {node: '>=10.13.0'}
     hasBin: true
+    requiresBuild: true
     dev: true
     optional: true
 
