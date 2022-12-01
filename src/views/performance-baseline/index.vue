@@ -8,14 +8,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import TestmentTable from './components/testment-table.vue';
 import SearchPannel from './components/search-pannel.vue';
 
 import { getPerformanceData } from '@/api/performance'
-// import { getDetail } from '@/api/detail'
 
 const data = ref<any[]>([])
 const submitDataLoading = ref(false)
@@ -56,14 +55,6 @@ const getAllData = (params: searchParams) => {
     submitDataLoading.value = false
   })
 }
-
-onMounted(() => {
-  // getDetail(10).then((res) => {
-  //   data.value = res.data.results
-  // })
-
-  
-})
 
 const getSubmitId = () => {
   // 华为的实例，获取job，只展示submit数据

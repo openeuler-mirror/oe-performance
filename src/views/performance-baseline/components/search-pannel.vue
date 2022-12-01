@@ -191,16 +191,25 @@
     </el-row>
     <el-row :gutter="20" justify="center">
       <el-col :span="2"><el-button>重置</el-button></el-col>
-      <el-col :span="2"><el-button type="primary" @click="handleSearch">搜索</el-button></el-col>
+      <el-col :span="2">
+        <el-button
+          type="primary"
+          @click="handleSearch"
+          :disabled="performanceStore.loadingStatus.searchLoading"
+          >
+          搜索
+        </el-button>
+      </el-col>
     </el-row>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
-
+import { usePerformanceData } from '@/stores/performanceData'
 const selectedSuite = ref('unixbench')
 const value = ref([])
+const performanceStore = usePerformanceData()
 
 const options = [
   {
