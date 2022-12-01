@@ -109,7 +109,11 @@
       </el-table-column>
       <el-table-column prop="detail" label="详细数据" fixed="right">
         <template #default="scope">
-          <router-link :to="`/normalBaseline/detail/${scope.row.submit_id}`">查看</router-link>
+          <router-link :to="`/normalBaseline/detail/${scope.row.submit_id}`">
+            <el-button link type="primary">
+              <span>查看</span>
+            </el-button>
+          </router-link>
         </template>
       </el-table-column>
     </el-table>
@@ -308,7 +312,7 @@ const tableLoading = ref(false)
 // 获取并合并jobs的逻辑
 // todo: 这段逻辑可以考虑一直store中
 const getAllJobsData = (idList:any[]) => {
-  const tempArr:any[] = reactive([])
+  const tempArr:any[] = reactive(Object.assign([],idList))
   // todo: 每次遍历请求前，应取消之前所有未完成的请求
   idList.forEach((idObj:any, idx:number) => {
     // 如果之前已经获得过数据则不再重复请求

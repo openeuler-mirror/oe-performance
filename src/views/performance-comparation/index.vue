@@ -2,13 +2,22 @@
   <div class="comparation-basic-performance">
     <el-card shadow="hover" header="基础性能" style="margin-bottom: 20px">
       <div v-loading="componentVisible">
-        <div style="margin-bottom: 10px;">请选择OS:</div>
-        <el-radio-group v-model="selectedOSBase">
-          <el-radio :label="item['os_release']" size="large" v-for="item in tableData" :key="item['os_release']">
-            {{ item['os_release'] }}
-          </el-radio>
-        </el-radio-group>
-        <div style="display: flex; justify-content: end"><el-button type="primary">对比</el-button></div>
+        <div style="margin-bottom: 10px;">请选择OS基准:</div>
+        <div style="position: relative;">
+          <el-radio-group v-model="selectedOSBase" class="radio-group">
+            <el-radio
+              :label="`${item['os_release']}${item['version_feature']}`"
+              v-for="item in tableData"
+              :key="`${item['os_release']}${item['version_feature']}`"
+            >
+              {{ `${item['os_release']} [${item['version_feature']}]` }}
+            </el-radio>
+          </el-radio-group>
+          <span class="base-bottom-decoration" v-if="baseDecorationVisible">已设为基准</span>
+        </div>
+        <div style="display:flex;justify-content:end">
+          <el-button type="primary" @click="handleCompare">对比</el-button>
+        </div>
       </div>
     </el-card>
     <el-card shadow="hover" style="margin-bottom: 20px; padding: 10px;">
@@ -62,18 +71,18 @@
   
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import CompareChart from './components/compare-chart.vue'
-
 import { usePerformanceData } from '@/stores/performanceData'
-
 import { getDetail } from '@/api/detail'
 
 const performanceStore= usePerformanceData()
 
 let componentVisible = ref(true)
 let modalVisible = ref(false)
-let selectedOSBase = ref('1')
-let tableData = reactive<any[]>([])
+let baseDecorationVisible = ref(false)
+let selectedOSBase = ref('')
+let tableData:any[] = reactive([])
 let tableData2 = reactive([
   {
     core: '多核',
@@ -104,6 +113,22 @@ onMounted(() => {
       componentVisible.value = false
     })
 })
+
+const handleCompare = () => {
+  const index = tableData.findIndex(item => {
+    return `${item['os_release']}${item['version_feature']}` === selectedOSBase.value
+  })
+  if (index !== -1) {
+    tableData.splice(0,0,tableData[index])
+    tableData.splice(index + 1,1)
+    baseDecorationVisible.value = true
+  } else if (index === -1) {
+    ElMessage({
+      message: '请先选择要设置的基准',
+      type: 'warning'
+    })
+  }
+}
 </script>
   
 <style lang="scss" scoped>
@@ -137,5 +162,27 @@ onMounted(() => {
     padding-left: 30px;
     padding-right: 30px;
   }
+}
+.radio-group {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:space-between;
+  label {
+    margin-bottom: 10px;
+  }
+  :deep(.el-radio__input.is-checked .el-radio__inner) {
+    border-color:#002fa1;
+    background:#002fa1;
+  }
+  :deep(.el-radio__input.is-checked+.el-radio__label) {
+    color:#606266;
+  }
+}
+.base-bottom-decoration {
+  position:absolute;
+  top:28px;
+  left: 20px;
+  font-size: 13px;
+  color: #002fa8;
 }
 </style>
