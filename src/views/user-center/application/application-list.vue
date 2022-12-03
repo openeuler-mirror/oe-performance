@@ -30,64 +30,21 @@
         </el-input>
       </el-col>
       <span class="right-btn">
-        <el-button type="primary" size="large" @click="centerDialogVisible = true">新建申请</el-button>
+        <el-button type="primary" size="large" @click="dialogVisible = true">新建申请</el-button>
       </span>
     </el-row>
-    <el-drawer
-    v-model="centerDialogVisible"
-    direction="rtl"
-    size="50%"
-    >
-      <template #header>
-        <span class="el-drawer-header">新建申请</span>
-      </template>
-      <div class="el-drawer-form">
-        <el-form :model="form">
-          <el-form-item label="测试场景：">
-            <el-cascader
-            class="my-el-cascader"
-            v-model="form.region" placeholder="请选择测试场景" :options="options" @change="handleChange" />
-          </el-form-item>
-          <el-form-item label="上传文件：">
-            <el-upload
-              v-model:file-list="fileList"
-              class="upload-demo"
-              multiple
-              :limit="1"
-              :http-request="handleUpload"
-            >
-              <div class="upload-btn">
-                <el-icon size="16"><Upload /></el-icon>
-                <span class="upload-txt">上传文件</span>
-              </div>
-              <!-- <el-button type="primary">上传文件</el-button> -->
-              <template #tip>
-              <span class="btn-a-margin"><a @click.stop="download">下载模板</a></span>
-                <div class="el-upload__tip">
-                  支持扩展名：.xlsx...
-                </div>
-              </template>
-            </el-upload>
-          </el-form-item>
-          <el-form-item label="申请描述：">
-            <el-input
-            v-model="form.description"
-            type="textarea"
-            maxlength="100"
-            placeholder="（可选）请输入描述，不超过100个字符"
-            />
-          </el-form-item>
-        </el-form>
-      </div>
-      <template #footer>   
-        <span class="dialog-footer">
-          <el-button @click="centerDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="centerDialogVisible = false">
-            新建
-          </el-button>
-        </span>
-      </template>
-    </el-drawer>
+    <re-po-uploader
+    title="新建申请"
+    description="上传描述："
+    btnText="新建"
+    :options="options"
+    :region="region"
+    :bool="dialogVisible"
+    disabled="true"
+    @cancel="dialogVisible = false"
+    @handleClose="dialogVisible = false"
+    @newlyBuilt="newlyBuilt"
+    ></re-po-uploader>
     <application-table
       v-if="JSON.stringify(propsData.data) !== '[]'"
       :tableData="propsData.data"
@@ -101,9 +58,9 @@
 import { ref,reactive,onMounted } from 'vue'
 import { getApplicationList } from '@/api/center/index.ts'
 import { Search } from '@element-plus/icons-vue'
-import { UploadUserFile } from 'element-plus'
 import { useRouter } from 'vue-router'
 import  ApplicationTable  from '../components/application-table.vue'
+import RePoUploader from '@/components/uploader/RePoUploader.vue'
 
 const router = useRouter()
 
@@ -111,15 +68,8 @@ const hashData = new Map()
 
 const select = ref('')
 const value = ref('')
-const centerDialogVisible = ref(false)
+const dialogVisible = ref(false)
 
-const form = reactive({
-  region: '',
-  description: ''
-})
-const data = reactive({
-  data: {}
-})
 const tableData = reactive({
   data: []
 })
@@ -148,53 +98,6 @@ function intoView(query) {
     path: '/userCenter/application/applicationProgress',
     query
   })
-}
-
-const fileList = ref<UploadUserFile[]>([])
-
-const handleChange = (value) => {
-  console.log(value)
-}
-const handleUpload = (uploadFiles) => {
-  const fileReader = new FileReader();
-  fileReader.readAsText(uploadFiles.file);
-  fileReader.onload = function() {
-    data.data = {}
-    let content = this.result.toString().split('\r\n').filter(item => item !== '').map(item => item.split('\t'));
-    for(let i = 0; i < content[0].length; i++) {
-      try {
-        let dt = content[1][i].replace(/""/g, '"')
-        if(content[1][i][0] === '"') data.data[content[0][i]] = JSON.parse(dt.slice(1,-1))
-        else data.data[content[0][i]] = JSON.parse(dt)
-      } catch (e) {
-        data.data[content[0][i]] = content[1][i]
-      }
-    }
-    console.log(data.data)
-  }
-}
-
-function download() {
-  // values可以从后端获取数据
-  let values = ['aaa','bbb','ccc','ddd','eee']
-  // 列标题，逗号隔开，每一个逗号就是隔开一个单元格
-  let str = ''
-  // 增加\t为了不让表格显示科学计数法或者其他格式
-  for (let i = 0; i < values.length; i++) {
-    str += `${values[i]},`
-  }
-  // 一个回车（'\n'）表示一行数据
-  str += '\n'
-  // encodeURIComponent解决中文乱码
-  let url = `data:text/csv;charset=utf-8,\ufeff${encodeURIComponent(str)}`
-  // 通过创建a标签实现
-  let link = document.createElement('a')
-  link.href = url
-  // 对下载的文件命名
-  link.download = 'template.xlsx'
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
 }
 
 onMounted(() => {
