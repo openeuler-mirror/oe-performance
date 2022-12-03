@@ -39,12 +39,13 @@ https://modao.cc/app/IUs90Nvri8odsTP3U18oR#screen=sl82p1aoqxqf18o
 | 4|数据上传申请审核接口| 性能测试-测试组件-上传 | 数据上传需要绑定审核人，增加数据描述 |
 | 5| 测试任务列表数据接口，可条件查询 | 测试任务 | 页面等同性能基线(一个task_id=submit_id, 一个submit_id=group of job_id) + 动态数据：总计/成功/失败 |
 | 6| 测试任务详情接口 | 测试任务-详情 | 对search到的job进行全部展开 |
-| 7| 删除测试任务接口 | 测试任务 | 调用接口对后端的job 进行cancel， 对于已经消费的job，无法调用该接口|
-| 8| 重新运行测试任务接口 | 测试任务 | 调用接口对后端的job 进行重新提交，重跑重新跳转到任务提交页面，进行任务提交，配置复用，重新分配submit_id|
-| 9| 提交测试接口 | 提交测试 | 根据前端post上来的数据，在后端组成job.yaml文件，进行任务提交 |
-| 10| 获取测试套件下有哪些测试用例的接口（提交测试时要选择测试用例） | 提交测试 | 根据每个测试组件的yaml文件进行划分 |
-| 11| OS版本数据接口| 提交测试 | 提交测试时选择OS版本 |
-| 12| 提交测试时的硬件 | 提交测试 | 提交测试时选择硬件配置 |
+| 7| 性能测试详情接口 | 性能测试-详情 | 一条数据的详情 |
+| 8| 删除测试任务接口 | 测试任务 | 调用接口对后端的job 进行cancel， 对于已经消费的job，无法调用该接口|
+| 9| 重新运行测试任务接口 | 测试任务 | 调用接口对后端的job 进行重新提交，重跑重新跳转到任务提交页面，进行任务提交，配置复用，重新分配submit_id|
+| 10| 提交测试接口 | 提交测试 | 根据前端post上来的数据，在后端组成job.yaml文件，进行任务提交 |
+| 11| 获取测试套件下有哪些测试用例的接口（提交测试时要选择测试用例） | 提交测试 | 根据每个测试组件的yaml文件进行划分 |
+| 12| OS版本数据接口| 提交测试 | 提交测试时选择OS版本 |
+| 13| 提交测试时的硬件 | 提交测试 | 提交测试时选择硬件配置 |
 
 ##### 简要描述（数据上传申请的列表接口）
 
@@ -620,6 +621,1010 @@ export const getsubmitidAxios = (param) => http({
 |testbox | string | 机器|
 |category | string | 测试类型（benchmark表示性能测试） |
 |result_root | string | 结果日志的下载路径 |
+
+##### 简要描述（性能测试详情接口）
+
+- 性能测试详情接口，性能测试-详情，对性能测试页面的一条数据进行完全展开
+
+|基础性能基线|测试组件|
+|:----- |-----      |
+|CPU|unixbench|
+||speccpu2006|
+||speccpu2017|
+|内存|stream|
+||lmbench|
+|存储|fio|
+||iozone(暂不支持)|
+|网络|netperf|
+|基础库|libmicro|
+||specjvm2008(暂不支持)|
+
+######  请求URL
+- ` /data-api/search`
+  
+######  请求方式
+- POST
+
+###### 请求示例（就是根据ES的查询语句来获取就行）
+- 根据submit_id，拿到一组job，同时，根据不同suite的表格划分不一致，依据配置文件进行详情页面的表格组合
+
+###### 测试套数据分析
+下面这张表格将8个测试组件的，不同表格结构展示出来了，有些测试组件，展示效果上，需要展示出多张表格，因为其有不同的测试用例，例如，lmbench有6张表格。
+组合规则：
+
+```
+p1：
+    性能测试页面，每一行的数据来自同一个submit_id, 一个submit_id是一组job(原子级的)的组id， 一组job，还需组合成多个表格，即： job和表格之间是多对多的关系。
+
+rules
+- 1 atomic job=1 test run
+- 1 atomic job => N KPI (show in N line)
+- M atomic jobs with equal params = repeated M runs => N KPI average (show in N line)
+- some params (bs) should be merged into 1 line in page1, then show in expanded lines in page2
+
+p1 unixbench.nr_task
+p1 fio.pp.nr_task
+p1 fio.pp.ioengine
+p1 fio.pp.rw
+p1 fio.pp.rwmixread
+p2 fio.pp.bs
+
+kpi: fio.stats.iops; fio.stats.bw
+
+test definitions:
+
+- user friendly param kv name (nr_task=1: 单核   nr_task=100%: 多核  rw=read: 读)
+- user friendly KPI name 
+- p1 param
+- p2 param
+- other params will be silently united and values averaged, not shown anywhere
+
+page1 cols
+hw-param1,2,3,   os-param1,2,3, test-params-p1, kpi-name, kpi-value
+
+page2 cols
+test-params-p2+kpi-name, kpi-value
+
+search unixbench jobs
+for each job (fio)
+  kpis = suite2kpis[job.suite]
+  for each kpi in kpis (iops, bw)
+	job.p1cols = page1-cols (hw-param1,2,3,   os-param1,2,3, test-params-p1-values, kpi-name)
+	job.p2cols = page2-cols (test-params-p2-values+kpi-name)
+	p1_lines[job.p1cols].jobs.append job
+	p1_lines[job.p1cols].values.append kpi-value (job[stats.$kpi])
+	p1_lines[job.p1cols].tablecols ||=  **user friendly names**[hw-param1,2,3,   os-param1,2,3, test-params-p1, kpi-name]
+	p1_lines[job.p1cols].p2_lines[p2cols].append **user friendly names**[test-params-p2+kpi-name, kpi-value]
+
+查看
+name=(mergable param + KPI)
+
+
+p1：
+    性能测试页面，每一行的数据来自同一个submit_id, 一个submit_id是一组job(原子级的)的组id， 一组job，还需组合成多个表格，即： job和表格之间是多对多的关系。
+test_params(p1)：
+    用于从大量job中筛选，划分表格数据的参数，实际上，os(操作系统)、os_arch(架构)、testbox(机器)也属于test_params(p1)，由于篇幅原因，就不在表格中展开，且这些参数，同一个submit_id下，一般都是一样的，直接通过submit_id 就够了。
+
+    group by submit_id ==> all jobs of suite
+    if test_params(p1) not the same:
+        not in one table
+        group by (pp.unixbench.nr_task=1) ==> table(单核)
+        group by (pp.unixbench.nr_task=96)  ==> table(多核)
+
+test_params(p2)：
+    用于划分表格的表头
+group by test_parmas(p1) ==> table data
+
+if test_params(p1) not the same:
+    not in one table
+        
+```
+
+|测试组件|表格名(等同于测试用例)|test_parmas(p1)|test_params(p2)|kpi|
+|:-----  |:-----|:-----|:-----|-----      |
+|stream|Function|pp.stream.nr_threads=96,pp.stream.array_size=100000000,pp.stream.omp=false||stream.copy_bandwidth_MBps |
+|||pp.stream.nr_threads=96,pp.stream.array_size=100000000,pp.stream.omp=false||stream.triad_bandwidth_MBps ||
+|||pp.stream.nr_threads=96,pp.stream.array_size=100000000,pp.stream.omp=false||stream.add_bandwidth_MBps |
+|||pp.stream.nr_threads=96,pp.stream.array_size=100000000,pp.stream.omp=false||stream.scale_bandwidth_MBps |
+|unixbench|单核|pp.unixbench.nr_task=1|"unixbench.Dhrystone_2_using_register_variables"|
+|||pp.unixbench.nr_task=1|"unixbench.Double-Precision_Whetstone"|
+|||pp.unixbench.nr_task=1|"unixbench.Execl_Throughput"|
+|||pp.unixbench.nr_task=1|"unixbench.File_Copy_1024_bufsize_2000_maxblocks"| 
+|||pp.unixbench.nr_task=1|"unixbench.File_Copy_256_bufsize_500_maxblocks"|
+|||pp.unixbench.nr_task=1|"unixbench.File_Copy_4096_bufsize_8000_maxblocks"|
+|||pp.unixbench.nr_task=1|"unixbench.Pipe_Throughput"|
+|||pp.unixbench.nr_task=1|"unixbench.Pipe-based_Context_Switching"|
+|||pp.unixbench.nr_task=1|"unixbench.Process_Creation"|
+|||pp.unixbench.nr_task=1|"unixbench.Shell_Scripts_(1_concurrent)"|
+|||pp.unixbench.nr_task=1|"unixbench.Shell_Scripts_(8_concurrent)"|
+|||pp.unixbench.nr_task=1|"unixbench.System_Call_Overhead"|
+|||pp.unixbench.nr_task=1|"unixbench.System_Benchmarks_Index_Score"|
+||多核|pp.unixbench.nr_task=96(不一定，根据机器规格还有128核的)|"unixbench.Dhrystone_2_using_register_variables"|
+|||pp.unixbench.nr_task=96|"unixbench.Double-Precision_Whetstone"|
+|||pp.unixbench.nr_task=96|"unixbench.Execl_Throughput"|
+|||pp.unixbench.nr_task=96|"unixbench.File_Copy_1024_bufsize_2000_maxblocks"| 
+|||pp.unixbench.nr_task=96|"unixbench.File_Copy_256_bufsize_500_maxblocks"|
+|||pp.unixbench.nr_task=96|"unixbench.File_Copy_4096_bufsize_8000_maxblocks"|
+|||pp.unixbench.nr_task=96|"unixbench.Pipe_Throughput"|
+|||pp.unixbench.nr_task=96|"unixbench.Pipe-based_Context_Switching"|
+|||pp.unixbench.nr_task=96|"unixbench.Process_Creation"|
+|||pp.unixbench.nr_task=96|"unixbench.Shell_Scripts_(1_concurrent)"|
+|||pp.unixbench.nr_task=96|"unixbench.Shell_Scripts_(8_concurrent)"|
+|||pp.unixbench.nr_task=96|"unixbench.System_Call_Overhead"|
+|||pp.unixbench.nr_task=96|"unixbench.System_Benchmarks_Index_Score"|
+|netperf|TCP_STREAM| pp.netperf.test=TCP_STREAM,pp.netperf.send_size=1,64,128,256,512,1024,1500,2048,4096,9000,16384,32768|"netperf.Throughput_tps"|
+||UDP_STREAM|pp.netperf.test=UDP_STREAM,pp.netperf.send_size=1,64,128,256,512,1024,1500,2048,4096,9000,16384,32768|"netperf.Throughput_tps"|
+||Protocol_kind| pp.netperf.test=TCP_RR,UDP_RR,TCP_CRR|"netperf.Throughput_tps"|
+|lmbench|Processor_Processes|pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.syscall.syscall.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.syscall.stat.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.syscall.open/close.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.null_io"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Process.fork+exit.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Process.fork+execve.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Process.fork+/bin/sh.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Select.100tcp.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.sig_inst"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.sig_hndl"|
+||local_latencies|pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.PIPE.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.AF_UNIX.sock.stream.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.UDP.usinglocalhost.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.TCP.localhost.latency"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.CONNECT.localhost.latency.us"|
+||local_bandwidths|pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.PIPE.bandwidth.MB/sec"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.AF_UNIX.sock.stream.bandwidth.MB/sec"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.TCP.socket.bandwidth.10MB.MB/sec"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.FILE.read.bandwidth.MB/sec"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.MMAP.read.bandwidth.MB/sec"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.BCOPY.libc.bandwidth.MB/sec"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.BCOPY.unrolled.bandwidth.MB/sec"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.BCOPY.memory_read.bandwidth.MB/sec"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.BCOPY.memory_write.bandwidth.MB/sec"|
+||Context_switching_ctxsw|pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.CTX.2P.0K.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.CTX.2P.16K.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.CTX.2P.64K.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.CTX.8P.16K.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.CTX.8P.64K.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.CTX.16P.16K.latency.us"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.CTX.16P.64K.latency.us"|
+||File_&_VM_latencies|pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Mmap_Latency"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Prot_Fault"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Pagefaults.ms"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Select.100fd.latency.us"|
+||Memory_latencies|pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.L1_$"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.L2_$"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Main_mem"|
+|||pp.lmbench.mode=all,pp.lmbench.nr_thread=1,pp.lmbench.test_memory_size=4096|"lmbench.Rand_mem"|
+|fio|randrwread_iops_blocksize|pp.fio-setup-basic.rw=randrw,pp.fio-setup-basic.rwmixread=70,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.read_iops"|
+||randrwread_bw_blocksize|pp.fio-setup-basic.rw=randrw,pp.fio-setup-basic.rwmixread=70,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.read_bw_MBps"|
+||randrwwrite_iops_blocksize|pp.fio-setup-basic.rw=randrw,pp.fio-setup-basic.rwmixread=70,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.write_iops"|
+||randrwwrite_bw_blocksize|pp.fio-setup-basic.rw=read,pp.fio-setup-basic.rwmixread=70,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.write_bw_MBps"|
+||read_iops_blocksize|pp.fio-setup-basic.rw=read,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.read_iops"|
+||read_bw_blocksize|pp.fio-setup-basic.rw=read,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.read_bw_MBps"|
+||randread_iops_blocksize|pp.fio-setup-basic.rw=randread,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.read_iops"|
+||randread_bw_blocksize|pp.fio-setup-basic.rw=randread,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.read_bw_MBps"|
+||write_iops_blocksize|pp.fio-setup-basic.rw=write,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.write_iops"|
+||write_bw_blocksize|pp.fio-setup-basic.rw=write,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.write_bw_MBps"|
+||randwrite_iops_blocksize|pp.fio-setup-basic.rw=randwrite,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.write_iops"|
+||randwrite_bw_blocksize|pp.fio-setup-basic.rw=randwrite,pp.fio-setup-basic.bs=4k,16k,32k,64k,128k,256k,512k,1024k|"fio.write_bw_MBps"|
+|speccpu2006|intrate|pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.400.perlbench_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.401.bzip2_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.403.gcc_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.429.mcf_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.445.gobmk_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.456.hmmer_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.458.sjeng_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.462.libquantum_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.464.h264ref_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.471.omnetpp_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.473.astar_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.483.xalancbmk_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=int|"speccpu-2006.Est.SPECint(R)_rate_base2006"|
+||intspeed|pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.400.perlbench_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.401.bzip2_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.403.gcc_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.429.mcf_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.445.gobmk_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.456.hmmer_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.458.sjeng_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.462.libquantum_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.464.h264ref_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.471.omnetpp_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.473.astar_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.483.xalancbmk_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=int|"speccpu-2006.Est.SPECint(R)_base2006"
+||fpspeed|pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.410.bwaves_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.416.gamess_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.433.milc_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.434.zeusmp_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.435.gromacs_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.436.cactusADM_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.437.leslie3d_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.444.namd_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.447.dealII_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.450.soplex_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.453.povray_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.454.calculix_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.459.GemsFDTD_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.465.tonto_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.470.lbm_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.481.wrf_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.482.sphinx3_Ratio"|
+|||pp.speccpu-2006.test_item=speed,pp.speccpu-2006.num_type=fp|"speccpu-2006.Est.SPECfp(R)_base2006"
+||fprate|pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.410.bwaves_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.416.gamess_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.433.milc_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.434.zeusmp_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.435.gromacs_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.436.cactusADM_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.437.leslie3d_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.444.namd_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.447.dealII_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.450.soplex_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.453.povray_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.454.calculix_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.459.GemsFDTD_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.465.tonto_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.470.lbm_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.481.wrf_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.482.sphinx3_Rate"|
+|||pp.speccpu-2006.test_item=rate,pp.speccpu-2006.num_type=fp|"speccpu-2006.Est.SPECfp(R)_rate_base2006"
+|speccpu2017|intrate|pp.speccpu-2017.item=intrate|"speccpu-2017.500.perlbench_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.502.gcc_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.505.mcf_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.520.omnetpp_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.523.xalancbmk_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.525.x264_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.531.deepsjeng_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.541.leela_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.548.exchange2_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.557.xz_r"|
+|||pp.speccpu-2017.item=intrate|"speccpu-2017.Est.SPECrate2017_int_base"|
+||intspeed|pp.speccpu-2017.item=intspeed|"speccpu-2017.600.perlbench_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.602.gcc_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.605.mcf_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.620.omnetpp_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.623.xalancbmk_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.625.x264_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.631.deepsjeng_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.641.leela_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.648.exchange2_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.657.xz_s"|
+|||pp.speccpu-2017.item=intspeed|"speccpu-2017.Est.SPECspeed2017_int_base"|
+||fpspeed|pp.speccpu-2017.item=fpspeed|"speccpu-2017.603.bwaves_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.607.cactuBSSN_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.619.lbm_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.621.wrf_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.627.cam4_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.628.pop2_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.638.imagick_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.644.nab_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.649.fotonik3d_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.654.roms_s"|
+|||pp.speccpu-2017.item=fpspeed|"speccpu-2017.Est.SPECspeed2017_fp_base"|
+||fprate|pp.speccpu-2017.item=fprate|"speccpu-2017.503.bwaves_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.507.cactuBSSN_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.508.namd_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.510.parest_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.511.povray_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.519.lbm_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.521.wrf_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.526.blender_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.527.cam4_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.538.imagick_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.544.nab_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.549.fotonik3d_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.554.roms_r"|
+|||pp.speccpu-2017.item=fprate|"speccpu-2017.Est.SPECrate2017_fp_base"|
+|libmicro|Function|pp.libmicro|"libmicro.getpid"|
+|||pp.libmicro|"libmicro.getpid"|
+|||pp.libmicro|"libmicro.getenv"|
+|||pp.libmicro|"libmicro.getenvT2"|
+|||pp.libmicro|"libmicro.gettimeofday"|
+|||pp.libmicro|"libmicro.log"|
+|||pp.libmicro|"libmicro.exp"|
+|||pp.libmicro|"libmicro.lrand48"|
+|||pp.libmicro|"libmicro.memset_10"|
+|||pp.libmicro|"libmicro.memset_256"|
+|||pp.libmicro|"libmicro.memset_256_u"|
+|||pp.libmicro|"libmicro.memset_1k"|
+|||pp.libmicro|"libmicro.memset_4k"|
+|||pp.libmicro|"libmicro.memset_4k_uc"|
+|||pp.libmicro|"libmicro.memset_10k"|
+|||pp.libmicro|"libmicro.memset_1m"|
+|||pp.libmicro|"libmicro.memset_10m"|
+|||pp.libmicro|"libmicro.memsetP2_10m"|
+|||pp.libmicro|"libmicro.memrand"|
+|||pp.libmicro|"libmicro.isatty_yes"|
+|||pp.libmicro|"libmicro.isatty_no"|
+|||pp.libmicro|"libmicro.malloc_10"|
+|||pp.libmicro|"libmicro.malloc_100"|
+|||pp.libmicro|"libmicro.malloc_1k"|
+|||pp.libmicro|"libmicro.malloc_10k"|
+|||pp.libmicro|"libmicro.malloc_100k"|
+|||pp.libmicro|"libmicro.mallocT2_10"|
+|||pp.libmicro|"libmicro.mallocT2_100"|
+|||pp.libmicro|"libmicro.mallocT2_1k"|
+|||pp.libmicro|"libmicro.mallocT2_10k"|
+|||pp.libmicro|"libmicro.mallocT2_100k"|
+|||pp.libmicro|"libmicro.close_bad"|
+|||pp.libmicro|"libmicro.close_tmp"|
+|||pp.libmicro|"libmicro.close_usr"|
+|||pp.libmicro|"libmicro.close_zero"|
+|||pp.libmicro|"libmicro.memcpy_10"|
+|||pp.libmicro|"libmicro.memcpy_1k"|
+|||pp.libmicro|"libmicro.memcpy_10k"|
+|||pp.libmicro|"libmicro.memcpy_1m"|
+|||pp.libmicro|"libmicro.memcpy_10m"|
+|||pp.libmicro|"libmicro.strcpy_10"|
+|||pp.libmicro|"libmicro.strchr_1k"|
+|||pp.libmicro|"libmicro.strcmp_10"|
+|||pp.libmicro|"libmicro.strcmp_1k"|
+|||pp.libmicro|"libmicro.scasecmp_10"|
+|||pp.libmicro|"libmicro.scasecmp_1k"|
+|||pp.libmicro|"libmicro.strtol"|
+|||pp.libmicro|"libmicro.getcontext"|
+|||pp.libmicro|"libmicro.setcontext"|
+|||pp.libmicro|"libmicro.mutex_st"|
+|||pp.libmicro|"libmicro.mutex_mt"|
+|||pp.libmicro|"libmicro.mutex_T2"|
+|||pp.libmicro|"libmicro.longjmp"|
+|||pp.libmicro|"libmicro.siglongjmp"|
+|||pp.libmicro|"libmicro.getrusage"|
+|||pp.libmicro|"libmicro.times"|
+|||pp.libmicro|"libmicro.time"|
+|||pp.libmicro|"libmicro.localtime_r"|
+|||pp.libmicro|"libmicro.strftime"|
+|||pp.libmicro|"libmicro.mktime"|
+|||pp.libmicro|"libmicro.mktimeT2"|
+|||pp.libmicro|"libmicro.c_mutex_1"|
+|||pp.libmicro|"libmicro.c_mutex_10"|
+|||pp.libmicro|"libmicro.c_mutex_200"|
+|||pp.libmicro|"libmicro.c_cond_1"|
+|||pp.libmicro|"libmicro.c_cond_10"|
+|||pp.libmicro|"libmicro.c_cond_200"|
+|||pp.libmicro|"libmicro.c_lockf_1"|
+|||pp.libmicro|"libmicro.c_lockf_10"|
+|||pp.libmicro|"libmicro.c_lockf_200"|
+|||pp.libmicro|"libmicro.c_flock"|
+|||pp.libmicro|"libmicro.c_flock_10"|
+|||pp.libmicro|"libmicro.c_flock_200"|
+|||pp.libmicro|"libmicro.c_fcntl_1"|
+|||pp.libmicro|"libmicro.c_fcntl_10"|
+|||pp.libmicro|"libmicro.c_fcntl_200"|
+|||pp.libmicro|"libmicro.file_lock"|
+|||pp.libmicro|"libmicro.getsockname"|
+|||pp.libmicro|"libmicro.getpeername"|
+|||pp.libmicro|"libmicro.chdir_tmp"|
+|||pp.libmicro|"libmicro.chdir_usr"|
+|||pp.libmicro|"libmicro.chgetwd_tmp"|
+|||pp.libmicro|"libmicro.chgetwd_usr"|
+|||pp.libmicro|"libmicro.realpath_tmp"|
+|||pp.libmicro|"libmicro.realpath_usr"|
+|||pp.libmicro|"libmicro.stat_tmp"|
+|||pp.libmicro|"libmicro.stat_usr"|
+|||pp.libmicro|"libmicro.fcntl_tmp"|
+|||pp.libmicro|"libmicro.fcntl_usr"|
+|||pp.libmicro|"libmicro.fcntl_ndelay"|
+|||pp.libmicro|"libmicro.lseek_t8k"|
+|||pp.libmicro|"libmicro.lseek_u8k"|
+|||pp.libmicro|"libmicro.open_tmp"|
+|||pp.libmicro|"libmicro.open_usr"|
+|||pp.libmicro|"libmicro.open_zero"|
+|||pp.libmicro|"libmicro.dup"|
+|||pp.libmicro|"libmicro.socket_u"|
+|||pp.libmicro|"libmicro.socket_i"|
+|||pp.libmicro|"libmicro.socketpair"|
+|||pp.libmicro|"libmicro.setsockopt"|
+|||pp.libmicro|"libmicro.bind"|
+|||pp.libmicro|"libmicro.listen"|
+|||pp.libmicro|"libmicro.connection"|
+|||pp.libmicro|"libmicro.poll_10"|
+|||pp.libmicro|"libmicro.poll_100"|
+|||pp.libmicro|"libmicro.poll_1000"|
+|||pp.libmicro|"libmicro.poll_w10"|
+|||pp.libmicro|"libmicro.poll_w100"|
+|||pp.libmicro|"libmicro.poll_w1000"|
+|||pp.libmicro|"libmicro.select_10"|
+|||pp.libmicro|"libmicro.select_100"|
+|||pp.libmicro|"libmicro.select_1000"|
+|||pp.libmicro|"libmicro.select_w10"|
+|||pp.libmicro|"libmicro.select_w100"|
+|||pp.libmicro|"libmicro.select_w1000"|
+|||pp.libmicro|"libmicro.semop"|
+|||pp.libmicro|"libmicro.sigaction"|
+|||pp.libmicro|"libmicro.signal"|
+|||pp.libmicro|"libmicro.sigprocmask"|
+|||pp.libmicro|"libmicro.pthread_8"|
+|||pp.libmicro|"libmicro.pthread_32"|
+|||pp.libmicro|"libmicro.pthread_128"|
+|||pp.libmicro|"libmicro.pthread_512"|
+|||pp.libmicro|"libmicro.fork_10"|
+|||pp.libmicro|"libmicro.fork_100"|
+|||pp.libmicro|"libmicro.fork_1000"|
+|||pp.libmicro|"libmicro.exit_10"|
+|||pp.libmicro|"libmicro.exit_100"|
+|||pp.libmicro|"libmicro.exit_1000"|
+|||pp.libmicro|"libmicro.exit_10_nolibc"|
+|||pp.libmicro|"libmicro.exec"|
+|||pp.libmicro|"libmicro.system"|
+|||pp.libmicro|"libmicro.recurse"|
+|||pp.libmicro|"libmicro.read_t1k"|
+|||pp.libmicro|"libmicro.read_t10k"|
+|||pp.libmicro|"libmicro.read_t100k"|
+|||pp.libmicro|"libmicro.read_u1k"|
+|||pp.libmicro|"libmicro.read_u10k"|
+|||pp.libmicro|"libmicro.read_u100k"|
+|||pp.libmicro|"libmicro.read_z1k"|
+|||pp.libmicro|"libmicro.read_z10k"|
+|||pp.libmicro|"libmicro.read_z100k"|
+|||pp.libmicro|"libmicro.read_zw100k"|
+|||pp.libmicro|"libmicro.write_t1k"|
+|||pp.libmicro|"libmicro.write_t10k"|
+|||pp.libmicro|"libmicro.write_t100k"|
+|||pp.libmicro|"libmicro.write_u1k"|
+|||pp.libmicro|"libmicro.write_u10k"|
+|||pp.libmicro|"libmicro.write_u100k"|
+|||pp.libmicro|"libmicro.write_n1k"|
+|||pp.libmicro|"libmicro.write_n10k"|
+|||pp.libmicro|"libmicro.write_n100k"|
+|||pp.libmicro|"libmicro.writev_t1k"|
+|||pp.libmicro|"libmicro.writev_t10k"|
+|||pp.libmicro|"libmicro.writev_t100k"|
+|||pp.libmicro|"libmicro.writev_u1k"|
+|||pp.libmicro|"libmicro.writev_u10k"|
+|||pp.libmicro|"libmicro.writev_u100k"|
+|||pp.libmicro|"libmicro.writev_n1k"|
+|||pp.libmicro|"libmicro.writev_n10k"|
+|||pp.libmicro|"libmicro.writev_n100k"|
+|||pp.libmicro|"libmicro.pread_t1k"|
+|||pp.libmicro|"libmicro.pread_t10k"|
+|||pp.libmicro|"libmicro.pread_t100k"|
+|||pp.libmicro|"libmicro.pread_u1k"|
+|||pp.libmicro|"libmicro.pread_u10k"|
+|||pp.libmicro|"libmicro.pread_u100k"|
+|||pp.libmicro|"libmicro.pread_z1k"|
+|||pp.libmicro|"libmicro.pread_z10k"|
+|||pp.libmicro|"libmicro.pread_z100k"|
+|||pp.libmicro|"libmicro.pread_zw100k"|
+|||pp.libmicro|"libmicro.pwrite_t1k"|
+|||pp.libmicro|"libmicro.pwrite_t10k"|
+|||pp.libmicro|"libmicro.pwrite_t100k"|
+|||pp.libmicro|"libmicro.pwrite_u1k"|
+|||pp.libmicro|"libmicro.pwrite_u10k"|
+|||pp.libmicro|"libmicro.pwrite_u100k"|
+|||pp.libmicro|"libmicro.pwrite_n1k"|
+|||pp.libmicro|"libmicro.pwrite_n10k"|
+|||pp.libmicro|"libmicro.pwrite_n100k"|
+|||pp.libmicro|"libmicro.mmap_z8k"|
+|||pp.libmicro|"libmicro.mmap_z128k"|
+|||pp.libmicro|"libmicro.mmap_t8k"|
+|||pp.libmicro|"libmicro.mmap_t128k"|
+|||pp.libmicro|"libmicro.mmap_u8k"|
+|||pp.libmicro|"libmicro.mmap_u128k"|
+|||pp.libmicro|"libmicro.mmap_a8k"|
+|||pp.libmicro|"libmicro.mmap_a128k"|
+|||pp.libmicro|"libmicro.mmap_rz8k"|
+|||pp.libmicro|"libmicro.mmap_rz128k"|
+|||pp.libmicro|"libmicro.mmap_rt8k"|
+|||pp.libmicro|"libmicro.mmap_rt128k"|
+|||pp.libmicro|"libmicro.mmap_ru8k"|
+|||pp.libmicro|"libmicro.mmap_ru128k"|
+|||pp.libmicro|"libmicro.mmap_ra8k"|
+|||pp.libmicro|"libmicro.mmap_ra128k"|
+|||pp.libmicro|"libmicro.mmap_wz8k"|
+|||pp.libmicro|"libmicro.mmap_wz128k"|
+|||pp.libmicro|"libmicro.mmap_wt8k"|
+|||pp.libmicro|"libmicro.mmap_wt128k"|
+|||pp.libmicro|"libmicro.mmap_wu8k"|
+|||pp.libmicro|"libmicro.mmap_wu128k"|
+|||pp.libmicro|"libmicro.mmap_wa8k"|
+|||pp.libmicro|"libmicro.mmap_wa128k"|
+|||pp.libmicro|"libmicro.unmap_z8k"|
+|||pp.libmicro|"libmicro.unmap_z128k"|
+|||pp.libmicro|"libmicro.unmap_t8k"|
+|||pp.libmicro|"libmicro.unmap_t128k"|
+|||pp.libmicro|"libmicro.unmap_u8k"|
+|||pp.libmicro|"libmicro.unmap_u128k"|
+|||pp.libmicro|"libmicro.unmap_a8k"|
+|||pp.libmicro|"libmicro.unmap_a128k"|
+|||pp.libmicro|"libmicro.unmap_rz8k"|
+|||pp.libmicro|"libmicro.unmap_rz128k"|
+|||pp.libmicro|"libmicro.unmap_rt8k"|
+|||pp.libmicro|"libmicro.unmap_rt128k"|
+|||pp.libmicro|"libmicro.unmap_ru8k"|
+|||pp.libmicro|"libmicro.unmap_ru128k"|
+|||pp.libmicro|"libmicro.unmap_ra8k"|
+|||pp.libmicro|"libmicro.unmap_ra128k"|
+|||pp.libmicro|"libmicro.conn_connect"|
+|||pp.libmicro|"libmicro.unmap_wz8k"|
+|||pp.libmicro|"libmicro.unmap_wz128k"|
+|||pp.libmicro|"libmicro.unmap_wt8k"|
+|||pp.libmicro|"libmicro.unmap_wt128k"|
+|||pp.libmicro|"libmicro.unmap_wu8k"|
+|||pp.libmicro|"libmicro.unmap_wu128k"|
+|||pp.libmicro|"libmicro.unmap_wa8k"|
+|||pp.libmicro|"libmicro.unmap_wa128k"|
+|||pp.libmicro|"libmicro.mprot_z8k"|
+|||pp.libmicro|"libmicro.mprot_z128k"|
+|||pp.libmicro|"libmicro.mprot_wz8k"|
+|||pp.libmicro|"libmicro.mprot_wz128k"|
+|||pp.libmicro|"libmicro.mprot_twz8k"|
+|||pp.libmicro|"libmicro.mprot_tw128k"|
+|||pp.libmicro|"libmicro.mprot_tw4m"|
+|||pp.libmicro|"libmicro.pipe_pst1"|
+|||pp.libmicro|"libmicro.pipe_pmt1"|
+|||pp.libmicro|"libmicro.pipe_pmp1"|
+|||pp.libmicro|"libmicro.pipe_pst4k"|
+|||pp.libmicro|"libmicro.pipe_pmt4k"|
+|||pp.libmicro|"libmicro.pipe_pmp4k"|
+|||pp.libmicro|"libmicro.pipe_sst1"|
+|||pp.libmicro|"libmicro.pipe_smt1"|
+|||pp.libmicro|"libmicro.pipe_smp1"|
+|||pp.libmicro|"libmicro.pipe_sst4k"|
+|||pp.libmicro|"libmicro.pipe_smt4k"|
+|||pp.libmicro|"libmicro.pipe_smp4k"|
+|||pp.libmicro|"libmicro.pipe_tst1"|
+|||pp.libmicro|"libmicro.pipe_tmt1"|
+|||pp.libmicro|"libmicro.pipe_tmp1"|
+|||pp.libmicro|"libmicro.pipe_tst4k"|
+|||pp.libmicro|"libmicro.pipe_tmt4k"|
+|||pp.libmicro|"libmicro.pipe_tmp4k"|
+|||pp.libmicro|"libmicro.conn_accept"|
+|||pp.libmicro|"libmicro.close_tcp"|
+
+##### 整理方法
+
+
+
+
+### 数据解析流程
+
+```mermaid
+sequenceDiagram
+perf_data->>request: 1.请求数据 suite:$suite （如：fio-basic）
+request->>data_api:  2./data-api/search
+
+data_api->>request:  3. 返回数据
+request->>perf_data: 4. 根据submit_id进行分类，并展示表格
+
+# 当用户点击详情
+perf_data->>perf_detail_data: 5. 获取指定submit_id的数据
+perf_detail_data->>request: 6. /data-api/search suite:$suite, submit_id: $submit_id
+request->>perf_detail_data: 7. 返回数据
+perf_detail_data->>perf_detail_data: 8. 读取suite对应的suite2kpi, suite2testparams_name 找到对应的kpi值
+perf_detail_data->>perf_detail_data: 9. 遍历所有job，遍历kpi
+perf_detail_data->>perf_detail_data: 10. 读取job中的suite2testparams_name字段，结合kpi得到p1col
+perf_detail_data->>perf_detail_data: 11. 获取job的所有值 生成p1col对应的 value
+perf_detail_data->>perf_detail_data: 12. 获取job的p1col2p2cols, 计算结果，并展示
+```
+
+#### 基础数据-suite2kpis
+
+```json
+{
+    "fio": ["iops", "bw"],
+    "lmbench3": [
+            "lmbench3.PIPE.bandwidth.MB/sec",
+            "lmbench3.AF_UNIX.sock.stream.bandwidth.MB",
+            "lmbench3.TCP.socket.bandwidth.10MB.MB/sec",
+            "lmbench3.FILE.read.bandwidth.MB/sec",
+            "lmbench3.MMAP.read.bandwidth.MB/sec",
+            "lmbench3.BCOPY.libc.bandwidth.MB/sec",
+            "lmbench3.BCOPY.unrolled.bandwidth.MB/sec",
+            "lmbench3.BCOPY.memory_read.bandwidth.MB/sec",
+            "lmbench3.BCOPY.memory_write.bandwidth.MB/sec",
+        
+        	"lmbench3.CTX.2P.0K.latency.us",
+            "lmbench3.CTX.2P.16K.latency.us",
+            "lmbench3.CTX.2P.64K.latency.us",
+            "lmbench3.CTX.8P.16K.latency.us",
+            "lmbench3.CTX.8P.64K.latency.us",
+            "lmbench3.CTX.16P.16K.latency.us",
+            "lmbench3.CTX.16P.64K.latency.us",
+          ],
+    ...
+}
+```
+
+#### 基础数据-suite2testparams
+
+```
+{
+    "fio": "pp.fio-setup-basic.rw",
+    "lmbench3": "pp.lmbench3.mode",
+    "unixbench": "pp.unixbench.nr_thread",
+    "netperf": "pp.netperf.test",
+    "libmicro": "",
+    "speccpu": "",
+    "stream": "",
+}
+```
+
+#### 基础数据-p1col2table
+
+```
+{
+    "rand-bw":"$table_fio_xxx",
+    "lmbench3.CTX.2P.64K.latency.us"+"all": "$table_name1",
+    "lmbench3.PIPE.bandwidth.MB/sec"+"all": "$table_name2",
+}
+```
+
+#### 基础数据-p1col2colname
+
+```
+# 不同的suite，不同的testparams，不同的kpi，读取 stats中的哪些内容，以及他们的user friendly name
+{
+    "rand-bw":"$colname0",
+    "lmbench3.CTX.2P.64K.latency.us"+"all": "$colname1",
+    "lmbench3.PIPE.bandwidth.MB/sec"+"all": "$colname2",
+}
+```
+
+
+
+### fio
+
+#### input:
+
+```
+/data-api/search
+
+data = {
+    "index": 'jobs_ex', # 存储了 硬件 和 os 信息的job表
+    "query": {
+        ## 读取内容，按照筛选项来决定，submit_id和stats为必选
+        ## soource_list = ["my_account", "stats", "submit_id"] 
+        "_source": $soource_list,
+        "query": {
+            "match": {  ## 筛选条件
+                "suite": "fio-basic",
+                "os_arch": $os_arch, (可选)
+                "model_name": $model_name,(可选)
+            }
+        }
+    }
+}
+```
+
+#### output: (当前请求到的返回，作为输入)
+
+```
+{
+  ...
+  "hits": {
+    ...
+    "hits": [
+      {
+        ...
+        "_id": "crystal.6502418",
+        "_score": null,
+        "_source": {
+          "#! jobs/fio-basic-benchmark.yaml": null,
+          "suite": "fio-basic",
+          "runtime": 30,
+          ...
+          "#! auto generated by add_pp()": null,
+          "pp": {
+            ...
+            "fio-setup-basic": {
+              "runtime": 30,
+              "rw": "read",
+              "bs": "4k",
+              "ioengine": "libaio",
+              "iodepth": 10,
+              "direct": 1,
+              "test_size": "1000G",
+              "nr_task": 10,
+              "fallocate": "none",
+              "raw_disk": false,
+              "invalidate": "none",
+              "nr_files": "none",
+              "filesize": "none",
+              "io_size": "none",
+              "file_service_type": "none",
+              "random_distribution": "none",
+              "pre_read": "none",
+              "rwmixread": 70,
+              "test_filename": "/test/fio",
+              "allow_mounted_write": "none",
+              "create_only": "none",
+              "run": 0,
+              "thread": 1
+            },
+            "run": 0,
+            "fio": null,
+            "setup-firewalld": null
+          },
+          ...
+          
+          "running_time": "2022-11-15T10:57:41+0800",
+          "post_run_time": "2022-11-15T11:00:50+0800",
+          "loadavg": "2.63 1.64 1.28 1/971 32011",
+          "end_time": "2022-11-15T11:00:48+0800",
+          "start_time": "2022-11-15T10:58:16+0800",
+          "job_health": "success",
+          "close_time": "2022-11-15T11:01:05+0800",
+          
+          "stats": {
+            "fio.read_bw_MBps": 2435.5087890625,
+            "fio.read_clat_mean_us": 153809.914265,
+            "fio.read_slat_stddev": 1981.649393,
+            "fio.latency_4ms%": 0.01,
+            "fio.latency_1000us%": 0.01,
+            "fio.latency_500us%": 1.19768,
+            "fio.workload": 18705332,
+            "fio.read_clat_99%_us": 254976,
+            "fio.latency_750us%": 0.038187,
+            "fio.read_clat_95%_us": 220160,
+            "fio.latency_50us%": 0.01,
+            "fio.read_slat_mean_us": 5824.911971,
+            "fio.read_clat_90%_us": 207872,
+            "fio.read_iops": 623490.283657,
+            "fio.latency_2ms%": 0.01,
+            "fio.latency_100us%": 10.563453,
+            "fio.latency_250us%": 88.187416,
+            "fio.read_clat_stddev": 45898.19936
+          }
+        },
+        "sort": [
+          1668481096000
+        ]
+      }
+    ]
+  }
+}
+
+```
+
+对搜索出来的内容，按照submit_id进行归类，并按照归类后的时间或指定内容进行排序；
+
+#### 对job数据进行处理
+
+```python
+# search fio jobs where submit_id=xxx
+for each job (fio)
+  kpis = suite2kpis[job.suite]
+  # kpis = ["iops", "bw"]
+  # "pp.fio-setup-basic.rw"  ["read","write","randread","randwrite","randrwread","randrwwrite"]
+  test-params-p1-value = job["pp.fio-setup-basic.rw"]
+  for each kpi in kpis:
+    # job.p1cols = read-ipos
+	job.p1cols = page1-cols(test-params-p1-value,  kpi-name)
+    # job.p2cols = ipos
+	job.p2cols = page2-cols(test-params-p2-values, kpi-name) 
+    # 4k, 16k等jobs添加到指定的p1cols中
+	p1_lines[job.p1cols].jobs.append job
+    # 对所有job的值进行，汇总计算
+	p1_lines[job.p1cols].values.append kpi-value (job[stats.$kpi])
+    # p1cols的名称, read-ipos => xxxx
+	p1_lines[job.p1cols].tablecols ||= user friendly names[test-params-p1, kpi-name]
+    # p2cols的名称，并计算值
+	p1_lines[job.p1cols].p2_lines[p2cols].append user friendly names[test-params-p2+kpi-name, kpi-value]
+```
+
+
+
+
+
+### lmbench3
+
+#### input:
+
+```
+/data-api/search
+
+data = {
+    "index": 'jobs',
+    "query": {
+        ## 读取内容，按照筛选项来决定，submit_id和stats为必选
+        ## soource_list = ["my_account", "stats", "submit_id"] 
+        "_source": $soource_list,
+        "query": {
+            "match": {  ## 筛选条件
+                "suite": "lmbench3",
+                "os_arch": $os_arch, (可选)
+                "model_name": $model_name,(可选)
+            }
+        }
+    }
+}
+```
+
+#### output
+
+```
+job info
+{
+  ...
+  "hits": {
+    ...
+    "hits": [
+      {
+        "_index": "jobs8",
+        "_type": "_doc",
+        "_id": "crystal.6502323",
+        "_score": null,
+        "_source": {
+          "#! jobs/lmbench3-performance.yaml": null,
+          "suite": "lmbench3",
+          "nr_hdd": 1,
+          ...
+          "pp": {
+            "disk": {
+              "nr_hdd": 1
+            },
+            "fs": {
+              "fs": "ext4"
+            },
+            "lmbench3": {
+              "nr_threads": 1,
+              "test_memory_size": 4096,
+              "mode": "all"
+            },
+            "setup-firewalld": null
+          },
+          "install_depend_packages": {
+            "fs": "btrfs-progs xfsdump xfsprogs nfs-utils f2fs-tools uuid-devel samba cifs-utils",
+            "lmbench3": "make gcc glibc-devel net-tools libtirpc-devel gnuplot",
+            "lkp": "bc gawk time kmod gzip which rsync ntpdate hostname util-linux lvm2 numactl net-tools cpio curl wget binutils"
+          },
+          ...
+          "stats": {
+            "lmbench3.CTX.2P.16K.latency.us": 1.35,
+            "lmbench3.CTX.96P.16K.latency.us": 2.92,
+            "lmbench3.TCP.localhost.latency": 10.9929,
+            "lmbench3.BCOPY.unrolled.bandwidth.MB/sec": 5898.0,
+            "lmbench3.TCP.socket.bandwidth.10MB.MB/sec": 5712.58,
+            "lmbench3.CTX.96P.64K.latency.us": 3.65,
+            "lmbench3.PIPE.bandwidth.MB/sec": 2607.76,
+            "lmbench3.CTX.2P.64K.latency.us": 1.46,
+            "lmbench3.TCP.socket.bandwidth.64B.MB/sec": 144.43,
+            "lmbench3.AF_UNIX.sock.stream.bandwidth.MB/sec": 6517.87,
+            "lmbench3.L2_$": 2.103,
+            "lmbench3.L1_$": 1.539,
+            "lmbench3.CTX.96P.0K.latency.us": 2.66,
+            "lmbench3.CTX.8P.16K.latency.us": 1.82,
+            "lmbench3.BCOPY.memory_read.bandwidth.MB/sec": 8983.71,
+            "lmbench3.BCOPY.libc.bandwidth.MB/sec": 5299.22,
+            "lmbench3.UDP.usinglocalhost.latency.us": 8.589,
+            "lmbench3.Rand_mem": 98.97,
+            "lmbench3.FILE.read.bandwidth.MB/sec": 5412.61,
+            "lmbench3.CTX.16P.64K.latency.us": 1.84,
+            "lmbench3.Main_mem": 99.086,
+            "lmbench3.CONNECT.localhost.latency.us": 19.0044,
+            "lmbench3.CTX.8P.64K.latency.us": 1.77,
+            "lmbench3.MMAP.read.bandwidth.MB/sec": 8561.99,
+            "lmbench3.CTX.2P.0K.latency.us": 2.07,
+            "lmbench3.Mmap_Latency": 4055,
+            "lmbench3.CTX.16P.16K.latency.us": 1.72,
+            "lmbench3.MMAP.read_open2close.bandwidth.MB/sec": 5462.03,
+            "lmbench3.BCOPY.memory_write.bandwidth.MB/sec": 3862.21
+          }
+        },
+        "sort": [
+          1668473024000
+        ]
+      }
+    ]
+  }
+}
+
+```
+
+
+```
+export const getsubmitidAxios = (param) => http({
+    url: '/data-api/search',
+    method: 'POST',
+    data: {
+        index: jobs
+        query: {
+            size: 10000，#取到这个submit中的所有的job
+            query: {
+                bool: {
+                    must: [
+                        {
+                            term: {
+                                submit_id: param.submit_id
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        sort: [
+            submit_time: {
+                order: desc
+            }
+        ],
+        _source: ["suite", "submit_id", "my_account", "submit_time", "boot_time", "close_time", "job_stage", "job_health", "testbox", "category", "result_root"]
+    }
+})
+                        
+```
+
+###### 参数
+
+|参数名|必选|类型|说明|
+|:----    |:---|:----- |-----   |
+| index|是  | 要查询的es表单名 | machine_info这个表单中保存了所有测试机的详细信息 |
+| query |是  | hash | es数据库的查询语句 |
+| size| 否 | int | 要返回的数据量 |
+| sort| 否 | hash | 用来排序的字段 |
+| _source | 否 | list | 要返回的字段 |
+
+###### 返回示例 
+
+``` 
+{
+    "_shards": {
+        "failed": 0,
+        "skipped": 0,
+        "successful": 1,
+        "total": 1
+    },
+    "hits": {
+        "hits": [
+            {
+                "_id": "9Fjzx4QBo5nFGu9ethdR",
+                "_index": "machine_info",
+                "_score": 1.0,
+                "_source": {
+                   "suite": "stream",
+                   "submit_id": "",
+                   "my_account": "",
+                   "submit_time": "",
+                   "boot_time": "",
+                   "close_time": "",
+                   "job_stage": "",
+                   "job_health": "",
+                   "testbox": "",
+                   "category": "",
+                   "result_root": "",    
+                },
+                "_type": "_doc"
+            }
+        ],
+        "max_score": 1.0,
+        "total": {
+            "relation": "eq",
+            "value": 5
+        }
+    },
+    "timed_out": false,
+    "took": 0
+}
+```
+
+###### 返回参数说明 
+
+|参数名|类型|说明|
+|:-----  |:-----|-----      |
+|suite| string | Test Suite |
+|submit_id | string | 详情页索id|
+|my_account | string | 任务提交人|
+|submit_time| string | 任务提交时间 |
+|boot_time | string | 任务开始时间 |
+|close_time | string | 任务完成时间 |
+|job_stage | string | 任务所处阶段，有submit(提交)，finish（完成） |
+|job_health | string | 任务状况，有failed， success |
+|testbox | string | 机器|
+|category | string | 测试类型（benchmark表示性能测试） |
+|result_root | string | 结果日志的下载路径 |
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```
 web-backend:
