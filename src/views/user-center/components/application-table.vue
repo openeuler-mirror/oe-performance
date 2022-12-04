@@ -82,8 +82,8 @@ function judgeLevelColor(type: string) {
 
 function judgeProgressColor(type: string) {
   let progressColor = {
-    '未提交': () => { return '#C9C9C9' },
-    '审批中': () => { return '#002FA7' },
+    // '未提交': () => { return '#C9C9C9' },
+    '待审批': () => { return '#002FA7' },
     '已发布': () => { return '#43BB57' },
     '已驳回': () => { return '#F95858' },
     'default': () => { return '#C9C9C9' }

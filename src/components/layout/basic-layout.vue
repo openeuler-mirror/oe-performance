@@ -20,7 +20,7 @@
     </el-header>
     <el-container>
       <el-aside width="250px">
-        <el-menu>
+        <el-menu router>
           <el-sub-menu index="1">
             <template #title>
               <span>解决方案性能基线</span>
@@ -38,6 +38,19 @@
             <el-menu-item index="2-3">存储</el-menu-item>
             <el-menu-item index="2-4">网络</el-menu-item>
             <el-menu-item index="2-5">基础库</el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu index="3">
+            <template #title>
+              <span>我的申请</span>
+            </template>
+            <el-menu-item index="/userCenter/application/applicationList">所有申请</el-menu-item>
+            <el-menu-item index="3-2">新建申请</el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu index="4">
+            <template #title>
+              <span>我的审批</span>
+            </template>
+            <el-menu-item index="/userCenter/approval/approveList">所有审批</el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-aside>

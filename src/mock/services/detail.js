@@ -17,7 +17,7 @@ const tableData = {
       describe: '测试描述',
       secretLevel: '公开1级',
       approver: 'lib',
-      progress: '未提交'
+      progress: '待审批'
     },
     {
       requestCode: 'TEST4064893',
@@ -27,7 +27,7 @@ const tableData = {
       describe: '测试描述',
       secretLevel: '绝密4级',
       approver: 'bic',
-      progress: '审批中'
+      progress: '待审批'
     },
     {
       requestCode: 'TEST4064892',

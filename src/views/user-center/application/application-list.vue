@@ -46,11 +46,10 @@
     @newlyBuilt="newlyBuilt"
     ></re-po-uploader>
     <application-table
-      v-if="JSON.stringify(propsData.data) !== '[]'"
+      v-loading="!(JSON.stringify(propsData.data) !== '[]')"
       :tableData="propsData.data"
       @pushView="intoView"
     ></application-table>
-    <el-empty v-else description="no data" />
   </el-card>
 </template>
 

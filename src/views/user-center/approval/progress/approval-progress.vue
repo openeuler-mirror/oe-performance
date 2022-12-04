@@ -109,8 +109,8 @@ const onSubmit = () => {
 
 function judgeProgress(type: string) {
   let progress = {
-    '未提交': () => { return 1 },
-    '审批中': () => { return 2 },
+    // '未提交': () => { return 1 },
+    '待审批': () => { return 2 },
     'default': () => { return 3 }
   }
   return (progress[type] || progress['default'])()
