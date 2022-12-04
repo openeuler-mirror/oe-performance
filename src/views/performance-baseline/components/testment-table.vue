@@ -359,7 +359,9 @@ const combineJobs = (jobList:any[]) => {
   // 在这里实现jobs的混合和映射逻辑，生成完整的一条submit_id对象
   // 暂时取第一条数据,不做整理
   const item = jobList[0]._source
-  item['submit_time'] = new Date(item['submit_time']).toLocaleString()  
+  item['submit_time'] = new Date(item['submit_time']).toLocaleString()
+  // 组合参数
+  item['os_release'] = `${item['os']} ${item['os_version']}`
   return item
 }
 

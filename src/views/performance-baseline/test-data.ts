@@ -4,6 +4,34 @@ export const allColumns = () => {
 
 const columnsData = [
   {
+    label: '操作系统',
+    prop: 'os_release'  // 需要拼接
+  },
+  {
+    label: '测试机',
+    prop: 'testbox'
+  },
+  {
+    label: '系统架构',
+    prop: 'os_arch'
+  },
+  {
+    label: 'CPU核数',
+    prop: 'nr_cpu'
+  },
+  {
+    label: 'CPU内核',
+    prop: 'kernel_version'
+  },
+  {
+    label: '内存配置',
+    prop: 'memory'
+  },
+  {
+    label: '操作系统页表大小',
+    prop: 'nr_node'
+  },
+  {
     label: '提交时间',
     prop: 'submit_time'
   },

@@ -82,7 +82,7 @@
       <el-col :span="6">
         <el-row :gutter="8">
           <el-col :span="8" class="general-font-style"
-            ><span>硬件配置:</span></el-col
+            ><span>硬盘配置:</span></el-col
           >
           <el-col :span="16">
             <el-cascader

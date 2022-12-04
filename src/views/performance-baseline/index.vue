@@ -19,6 +19,7 @@ import { getPerformanceData } from '@/api/performance'
 const data = ref<any[]>([])
 const submitDataLoading = ref(false)
 
+/* eslint-disable */
 const getAllData = (params: searchParams) => {
   console.log(params)
   submitDataLoading.value = true
@@ -42,6 +43,46 @@ const getAllData = (params: searchParams) => {
         }
       }
     },
+    /*
+    index: 'jobs',
+    query: {
+      size: 2,
+      _source: ['submit_id', 'suite'],
+      query: {
+        bool: {
+          must: [
+            {
+              match: {
+                suite: params.suite
+              }
+            },
+            {
+              exists: {
+                field: "submit_id"
+              }
+            }
+          ]
+        }
+      },
+      aggs: {
+        uid_aggs: {
+          terms: {
+            field: "submit_id",
+            size: 10000,
+          },
+          aggs: {
+            my_top_hits: {
+              top_hits: {
+                _source: {
+                  includes: ['suite', 'submit_id', 'os', 'os_version', 'nr_cpu', 'testbox', 'kernel_version', 'nr_node', "job_stage", "job_health"]
+                },
+                size: 100 // 最大只能取100个
+              }
+            }
+          }
+        }
+      }
+    } */ 
   }).then((res) => {
     // todo: 数据为空的异常处理
     data.value = res.data.aggregations.jobs_terms.buckets
