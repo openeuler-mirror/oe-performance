@@ -57,12 +57,8 @@
       </el-radio-group>
     </el-row>
     <el-row>
-      <el-col :span="3">
-        选择OS镜像版本:
-      </el-col>
-      <el-col :span="21" style="margin-left: -24px;">
-        <el-cascader v-model="selectedVersion" :options="imageVersion" clearable style="200%"/>
-      </el-col> 
+      <span style="margin-right: 15px;">选择OS镜像版本:</span>
+      <el-cascader v-model="selectedVersion" :options="imageVersion" clearable style="200%"/>
     </el-row>
   </el-card>
   <el-card shadow="always">
@@ -104,8 +100,8 @@
       </el-row>
   </el-card>
   <el-card shadow="always" style="margin-bottom: 20px;">
-    <div style="float: right;">
-      <el-button>取消</el-button>
+    <div style="margin-left: 40%;">
+      <el-button style="margin-right: 40px;">取消</el-button>
       <el-button type="primary" @click="submitTest">提交</el-button>
     </div>
   </el-card>
@@ -125,7 +121,7 @@ const selectedExample = (selectedExample: any) => {
 }
 
 const radioMirror = ref('公共镜像')
-const selectRadio = (label: string) => {
+const selectRadio = (label: any) => {
   console.log(label, '切换任务类型的处理')
 }
 

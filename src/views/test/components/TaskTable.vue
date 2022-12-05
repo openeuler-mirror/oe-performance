@@ -29,8 +29,10 @@
          </el-input>
      </el-col>
      <el-col :span="1">
-       <div class="refresh-icon">
-           <el-icon><RefreshRight /></el-icon>
+       <div class="refresh-icon" style="margin: 5px 0 0 5px;">
+        <el-button link="" type="primary">
+          <el-icon size="18px"><RefreshRight /></el-icon>
+        </el-button>
        </div>
      </el-col>
    </el-row>
@@ -43,16 +45,13 @@
        @selection-change="handleSelectionChange"
      >
        <el-table-column type="selection"/>
-       <el-table-column width="58">
+       <el-table-column fixed width="58">
          <template #default>
           <el-icon size="20px" @click="changeStar"><Star /></el-icon>
           <!-- <el-icon size="20px"><StarFilled /></el-icon> -->
          </template>
        </el-table-column>
-       <el-table-column label="Task ID">
-         <!-- <template #default="scope">
-           <el-button link type="primary">{{ scope.row.date }}</el-button>
-         </template> -->
+       <el-table-column fixed label="TaskID" width="110">
          <template #default="scope">
              <router-link :to="`/submitTest/testTask/resultDetails/${scope.row.date}`">
                 <el-button link="" type="primary">
@@ -61,7 +60,7 @@
             </router-link>
         </template>
        </el-table-column>
-       <el-table-column prop="name" label="Task Name" show-overflow-tooltip/>
+       <el-table-column prop="name" label="Task名称" fixed width="90" show-overflow-tooltip/>
        <el-table-column
              label="审批状态"
              width="100"
@@ -94,6 +93,7 @@
        <el-table-column
           prop="date"
           label="测试类型"
+          width="100"
           :filters="[
           { text: 'Am', value: 'Am' },
           { text: 'Tm', value: 'Tm' },
@@ -113,17 +113,17 @@
            </el-tooltip>
          </template>
        </el-table-column>
-       <el-table-column prop="address" label="所属项目" show-overflow-tooltip />
+       <el-table-column prop="address" label="所属项目" width="165" show-overflow-tooltip />
        <el-table-column prop="date" label="创建人" />
-       <el-table-column prop="date" sortable label="创建时间"/>
-       <el-table-column prop="date" sortable label="完成时间">
+       <el-table-column prop="date" sortable label="创建时间" width="165"/>
+       <el-table-column prop="date" sortable label="完成时间" width="165">
         <template #default="scope">
           <div>
             {{scope.row.date}}
           </div>
          </template>
        </el-table-column>
-       <el-table-column prop="detail" label="操作" fixed="right">
+       <el-table-column prop="detail" label="操作" fixed="right" width="120px">
          <template #default>
            <el-button link type="primary">重跑</el-button>
            <el-button link type="primary">删除</el-button>
@@ -223,7 +223,7 @@ const tableData: User[] = [
     address: 'No. 189, Grove St, Los Angeles',
   },
   {
-    date: '2016-05-01',
+    date: '2016-05-01 09:00:12',
     name: 'IC',
     approval: 'Pending',
     address: 'No. 189, Grove St, Los Angeles',
