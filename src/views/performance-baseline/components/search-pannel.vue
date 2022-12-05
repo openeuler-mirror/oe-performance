@@ -7,7 +7,7 @@
       <el-col :span="22">
         <el-radio-group v-model="selectedSuite" class="ml-4">
           <el-radio-button label="unixbench" />
-          <el-radio-button label="lmbench3" />
+          <el-radio-button label="lmbench" />
           <el-radio-button label="iperf" />
         </el-radio-group>
       </el-col>

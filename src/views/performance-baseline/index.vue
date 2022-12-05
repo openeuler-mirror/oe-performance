@@ -36,6 +36,8 @@ const getAllData = (params: searchParams) => {
     }
   })
 
+  matchCases.push({ match: {job_state: 'finished'} })
+
   // 获取unixbench下的submitID list
   getPerformanceData({
     'index': 'jobs',
@@ -48,7 +50,10 @@ const getAllData = (params: searchParams) => {
           // 'nr_cpu': params.nr_cpu,
           // 'testbox': params.testbox,
           // 'memory': params.memory
-          must: matchCases
+          must: matchCases,
+          // must: [
+          //   { match: {suite: 'unixbench'} },
+          // ]
         }
       },
       'aggs': {
