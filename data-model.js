@@ -142,21 +142,21 @@ jobModel = {
 	},
 
 	kpis: {
-		'stream.bandwidth_MBps': 		{ direction: 1,  label: '内存带宽(MBps)' },
-		'netperf.Throughput_Mbps': 		{ direction: 1,  label: '网络带宽(MBps)' },
-		'netperf.Throughput_Tps': 		{ direction: 1,  label: '请求转换率(应答次数/s)' },
-		'unixbench.score': 			{ direction: 1,  label: '综合跑分' },
-		'lmbench.local_bandwidths': 		{ direction: 1,  label: '内存映射、拷贝及读写带宽(MB/s)' },
-		'lmbench.Processor_Processes.latency': 	{ direction: -1, label: 'CPU、进程常用操作延迟(us)' },
-		'lmbench.local_latencies': 		{ direction: -1, label: '本地通信延迟(us)' },
-		'lmbench.Context_switching_ctxsw': 	{ direction: -1, label: '进程上下文切换开销(us)' },
-		'lmbench.File_&_VM_latencies': 		{ direction: -1, label: '内存映射延迟(us)' },
-		'lmbench.Memory_latencies': 		{ direction: -1, label: '主存及缓存延迟(us)' },
+		'stats.stream.bandwidth_MBps': 			{ direction: 1,  label: '内存带宽(MBps)' },
+		'stats.netperf.Throughput_Mbps': 		{ direction: 1,  label: '网络带宽(MBps)' },
+		'stats.netperf.Throughput_Tps': 		{ direction: 1,  label: '请求转换率(应答次数/s)' },
+		'stats.unixbench.score': 			{ direction: 1,  label: '综合跑分' },
+		'stats.lmbench.local_bandwidths': 		{ direction: 1,  label: '内存映射、拷贝及读写带宽(MB/s)' },
+		'stats.lmbench.Processor_Processes.latency': 	{ direction: -1, label: 'CPU、进程常用操作延迟(us)' },
+		'stats.lmbench.local_latencies': 		{ direction: -1, label: '本地通信延迟(us)' },
+		'stats.lmbench.Context_switching_ctxsw': 	{ direction: -1, label: '进程上下文切换开销(us)' },
+		'stats.lmbench.File_&_VM_latencies': 		{ direction: -1, label: '内存映射延迟(us)' },
+		'stats.lmbench.Memory_latencies': 		{ direction: -1, label: '主存及缓存延迟(us)' },
 	},
 
 	// 查询方法：先查询suite.param, 再查询公共param
 	params: {
-		// 公共param
+		// 公共param，去掉前缀pp.$program.后与之匹配
 		nr_task: {
 			'1':	'单核',
 			'100%':	'多核',
@@ -166,8 +166,8 @@ jobModel = {
 			'100%':	'多核',
 		},
 
-		// 测试套特定param
-		'fio.rw': {
+		// 测试套特定param，以pp.打头
+		'pp.fio.rw': {
 			'read':		'顺序读',
 			'write':	'顺序写',
 			'rw':		'顺序混合读写',
