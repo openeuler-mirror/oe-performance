@@ -86,7 +86,7 @@ const form = reactive({
   description: ''
 })
 
-const handleChange = (value) => {
+const handleChange = (value: any) => {
   console.log(value)
 }
 

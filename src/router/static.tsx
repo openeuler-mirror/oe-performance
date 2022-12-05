@@ -114,7 +114,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             }
           },
           {
-            path: '/submitTest/resultDetails',
+            path: '/submitTest/testTask/resultDetails/:task_id',
             name: 'resultDetails',
             component: () => import('@/views/test/ResultDetails.vue'),
             meta: {

@@ -1,7 +1,9 @@
 <template>
    <el-row>
      <el-col :span="15">
-         <el-radio-group v-model="radio" @change="selectRadio">
+         <el-radio-group
+           v-model="radio"
+           @change ="selectRadio">
              <el-radio-button label="1">全部任务({{ number }})</el-radio-button>
              <el-radio-button label="2">Pending({{ number }})</el-radio-button>
              <el-radio-button label="3">Running({{ number }})</el-radio-button>
@@ -48,9 +50,16 @@
          </template>
        </el-table-column>
        <el-table-column label="Task ID">
-         <template #default="scope">
+         <!-- <template #default="scope">
            <el-button link type="primary">{{ scope.row.date }}</el-button>
-         </template>
+         </template> -->
+         <template #default="scope">
+             <router-link :to="`/submitTest/testTask/resultDetails/${scope.row.date}`">
+                <el-button link="" type="primary">
+                <span>{{ scope.row.date }}</span>
+              </el-button>
+            </router-link>
+        </template>
        </el-table-column>
        <el-table-column prop="name" label="Task Name" show-overflow-tooltip/>
        <el-table-column
@@ -153,7 +162,7 @@ const select = ref('Task ID')
 const number = ref('423')
 const searchInput = ref('')
 
-const selectRadio = (label: string) => {
+const selectRadio = (label: any) => {
   console.log(label, '切换任务类型的处理')
 }
 // , column: TableColumnCtx<User>
@@ -242,13 +251,13 @@ const tableData: User[] = [
 
 <style lang="scss" scoped>
 .Fail {
-  background-color: rgb(232, 7, 7);
+  background-color: rgb(250, 88, 88);
   color: rgb(214, 209, 209);
   border-radius: 5px;
   text-align: center;
 }
 .Complete {
-  background-color: rgb(116, 208, 65);
+  background-color: rgb(63, 189, 87);
   color: rgb(249, 247, 247);
   border-radius: 5px;
   text-align: center;

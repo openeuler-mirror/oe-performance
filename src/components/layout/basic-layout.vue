@@ -46,9 +46,6 @@
             <router-link to="/submitTest/testTask" style="text-decoration: none;">
               <el-menu-item index="3-1">测试任务</el-menu-item>
             </router-link>
-            <router-link to="/submitTest/resultDetails" style="text-decoration: none;">
-              <el-menu-item index="3-2">测试结果</el-menu-item>
-            </router-link>
           </el-sub-menu>
         </el-menu>
       </el-aside>
