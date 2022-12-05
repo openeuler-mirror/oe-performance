@@ -37,12 +37,19 @@
             ><span>服务器型号:</span></el-col
           >
           <el-col :span="16">
-            <el-cascader
+            <el-select
               placeholder="请选择服务器型号"
-              v-model="value"
-              :options="options"
-              @change="hChange"
-              clearable />
+              v-model="searchParams.testbox"
+              clearable
+              filterable
+            >
+              <el-option
+                v-for="item in searchParamsOptions.testboxList"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select>
           </el-col>
         </el-row>
       </el-col>
@@ -52,12 +59,19 @@
             ><span>CPU配置:</span></el-col
           >
           <el-col :span="16">
-            <el-cascader
+            <el-select
               placeholder="请选择CPU配置"
-              v-model="value"
-              :options="options"
-              @change="hChange"
-              clearable />
+              v-model="searchParams.nr_cpu"
+              clearable
+              filterable
+            >
+              <el-option
+                v-for="item in searchParamsOptions.cpuList"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select>
           </el-col>
         </el-row>
       </el-col>
@@ -67,12 +81,19 @@
             ><span>内存配置:</span></el-col
           >
           <el-col :span="16">
-            <el-cascader
+            <el-select
               placeholder="请选择内存配置"
-              v-model="value"
-              :options="options"
-              @change="hChange"
-              clearable />
+              v-model="searchParams.memory"
+              clearable
+              filterable
+            >
+              <el-option
+                v-for="item in searchParamsOptions.memoryList"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select>
           </el-col>
         </el-row>
       </el-col>
@@ -205,8 +226,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import { usePerformanceData } from '@/stores/performanceData'
+
+import { getSearchParams } from '@/api/performance'
+
 const selectedSuite = ref('unixbench')
 const value = ref([])
 const performanceStore = usePerformanceData()
@@ -230,6 +254,18 @@ const options = [
   }
 ]
 
+const searchParamsOptions = reactive({
+  testboxList: [], // 服务器型号
+  cpuList: [], // cpu配置
+  memoryList: [], // 内存配置
+})
+
+const searchParams = reactive({
+  testbox: '',
+  nr_cpu: '',
+  memory: ''
+})
+
 const hChange = (value: any) => {
   console.log(value)
 }
@@ -242,8 +278,68 @@ const emit = defineEmits<{
 }>()
 
 const handleSearch = () => {
-  emit('search', { os: 'openEuler', suite: selectedSuite.value})
+  emit('search', { ...searchParams, suite: selectedSuite.value})
 }
+
+// 获取搜索条件
+const getRawSearchParams = () => {
+  getSearchParams({
+    index: 'jobs',
+    query: {
+      size: 0,
+      _source: ['submit_id', 'suite'],
+      query: {
+        bool: {
+          must: [
+            {match: {suite: selectedSuite.value}},
+            {exists: {field: 'submit_id'}}
+          ]
+        }
+      },
+      aggs: {
+        uid_aggs: {
+          terms: {
+            field: 'submit_id',
+            size: 10000,
+          },
+          aggs: {
+            my_top_hits: {
+              top_hits: {
+                _source: {
+                  includes: ['suite', 'submit_id', 'os', 'os_version', 'nr_cpu', 'memory', 'testbox', 'kernel_version', 'nr_node', 'job_stage', 'job_health']
+                },
+                size: 1 // 查询配置是通用配置，只取其中的第一个job的数据做处理
+              }
+            }
+          }
+        }
+      }
+    }
+  }).then((res) => {
+    const rawData = res.data.aggregations.uid_aggs.buckets.map(sub_item => sub_item.my_top_hits.hits.hits[0]._source)
+    console.log('粗粒度筛选数据: ', rawData)
+    generateSearchParams(rawData)
+  })
+}
+
+const generateSearchParams = (testResultCommonParamsList: any) => {
+  testResultCommonParamsList.forEach(item => {
+    if (item.testbox && searchParamsOptions.testboxList.indexOf(item.testbox) === -1) {
+      searchParamsOptions.testboxList.push(item.testbox)
+    }
+    if (item.nr_cpu && searchParamsOptions.cpuList.indexOf(item.nr_cpu) === -1) {
+      searchParamsOptions.cpuList.push(item.nr_cpu)
+    }
+    if (item.memory && searchParamsOptions.memoryList.indexOf(item.memory) === -1) {
+      searchParamsOptions.memoryList.push(item.memory)
+    }
+  })
+  console.log('筛选数据: ', searchParamsOptions)
+}
+
+onMounted(() => {
+  getRawSearchParams()
+})
 
 </script>
 

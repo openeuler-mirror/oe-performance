@@ -24,14 +24,31 @@ const getAllData = (params: searchParams) => {
   console.log(params)
   submitDataLoading.value = true
 
+  const matchCases = []
+
+  Object.keys(params).forEach(paramKey => {
+    if (params[paramKey]) {
+      const matchObj = {}
+      matchObj[paramKey] = params[paramKey]
+      matchCases.push({
+        match: matchObj
+      })
+    }
+  })
+
   // 获取unixbench下的submitID list
   getPerformanceData({
     'index': 'jobs',
     'query': {
+      size: 1,
       'query': {
-        'term': {
-          'suite': params.suite
-          // 其他查询条件应该是放在这里
+        bool: {
+          // suite': params.suite,
+          // // 其他查询条件应该是放在这里
+          // 'nr_cpu': params.nr_cpu,
+          // 'testbox': params.testbox,
+          // 'memory': params.memory
+          must: matchCases
         }
       },
       'aggs': {
