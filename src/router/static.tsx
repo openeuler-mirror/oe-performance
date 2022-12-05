@@ -1,6 +1,4 @@
-import { RouteRecordRaw } from 'vue-router'
-
-// import RouteView from '@/components/layout/route-view.vue'
+import { RouteRecordRaw, RouterView } from 'vue-router'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -19,7 +17,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'indexLayout',
     redirect: '/index',
-    component: () => import('@/components/layout/basic-layout.vue'),
+    component: () => import('@/layout/basic-layout.vue'),
     children: [
       /*
        * todo: 待确定布局方案。
@@ -32,7 +30,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
       {
         path: '/index',
         name: '/index',
-        component: () => import('@/views/template-page.vue'),
+        component: () => import('@/views/performance-baseline/index.vue'),
         meta: {
           title: 'index'
         }
@@ -48,7 +46,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: '/solutionBaseline/bigData',
             name: 'bigData',
-            component: () => import('@/views/template-page.vue'),
+            component: () => import('@/views/performance-baseline/index.vue'),
             meta: {
               title: 'bigData'
             }
@@ -56,12 +54,56 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         ]
       },
       {
-        path: 'normalBaseline',
+        path: '/normalBaseline',
         name: 'normalBaseline',
-        component: () => import('@/views/template-page.vue'),
+        component: RouterView,
         meta: {
           title: 'normalBaseline'
-        }
+        },
+        children: [
+          {
+            path: '/normalBaseline/list',
+            name: 'normalBaseline-list',
+            component: () => import('@/views/performance-baseline/index.vue'),
+            meta: {
+              title: 'normalBaseline'
+            }
+          },
+          {
+            path: '/normalBaseline/detail/:guid',
+            name: 'detail',
+            component: () => import('@/views/detail/baseline-detail.vue'),
+            meta: {
+              title: 'detail'
+            }
+          },
+          {
+            path: '/normalBaseline/detail/:guid/workloadDetail',
+            name: 'workloadDetail',
+            component: () => import('@/views/detail/workload-detail.vue'),
+            meta: {
+              title: 'workloadDetail'
+            }
+          }
+        ]
+      },
+      {
+        path: '/comparativeSearch',
+        name: 'comparativeSearch',
+        component: RouteView,
+        meta: {
+          title: 'comparativeSearch'
+        },
+        children: [
+          {
+            path: 'basicPerformance',
+            name: 'basicPerformance',
+            component: () => import('@/views/compare/comparation-basic-performance.vue'),
+            meta: {
+              title: 'basicPerformance'
+            }
+          }
+        ]
       },
       {
         path: '/userCenter',
@@ -72,19 +114,27 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         },
         children: [
           {
-            path: '/userCenter/allApplication',
-            name: 'allApplication',
-            component: () => import('@/views/user-center/application/all-application.vue'),
+            path: '/userCenter/application/applicationList',
+            name: 'applicationList',
+            component: () => import('@/views/user-center/application/application-list.vue'),
             meta: {
-              title: 'allApplication'
+              title: 'applicationList'
             }
           },
           {
-            path: '/userCenter/allApproval',
-            name: 'allApproval',
-            component: () => import('@/views/user-center/approval/all-approval.vue'),
+            path: '/userCenter/application/applicationProgress',
+            name: 'applicationProgress',
+            component: () => import('@/views/user-center/application/progress/application-progress.vue'),
             meta: {
-              title: 'allApproval'
+              title: 'applicationProgress'
+            }
+          },
+          {
+            path: '/userCenter/approveList',
+            name: 'approveList',
+            component: () => import('@/views/user-center/approval/approve-list.vue'),
+            meta: {
+              title: 'approveList'
             }
           },
           {
@@ -95,7 +145,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
               title: 'approvalprogress'
             }
           }
-        ]
+        ]  
       },
       {
         path: '/submitTest',
@@ -105,6 +155,14 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           title: 'submitTest'
         },
         children: [
+          {
+            path: '/submitTest/cpuTest',
+            name: 'cpuTest',
+            component: () => import('@/views/test/CpuTest.vue'),
+            meta: {
+              title: 'cpuTest'
+            }
+          },
           {
             path: '/submitTest/testTask',
             name: 'testTask',
@@ -122,7 +180,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             }
           },
         ]
-      },
+      }
     ]
   },
   {

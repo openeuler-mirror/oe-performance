@@ -20,7 +20,7 @@
     </el-header>
     <el-container>
       <el-aside width="250px">
-        <el-menu>
+        <el-menu router>
           <el-sub-menu index="1">
             <template #title>
               <span>解决方案性能基线</span>
@@ -33,11 +33,18 @@
             <template #title>
               <span>基础性能基线</span>
             </template>
-            <el-menu-item index="2-1">CPU</el-menu-item>
-            <el-menu-item index="2-2">内存</el-menu-item>
-            <el-menu-item index="2-3">存储</el-menu-item>
-            <el-menu-item index="2-4">网络</el-menu-item>
-            <el-menu-item index="2-5">基础库</el-menu-item>
+            <el-menu-item index="/normalBaseline/list">CPU</el-menu-item>
+            <el-menu-item index="/normalBaseline/list">内存</el-menu-item>
+            <el-menu-item index="/normalBaseline/list">存储</el-menu-item>
+            <el-menu-item index="/normalBaseline/list">网络</el-menu-item>
+            <el-menu-item index="/normalBaseline/list">基础库</el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu index="3">
+            <template #title>
+              <span>对比检索</span>
+            </template>
+            <el-menu-item index="/comparativeSearch/basicPerformance">基础性能</el-menu-item>
+            <el-menu-item index="3-2">解决方案</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="3">
             <template #title>
@@ -46,6 +53,15 @@
             <router-link to="/submitTest/testTask" style="text-decoration: none;">
               <el-menu-item index="3-1">测试任务</el-menu-item>
             </router-link>
+<<<<<<< HEAD:src/components/layout/basic-layout.vue
+=======
+            <router-link to="/submitTest/resultDetails" style="text-decoration: none;">
+              <el-menu-item index="3-2">测试结果</el-menu-item>
+            </router-link>
+            <router-link to="/submitTest/cpuTest" style="text-decoration: none;">
+              <el-menu-item index="3-3">CPU</el-menu-item>
+            </router-link>
+>>>>>>> feature_userCenter&testTask:src/layout/basic-layout.vue
           </el-sub-menu>
         </el-menu>
       </el-aside>
@@ -76,59 +92,65 @@ const userLogout = () => {
 
 </script>
 <style scoped lang="scss">
-  $header-height: 56px;
-  $breadcrumb-nav-height: 32px;
-  .basic-layout-header {
+$header-height: 56px;
+$breadcrumb-nav-height: 32px;
+.basic-layout-header {
+  display: flex;
+  height: $header-height;
+  line-height: $header-height;
+  background: var(--oe-perf-color-primary);
+  color: var(--oe-perf-font-color);
+  justify-content: space-between;
+  .header-left {
     display: flex;
     height: $header-height;
     line-height: $header-height;
     background: var(--oe-perf-color-primary);
     color: var(--oe-perf-font-color);
     justify-content: space-between;
-    .header-left {
-      display: flex;
-      .logo {
-        width: 250px;
-        font-size: 24px;
-        padding-left: 50px;
-      }
-    }
-    .header-nav {
-      display: flex;
-      align-items: center;
-      padding-left: var(--oe-perf-padding);
-      .nav-item {
-        height: 36px;
-        line-height: 36px;
-        cursor: pointer;
-        &:not(:first-child) {
-          margin-left: 20px;
-        }
-        &.active {
-          border-bottom: 2px solid var(--oe-perf-font-color);
-        }
-      }
-    }
-    .header-right {
-      display: flex;
-      align-items: center;
-      .logout-btn {
-        margin-left: 10px;
-        cursor: pointer;
-      }
+    .logo {
+      width: 250px;
+      font-size: 24px;
+      padding-left: 50px;
     }
   }
-  .breadcrumb-nav {
-    height: $breadcrumb-nav-height;
-    line-height: $breadcrumb-nav-height;
+  .header-right {
+    display: flex;
+    align-items: center;
+    .logout-btn {
+      margin-left: 10px;
+      cursor: pointer;
+    }
+  }
+  .header-nav {
+    display: flex;
+    align-items: center;
     padding-left: var(--oe-perf-padding);
+    .nav-item {
+      height: 36px;
+      line-height: 36px;
+      cursor: pointer;
+      &:not(:first-child) {
+        margin-left: 20px;
+      }
+      &.active {
+        border-bottom: 2px solid var(--oe-perf-font-color);
+      }
+    }
   }
-  .el-main {
-    padding: 0;
-  }
-  .basic-layout-content {
-    height: calc(100vh - $header-height - $breadcrumb-nav-height);
-    background: var(--oe-perf-bg-layout);
-    padding: var(--oe-perf-padding);
-  }
+  
+}
+.breadcrumb-nav {
+  height: $breadcrumb-nav-height;
+  line-height: $breadcrumb-nav-height;
+  padding-left: var(--oe-perf-padding);
+}
+.el-main {
+  padding: 0;
+}
+.basic-layout-content {
+  min-height: calc(100vh - $header-height - $breadcrumb-nav-height);
+  background: var(--oe-perf-bg-layout);
+  padding: var(--oe-perf-padding);
+}
 </style>
