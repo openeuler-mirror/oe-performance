@@ -82,7 +82,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: '/userCenter/application/applicationProgress',
             name: 'applicationProgress',
-            component: () => import('@/views/user-center/application/progress/application-progress.vue'),
+            component: () => import('@/views/user-center/progress/user-progress.vue'),
             meta: {
               title: 'applicationProgress'
             }
@@ -98,7 +98,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: '/userCenter/approval/approvalprogress',
             name: 'approvalprogress',
-            component: () => import('@/views/user-center/approval/progress/approval-progress.vue'),
+            component: () => import('@/views/user-center/progress/user-progress.vue'),
             meta: {
               title: 'approvalprogress'
             }

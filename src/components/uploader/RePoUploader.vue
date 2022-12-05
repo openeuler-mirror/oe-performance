@@ -20,6 +20,7 @@
               v-model:file-list="fileList"
               class="upload-demo"
               multiple
+              accept=".xlsx"
               :limit="1"
               :http-request="handleUpload"
             >
@@ -48,7 +49,7 @@
       <template #footer>   
         <span class="dialog-footer">
           <el-button @click="cancel()">取消</el-button>
-          <el-button type="primary" @click="newlyBuilt(data)">
+          <el-button type="primary" @click="upload(data)">
             {{ btnText }}
           </el-button>
         </span>
@@ -57,11 +58,11 @@
 </template>
 <script lang="ts" setup>
 import { ref,reactive, defineEmits, toRefs, watchEffect } from 'vue'
-import { UploadUserFile } from 'element-plus'
+import { UploadUserFile, ElMessage } from 'element-plus'
 
 const emit = defineEmits<{
   (e:'cancel'):void,
-  (e:'newlyBuilt'):void,
+  (e:'upload'):void,
   (e:'handleClose'):void
 }>()
 const props = withDefaults(defineProps<{
@@ -95,6 +96,7 @@ const props = withDefaults(defineProps<{
 })
 const { bool, title, description, options, region, btnText, disabled } = toRefs(props)
 const centerDialogVisible = ref(false)
+const fileNameBool = ref(false)
 const form = reactive({
   region: ''
 })
@@ -107,8 +109,10 @@ const cancel:void = () => {
   emit('cancel')
 }
 
-const newlyBuilt:void = () => {
-  emit('newlyBuilt', data)
+const upload:void = () => {
+  if(fileNameBool.value)
+    emit('upload', data)
+  else ElMessage.error('请上传 .xlsx 的文件')
 }
 
 const handleClose:void = () => {
@@ -122,23 +126,26 @@ const data = reactive({
 })
 
 const handleUpload = (uploadFiles) => {
-  const fileReader = new FileReader();
-  fileReader.readAsText(uploadFiles.file);
-  fileReader.onload = function() {
-    data.data = {}
-    let content = this.result.toString().split('\r\n').filter(item => item !== '').map(item => item.split('\t'));
-    for(let i = 0; i < content[0].length; i++) {
-      try {
-        let dt = content[1][i].replace(/""/g, '"')
-        if(content[1][i][0] === '"') data.data[content[0][i]] = JSON.parse(dt.slice(1,-1))
-        else data.data[content[0][i]] = JSON.parse(dt)
-      } catch (e) {
-        data.data[content[0][i]] = content[1][i]
+  const fileReader = new FileReader()
+  fileReader.readAsText(uploadFiles.file)
+  if(uploadFiles.file.name.split('.').pop() === 'xlsx') {
+    fileNameBool.value = true
+    fileReader.onload = function() {
+      data.data = {}
+      let content = this.result.toString().split('\r\n').filter(item => item !== '').map(item => item.split('\t'));
+      for(let i = 0; i < content[0].length; i++) {
+        content[1] = content[1]?content[1]:[]
+        try {
+          let dt = content[1][i].replace(/""/g, '"')
+          if(content[1][i][0] === '"') data.data[content[0][i]] = JSON.parse(dt.slice(1,-1))
+          else data.data[content[0][i]] = JSON.parse(dt)
+        } catch (e) {
+          data.data[content[0][i]] = content[1][i]
+        }
       }
     }
   }
 }
-
 function download() {
   // values可以从后端获取数据
   let values = ['aaa','bbb','ccc','ddd','eee']

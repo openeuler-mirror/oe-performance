@@ -40,7 +40,6 @@
     :options="options"
     :region="region"
     :bool="dialogVisible"
-    disabled="true"
     @cancel="dialogVisible = false"
     @handleClose="dialogVisible = false"
     @newlyBuilt="newlyBuilt"
