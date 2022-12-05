@@ -186,7 +186,7 @@ ejobs样例(类YAML伪代码):
 		copy ejob to a new job
 		job.testcase = job.test
 
-		delete all kpis from ejob
+		delete all (kpis in kpiMaps/kpiMapFuncs) from ejob
 		for each matching kpi in kpiMaps/kpiMapFuncs:
 			copy job to a new tjob
 			tjob.testcase = map($kpi).testcase
