@@ -1,0 +1,30 @@
+{
+  "size": 0,
+  "query": {
+    "range": {
+      "time": {
+        "gte": "now-10d/d"
+      }
+    }
+  },
+  "aggs": {
+    "my-agg1": {
+      "terms": {
+        "field": "suite",
+	"size": 100
+      }
+    },
+    "my-agg2": {
+      "terms": {
+        "field": "os_version",
+	"size": 100
+      }
+    },
+    "my-agg3": {
+      "terms": {
+        "field": "os",
+	"size": 100
+      }
+    }
+  }
+}
