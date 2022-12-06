@@ -34,7 +34,7 @@ jobModel = {
                         origin: 'jobs',
                         valueSources: ['value'],
                         fieldSettings: {
-                                listValues: // 查询jobs后动态赋值
+                                listValues: [], // 查询jobs后动态赋值
                         },
                 },
                 group_id: {
@@ -43,7 +43,7 @@ jobModel = {
                         origin: 'jobs',
                         valueSources: ['value'],
                         fieldSettings: {
-                                listValues: // 查询jobs后动态赋值
+                                listValues: [], // 查询jobs后动态赋值
                         },
                 },
                 tags: {
@@ -52,7 +52,7 @@ jobModel = {
                         origin: 'jobs',
                         valueSources: ['value'],
                         fieldSettings: {
-                                listValues: // 查询jobs后动态赋值
+                                listValues: [], // 查询jobs后动态赋值
                         },
                 },
                 osv: {
@@ -90,6 +90,7 @@ jobModel = {
                                         { value: 'ubuntu@22.04' },
                                         { value: 'uos-deb@20',          label: 'UOS桌面版 V20' },
                                         { value: 'uos-rpm-e@20',        label: 'UOS服务器版 V20' },
+                                ],
                         },
                 },
                 os_arch: {
@@ -102,7 +103,7 @@ jobModel = {
                                         { value: 'x86_64' },
                                         { value: 'aarch64' },
                                         { value: 'riscv' },
-                                ]
+                                ],
                         },
                 },
                 testbox: {
@@ -111,34 +112,34 @@ jobModel = {
                         origin: 'jobs',
                         valueSources: ['value'],
                         fieldSettings: {
-                                listValues: // 查询hosts后动态赋值
+                                listValues: [], // 查询hosts后动态赋值
                         },
                 },
-                hw.nr_cpu: {
+                'hw.nr_cpu': {
                         label: '逻辑CPU数',
                         type: 'select',
                         origin: 'hosts',
                         valueSources: ['value'],
                         fieldSettings: {
-                                listValues: // 查询hosts后动态赋值
+                                listValues: [], // 查询hosts后动态赋值
                         },
                 },
-                hw.nr_node: {
+                'hw.nr_node': {
                         label: '物理CPU数',
                         type: 'select',
                         origin: 'hosts',
                         valueSources: ['value'],
                         fieldSettings: {
-                                listValues: // 查询hosts后动态赋值
+                                listValues: [], // 查询hosts后动态赋值
                         },
                 },
-                hw.memory: {
+                'hw.memory': {
                         label: '内存大小',
                         type: 'select',
                         origin: 'hosts',
                         valueSources: ['value'],
                         fieldSettings: {
-                                listValues: // 查询hosts后动态赋值
+                                listValues: [], // 查询hosts后动态赋值
                         },
                 },
         },
