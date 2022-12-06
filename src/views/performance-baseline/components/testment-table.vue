@@ -5,9 +5,11 @@
         <el-button
           type="primary"
           class="button"
-          :disabled="selectedTableRows.length < 2 || selectedTableRows.length > 5"
+          :disabled="
+            selectedTableRows.length < 2 || selectedTableRows.length > 5
+          "
           @click="handleComaration"
-        >对比</el-button
+          >对比</el-button
         >
         <el-button type="primary" class="button">导出</el-button>
       </div>
@@ -93,12 +95,15 @@
     </div>
     <el-table
       :data="tableData"
-      v-loading="tableLoading || submitDataLoading" 
+      v-loading="tableLoading || submitDataLoading"
       :header-cell-style="{ background: 'rgb(243,243,243)' }"
-      @selection-change="handleSelectionChange"
-    >
+      @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" />
-      <el-table-column fixed="left" width="150" label="数据来源" prop="job_origin">
+      <el-table-column
+        fixed="left"
+        width="150"
+        label="数据来源"
+        prop="job_origin">
       </el-table-column>
       <el-table-column
         v-for="(item, index) in tableColumn"
@@ -109,11 +114,11 @@
       </el-table-column>
       <el-table-column prop="detail" label="详细数据" fixed="right">
         <template #default="scope">
-             <router-link :to="`/normalBaseline/detail/${scope.row.submit_id}`">
-                <el-button link="" type="primary">
-                <span>查看</span>
-              </el-button>
-            </router-link>
+          <router-link :to="`/normalBaseline/detail/${scope.row.submit_id}`">
+            <el-button link="" type="primary">
+              <span>查看</span>
+            </el-button>
+          </router-link>
         </template>
       </el-table-column>
     </el-table>
@@ -126,13 +131,13 @@
       :disabled="disabled"
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="total"/>
+      :total="total" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { PropType, ref, watchEffect, reactive, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import {
   Search,
   Setting,
@@ -140,8 +145,7 @@ import {
   MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
-import { config } from '../config-file'
-import { useSceneConfig } from '@/stores/performanceData'
+import { config, sceneConfig } from '../config-file'
 import { ElMessage } from 'element-plus'
 import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
@@ -165,9 +169,9 @@ const props = defineProps({
   }
 })
 
-const sceneConfigStore = useSceneConfig()
 const performanceStore = usePerformanceData()
 const router = useRouter()
+const route = useRoute()
 
 const input = ref('')
 const selectedOption = ref('')
@@ -213,8 +217,14 @@ onMounted(() => {
 })
 
 watchEffect(() => {
-  allColumn.value = config[sceneConfigStore.currentScene].column
-  tableColumn.value = allColumn.value
+  const scene = route.query.scene ? route.query.scene : 'bigData'
+  let key: keyof typeof sceneConfig
+  for (key in sceneConfig) {
+    if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
+      allColumn.value = config[scene as string].column
+      tableColumn.value = allColumn.value
+    }
+  }
 })
 // 数据扁平化，便于table展示
 
@@ -245,15 +255,15 @@ watchEffect(() => {
 //   return result
 // }
 
-const handlecheckAllColumn = (val: boolean) => {
+const handlecheckAllColumn = (val: any) => {
   tableColumn.value = val ? allColumn.value : []
   isIndeterminate.value = false
 }
-// 
-const handleCheckedTableCloumn = (value: object[]) => {
+const handleCheckedTableCloumn = (value: any) => {
   const checkedCount = value.length
   checkAllColumn.value = checkedCount === allColumn.value.length
-  isIndeterminate.value = checkedCount > 0 && checkedCount < allColumn.value.length
+  isIndeterminate.value =
+    checkedCount > 0 && checkedCount < allColumn.value.length
 }
 
 const handleSelectionChange = (selectedRow: any) => {
@@ -269,9 +279,11 @@ const handleSearchTable = () => {
     ElMessage('请输入搜索内容！')
   } else {
     tableData.value = originData.filter(
-      (data) =>
+      data =>
         !input.value ||
-        data[selectedOption.value].toLowerCase().includes(input.value.toLowerCase())
+        data[selectedOption.value]
+          .toLowerCase()
+          .includes(input.value.toLowerCase())
     )
   }
 }
@@ -287,10 +299,10 @@ const handleReFresh = () => {
 
 // 获取并合并jobs的逻辑
 // todo: 这段逻辑可以考虑一直store中
-const getAllJobsData = (idList:any) => {
+const getAllJobsData = (idList: any) => {
   const tempArr = reactive(Object.assign([], idList))
   // todo: 每次遍历请求前，应取消之前所有未完成的请求
-  idList.forEach((idObj:any, idx:number) => {
+  idList.forEach((idObj: any, idx: number) => {
     // 如果之前已经获得过数据则不再重复请求
     if (performanceStore.performanceData[idObj.submit_id]) {
       tempArr[idx] = performanceStore.performanceData[idObj.submit_id]
@@ -300,30 +312,33 @@ const getAllJobsData = (idList:any) => {
     requestCount.value += 1
     tableLoading.value = true
     getPerformanceData({
-      'index': 'jobs',
-      'query': {
-        'size': 10000,  // 取全量
-        'query': {
-          'term': {
-            'submit_id': idObj.submit_id
+      index: 'jobs',
+      query: {
+        size: 10000, // 取全量
+        query: {
+          term: {
+            submit_id: idObj.submit_id
           }
         }
-      },
-    }).then((res) => {
-      const resultObj = combineJobs(res.data.hits.hits)
-      performanceStore.setPerformanceData(idObj.submit_id,resultObj)
-      tempArr[idx] = resultObj
-    }).catch((err) => {
-      ElMessage({
-        message: err.message,
-        type: 'error'
-      })
-    }).finally(() => {
-      requestCount.value -= 1
-      if (requestCount.value === 0) {
-        tableLoading.value = false
       }
     })
+      .then(res => {
+        const resultObj = combineJobs(res.data.hits.hits)
+        performanceStore.setPerformanceData(idObj.submit_id, resultObj)
+        tempArr[idx] = resultObj
+      })
+      .catch(err => {
+        ElMessage({
+          message: err.message,
+          type: 'error'
+        })
+      })
+      .finally(() => {
+        requestCount.value -= 1
+        if (requestCount.value === 0) {
+          tableLoading.value = false
+        }
+      })
   })
   return tempArr
 }
@@ -337,7 +352,7 @@ const idList = ref(<any>[])
 
 // 自动分页
 watchEffect(() => {
-  const startIndex = (currentPage.value -1) * pageSize.value
+  const startIndex = (currentPage.value - 1) * pageSize.value
   // 数据分页
   idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
   total.value = props.dataList.length
@@ -358,7 +373,6 @@ const handleComaration = () => {
   performanceStore.setComparationList(selectedTableRows.value)
   router.push({ name: 'basicPerformance' })
 }
-
 </script>
 
 <style scoped lang="scss">
@@ -366,7 +380,6 @@ a {
   text-decoration: none !important;
 }
 .handle-pannel {
-
   display: flex;
   justify-content: space-between;
   align-items: center;

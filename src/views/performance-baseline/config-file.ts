@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 export const columnConfig = [
   {
     label: '测试用例名称',
@@ -300,69 +301,65 @@ export const columnConfig2 = [
   }
 ]
 
-export const optionConfig = [
+export const optionConfig = ref([
   [
     {
       title: '测试模型版本',
+      paramKey: 'testv',
+      bindValue: '',
       tag: 'case',
       options: [
         {
           value: 'guide',
-          label: 'Guide',
-          children: [
-            {
-              value: 'disciplines',
-              label: 'Disciplines'
-            }
-          ]
+          label: 'Guide'
+        },
+        {
+          value: 'disciplines',
+          label: 'Disciplines'
+        },
+        {
+          value: 'yut',
+          label: 'uityu'
         }
       ]
     },
     {
       title: '服务器型号',
+      paramKey: 'model',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'model',
-          label: 'Model',
-          children: [
-            {
-              value: 'di',
-              label: 'Di'
-            }
-          ]
+          label: 'sdad'
         }
       ]
     },
     {
       title: 'CPU配置',
+      paramKey: 'cpuconfig',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'gu',
-          label: 'Gu',
-          children: [
-            {
-              value: 'dis',
-              label: 'Dis'
-            }
-          ]
+          label: 'Gu'
         }
       ]
     },
     {
       title: '内存配置',
+      paramKey: 'memory',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'g',
-          label: 'G',
-          children: [
-            {
-              value: 'disc',
-              label: 'Disc'
-            }
-          ]
+          label: 'G'
+        },
+        {
+          value: 'disc',
+          label: 'Disc'
         }
       ]
     }
@@ -370,65 +367,65 @@ export const optionConfig = [
   [
     {
       title: '硬件配置',
+      paramKey: 'con',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'gsd',
-          label: 'Gsd',
-          children: [
-            {
-              value: 'discipl',
-              label: 'Discipl'
-            }
-          ]
+          label: 'Gsd'
+        },
+        {
+          value: 'discipl',
+          label: 'Discipl'
         }
       ]
     },
     {
       title: 'Raid卡',
+      paramKey: 'Raid',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'gui',
-          label: 'Gui',
-          children: [
-            {
-              value: 'discip',
-              label: 'Disciplines'
-            }
-          ]
+          label: 'Gui'
+        },
+        {
+          value: 'disciplines',
+          label: 'Disciplines'
         }
       ]
     },
     {
       title: '组网配置',
+      paramKey: 'netGroup',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'cpu',
-          label: 'Cpu',
-          children: [
-            {
-              value: 'discipl',
-              label: 'Discipl'
-            }
-          ]
+          label: 'Cpu'
+        },
+        {
+          value: 'discipl',
+          label: 'Discipl'
         }
       ]
     },
     {
       title: '测试用例',
+      paramKey: 'testCase',
+      bindValue: '',
       tag: 'case',
       options: [
         {
           value: 'system',
-          label: 'Ssytem',
-          children: [
-            {
-              value: 'disc',
-              label: 'Disc'
-            }
-          ]
+          label: 'System'
+        },
+        {
+          value: 'disc',
+          label: 'Disc'
         }
       ]
     }
@@ -436,118 +433,114 @@ export const optionConfig = [
   [
     {
       title: '测试工具版本',
+      paramKey: 'testTool',
+      bindValue: '',
       tag: 'case',
       options: [
         {
           value: 'ui',
-          label: 'Ui',
-          children: [
-            {
-              value: 'discipl',
-              label: 'Discipl'
-            }
-          ]
+          label: 'Ui'
+        },
+        {
+          value: 'discip',
+          label: 'Discip'
         }
       ]
     },
     {
       title: '操作系统',
+      paramKey: 'os',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'po',
-          label: 'Po',
-          children: [
-            {
-              value: 'yebfghj',
-              label: 'yebfghj'
-            }
-          ]
+          label: 'Po'
+        },
+        {
+          value: 'yebfghj',
+          label: 'yebfghj'
         }
       ]
     },
     {
       title: '数据来源',
+      paramKey: 'resourse',
+      bindValue: '',
       tag: 'case',
       options: [
         {
           value: 'gfe',
-          label: 'Gfe',
-          children: [
-            {
-              value: 'jkyhiotjh',
-              label: 'jkyhiotjh'
-            }
-          ]
+          label: 'Gfe'
+        },
+        {
+          value: 'jkyhiotjh',
+          label: 'jkyhiotjh'
         }
       ]
     }
   ]
-]
+])
 
-export const optionConfig2 = [
+export const optionConfig2 = ref([
   [
     {
       title: '测试模型版本2',
+      paramKey: 'testv',
+      bindValue: '',
       tag: 'case',
       options: [
         {
           value: 'guide',
-          label: 'Guide',
-          children: [
-            {
-              value: 'disciplines',
-              label: 'Disciplines'
-            }
-          ]
+          label: 'Guide'
+        },
+        {
+          value: 'disciplines',
+          label: 'Disciplines'
+        },
+        {
+          value: 'yut',
+          label: 'uityu'
         }
       ]
     },
     {
       title: '服务器型号2',
+      paramKey: 'model',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'model',
-          label: 'Model',
-          children: [
-            {
-              value: 'di',
-              label: 'Di'
-            }
-          ]
+          label: 'sdad'
         }
       ]
     },
     {
       title: 'CPU配置2',
+      paramKey: 'cpuconfig',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'gu',
-          label: 'Gu',
-          children: [
-            {
-              value: 'dis',
-              label: 'Dis'
-            }
-          ]
+          label: 'Gu'
         }
       ]
     },
     {
       title: '内存配置2',
+      paramKey: 'memory',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'g',
-          label: 'G',
-          children: [
-            {
-              value: 'disc',
-              label: 'Disc'
-            }
-          ]
+          label: 'G'
+        },
+        {
+          value: 'disc',
+          label: 'Disc'
         }
       ]
     }
@@ -555,120 +548,120 @@ export const optionConfig2 = [
   [
     {
       title: '硬件配置2',
+      paramKey: 'con',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'gsd',
-          label: 'Gsd',
-          children: [
-            {
-              value: 'discipl',
-              label: 'Discipl'
-            }
-          ]
+          label: 'Gsd'
+        },
+        {
+          value: 'discipl',
+          label: 'Discipl'
         }
       ]
     },
     {
-      title: 'Raid卡',
+      title: 'Raid卡2',
+      paramKey: 'Raid',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'gui',
-          label: 'Gui',
-          children: [
-            {
-              value: 'discip',
-              label: 'Disciplines'
-            }
-          ]
+          label: 'Gui'
+        },
+        {
+          value: 'disciplines',
+          label: 'Disciplines'
         }
       ]
     },
     {
-      title: '组网配置',
+      title: '组网配置2',
+      paramKey: 'netGroup',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'cpu',
-          label: 'Cpu',
-          children: [
-            {
-              value: 'discipl',
-              label: 'Discipl'
-            }
-          ]
+          label: 'Cpu'
+        },
+        {
+          value: 'discipl',
+          label: 'Discipl'
         }
       ]
     },
     {
-      title: '测试用例',
+      title: '测试用例2',
+      paramKey: 'testCase',
+      bindValue: '',
       tag: 'case',
       options: [
         {
           value: 'system',
-          label: 'Ssytem',
-          children: [
-            {
-              value: 'disc',
-              label: 'Disc'
-            }
-          ]
+          label: 'System'
+        },
+        {
+          value: 'disc',
+          label: 'Disc'
         }
       ]
     }
   ],
   [
     {
-      title: '测试工具版本',
+      title: '测试工具版本2',
+      paramKey: 'testTool',
+      bindValue: '',
       tag: 'case',
       options: [
         {
           value: 'ui',
-          label: 'Ui',
-          children: [
-            {
-              value: 'discipl',
-              label: 'Discipl'
-            }
-          ]
+          label: 'Ui'
+        },
+        {
+          value: 'discip',
+          label: 'Discip'
         }
       ]
     },
     {
-      title: '操作系统',
+      title: '操作系统2',
+      paramKey: 'os',
+      bindValue: '',
       tag: 'system',
       options: [
         {
           value: 'po',
-          label: 'Po',
-          children: [
-            {
-              value: 'yebfghj',
-              label: 'yebfghj'
-            }
-          ]
+          label: 'Po'
+        },
+        {
+          value: 'yebfghj',
+          label: 'yebfghj'
         }
       ]
     },
     {
-      title: '数据来源',
+      title: '数据来源2',
+      paramKey: 'resourse',
+      bindValue: '',
       tag: 'case',
       options: [
         {
           value: 'gfe',
-          label: 'Gfe',
-          children: [
-            {
-              value: 'jkyhiotjh',
-              label: 'jkyhiotjh'
-            }
-          ]
+          label: 'Gfe'
+        },
+        {
+          value: 'jkyhiotjh',
+          label: 'jkyhiotjh'
         }
       ]
     }
   ]
-]
+])
 
 export const sceneConfig = {
   solution: [
@@ -719,7 +712,7 @@ export const sceneConfig = {
   ]
 }
 
-export interface configItem{
+export interface configItem {
   [key: string]: any
 }
 

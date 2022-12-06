@@ -69,21 +69,21 @@ onMounted(() => {
   // })
 })
 
-const getSubmitId = () => {
-  // 华为的实例，获取job，只展示submit数据
-  getPerformanceData({
-    index: 'jobs',
-    query: {
-      size: 10,
-      _source: ['submit_id'],
-      query: {
-        term: {
-          suite: 'unixbench'
-        }
-      }
-    }
-  })
-}
+// const getSubmitId = () => {
+//   // 华为的实例，获取job，只展示submit数据
+//   getPerformanceData({
+//     index: 'jobs',
+//     query: {
+//       size: 10,
+//       _source: ['submit_id'],
+//       query: {
+//         term: {
+//           suite: 'unixbench'
+//         }
+//       }
+//     }
+//   })
+// }
 </script>
 
 <style></style>

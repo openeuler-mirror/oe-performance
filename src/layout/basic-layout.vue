@@ -20,7 +20,7 @@
     </el-header>
     <el-container>
       <el-aside width="250px">
-        <el-menu router>
+        <el-menu :default-active="currentKey" @select="handleChangeScene">
           <el-sub-menu index="1">
             <template #title>
               <span>解决方案性能基线</span>
@@ -28,8 +28,7 @@
             <el-menu-item
               v-for="(item, index) in sceneConfig.solution"
               :key="index"
-              index="/normalBaseline/list"
-              @click="handleChangeScene(item.prop)"
+              :index="item.prop"
               >{{ item.label }}</el-menu-item
             >
           </el-sub-menu>
@@ -40,8 +39,7 @@
             <el-menu-item
               v-for="(item, index) in sceneConfig.basic"
               :key="index"
-              index="/normalBaseline/list"
-              @click="handleChangeScene(item.prop)"
+              :index="item.prop"
               >{{ item.label }}</el-menu-item
             >
           </el-sub-menu>
@@ -52,8 +50,7 @@
             <el-menu-item
               v-for="(item, index) in sceneConfig.contrast"
               :key="index"
-              index="/normalBaseline/list"
-              @click="handleChangeScene(item.prop)"
+              :index="item.prop"
               >{{ item.label }}</el-menu-item
             >
           </el-sub-menu>
@@ -69,15 +66,16 @@
   </el-container>
 </template>
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserInfo } from '@/stores/userInfo'
 import { ElMessage } from 'element-plus'
-import { useSceneConfig } from '@/stores/performanceData'
 import { sceneConfig } from '@/views/performance-baseline/config-file'
+import { onMounted, ref } from 'vue'
 
 const router = useRouter()
+const route = useRoute()
 const userInfoStore = useUserInfo()
-const sceneConfigStore = useSceneConfig()
+const currentKey = ref('bigData')
 
 const userLogout = () => {
   userInfoStore
@@ -90,10 +88,20 @@ const userLogout = () => {
     })
 }
 
-const handleChangeScene = (val: string) => {
-  console.log(val)
-  sceneConfigStore.setScene(val)
+const handleChangeScene = (index: string) => {
+  router.replace({
+    path: '/normalBaseline/list',
+    query: { ...route.query, scene: index }
+  })
 }
+
+onMounted(() => {
+  if (route.query.scene) {
+    currentKey.value = route.query.scene as string
+  } else {
+    handleChangeScene('bigData')
+  }
+})
 
 </script>
 <style scoped lang="scss">

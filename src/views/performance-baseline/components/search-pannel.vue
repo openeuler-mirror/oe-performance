@@ -6,7 +6,10 @@
       >
       <el-col :span="22">
         <el-radio-group v-model="selectedSuite" class="ml-4">
-          <el-radio-button v-for="(item, index) in testSubassembly" :key="index" :label="item" />
+          <el-radio-button
+            v-for="(item, index) in testSubassembly"
+            :key="index"
+            :label="item" />
         </el-radio-group>
       </el-col>
     </el-row>
@@ -25,11 +28,18 @@
               v-for="(option, secIndex) in options"
               :key="secIndex">
               <span class="general-font-style">{{ option.title + ':' }}</span>
-              <el-cascader
-                :options="option.options"
-                @change="handleCriteriaChange(option)"
+              <el-select
+                v-model="option.bindValue"
+                @clear="handleClearCriteria(option.paramKey, option.tag)"
                 clearable
-                size="small" />
+                size="small">
+                <el-option
+                  v-for="item in option.options"
+                  @click="handleCriteriaChange(option, item.value)"
+                  :label="item.label"
+                  :value="item.value"
+                  :key="item.value" />
+              </el-select>
             </el-col>
           </el-row>
         </div>
@@ -47,11 +57,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue'
-import { TableItem } from '../components/testment-table.vue'
-import { queryBySystemParam, queryCriteria } from '@/api/detail'
-import { config } from '../config-file'
-import { useSceneConfig } from '@/stores/performanceData'
+import { onMounted, ref, watchEffect } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { config, sceneConfig } from '../config-file'
 
 const emit = defineEmits<{
   // 在此处收集查询菜单中的查询条件，整理后去请求全量的submit_id列表
@@ -60,65 +68,116 @@ const emit = defineEmits<{
   (event: 'search', params: searchParams): void
 }>()
 
-const sceneConfigStore = useSceneConfig()
+const route = useRoute()
+const router = useRouter()
 const testSubassembly = ref([] as string[])
 const filterCriteria = ref([] as any[])
 
 const systemParams = [] as any[]
 const caseParams = [] as any[]
-const filterData = ref([] as TableItem[])
 
-const handleCriteriaChange = (value: any) => {
+interface queryItem {
+  [key: string]: string
+} 
+const handleQueryChange = () => {
+  const newQuery = {} as queryItem
+  caseParams.forEach((item: any) => {
+    newQuery[item.paramKey] = item.value
+  })
+  systemParams.forEach((item: any) => {
+    newQuery[item.paramKey] = item.value
+  })
+  newQuery['scene'] = route.query.scene as string
+  newQuery['testSubassembly'] = selectedSuite.value
+  router.replace({
+    path: '/normalBaseline/list',
+    query: { ...newQuery }
+  })
+}
+
+const handleCriteriaChange = (value: any, param: string) => {
   let index: number
   if (value.tag === 'system') {
-    index = systemParams.findIndex(item => item.title === value.title)
+    index = systemParams.findIndex(item => item.paramKey === value.paramKey)
     if (index === -1) {
-      systemParams.push(value)
-    } else {
-      systemParams.splice(index, 1)
-    }
-  } else {
-    index = caseParams.findIndex(item => item.title === value.title)
-    if (index === -1) {
-      caseParams.push(value)
-    } else {
-      caseParams.splice(index, 1)
-    }
-  }
-  console.log(caseParams, systemParams)
-}
-const handleQueryCriteria = () => {
-  const submitCaseParams = [] as any[]
-  caseParams.forEach((elem: any) => {
-    submitCaseParams.push(elem.options)
-  })
-  if (systemParams.length > 0) {
-    console.log('submit1')
-    const submitSystemParams = [] as any[]
-    systemParams.forEach((elem: any) => {
-      submitSystemParams.push(elem.options)
-    })
-    queryBySystemParam(submitSystemParams).then(res => {
-      queryCriteria(submitCaseParams, res.data).then(resCase => {
-        filterData.value = resCase.data
+      systemParams.push({
+        paramKey: value.paramKey,
+        value: param
       })
-    })
+    } else {
+      systemParams[index].value = param
+    }
   } else {
-    console.log('submit2')
-    queryCriteria(submitCaseParams).then(resCase => {
-      filterData.value = resCase.data
-    })
+    index = caseParams.findIndex(item => item.paramKey === value.paramKey)
+    if (index === -1) {
+      caseParams.push({
+        paramKey: value.paramKey,
+        value: param
+      })
+    } else {
+      caseParams[index].value = param
+    }
   }
 }
+const handleClearCriteria = (paramKey: string, tag: string) => {
+  if (tag === 'system') {
+    systemParams.splice(systemParams.findIndex(item => item.paramKey === paramKey), 1)
+  } else {
+    caseParams.splice(caseParams.findIndex(item => item.paramKey === paramKey), 1)
+  }
+}
+// const handleQueryCriteria = () => {
+//   const submitCaseParams = [] as any[]
+//   caseParams.forEach((elem: any) => {
+//     submitCaseParams.push(elem.options)
+//   })
+//   if (systemParams.length > 0) {
+//     console.log('submit1')
+//     const submitSystemParams = [] as any[]
+//     systemParams.forEach((elem: any) => {
+//       submitSystemParams.push(elem.options)
+//     })
+//     queryBySystemParam(submitSystemParams).then(res => {
+//       queryCriteria(submitCaseParams, res.data).then(resCase => {
+//         filterData.value = resCase.data
+//       })
+//     })
+//   } else {
+//     console.log('submit2')
+//     queryCriteria(submitCaseParams).then(resCase => {
+//       filterData.value = resCase.data
+//     })
+//   }
+// }
 const selectedSuite = ref('unixbench')
 
 const handleSearch = () => {
+  handleQueryChange()
   emit('search', { os: 'openEuler', suite: selectedSuite.value })
 }
 
 watchEffect(() => {
-  testSubassembly.value = config[sceneConfigStore.currentScene].testSubassembly || []
-  filterCriteria.value = config[sceneConfigStore.currentScene].filterCriteria || []
+  const scene = route.query.scene ? route.query.scene : 'bigData'
+  let key: keyof typeof sceneConfig
+  for (key in sceneConfig) {
+    if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
+      testSubassembly.value = config[scene as string].testSubassembly || []
+      filterCriteria.value = config[scene as string].filterCriteria.value || []
+    }
+  }
+})
+
+onMounted(() => {
+  selectedSuite.value = route.query.testSubassembly ? route.query.testSubassembly as string : 'unixbench'
+  const keys = Object.keys(route.query)
+  keys.forEach((key: string) => {
+    filterCriteria.value.forEach((item: any[]) => {
+      const index = item.findIndex(criteriaItem => criteriaItem.paramKey === key)
+      if (index !== -1) {
+        item[index].bindValue = route.query[key]
+      }
+    })
+  })
 })
 </script>
 
@@ -132,7 +191,7 @@ watchEffect(() => {
 }
 .filter-criteria {
   width: 1200px;
-  :deep(.el-cascader--small) {
+  :deep(.el-select--small) {
     position: absolute;
     left: 100px;
   }
