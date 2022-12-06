@@ -155,6 +155,7 @@ jobModel = {
                 'stats.lmbench.Context_switching_ctxsw':        { direction: -1, label: '进程上下文切换开销(us)' },
                 'stats.lmbench.File_&_VM_latencies':            { direction: -1, label: '内存映射延迟(us)' },
                 'stats.lmbench.Memory_latencies':               { direction: -1, label: '主存及缓存延迟(us)' },
+                'stats.libmicro.usecs_per_call':                { direction: -1, label: '系统调用延迟(us)' },
         },
 
         // 查询方法：先查询suite.param, 再查询公共param
@@ -181,6 +182,12 @@ jobModel = {
                 },
         },
 }
+
+const libmicroGroups = [
+        'c_', 'get', 'malloc', 'memcpy', 'memset', 'mmap', 'mprot', 'pipe', 'poll',
+        'pread', 'pwrite', 'read', 'select', 'str', 'unmap', 'write', 'writev',
+        'Miscellaneous' // all the others, keep it the last element
+]
 
 // suite => function(kpi) => Map with keys (testcase, kpi)
 kpiMapFuncs = {
@@ -220,11 +227,32 @@ kpiMapFuncs = {
                         testcase: kpi,  // can do this in caller: .replace('stats.unixbench.', '')
                 }
         },
+        libmicro: function (kpi) {
+                // https://github.com/rzezeski/libMicro/blob/master/bench.sh has the group info
+                let testgroup = libmicroGroups[libmicroGroups.length - 1]
+                for (const group of libmicroGroups) {
+                        if (kpi.startsWith(group)) {
+                                testgroup = group
+                                break
+                        }
+                }
+                return {
+                        // testgroup is not test param that impacts test result,
+                        // but merely a way to break up the too many test cases,
+                        // so that they can be shown in multiple talbes,
+                        // as described in suiteTables.libmicro
+                        testgroup: testgroup,
+                        testcase: kpi,
+                        kpi: 'usecs_per_call',
+                }
+        },
 }
 // debug:
 // console.log(kpiMapFuncs.unixbench('Process_Creation'))
+// console.log(kpiMapFuncs.libmicro('getpid'))
 // output:
 // { testcase: 'Process_Creation', kpi: 'score' }
+// { kpi: 'usecs_per_call', testcase: 'getpid', testgroup: 'get' }
 
 // suite => Map with keys (testcase, kpi)
 kpiMaps = {
@@ -305,4 +333,16 @@ suiteTables = {
                 { kpi: 'File_&_VM_latencies',           x_param: 'testcase' },
                 { kpi: 'Memory_latencies',              x_param: 'testcase' },
         ],
+        libmicro: [
+        ],
 }
+
+for (const group of libmicroGroups) {
+        suiteTables.libmicro.push ({
+                kpi: 'usecs_per_call',
+                x_param: 'testcase',
+                filters: { testgroup: group }
+        })
+}
+
+// console.log((suiteTables.libmicro))
