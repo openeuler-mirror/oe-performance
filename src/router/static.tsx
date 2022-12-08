@@ -8,7 +8,7 @@ declare module 'vue-router' {
 
 const RouteView = {
   render() {
-    return (<router-view></router-view>)
+    return <router-view></router-view>
   }
 }
 
@@ -16,7 +16,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'indexLayout',
-    redirect: '/index',
+    redirect: '/normalBaseline/list',
     component: () => import('@/layout/basic-layout.vue'),
     children: [
       /*
@@ -27,14 +27,6 @@ const asyncRoutes: Array<RouteRecordRaw> = [
        * 但是页面应至少匹配一个二级路径？
        * 第三极及更深层的child，均不在菜单中展示。
        */
-      {
-        path: '/index',
-        name: '/index',
-        component: () => import('@/views/performance-baseline/index.vue'),
-        meta: {
-          title: 'index'
-        }
-      },
       {
         path: '/solutionBaseline',
         name: 'index',
@@ -65,9 +57,6 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             path: '/normalBaseline/list',
             name: 'normalBaseline-list',
             component: () => import('@/views/performance-baseline/index.vue'),
-            meta: {
-              title: 'normalBaseline'
-            }
           },
           {
             path: '/normalBaseline/detail/:submit_id',
@@ -80,7 +69,8 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: '/normalBaseline/detail/:submit_id/workloadDetail',
             name: 'workloadDetail',
-            component: () => import('@/views/performance-detail/workload-detail.vue'),
+            component: () =>
+              import('@/views/performance-detail/workload-detail.vue'),
             meta: {
               title: 'workloadDetail'
             }
@@ -98,7 +88,8 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'basicPerformance',
             name: 'basicPerformance',
-            component: () => import('@/views/performance-comparation/index.vue'),
+            component: () =>
+              import('@/views/performance-comparation/index.vue'),
             meta: {
               title: 'basicPerformance'
             }
@@ -109,7 +100,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
   },
   {
     path: '/:path(.*)*',
-    redirect: '/404',
+    redirect: '/404'
   },
   {
     path: '/404',
@@ -117,7 +108,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
     component: () => import('@/views/common/error/404.vue'),
     meta: {
       title: '404'
-    },
+    }
   }
 ]
 

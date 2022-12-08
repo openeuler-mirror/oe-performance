@@ -10,7 +10,7 @@
         </div>
       </div>
       <div class="header-right">
-        {{userInfoStore.userInfo.username}}
+        {{ userInfoStore.userInfo.username }}
         <el-popconfirm title="登出系统？" @confirm="userLogout">
           <template #reference>
             <el-icon class="logout-btn"><SwitchButton /></el-icon>
@@ -20,31 +20,39 @@
     </el-header>
     <el-container>
       <el-aside width="250px">
-        <el-menu router>
+        <el-menu :default-active="currentKey" @select="handleChangeScene">
           <el-sub-menu index="1">
             <template #title>
               <span>解决方案性能基线</span>
             </template>
-            <el-menu-item index="1-1">大数据</el-menu-item>
-            <el-menu-item index="1-2">数据库</el-menu-item>
-            <el-menu-item index="1-3">分布式存储</el-menu-item>
+            <el-menu-item
+              v-for="(item, index) in sceneConfig.solution"
+              :key="index"
+              :index="item.prop"
+              >{{ item.label }}</el-menu-item
+            >
           </el-sub-menu>
           <el-sub-menu index="2">
             <template #title>
               <span>基础性能基线</span>
             </template>
-            <el-menu-item index="/normalBaseline/list">CPU</el-menu-item>
-            <el-menu-item index="/normalBaseline/list">内存</el-menu-item>
-            <el-menu-item index="/normalBaseline/list">存储</el-menu-item>
-            <el-menu-item index="/normalBaseline/list">网络</el-menu-item>
-            <el-menu-item index="/normalBaseline/list">基础库</el-menu-item>
+            <el-menu-item
+              v-for="(item, index) in sceneConfig.basic"
+              :key="index"
+              :index="item.prop"
+              >{{ item.label }}</el-menu-item
+            >
           </el-sub-menu>
           <el-sub-menu index="3">
             <template #title>
               <span>对比检索</span>
             </template>
-            <el-menu-item index="/comparativeSearch/basicPerformance">基础性能</el-menu-item>
-            <el-menu-item index="3-2">解决方案</el-menu-item>
+            <el-menu-item
+              v-for="(item, index) in sceneConfig.contrast"
+              :key="index"
+              :index="item.prop"
+              >{{ item.label }}</el-menu-item
+            >
           </el-sub-menu>
         </el-menu>
       </el-aside>
@@ -58,20 +66,42 @@
   </el-container>
 </template>
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useUserInfo } from '@/stores/userInfo'
-import { ElMessage } from 'element-plus';
+import { ElMessage } from 'element-plus'
+import { sceneConfig } from '@/views/performance-baseline/config-file'
+import { onMounted, ref } from 'vue'
 
 const router = useRouter()
+const route = useRoute()
 const userInfoStore = useUserInfo()
+const currentKey = ref('bigData')
 
 const userLogout = () => {
-  userInfoStore.userLogout().then(() => {
-    router.push('/user/login')
-  }).catch(err => {
-    ElMessage.error(err.message)
+  userInfoStore
+    .userLogout()
+    .then(() => {
+      router.push('/user/login')
+    })
+    .catch(err => {
+      ElMessage.error(err.message)
+    })
+}
+
+const handleChangeScene = (index: string) => {
+  router.replace({
+    path: '/normalBaseline/list',
+    query: { ...route.query, scene: index }
   })
 }
+
+onMounted(() => {
+  if (route.query.scene) {
+    currentKey.value = route.query.scene as string
+  } else {
+    handleChangeScene('bigData')
+  }
+})
 
 </script>
 <style scoped lang="scss">
@@ -121,7 +151,6 @@ $breadcrumb-nav-height: 32px;
       }
     }
   }
-  
 }
 .breadcrumb-nav {
   height: $breadcrumb-nav-height;

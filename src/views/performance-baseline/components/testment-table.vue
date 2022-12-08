@@ -5,9 +5,11 @@
         <el-button
           type="primary"
           class="button"
-          :disabled="selectedTableRows.length < 2 || selectedTableRows.length > 5"
+          :disabled="
+            selectedTableRows.length < 2 || selectedTableRows.length > 5
+          "
           @click="handleComaration"
-        >对比</el-button
+          >对比</el-button
         >
         <el-button type="primary" class="button" @click="handleExportCsv">导出</el-button>
       </div>
@@ -30,7 +32,7 @@
           </el-select>
         </template>
         <template #append>
-          <el-button :icon="Search" @click="handleSearch(selectedOption)" />
+          <el-button :icon="Search" @click="handleSearchTable" />
         </template>
       </el-input>
       <div>
@@ -93,7 +95,7 @@
     </div>
     <el-table
       :data="tableData"
-      v-loading="tableLoading || submitDataLoading" 
+      v-loading="tableLoading || submitDataLoading"
       :header-cell-style="{ background: 'rgb(243,243,243)' }"
       @selection-change="handleSelectionChange"
     >
@@ -119,21 +121,20 @@
     </el-table>
     <el-pagination
       class="pagination"
-      v-model:currentPage="pagination.currentPage"
-      v-model:page-size="pagination.pageSize"
-      :page-sizes="[10, 20, 30, 40]"
+      v-model:currentPage="currentPage"
+      v-model:page-size="pageSize"
+      :page-sizes="pageSizes"
       :small="small"
       :disabled="disabled"
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
-      :total="pagination.total" />
+      :total="total" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watchEffect, reactive, watch } from 'vue'
-import { useRouter } from 'vue-router'
-
+import { PropType, ref, watchEffect, reactive, watch, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import {
   Search,
   Setting,
@@ -141,13 +142,12 @@ import {
   MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
+import { config, sceneConfig } from '../config-file'
 import { ElMessage } from 'element-plus'
-
 import { usePerformanceData } from '@/stores/performanceData'
-
 import { getPerformanceData } from '@/api/performance'
 
-import { allColumns } from '../test-data'
+// import { allColumns } from '../test-data'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 
 export interface Column {
@@ -157,6 +157,7 @@ export interface Column {
 export interface TableItem {
   [key: string]: any
 }
+
 const props = defineProps({
   dataList: {
     type: Array as PropType<any[]>,
@@ -170,16 +171,14 @@ const props = defineProps({
 
 const performanceStore = usePerformanceData()
 const router = useRouter()
+const route = useRoute()
 
 const input = ref('')
-
-const reFreshLodaing = ref(false)
-
 const selectedOption = ref('')
 const selectOptions = [
   {
     label: '测试用例',
-    value: 'testCase'
+    value: 'submit_id'
   },
   {
     label: '任务名称',
@@ -187,42 +186,60 @@ const selectOptions = [
   },
   {
     label: '测试人',
-    value: 'tester'
+    value: 'my_account'
   }
 ]
 
-const tableData = ref<any[]>([])
-const tableColumn = ref<Column[]>([])
-// const selectedCase = ref(0)
+const tableData = ref<TableItem[]>([])
+let originData: TableItem[] = []
+
+let allColumn = ref([] as Column[])
+const tableColumn = ref([] as Column[])
+const isIndeterminate = ref(true)
 const checkAllColumn = ref(true)
 
-const selectedTableRows = ref<any[]>([])
-// let selectedContrastList = <any[]>[]
+const selectedTableRows = ref(<{}[]>[])
 
-const isIndeterminate = ref(true)
-// const checkAllItems = ref(false)
-
-const pagination = reactive({
-  currentPage: 1,
-  pageSize: 10,
-  total: 0
-})
-
+const currentPage = ref(1)
+const pageSize = ref(10)
+const pageSizes = ref([] as number[])
+const total = ref(1)
 const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
 
-const allColumn = allColumns()
-const copy = JSON.parse(JSON.stringify(tableData.value))
+const requestCount = ref(0) // 记录请求总是
+const reFreshLodaing = ref(false)
+const tableLoading = ref(false)
 
-tableColumn.value = allColumn
+onMounted(() => {
+  // handleTableData(1)
+})
 
-// const handleTableData = <T extends object>(data: T[]) => {
-//   data.forEach((Element: any) => {
-//     tableData.value.push(flattenObj(Element))
-//   })
+watchEffect(() => {
+  const scene = route.query.scene ? route.query.scene : 'bigData'
+  let key: keyof typeof sceneConfig
+  for (key in sceneConfig) {
+    if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
+      allColumn.value = config[scene as string].column
+      tableColumn.value = allColumn.value
+    }
+  }
+})
+// 数据扁平化，便于table展示
+
+// const handleTableData = (page: number) => {
+//   let start = (page - 1) * 5
+//   let end =
+//     props.dataList.length <= start + 5 ? props.dataList.length : start + 5
+//   const temp = []
+//   for (let i = start; i < end; i++) {
+//     temp.push(flattenObj(props.dataList[i]))
+//   }
+//   tableData.value = temp
+//   originData = JSON.parse(JSON.stringify(tableData.value))
 // }
-// 
+
 // const flattenObj = (ob: any) => {
 //   let result = <TableItem>{}
 //   for (const i in ob) {
@@ -238,83 +255,54 @@ tableColumn.value = allColumn
 //   return result
 // }
 
-const handlecheckAllColumn = (val: boolean) => {
-  tableColumn.value = val ? allColumn : []
+const handlecheckAllColumn = (val: any) => {
+  tableColumn.value = val ? allColumn.value : []
   isIndeterminate.value = false
 }
-// 
-const handleCheckedTableCloumn = (value: object[]) => {
+const handleCheckedTableCloumn = (value: any) => {
   const checkedCount = value.length
-  checkAllColumn.value = checkedCount === allColumn.length
-  isIndeterminate.value = checkedCount > 0 && checkedCount < allColumn.length
+  checkAllColumn.value = checkedCount === allColumn.value.length
+  isIndeterminate.value =
+    checkedCount > 0 && checkedCount < allColumn.value.length
 }
-// 
-// const handleCheckedAllItems = (val: boolean) => {
-//   tableData.value.forEach((element: any) => {
-//     element.check = val
-//   })
-//   if (val) {
-//     copy.forEach((element: any) => {
-//       selectedContrastList.push(element)
-//     })
-//   } else {
-//     selectedContrastList = []
-//   }
-// }
-// 
-// const handleCheckedItem = (value: any) => {
-//   const index = selectedContrastList.findIndex(
-//     item => item.index === value.row.index
-//   )
-//   if (index === -1) {
-//     selectedContrastList.push(toRaw(value.row))
-//   } else {
-//     selectedContrastList.splice(index, 1)
-//   }
-//   checkAllItems.value = selectedContrastList.length === copy.length
-// }
 
 const handleSelectionChange = (selectedRow: any) => {
   selectedTableRows.value = selectedRow
+  console.log(selectedTableRows.value)
 }
 
-const handleSearch = (key: any) => {
+const handleSearchTable = () => {
+  console.log(originData)
   if (selectedOption.value === '') {
     ElMessage('请选择搜索条件！')
   } else if (input.value === '') {
     ElMessage('请输入搜索内容！')
   } else {
-    tableData.value = copy.value.filter(
-      (item: any) => item[key] === input.value
+    tableData.value = originData.filter(
+      data =>
+        !input.value ||
+        data[selectedOption.value]
+          .toLowerCase()
+          .includes(input.value.toLowerCase())
     )
   }
 }
-
-// const handleSizeChange = (val: number) => {
-//   console.log(`${val} items per page`)
-// }
-// const handleCurrentChange = (val: number) => {
-//   console.log(`current page: ${val}`)
-// }
+watchEffect(() => {
+  if (input.value === '') {
+    tableData.value = originData
+  }
+})
 
 const handleReFresh = () => {
   reFreshLodaing.value = !reFreshLodaing.value
 }
 
-// watchEffect(() => {
-//   if (input.value === '') {
-//     tableData.value = copy
-//   }
-// })
-
-const requestCount = ref(0) // 记录请求总是
-const tableLoading = ref(false)
 // 获取并合并jobs的逻辑
 // todo: 这段逻辑可以考虑一直store中
 const getAllJobsData = (idList:any[]) => {
   const tempArr:any[] = reactive(Object.assign([],idList))
   // todo: 每次遍历请求前，应取消之前所有未完成的请求
-  idList.forEach((idObj:any, idx:number) => {
+  idList.forEach((idObj: any, idx: number) => {
     // 如果之前已经获得过数据则不再重复请求
     if (performanceStore.performanceData[idObj.submit_id]) {
       tempArr[idx] = performanceStore.performanceData[idObj.submit_id]
@@ -325,12 +313,12 @@ const getAllJobsData = (idList:any[]) => {
     tableLoading.value = true
     performanceStore.changeLoadingStatus(true)
     getPerformanceData({
-      'index': 'jobs',
-      'query': {
-        'size': 10000,  // 取全量
-        'query': {
-          'term': {
-            'submit_id': idObj.submit_id
+      index: 'jobs',
+      query: {
+        size: 10000, // 取全量
+        query: {
+          term: {
+            submit_id: idObj.submit_id
           }
         }
       },
@@ -351,7 +339,6 @@ const getAllJobsData = (idList:any[]) => {
       }
     })
   })
-
   return tempArr
 }
 
@@ -367,15 +354,20 @@ const idList = ref(<any>[])
 
 // 自动分页
 watchEffect(() => {
-  const startIndex = (pagination.currentPage -1) * pagination.pageSize
+  const startIndex = (currentPage.value - 1) * pageSize.value
   // 数据分页
-  idList.value = props.dataList.slice(startIndex, startIndex + pagination.pageSize)
-  pagination.total = props.dataList.length
+  idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
+  total.value = props.dataList.length
+  for (let i = 0; total.value > i * 10; i++) {
+    pageSizes.value.push((i + 1) * 10)
+  }
 })
 
 // 当前页数据变化时，获取jobs数据
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
+  originData = JSON.parse(JSON.stringify(tableData.value))
+  console.log(tableData.value)
 })
 
 // 对比
@@ -393,7 +385,7 @@ const handleExportCsv = () => {
   } else {
     const data = []
     // 这里要深拷贝,不然影响列的字段
-    const titleData:any[] = JSON.parse(JSON.stringify(allColumns()))
+    const titleData:any[] = JSON.parse(JSON.stringify(allColumn))
     titleData.splice(0, 0, { label: '数据来源', prop: 'submit_id' })
     const title = titleData.map<string>((item:any) => item.label).join(',')
     const keys = titleData.map<string>((item:any) => item.prop)
@@ -420,7 +412,6 @@ a {
   text-decoration: none !important;
 }
 .handle-pannel {
-
   display: flex;
   justify-content: space-between;
   align-items: center;
