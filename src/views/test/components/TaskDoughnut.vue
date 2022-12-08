@@ -22,25 +22,25 @@ const option = {
       {
         name:'通过(111)',
         textStyle:{
-          color: 'green'
+          color: 'rgba(67, 187, 87)'
         }
       },
       {
         name:'失败',
         textStyle:{
-          color: 'red'
+          color: 'rgba(249, 88, 88, 1)'
         }
       },
       {
         name:'跳过',
         textStyle:{
-          color: 'black'
+          color: 'rgba(51, 51, 51, 1)'
         }
       },
       {
         name:'警告',
         textStyle:{
-          color: 'orange'
+          color: 'rgba(255, 166, 52, 1)'
         }
       },]
   },
@@ -60,7 +60,7 @@ const option = {
           value: 1335,
           name: '通过(111)',
           itemStyle: {
-            color: 'rgb(142, 189, 137)'
+            color: 'rgba(67, 187, 87, 1)'
           }
         },
         {

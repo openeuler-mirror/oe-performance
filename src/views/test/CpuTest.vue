@@ -23,23 +23,26 @@
         @selectedExample="selectedExample"></exampleDrawer>
     </el-row>
     <el-row style="margin-left: 20px;">
-      <div style="width: 100%;">
-        <div class="demo-collapse">
-          <el-collapse v-model="activeNames">
-            单核:
-            <el-collapse-item title="hackbench" name="1">
-              <div v-for="(item, index) in state.selectedExample" :key="index">
-                {{item}}
-              </div>
-            </el-collapse-item>
-            多核:
-            <el-collapse-item title="hackbench" name="1">
-              <div v-for="(item, index) in state.selectedExample" :key="index">
-                {{item}}
-              </div>
-            </el-collapse-item>
-          </el-collapse>
-        </div>
+        <el-table :data="state.selectedExample" style="width: 100%;" border="true" v-if="tableEmpty">
+          <template #empty>
+              <el-empty description="请先选择用例" image-size="70" style="line-height: 0px;"/>
+          </template>
+        </el-table>
+      <div class="demo-collapse" v-if="state.selectedExample" style="width: 100%;">
+        <el-collapse v-model="activeNames">
+          单核:
+          <el-collapse-item title="hackbench" name="1">
+            <div v-for="(item, index) in state.selectedExample" :key="index">
+              {{item}}
+            </div>
+          </el-collapse-item>
+          多核:
+          <el-collapse-item title="hackbench" name="2">
+            <div v-for="(item, index) in state.selectedExample" :key="index">
+              {{item}}
+            </div>
+          </el-collapse-item>
+        </el-collapse>
       </div>
     </el-row>
   </el-card>
@@ -113,11 +116,14 @@ import exampleDrawer from './components/exampleDrawer.vue'
 const radioModule = ref('unixbench')
 
 // 选择用例
+const tableEmpty = ref(true)
+
 const drawer = ref(false)
 const state = ref([] as any);
 const selectedExample = (selectedExample: any) => {
   state.value = selectedExample
   console.log('获取到了选择了的测试用例', state.value);
+  tableEmpty.value = false
 }
 
 const radioMirror = ref('公共镜像')
