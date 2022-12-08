@@ -9,121 +9,105 @@
           class="input-with-select"
           :suffix-icon="Search"
           size="large"
+          @input="inputValue"
         >
           <template #prepend>
-            <el-select v-model="select" placeholder="申请单号" style="width: 115px" size="large">
-              <el-option label="Restaurant" value="1" />
-              <el-option label="Order No." value="2" />
-              <el-option label="Tel" value="3" />
+            <el-select
+              v-if="JSON.stringify(tableData.data) !== '{}'"
+              v-model="select"
+              placeholder="申请单号"
+              style="width: 115px" size="large"
+              @change="changeSelect"  
+            >
+              <el-option
+                v-for="item in tableData.data"
+                :key="item.requestCode"
+                :label="item.requestCode"
+                :value="item.requestCode"
+              />
             </el-select>
           </template>
         </el-input>
       </el-col>
       <span class="right-btn">
-        <el-button type="primary" size="large" @click="centerDialogVisible = true">新建申请</el-button>
+        <el-button type="primary" size="large" @click="dialogVisible = true">新建申请</el-button>
       </span>
     </el-row>
-    <el-dialog
-      v-model="centerDialogVisible"
-      title="新建申请"
-      width="30%"
-      align-center
-      class="dialog-with-body"
-    >
-      <el-form :model="form" label-width="120px">
-        <el-form-item label="测试场景：">
-          <el-cascader v-model="form.region" placeholder="请选择测试场景" :options="options" @change="handleChange" />
-        </el-form-item>
-        <el-form-item label="上传文件：">
-          <el-upload
-            v-model:file-list="fileList"
-            class="upload-demo"
-            action="https://run.mocky.io/v3/9d059bf9-4660-45f2-925d-ce80ad6c4d15"
-            multiple
-            :on-preview="handlePreview"
-            :on-remove="handleRemove"
-            :before-remove="beforeRemove"
-            :limit="3"
-            :on-exceed="handleExceed"
-          >
-            <el-button type="primary">Click to upload</el-button>
-            <span class="btn-a-margin"><a href="#">下载模板</a></span>
-            <template #tip>
-              <div class="el-upload__tip">
-                支持扩展名：.csv...
-              </div>
-            </template>
-          </el-upload>
-        </el-form-item>
-        <el-form-item label="申请描述：">
-          <el-input v-model="form.description" type="textarea" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="centerDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="centerDialogVisible = false">
-            新建
-          </el-button>
-        </span>
-      </template>
-    </el-dialog>
-    <application-table @pushView="intoView"></application-table>
+    <re-po-uploader
+    title="新建申请"
+    description="上传描述："
+    btnText="新建"
+    :options="options"
+    :region="region"
+    :bool="dialogVisible"
+    @cancel="dialogVisible = false"
+    @handleClose="dialogVisible = false"
+    @newlyBuilt="newlyBuilt"
+    ></re-po-uploader>
+    <application-table
+      v-loading="!(JSON.stringify(propsData.data) !== '[]')"
+      :tableData="propsData.data"
+      @pushView="intoView"
+    ></application-table>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { ref,reactive } from 'vue'
+import { ref,reactive,onMounted } from 'vue'
+import { getApplicationList } from '@/api/center/index.ts'
 import { Search } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox,UploadProps, UploadUserFile } from 'element-plus'
 import { useRouter } from 'vue-router'
 import  ApplicationTable  from '../components/application-table.vue'
+import RePoUploader from '@/components/uploader/RePoUploader.vue'
 
 const router = useRouter()
 
+const hashData = new Map()
+
 const select = ref('')
 const value = ref('')
-const centerDialogVisible = ref(false)
-const form = reactive({
-  region: '',
-  description: ''
+const dialogVisible = ref(false)
+
+const tableData = reactive({
+  data: []
+})
+const propsData = reactive({
+  data: []
 })
 
-const handleChange = (value) => {
-  console.log(value)
+function inputValue() {
+  let v = value.value
+  select.value = ''
+  if(v) {
+    propsData.data = []
+    for (let [key, val] of hashData) {
+      if(key.indexOf(v) !== -1) {
+        propsData.data.push(tableData.data[val])
+      }
+    }
+  } else propsData.data = tableData.data
+}
+function changeSelect() {
+  propsData.data = [tableData.data[hashData.get(select.value)]]
 }
 
-function intoView() {
+function intoView(query) {
   router.push({
-    path: '/userCenter/application/applicationProgress'
+    path: '/userCenter/application/applicationProgress',
+    query
   })
 }
-const fileList = ref<UploadUserFile[]>([])
 
-const handleRemove: UploadProps['onRemove'] = (file, uploadFiles) => {
-  console.log(file, uploadFiles)
-}
-
-const handlePreview: UploadProps['onPreview'] = (uploadFile) => {
-  console.log(uploadFile)
-}
-
-const handleExceed: UploadProps['onExceed'] = (files, uploadFiles) => {
-  ElMessage.warning(
-    `The limit is 3, you selected ${files.length} files this time, add up to ${
-      files.length + uploadFiles.length
-    } totally`
-  )
-}
-
-const beforeRemove: UploadProps['beforeRemove'] = (uploadFile) => {
-  return ElMessageBox.confirm(
-    `Cancel the transfert of ${uploadFile.name} ?`
-  ).then(
-    () => true,
-    () => false
-  )
-}
+onMounted(() => {
+  getApplicationList()
+    .then((data) => {
+      tableData.data = data.data.data
+      propsData.data = data.data.data
+      tableData.data.forEach((item, index) => {
+        hashData.set(item.requestCode, index)
+      })
+    })
+})
 
 const options = [
   {
@@ -176,14 +160,45 @@ const options = [
   justify-content: flex-end;
 }
 .btn-a-margin {
-  margin-left: var(--oe-perf-padding);
+  margin-left: 16px;
 }
 a {
+  color: #002FA7;
+  cursor: pointer;
+}
+a:active {
   color: var(--oe-perf-color-secondary);
+}
+.el-drawer-header {
+  display: block;
+  padding: 12px 17px;
+  color: #333333;
+  font-size: 20px;
+  width: 100%;
+  border-bottom: 2px solid #E2E2E2;
+}
+.el-drawer-form {
+  margin-top: 0;
+  padding: calc(30px - var(--el-drawer-padding-primary)) 35px;
+}
+.upload-btn {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  line-height: 22px;
+  border-radius: 4px 4px 4px 4px;
+  border: 1px solid rgba(0,0,0,0.15);
+  font-size: 16px;
+}
+.upload-txt {
+  font-size: 14px !important;
 }
 </style>
 <style>
-.dialog-with-body .el-dialog__body {
-  border: 1px solid #dddddd!important;
+.my-el-cascader {
+  width: 100%!important;
+}
+.el-drawer__header {
+  margin-bottom: 0px;
 }
 </style>
