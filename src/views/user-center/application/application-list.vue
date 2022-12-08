@@ -81,7 +81,7 @@ function inputValue() {
   if(v) {
     propsData.data = []
     for (let [key, val] of hashData) {
-      if(key.indexOf(v: any) !== -1) {
+      if(key.indexOf(v) !== -1) {
         propsData.data.push(tableData.data[val])
       }
     }
