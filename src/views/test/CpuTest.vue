@@ -23,23 +23,26 @@
         @selectedExample="selectedExample"></exampleDrawer>
     </el-row>
     <el-row style="margin-left: 20px;">
-      <div style="width: 100%;">
-        <div class="demo-collapse">
-          <el-collapse v-model="activeNames">
-            单核:
-            <el-collapse-item title="hackbench" name="1">
-              <div v-for="(item, index) in state.selectedExample" :key="index">
-                {{item}}
-              </div>
-            </el-collapse-item>
-            多核:
-            <el-collapse-item title="hackbench" name="1">
-              <div v-for="(item, index) in state.selectedExample" :key="index">
-                {{item}}
-              </div>
-            </el-collapse-item>
-          </el-collapse>
-        </div>
+        <el-table :data="state.selectedExample" style="width: 100%;" border="true" v-if="tableEmpty">
+          <template #empty>
+              <el-empty description="请先选择用例" image-size="70" style="line-height: 0px;"/>
+          </template>
+        </el-table>
+      <div class="demo-collapse" v-if="state.selectedExample" style="width: 100%;">
+        <el-collapse v-model="activeNames">
+          单核:
+          <el-collapse-item title="hackbench" name="1">
+            <div v-for="(item, index) in state.selectedExample" :key="index">
+              {{item}}
+            </div>
+          </el-collapse-item>
+          多核:
+          <el-collapse-item title="hackbench" name="2">
+            <div v-for="(item, index) in state.selectedExample" :key="index">
+              {{item}}
+            </div>
+          </el-collapse-item>
+        </el-collapse>
       </div>
     </el-row>
   </el-card>
@@ -57,12 +60,8 @@
       </el-radio-group>
     </el-row>
     <el-row>
-      <el-col :span="3">
-        选择OS镜像版本:
-      </el-col>
-      <el-col :span="21" style="margin-left: -24px;">
-        <el-cascader v-model="selectedVersion" :options="imageVersion" clearable style="200%"/>
-      </el-col> 
+      <span style="margin-right: 15px;">选择OS镜像版本:</span>
+      <el-cascader v-model="selectedVersion" :options="imageVersion" clearable style="200%"/>
     </el-row>
   </el-card>
   <el-card shadow="always">
@@ -104,8 +103,8 @@
       </el-row>
   </el-card>
   <el-card shadow="always" style="margin-bottom: 20px;">
-    <div style="float: right;">
-      <el-button>取消</el-button>
+    <div style="margin-left: 40%;">
+      <el-button style="margin-right: 40px;">取消</el-button>
       <el-button type="primary" @click="submitTest">提交</el-button>
     </div>
   </el-card>
@@ -117,15 +116,18 @@ import exampleDrawer from './components/exampleDrawer.vue'
 const radioModule = ref('unixbench')
 
 // 选择用例
+const tableEmpty = ref(true)
+
 const drawer = ref(false)
 const state = ref([] as any);
 const selectedExample = (selectedExample: any) => {
   state.value = selectedExample
   console.log('获取到了选择了的测试用例', state.value);
+  tableEmpty.value = false
 }
 
 const radioMirror = ref('公共镜像')
-const selectRadio = (label: string) => {
+const selectRadio = (label: any) => {
   console.log(label, '切换任务类型的处理')
 }
 

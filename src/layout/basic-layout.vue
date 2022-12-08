@@ -46,19 +46,12 @@
             <el-menu-item index="/comparativeSearch/basicPerformance">基础性能</el-menu-item>
             <el-menu-item index="3-2">解决方案</el-menu-item>
           </el-sub-menu>
-          <el-sub-menu index="3">
+          <el-sub-menu index="4">
             <template #title>
               <span>提交测试</span>
             </template>
-            <router-link to="/submitTest/testTask" style="text-decoration: none;">
-              <el-menu-item index="3-1">测试任务</el-menu-item>
-            </router-link>
-            <router-link to="/submitTest/resultDetails" style="text-decoration: none;">
-              <el-menu-item index="3-2">测试结果</el-menu-item>
-            </router-link>
-            <router-link to="/submitTest/cpuTest" style="text-decoration: none;">
-              <el-menu-item index="3-3">CPU</el-menu-item>
-            </router-link>
+              <el-menu-item index="/submitTest/testTask">测试任务</el-menu-item>
+              <el-menu-item index="/submitTest/cpuTest">CPU</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="4">
             <template #title>
