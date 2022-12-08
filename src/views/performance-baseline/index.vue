@@ -8,13 +8,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import TestmentTable from './components/testment-table.vue';
 import SearchPannel from './components/search-pannel.vue';
 
-import { getPerformanceData } from '@/api/performance'
+import { getPerformanceData, getTestBoxes } from '@/api/performance'
 
 const data = ref<any[]>([])
 const submitDataLoading = ref(false)
@@ -134,6 +134,10 @@ const getSubmitId = () => {
     }
   })
 }
+
+onMounted(() => {
+  getTestBoxes()
+})
 </script>
 
 <style>

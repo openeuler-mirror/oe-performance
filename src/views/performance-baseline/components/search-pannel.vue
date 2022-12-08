@@ -229,7 +229,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { usePerformanceData } from '@/stores/performanceData'
 
-import { getSearchParams } from '@/api/performance'
+import { getSearchParams, getJobValueList } from '@/api/performance'
 
 const selectedSuite = ref('unixbench')
 const value = ref([])
@@ -339,6 +339,7 @@ const generateSearchParams = (testResultCommonParamsList: any) => {
 
 onMounted(() => {
   getRawSearchParams()
+  getJobValueList()
 })
 
 </script>
