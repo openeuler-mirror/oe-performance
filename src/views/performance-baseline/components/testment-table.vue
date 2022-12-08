@@ -323,6 +323,8 @@ const getAllJobsData = (idList:any[]) => {
         }
       },
     }).then((res) => {
+      console.log(res.data);
+      
       const resultObj = combineJobs(res.data.hits.hits)
       performanceStore.setPerformanceData(idObj.submit_id,resultObj)
       tempArr[idx] = resultObj
