@@ -74,7 +74,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: '/userCenter/application/applicationList',
             name: 'applicationList',
-            component: () => import('@/views/user-center/application/application-list.vue'),
+            component: () => import('@/views/user-center/list/user-list.vue'),
             meta: {
               title: 'applicationList'
             }
@@ -90,7 +90,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: '/userCenter/approval/approveList',
             name: 'approveList',
-            component: () => import('@/views/user-center/approval/approve-list.vue'),
+            component: () => import('@/views/user-center/list/user-list.vue'),
             meta: {
               title: 'approveList'
             }

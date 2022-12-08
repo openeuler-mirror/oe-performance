@@ -29,7 +29,7 @@
           </template>
         </el-input>
       </el-col>
-      <span class="right-btn">
+      <span class="right-btn" v-if="route.meta.title === 'applicationList'">
         <el-button type="primary" size="large" @click="dialogVisible = true">新建申请</el-button>
       </span>
     </el-row>
@@ -38,14 +38,12 @@
     description="上传描述："
     btnText="新建"
     :options="options"
-    :region="region"
     :bool="dialogVisible"
     @cancel="dialogVisible = false"
     @handleClose="dialogVisible = false"
-    @newlyBuilt="newlyBuilt"
+    @upload="upload"
     ></re-po-uploader>
     <application-table
-      v-loading="!(JSON.stringify(propsData.data) !== '[]')"
       :tableData="propsData.data"
       @pushView="intoView"
     ></application-table>
@@ -56,11 +54,12 @@
 import { ref,reactive,onMounted } from 'vue'
 import { getApplicationList } from '@/api/center/index.ts'
 import { Search } from '@element-plus/icons-vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import  ApplicationTable  from '../components/application-table.vue'
 import RePoUploader from '@/components/uploader/RePoUploader.vue'
 
 const router = useRouter()
+const route = useRoute()
 
 const hashData = new Map()
 
@@ -92,10 +91,18 @@ function changeSelect() {
 }
 
 function intoView(query) {
+  let path = '/userCenter/application/applicationProgress'
+  if(route.meta.title === 'approveList')
+    path = '/userCenter/approval/approvalprogress'
   router.push({
-    path: '/userCenter/application/applicationProgress',
+    path,
     query
   })
+
+}
+
+function upload() {
+
 }
 
 onMounted(() => {
