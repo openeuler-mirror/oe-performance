@@ -800,3 +800,9 @@ export const detailObj = {
 
 // workload详情数据
 export const workLoadObj = {}
+
+export const submitId = [
+  'test202210021123',
+  'test202210021123',
+  'test202210021123'
+]

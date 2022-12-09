@@ -1,5 +1,6 @@
 // vim: set et:
 
+/* eslint-disable */
 jobModel = {
         // 以下fields字段的格式参见
         // https://www.npmjs.com/package/react-awesome-query-builder
