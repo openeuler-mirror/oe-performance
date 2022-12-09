@@ -105,12 +105,4 @@ $breadcrumb-nav-height: 32px;
   line-height: $breadcrumb-nav-height;
   padding-left: var(--oe-perf-padding);
 }
-.el-main {
-  padding: 0;
-}
-.basic-layout-content {
-  min-height: calc(100vh - $header-height - $breadcrumb-nav-height);
-  background: var(--oe-perf-bg-layout);
-  padding: var(--oe-perf-padding);
-}
 </style>
