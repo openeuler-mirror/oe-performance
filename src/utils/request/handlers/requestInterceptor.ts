@@ -7,6 +7,7 @@ function requestInterceptor(config: AxiosRequestConfig) {
   const token = cookie.get('token');
   if(token && typeof config.headers !== 'undefined'){
     config.headers.auth = token
+    config.headers['Access-Control-Allow-Origin'] = '*'
   }
 
   return config;

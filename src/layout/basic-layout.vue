@@ -54,6 +54,25 @@
               >{{ item.label }}</el-menu-item
             >
           </el-sub-menu>
+          <el-sub-menu index="4">
+            <template #title>
+              <span>提交测试</span>
+            </template>
+              <el-menu-item index="/submitTest/testTask">测试任务</el-menu-item>
+              <el-menu-item index="/submitTest/cpuTest">CPU</el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu index="4">
+            <template #title>
+              <span>我的申请</span>
+            </template>
+            <el-menu-item index="/userCenter/application/applicationList">所有申请</el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu index="5">
+            <template #title>
+              <span>我的审批</span>
+            </template>
+            <el-menu-item index="/userCenter/approval/approveList">所有审批</el-menu-item>
+          </el-sub-menu>
         </el-menu>
       </el-aside>
       <el-main>
@@ -89,10 +108,15 @@ const userLogout = () => {
 }
 
 const handleChangeScene = (index: string) => {
+  // if (index.indexOf('normalBaseline') > -1) {
   router.replace({
     path: '/normalBaseline/list',
     query: { ...route.query, scene: index }
   })
+  // } else {
+  //   router.push(index)
+  // }
+  
 }
 
 onMounted(() => {

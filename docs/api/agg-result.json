@@ -1,0 +1,270 @@
+{
+  "took": 50,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": {
+      "value": 10000,
+      "relation": "gte"
+    },
+    "max_score": null,
+    "hits": []
+  },
+  "aggregations": {
+    "my-agg1": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "rpmbuild",
+          "doc_count": 144649
+        },
+        {
+          "key": "install-rpm",
+          "doc_count": 107612
+        },
+        {
+          "key": "rpmbuild-pkgbuild2spec",
+          "doc_count": 53073
+        },
+        {
+          "key": "rpmbuild-sp3",
+          "doc_count": 7752
+        },
+        {
+          "key": "multi-qemu-docker",
+          "doc_count": 5470
+        },
+        {
+          "key": "host-info",
+          "doc_count": 751
+        },
+        {
+          "key": "borrow",
+          "doc_count": 321
+        },
+        {
+          "key": "build-pkg",
+          "doc_count": 282
+        },
+        {
+          "key": "kunit",
+          "doc_count": 247
+        },
+        {
+          "key": "oec-hardware",
+          "doc_count": 171
+        },
+        {
+          "key": "boards-scan",
+          "doc_count": 143
+        },
+        {
+          "key": "hackbench-git",
+          "doc_count": 126
+        },
+        {
+          "key": "ku-latency",
+          "doc_count": 126
+        },
+        {
+          "key": "mutex",
+          "doc_count": 126
+        },
+        {
+          "key": "netpipe",
+          "doc_count": 126
+        },
+        {
+          "key": "pft",
+          "doc_count": 126
+        },
+        {
+          "key": "pixz",
+          "doc_count": 126
+        },
+        {
+          "key": "reaim",
+          "doc_count": 126
+        },
+        {
+          "key": "spinlock",
+          "doc_count": 126
+        },
+        {
+          "key": "iozone",
+          "doc_count": 123
+        },
+        {
+          "key": "unixbench",
+          "doc_count": 24
+        },
+        {
+          "key": "cci-depends",
+          "doc_count": 13
+        },
+        {
+          "key": "lmbench3",
+          "doc_count": 13
+        },
+        {
+          "key": "libmicro",
+          "doc_count": 12
+        },
+        {
+          "key": "stream",
+          "doc_count": 12
+        },
+        {
+          "key": "netperf",
+          "doc_count": 5
+        },
+        {
+          "key": "docker-buildx",
+          "doc_count": 2
+        },
+        {
+          "key": "iperf",
+          "doc_count": 2
+        },
+        {
+          "key": "ftrace-onoff",
+          "doc_count": 1
+        },
+        {
+          "key": "makebuild",
+          "doc_count": 1
+        }
+      ]
+    },
+    "my-agg3": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "openeuler",
+          "doc_count": 320645
+        },
+        {
+          "key": "centos",
+          "doc_count": 624
+        },
+        {
+          "key": "debian",
+          "doc_count": 273
+        },
+        {
+          "key": "archlinux",
+          "doc_count": 143
+        },
+        {
+          "key": "ubuntu",
+          "doc_count": 2
+        }
+      ]
+    },
+    "my-agg2": {
+      "doc_count_error_upper_bound": 0,
+      "sum_other_doc_count": 0,
+      "buckets": [
+        {
+          "key": "22.03-LTS",
+          "doc_count": 183181
+        },
+        {
+          "key": "20.03-LTS-SP1",
+          "doc_count": 108826
+        },
+        {
+          "key": "20.03-LTS-SP3",
+          "doc_count": 19167
+        },
+        {
+          "key": "20.03",
+          "doc_count": 6485
+        },
+        {
+          "key": "20.03-LTS-SP2",
+          "doc_count": 2115
+        },
+        {
+          "key": "20.03-SP1",
+          "doc_count": 273
+        },
+        {
+          "key": "7.6.1810",
+          "doc_count": 273
+        },
+        {
+          "key": "sid",
+          "doc_count": 273
+        },
+        {
+          "key": "22.03-LTS-SP1-Alpha-iso",
+          "doc_count": 235
+        },
+        {
+          "key": "7",
+          "doc_count": 177
+        },
+        {
+          "key": "2021-01-06-pre",
+          "doc_count": 143
+        },
+        {
+          "key": "20.03-pre",
+          "doc_count": 140
+        },
+        {
+          "key": "20.03-SP1-iso",
+          "doc_count": 91
+        },
+        {
+          "key": "7.6.1810-iso",
+          "doc_count": 91
+        },
+        {
+          "key": "20.03-iso",
+          "doc_count": 90
+        },
+        {
+          "key": "8",
+          "doc_count": 83
+        },
+        {
+          "key": "22.03-LTS-SP1-Alpha",
+          "doc_count": 14
+        },
+        {
+          "key": "20.03-LTS",
+          "doc_count": 11
+        },
+        {
+          "key": "22.09-iso",
+          "doc_count": 8
+        },
+        {
+          "key": "20.03-LTS-iso",
+          "doc_count": 4
+        },
+        {
+          "key": "20.03-LTS-SP3-iso",
+          "doc_count": 3
+        },
+        {
+          "key": "20.04",
+          "doc_count": 2
+        },
+        {
+          "key": "22.03-LTS-iso",
+          "doc_count": 2
+        }
+      ]
+    }
+  }
+}

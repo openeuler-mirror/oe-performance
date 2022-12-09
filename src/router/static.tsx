@@ -95,13 +95,89 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             }
           }
         ]
+      },
+      {
+        path: '/userCenter',
+        name: 'userCenter',
+        component: RouteView,
+        meta: {
+          title: 'userCenter'
+        },
+        children: [
+          {
+            path: '/userCenter/application/applicationList',
+            name: 'applicationList',
+            component: () => import('@/views/user-center/list/user-list.vue'),
+            meta: {
+              title: 'applicationList'
+            }
+          },
+          {
+            path: '/userCenter/application/applicationProgress',
+            name: 'applicationProgress',
+            component: () => import('@/views/user-center/progress/user-progress.vue'),
+            meta: {
+              title: 'applicationProgress'
+            }
+          },
+          {
+            path: '/userCenter/approval/approveList',
+            name: 'approveList',
+            component: () => import('@/views/user-center/list/user-list.vue'),
+            meta: {
+              title: 'approveList'
+            }
+          },
+          {
+            path: '/userCenter/approval/approvalprogress',
+            name: 'approvalprogress',
+            component: () => import('@/views/user-center/progress/user-progress.vue'),
+            meta: {
+              title: 'approvalprogress'
+            }
+          }
+        ]  
+      },
+      {
+        path: '/submitTest',
+        name: 'submitTest',
+        component: RouteView,
+        meta: {
+          title: 'submitTest'
+        },
+        children: [
+          {
+            path: '/submitTest/cpuTest',
+            name: 'cpuTest',
+            component: () => import('@/views/test/CpuTest.vue'),
+            meta: {
+              title: 'cpuTest'
+            }
+          },
+          {
+            path: '/submitTest/testTask',
+            name: 'testTask',
+            component: () => import('@/views/test/TestTask.vue'),
+            meta: {
+              title: 'testTask'
+            }
+          },
+          {
+            path: '/submitTest/testTask/resultDetails/:task_id',
+            name: 'resultDetails',
+            component: () => import('@/views/test/ResultDetails.vue'),
+            meta: {
+              title: 'resultDetails'
+            }
+          },
+        ]
       }
     ]
   },
-  {
-    path: '/:path(.*)*',
-    redirect: '/404'
-  },
+  // {
+  //   path: '/:path(.*)*',
+  //   redirect: '/404'
+  // },
   {
     path: '/404',
     name: 'notFound',
