@@ -58,7 +58,6 @@
               <span>我的申请</span>
             </template>
             <el-menu-item index="/userCenter/application/applicationList">所有申请</el-menu-item>
-            <el-menu-item index="3-2">新建申请</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="5">
             <template #title>
