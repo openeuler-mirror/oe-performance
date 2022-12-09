@@ -4,19 +4,18 @@
       <div class="main-title">
         <span>unixbench信息总览 >> UUID: test324802348</span>
         <span class="work-load-title">Workload性能值详情</span>
-      </div>
-      <div class="main-info">
-        <div class="use-case-info main-item">
-          <el-card shadow="never">
-            <div class="top-title">
+        <div class="top-title">
               <div class="case-info">
                 用例信息 <span class="title-value">多核</span>
               </div>
               <div class="performance-value">
                 性能值 <span class="title-value">13491.08</span>
               </div>
-            </div>
-          </el-card>
+        </div>
+      </div>
+      <div class="main-info">
+        <div class="use-case-info main-item">
+           
           <!-- 用例信息 -->
           <section class="test-case main-item">
             <div class="sub-title">用例信息</div>
@@ -122,32 +121,39 @@
     display: flex;
     flex-direction: column;
     .work-load-title {
+      font-size: var(--oe-perf-font-size-head);
       margin-top: 20px;
+      margin-bottom: 20px;
       padding-left: 2px;
       font-weight: bold;
-      border-left: 2px solid var(--oe-perf-color-secondary);
+    }
+    .top-title {
+      width: 100%;
+      /* padding: var(--oe-perf-padding); */
+      display: flex;
+      .title-value {
+        color: var(--oe-perf-color-primary);
+      }
+      .case-info {
+        margin-right: 70px;
+      }
     }
   }
   /* 主体信息 */
   .main-info {
     width: 100%;
     /* 主体item */
-    .top-title {
-      width: 100%;
-      /* padding: var(--oe-perf-padding); */
-      display: flex;
-      .title-value {
-        color: #ff70b8;
-      }
-      .case-info {
-        margin-right: 40px;
-      }
-    }
     .main-item {
       margin-bottom: 50px;
       :deep(.el-descriptions__cell) {
         padding: var(--oe-perf-padding);
         background-color: #fff;
+        &:nth-child(2n - 1){
+          border-left: none;
+        }
+        &:nth-child(2n){
+          border-right: none;
+        }
       }
       :deep(.el-descriptions__label) {
         width: 20%;
@@ -157,7 +163,7 @@
       }
       .sub-title {
         padding: var(--oe-perf-padding);
-        background-color: var(--oe-perf-bg-layout);
+        background-color: #F3F3F5;
         font-weight: bold;
         font-size: var(--oe-perf-font-size-display);
       }

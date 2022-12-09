@@ -8,116 +8,168 @@ declare module 'vue-router' {
 
 const RouteView = {
   render() {
-    return (<router-view></router-view>)
+    return <router-view></router-view>
   }
 }
 
 const asyncRoutes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'indexLayout',
-    redirect: '/index',
+    name: 'headerLayout',
+    // todo: 默认跳转页面需要定一下
+    redirect: '/baseline/list',
     component: () => import('@/layout/basic-layout.vue'),
     children: [
-      /*
-       * todo: 待确定布局方案。
-       * 第一级对应菜单第一级目录
-       * 第一级目录可能出现的情况：1.点击后直接进入对应页面；2.点击后展开，不会打开对应的页面。通过children属性长度>1判断。
-       * 第二级有两种情况：1.对应菜单的第二级目录，点击后进入对应页面；2.路径匹配相应的页面但是不在菜单中展示（配置hidden属性）。
-       * 但是页面应至少匹配一个二级路径？
-       * 第三极及更深层的child，均不在菜单中展示。
-       */
       {
-        path: '/index',
-        name: '/index',
-        component: () => import('@/views/performance-baseline/index.vue'),
-        meta: {
-          title: 'index'
-        }
-      },
-      {
-        path: '/solutionBaseline',
-        name: 'index',
-        component: RouteView,
-        meta: {
-          title: 'solutionBaseline'
-        },
+        path: 'baseline',
+        name: 'baselineLayout',
+        redirect: '/baseline/list',
+        component: () => import('@/layout/sub-layout/baseline-layout.vue'),
         children: [
           {
-            path: '/solutionBaseline/bigData',
-            name: 'bigData',
+            path: 'list',
+            name: 'baseline-list',
             component: () => import('@/views/performance-baseline/index.vue'),
-            meta: {
-              title: 'bigData'
-            }
-          }
-        ]
-      },
-      {
-        path: '/normalBaseline',
-        name: 'normalBaseline',
-        component: RouterView,
-        meta: {
-          title: 'normalBaseline'
-        },
-        children: [
-          {
-            path: '/normalBaseline/list',
-            name: 'normalBaseline-list',
-            component: () => import('@/views/performance-baseline/index.vue'),
-            meta: {
-              title: 'normalBaseline'
-            }
           },
           {
-            path: '/normalBaseline/detail/:submit_id',
-            name: 'detail',
+            path: 'detail/:submit_id',
+            name: 'baseline-detail',
             component: () => import('@/views/performance-detail/index.vue'),
             meta: {
               title: 'detail'
-            }
+            },
+            children: [
+              {
+                path: 'workloadDetail',
+                name: 'baseline-workloadDetail',
+                component: () => import('@/views/performance-detail/workload-detail.vue'),
+                meta: {
+                  title: 'workloadDetail'
+                }
+              }
+            ]
           },
           {
-            path: '/normalBaseline/detail/:submit_id/workloadDetail',
-            name: 'workloadDetail',
-            component: () => import('@/views/performance-detail/workload-detail.vue'),
+            path: 'comparativeSearch',
+            name: 'comparativeSearch',
+            component: RouteView,
             meta: {
-              title: 'workloadDetail'
-            }
+              title: 'comparativeSearch'
+            },
+            children: [
+              {
+                path: 'basicPerformance',
+                name: 'performanceCompare',
+                component: () =>
+                  import('@/views/performance-comparation/index.vue'),
+                meta: {
+                  title: 'basicPerformance'
+                }
+              },
+              {
+                path: 'solution',
+                name: 'solutionCompare',
+                component: () =>
+                  import('@/views/performance-comparation/index.vue'),
+                meta: {
+                  title: 'solution'
+                }
+              }
+            ]
           }
         ]
       },
       {
-        path: '/comparativeSearch',
-        name: 'comparativeSearch',
-        component: RouteView,
+        path: '/userCenter',
+        name: 'userCenter',
+        redirect: '/userCenter/application/applicationList',
+        component: () => import('@/layout/sub-layout/user-center-layout.vue'),
         meta: {
-          title: 'comparativeSearch'
+          title: 'userCenter'
         },
         children: [
           {
-            path: 'basicPerformance',
-            name: 'basicPerformance',
-            component: () => import('@/views/performance-comparation/index.vue'),
+            path: 'application/applicationList',
+            name: 'applicationList',
+            component: () => import('@/views/user-center/user-list/index.vue'),
             meta: {
-              title: 'basicPerformance'
+              title: 'applicationList'
+            }
+          },
+          {
+            path: 'application/applicationProgress',
+            name: 'applicationProgress',
+            component: () => import('@/views/user-center/user-progress/index.vue'),
+            meta: {
+              title: 'applicationProgress'
+            }
+          },
+          {
+            path: 'approval/approveList',
+            name: 'approveList',
+            component: () => import('@/views/user-center/user-list/index.vue'),
+            meta: {
+              title: 'approveList'
+            }
+          },
+          {
+            path: 'approval/approvalprogress',
+            name: 'approvalprogress',
+            component: () => import('@/views/user-center/user-progress/index.vue'),
+            meta: {
+              title: 'approvalprogress'
             }
           }
+        ]  
+      },
+      {
+        path: '/testTask',
+        name: 'testTask',
+        redirect: '/testTask/taskList',
+        component: () => import('@/layout/sub-layout/test-task-layout.vue'),
+        meta: {
+          title: 'testTask'
+        },
+        children: [
+          {
+            path: 'taskList',
+            name: 'taskList',
+            component: () => import('@/views/test-task/task-list.vue'),
+            meta: {
+              title: 'taskList'
+            }
+          },
+          {
+            path: 'createTask',
+            name: 'createTask',
+            component: () => import('@/views/test-task/create-task.vue'),
+            meta: {
+              title: 'createTask'
+            }
+          },
+          {
+            path: 'taskDetails/:task_id',
+            name: 'taskDetail',
+            component: () => import('@/views/test-task/task-detail.vue'),
+            meta: {
+              title: 'taskDetail'
+            }
+          },
         ]
       }
     ]
   },
-  {
-    path: '/:path(.*)*',
-    redirect: '/404',
-  },
+  // {
+  //   path: '/:path(.*)*',
+  //   redirect: '/404'
+  // },
   {
     path: '/404',
     name: 'notFound',
     component: () => import('@/views/common/error/404.vue'),
     meta: {
       title: '404'
-    },
+    }
   }
 ]
 

@@ -1,7 +1,7 @@
 import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
 
-const performanceData = reactive(<{[key:string]: any}>{})
+const performanceData = reactive(<{ [key: string]: any }>{})
 
 const comparationList = ref(<{}>[])
 const loadingStatus = reactive({

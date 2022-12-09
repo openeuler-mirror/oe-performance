@@ -3,7 +3,9 @@
     <search-pannel @search="getAllData"></search-pannel>
   </div>
   <div class="oe-perf-section">
-    <testment-table :dataList="data" :submitDataLoading="submitDataLoading"></testment-table>
+    <testment-table
+      :dataList="data"
+      :submitDataLoading="submitDataLoading"></testment-table>
   </div>
 </template>
 
@@ -11,8 +13,8 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 
-import TestmentTable from './components/testment-table.vue';
-import SearchPannel from './components/search-pannel.vue';
+import TestmentTable from './components/testment-table.vue'
+import SearchPannel from './components/search-pannel.vue'
 
 import { getPerformanceData, getTestBoxes } from '@/api/performance'
 
@@ -56,11 +58,11 @@ const getAllData = (params: searchParams) => {
           // ]
         }
       },
-      'aggs': {
-        'jobs_terms': {
-          'terms': {
-            'field': 'submit_id',
-            'size': 10000  // 取全量
+      aggs: {
+        jobs_terms: {
+          terms: {
+            field: 'submit_id',
+            size: 10000 // 取全量
           }
         }
       }
@@ -133,6 +135,21 @@ const getSubmitId = () => {
       }
     }
   })
+    .then(res => {
+      // todo: 数据为空的异常处理
+      data.value = res.data.aggregations.jobs_terms.buckets.map((item: any) => {
+        return { submit_id: item.key }
+      })
+    })
+    .catch(err => {
+      ElMessage({
+        message: err.message,
+        type: 'error'
+      })
+    })
+    .finally(() => {
+      submitDataLoading.value = false
+    })
 }
 
 onMounted(() => {
@@ -140,5 +157,4 @@ onMounted(() => {
 })
 </script>
 
-<style>
-</style>
+<style></style>
