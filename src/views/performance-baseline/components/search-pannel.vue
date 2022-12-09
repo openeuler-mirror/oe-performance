@@ -19,26 +19,23 @@
       >
       <el-col :span="22" class="filter-criteria-col">
         <div class="filter-criteria">
-          <el-row
-            :gutter="8"
-            v-for="(options, index) in filterCriteria"
-            :key="index">
+          <el-row :gutter="8">
             <el-col
               :span="6"
               :xs="{span:24}"
               :sm="{span:12}"
               :lg="{span:6}"
-              v-for="(option, secIndex) in options"
-              :key="secIndex">
-              <span class="general-font-style">{{ option.title + ':' }}</span>
+              v-for="(param, index) in searchParamList"
+              :key="index">
+              <span class="general-font-style">{{ param.title + ':' }}</span>
               <el-select
-                v-model="option.bindValue"
-                @clear="handleClearCriteria(option.paramKey, option.tag)"
+                v-model="param.bindValue"
+                @clear="clearParamValue(param.paramKey, param.tag)"
                 clearable
                 size="small">
                 <el-option
-                  v-for="item in option.options"
-                  @click="handleCriteriaChange(option, item.value)"
+                  v-for="item in param.options"
+                  @click="selectParamValue(param, item.value)"
                   :label="item.label"
                   :value="item.value"
                   :key="item.value" />
@@ -76,110 +73,20 @@ const selectedSuite = ref('unixbench')
 
 const performanceStore = usePerformanceData()
 
-const searchParamsOptions = reactive({
-  testboxList: [], // 服务器型号
-  cpuList: [], // cpu配置
-  memoryList: [], // 内存配置
-})
-
-const searchParams = reactive({
-  testbox: '',
-  nr_cpu: '',
-  memory: ''
-})
-
 const emit = defineEmits<{
-  // 在此处收集查询菜单中的查询条件，整理后去请求全量的submit_id列表
-  // 如果用户选择了机器配置类的条件，则需要先根据机器配置去获取对应的主机列表。
-  // 然后通过主机列表和其他条件去查询submit_id列表
   (event: 'search', params: searchParams): void
 }>()
 
 const route = useRoute()
 const router = useRouter()
 const testSubassembly = ref([] as string[])
-const filterCriteria = ref([] as any[])
+const searchParamList = ref([] as any[])
 
 const systemParams = [] as any[]
 const caseParams = [] as any[]
 
 interface queryItem {
   [key: string]: string
-} 
-const setQueryToUrl = () => {
-  const newQuery = {} as queryItem
-  caseParams.forEach((item: any) => {
-    newQuery[item.paramKey] = item.value
-  })
-  systemParams.forEach((item: any) => {
-    newQuery[item.paramKey] = item.value
-  })
-  newQuery['scene'] = route.query.scene as string
-  newQuery['testSubassembly'] = selectedSuite.value
-  router.replace({
-    path: '/baseline/list',
-    query: { ...newQuery }
-  })
-}
-
-const handleCriteriaChange = (value: any, param: string) => {
-  let index: number
-  if (value.tag === 'system') {
-    index = systemParams.findIndex(item => item.paramKey === value.paramKey)
-    if (index === -1) {
-      systemParams.push({
-        paramKey: value.paramKey,
-        value: param
-      })
-    } else {
-      systemParams[index].value = param
-    }
-  } else {
-    index = caseParams.findIndex(item => item.paramKey === value.paramKey)
-    if (index === -1) {
-      caseParams.push({
-        paramKey: value.paramKey,
-        value: param
-      })
-    } else {
-      caseParams[index].value = param
-    }
-  }
-}
-const handleClearCriteria = (paramKey: string, tag: string) => {
-  if (tag === 'system') {
-    systemParams.splice(systemParams.findIndex(item => item.paramKey === paramKey), 1)
-  } else {
-    caseParams.splice(caseParams.findIndex(item => item.paramKey === paramKey), 1)
-  }
-}
-// const handleQueryCriteria = () => {
-//   const submitCaseParams = [] as any[]
-//   caseParams.forEach((elem: any) => {
-//     submitCaseParams.push(elem.options)
-//   })
-//   if (systemParams.length > 0) {
-//     console.log('submit1')
-//     const submitSystemParams = [] as any[]
-//     systemParams.forEach((elem: any) => {
-//       submitSystemParams.push(elem.options)
-//     })
-//     queryBySystemParam(submitSystemParams).then(res => {
-//       queryCriteria(submitCaseParams, res.data).then(resCase => {
-//         filterData.value = resCase.data
-//       })
-//     })
-//   } else {
-//     console.log('submit2')
-//     queryCriteria(submitCaseParams).then(resCase => {
-//       filterData.value = resCase.data
-//     })
-//   }
-// }
-
-const handleSearch = () => {
-  setQueryToUrl()
-  emit('search', { ...searchParams, suite: selectedSuite.value})
 }
 
 // 获取搜索条件
@@ -219,23 +126,103 @@ const getRawSearchParams = () => {
   }).then((res) => {
     const rawData = res.data.aggregations.uid_aggs.buckets.map(sub_item => sub_item.my_top_hits.hits.hits[0]._source)
     console.log('粗粒度筛选数据: ', rawData)
-    generateSearchParams(rawData)
+    setSearchOptions(rawData)
   })
 }
 
-const generateSearchParams = (testResultCommonParamsList: any) => {
-  testResultCommonParamsList.forEach(item => {
-    if (item.testbox && searchParamsOptions.testboxList.indexOf(item.testbox) === -1) {
-      searchParamsOptions.testboxList.push(item.testbox)
-    }
-    if (item.nr_cpu && searchParamsOptions.cpuList.indexOf(item.nr_cpu) === -1) {
-      searchParamsOptions.cpuList.push(item.nr_cpu)
-    }
-    if (item.memory && searchParamsOptions.memoryList.indexOf(item.memory) === -1) {
-      searchParamsOptions.memoryList.push(item.memory)
-    }
+const setSearchOptions = (testResultCommonParamsList: any) => {
+  searchParamList.value.forEach(param => {
+    testResultCommonParamsList.forEach(submitItem => {
+      if (submitItem[param.paramKey] 
+      && !param.options.filter(option => submitItem[param.paramKey] === option.value)[0]) {
+        param.options.push({
+          label: submitItem[param.paramKey],
+          value: submitItem[param.paramKey]
+        })
+      }
+    })
   })
-  console.log('筛选数据: ', searchParamsOptions)
+  console.log('筛选数据: ', searchParamList.value)
+}
+
+const selectParamValue = (value: any, param: string) => {
+  let index: number
+  if (value.tag === 'system') {
+    index = systemParams.findIndex(item => item.paramKey === value.paramKey)
+    if (index === -1) {
+      systemParams.push({
+        paramKey: value.paramKey,
+        value: param
+      })
+    } else {
+      systemParams[index].value = param
+    }
+  } else {
+    index = caseParams.findIndex(item => item.paramKey === value.paramKey)
+    if (index === -1) {
+      caseParams.push({
+        paramKey: value.paramKey,
+        value: param
+      })
+    } else {
+      caseParams[index].value = param
+    }
+  }
+}
+const clearParamValue = (paramKey: string, tag: string) => {
+  if (tag === 'system') {
+    systemParams.splice(systemParams.findIndex(item => item.paramKey === paramKey), 1)
+  } else {
+    caseParams.splice(caseParams.findIndex(item => item.paramKey === paramKey), 1)
+  }
+}
+// const handleQueryCriteria = () => {
+//   const submitCaseParams = [] as any[]
+//   caseParams.forEach((elem: any) => {
+//     submitCaseParams.push(elem.options)
+//   })
+//   if (systemParams.length > 0) {
+//     console.log('submit1')
+//     const submitSystemParams = [] as any[]
+//     systemParams.forEach((elem: any) => {
+//       submitSystemParams.push(elem.options)
+//     })
+//     queryBySystemParam(submitSystemParams).then(res => {
+//       queryCriteria(submitCaseParams, res.data).then(resCase => {
+//         filterData.value = resCase.data
+//       })
+//     })
+//   } else {
+//     console.log('submit2')
+//     queryCriteria(submitCaseParams).then(resCase => {
+//       filterData.value = resCase.data
+//     })
+//   }
+// }
+
+const setQueryToUrl = () => {
+  const newQuery = {} as queryItem
+  caseParams.forEach((item: any) => {
+    newQuery[item.paramKey] = item.value
+  })
+  systemParams.forEach((item: any) => {
+    newQuery[item.paramKey] = item.value
+  })
+  newQuery['scene'] = route.query.scene as string
+  newQuery['testSubassembly'] = selectedSuite.value
+  router.replace({
+    path: '/baseline/list',
+    query: { ...newQuery }
+  })
+}
+
+const handleSearch = () => {
+  const searchParams = reactive({})
+  searchParamList.value.forEach(item => {
+    searchParams[item.paramKey] = item.bindValue
+  })
+  setQueryToUrl()
+  emit('search', { ...searchParams, suite: selectedSuite.value})
 }
 
 watchEffect(() => {
@@ -244,7 +231,7 @@ watchEffect(() => {
   for (key in sceneConfig) {
     if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
       testSubassembly.value = config[scene as string].testSubassembly || []
-      filterCriteria.value = config[scene as string].filterCriteria.value || []
+      searchParamList.value = config[scene as string].searchParamList.value || []
     }
   }
 })
@@ -253,12 +240,10 @@ onMounted(() => {
   selectedSuite.value = route.query.testSubassembly ? route.query.testSubassembly as string : 'unixbench'
   const keys = Object.keys(route.query)
   keys.forEach((key: string) => {
-    filterCriteria.value.forEach((item: any[]) => {
-      const index = item.findIndex(criteriaItem => criteriaItem.paramKey === key)
-      if (index !== -1) {
-        item[index].bindValue = route.query[key]
-      }
-    })
+    const matchedObj = searchParamList.value.filter(paramItem => paramItem.paramKey === key)[0]
+    if (matchedObj) {
+      matchedObj.bindValue = route.query[key]
+    }
   })
 
   getRawSearchParams()

@@ -330,365 +330,334 @@ export const columnConfig2 = [
 ]
 
 export const optionConfig = ref([
-  [
-    {
-      title: '测试模型版本',
-      paramKey: 'testv',
-      bindValue: '',
-      tag: 'case',
-      options: [
-        {
-          value: 'guide',
-          label: 'Guide'
-        },
-        {
-          value: 'disciplines',
-          label: 'Disciplines'
-        },
-        {
-          value: 'yut',
-          label: 'uityu'
-        }
-      ]
-    },
-    {
-      title: '服务器型号',
-      paramKey: 'model',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'model',
-          label: 'sdad'
-        }
-      ]
-    },
-    {
-      title: 'CPU配置',
-      paramKey: 'cpuconfig',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'gu',
-          label: 'Gu'
-        }
-      ]
-    },
-    {
-      title: '内存配置',
-      paramKey: 'memory',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'g',
-          label: 'G'
-        },
-        {
-          value: 'disc',
-          label: 'Disc'
-        }
-      ]
-    }
-  ],
-  [
-    {
-      title: '硬件配置',
-      paramKey: 'con',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'gsd',
-          label: 'Gsd'
-        },
-        {
-          value: 'discipl',
-          label: 'Discipl'
-        }
-      ]
-    },
-    {
-      title: 'Raid卡',
-      paramKey: 'Raid',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'gui',
-          label: 'Gui'
-        },
-        {
-          value: 'disciplines',
-          label: 'Disciplines'
-        }
-      ]
-    },
-    {
-      title: '组网配置',
-      paramKey: 'netGroup',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'cpu',
-          label: 'Cpu'
-        },
-        {
-          value: 'discipl',
-          label: 'Discipl'
-        }
-      ]
-    },
-    {
-      title: '测试用例',
-      paramKey: 'testCase',
-      bindValue: '',
-      tag: 'case',
-      options: [
-        {
-          value: 'system',
-          label: 'System'
-        },
-        {
-          value: 'disc',
-          label: 'Disc'
-        }
-      ]
-    }
-  ],
-  [
-    {
-      title: '测试工具版本',
-      paramKey: 'testTool',
-      bindValue: '',
-      tag: 'case',
-      options: [
-        {
-          value: 'ui',
-          label: 'Ui'
-        },
-        {
-          value: 'discip',
-          label: 'Discip'
-        }
-      ]
-    },
-    {
-      title: '操作系统',
-      paramKey: 'os',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'po',
-          label: 'Po'
-        },
-        {
-          value: 'yebfghj',
-          label: 'yebfghj'
-        }
-      ]
-    },
-    {
-      title: '数据来源',
-      paramKey: 'resourse',
-      bindValue: '',
-      tag: 'case',
-      options: [
-        {
-          value: 'gfe',
-          label: 'Gfe'
-        },
-        {
-          value: 'jkyhiotjh',
-          label: 'jkyhiotjh'
-        }
-      ]
-    }
-  ]
+  {
+    title: '测试模型版本',
+    paramKey: 'testv',
+    bindValue: '',
+    tag: 'case',
+    options: [
+      {
+        value: 'guide',
+        label: 'Guide'
+      },
+      {
+        value: 'disciplines',
+        label: 'Disciplines'
+      },
+      {
+        value: 'yut',
+        label: 'uityu'
+      }
+    ]
+  },
+  {
+    title: '服务器型号',
+    paramKey: 'testbox',
+    bindValue: '',
+    tag: 'system',
+    options: []
+  },
+  {
+    title: 'CPU配置',
+    paramKey: 'nr_cpu',
+    bindValue: '',
+    tag: 'system',
+    options: []
+  },
+  {
+    title: '内存配置',
+    paramKey: 'memory',
+    bindValue: '',
+    tag: 'system',
+    options: []
+  },
+  {
+    title: '硬件配置',
+    paramKey: 'con',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'gsd',
+        label: 'Gsd'
+      },
+      {
+        value: 'discipl',
+        label: 'Discipl'
+      }
+    ]
+  },
+  {
+    title: 'Raid卡',
+    paramKey: 'Raid',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'gui',
+        label: 'Gui'
+      },
+      {
+        value: 'disciplines',
+        label: 'Disciplines'
+      }
+    ]
+  },
+  {
+    title: '组网配置',
+    paramKey: 'netGroup',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'cpu',
+        label: 'Cpu'
+      },
+      {
+        value: 'discipl',
+        label: 'Discipl'
+      }
+    ]
+  },
+  {
+    title: '测试用例',
+    paramKey: 'testCase',
+    bindValue: '',
+    tag: 'case',
+    options: [
+      {
+        value: 'system',
+        label: 'System'
+      },
+      {
+        value: 'disc',
+        label: 'Disc'
+      }
+    ]
+  },
+  {
+    title: '测试工具版本',
+    paramKey: 'testTool',
+    bindValue: '',
+    tag: 'case',
+    options: [
+      {
+        value: 'ui',
+        label: 'Ui'
+      },
+      {
+        value: 'discip',
+        label: 'Discip'
+      }
+    ]
+  },
+  {
+    title: '操作系统',
+    paramKey: 'os',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'po',
+        label: 'Po'
+      },
+      {
+        value: 'yebfghj',
+        label: 'yebfghj'
+      }
+    ]
+  },
+  {
+    title: '数据来源',
+    paramKey: 'resourse',
+    bindValue: '',
+    tag: 'case',
+    options: [
+      {
+        value: 'gfe',
+        label: 'Gfe'
+      },
+      {
+        value: 'jkyhiotjh',
+        label: 'jkyhiotjh'
+      }
+    ]
+  }
 ])
 
 export const optionConfig2 = ref([
-  [
-    {
-      title: '测试模型版本2',
-      paramKey: 'testv',
-      bindValue: '',
-      tag: 'case',
-      options: [
-        {
-          value: 'guide',
-          label: 'Guide'
-        },
-        {
-          value: 'disciplines',
-          label: 'Disciplines'
-        },
-        {
-          value: 'yut',
-          label: 'uityu'
-        }
-      ]
-    },
-    {
-      title: '服务器型号2',
-      paramKey: 'model',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'model',
-          label: 'sdad'
-        }
-      ]
-    },
-    {
-      title: 'CPU配置2',
-      paramKey: 'cpuconfig',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'gu',
-          label: 'Gu'
-        }
-      ]
-    },
-    {
-      title: '内存配置2',
-      paramKey: 'memory',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'g',
-          label: 'G'
-        },
-        {
-          value: 'disc',
-          label: 'Disc'
-        }
-      ]
-    }
-  ],
-  [
-    {
-      title: '硬件配置2',
-      paramKey: 'con',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'gsd',
-          label: 'Gsd'
-        },
-        {
-          value: 'discipl',
-          label: 'Discipl'
-        }
-      ]
-    },
-    {
-      title: 'Raid卡2',
-      paramKey: 'Raid',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'gui',
-          label: 'Gui'
-        },
-        {
-          value: 'disciplines',
-          label: 'Disciplines'
-        }
-      ]
-    },
-    {
-      title: '组网配置2',
-      paramKey: 'netGroup',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'cpu',
-          label: 'Cpu'
-        },
-        {
-          value: 'discipl',
-          label: 'Discipl'
-        }
-      ]
-    },
-    {
-      title: '测试用例2',
-      paramKey: 'testCase',
-      bindValue: '',
-      tag: 'case',
-      options: [
-        {
-          value: 'system',
-          label: 'System'
-        },
-        {
-          value: 'disc',
-          label: 'Disc'
-        }
-      ]
-    }
-  ],
-  [
-    {
-      title: '测试工具版本2',
-      paramKey: 'testTool',
-      bindValue: '',
-      tag: 'case',
-      options: [
-        {
-          value: 'ui',
-          label: 'Ui'
-        },
-        {
-          value: 'discip',
-          label: 'Discip'
-        }
-      ]
-    },
-    {
-      title: '操作系统2',
-      paramKey: 'os',
-      bindValue: '',
-      tag: 'system',
-      options: [
-        {
-          value: 'po',
-          label: 'Po'
-        },
-        {
-          value: 'yebfghj',
-          label: 'yebfghj'
-        }
-      ]
-    },
-    {
-      title: '数据来源2',
-      paramKey: 'resourse',
-      bindValue: '',
-      tag: 'case',
-      options: [
-        {
-          value: 'gfe',
-          label: 'Gfe'
-        },
-        {
-          value: 'jkyhiotjh',
-          label: 'jkyhiotjh'
-        }
-      ]
-    }
-  ]
+  {
+    title: '测试模型版本2',
+    paramKey: 'testv',
+    bindValue: '',
+    tag: 'case',
+    options: [
+      {
+        value: 'guide',
+        label: 'Guide'
+      },
+      {
+        value: 'disciplines',
+        label: 'Disciplines'
+      },
+      {
+        value: 'yut',
+        label: 'uityu'
+      }
+    ]
+  },
+  {
+    title: '服务器型号2',
+    paramKey: 'model',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'model',
+        label: 'sdad'
+      }
+    ]
+  },
+  {
+    title: 'CPU配置2',
+    paramKey: 'cpuconfig',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'gu',
+        label: 'Gu'
+      }
+    ]
+  },
+  {
+    title: '内存配置2',
+    paramKey: 'memory',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'g',
+        label: 'G'
+      },
+      {
+        value: 'disc',
+        label: 'Disc'
+      }
+    ]
+  },
+  {
+    title: '硬件配置2',
+    paramKey: 'con',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'gsd',
+        label: 'Gsd'
+      },
+      {
+        value: 'discipl',
+        label: 'Discipl'
+      }
+    ]
+  },
+  {
+    title: 'Raid卡2',
+    paramKey: 'Raid',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'gui',
+        label: 'Gui'
+      },
+      {
+        value: 'disciplines',
+        label: 'Disciplines'
+      }
+    ]
+  },
+  {
+    title: '组网配置2',
+    paramKey: 'netGroup',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'cpu',
+        label: 'Cpu'
+      },
+      {
+        value: 'discipl',
+        label: 'Discipl'
+      }
+    ]
+  },
+  {
+    title: '测试用例2',
+    paramKey: 'testCase',
+    bindValue: '',
+    tag: 'case',
+    options: [
+      {
+        value: 'system',
+        label: 'System'
+      },
+      {
+        value: 'disc',
+        label: 'Disc'
+      }
+    ]
+  },
+  {
+    title: '测试工具版本2',
+    paramKey: 'testTool',
+    bindValue: '',
+    tag: 'case',
+    options: [
+      {
+        value: 'ui',
+        label: 'Ui'
+      },
+      {
+        value: 'discip',
+        label: 'Discip'
+      }
+    ]
+  },
+  {
+    title: '操作系统2',
+    paramKey: 'os',
+    bindValue: '',
+    tag: 'system',
+    options: [
+      {
+        value: 'po',
+        label: 'Po'
+      },
+      {
+        value: 'yebfghj',
+        label: 'yebfghj'
+      }
+    ]
+  },
+  {
+    title: '数据来源2',
+    paramKey: 'resourse',
+    bindValue: '',
+    tag: 'case',
+    options: [
+      {
+        value: 'gfe',
+        label: 'Gfe'
+      },
+      {
+        value: 'jkyhiotjh',
+        label: 'jkyhiotjh'
+      }
+    ]
+  }
 ])
 
 export const sceneConfig = {
@@ -747,52 +716,52 @@ export interface configItem {
 export const config: configItem = {
   bigData: {
     testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
-    filterCriteria: optionConfig,
+    searchParamList: optionConfig,
     column: columnConfig
   },
   dataBase: {
     testSubassembly: ['???', '??', '?'],
-    filterCriteria: optionConfig2,
+    searchParamList: optionConfig2,
     column: columnConfig2
   },
   distributedStorage: {
     testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
-    filterCriteria: optionConfig,
+    searchParamList: optionConfig,
     column: columnConfig
   },
   cpu: {
     testSubassembly: ['???', '??', '?'],
-    filterCriteria: optionConfig2,
+    searchParamList: optionConfig2,
     column: columnConfig2
   },
   memory: {
     testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
-    filterCriteria: optionConfig,
+    searchParamList: optionConfig,
     column: columnConfig
   },
   storage: {
     testSubassembly: ['???', '??', '?'],
-    filterCriteria: optionConfig2,
+    searchParamList: optionConfig2,
     column: columnConfig2
   },
   network: {
     testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
-    filterCriteria: optionConfig,
+    searchParamList: optionConfig,
     column: columnConfig
   },
   basic: {
     testSubassembly: ['???', '??', '?'],
-    filterCriteria: optionConfig2,
+    searchParamList: optionConfig2,
     column: columnConfig2
   },
   basicPerformance: {
     testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
-    filterCriteria: optionConfig,
+    searchParamList: optionConfig,
     column: columnConfig
   },
   solution: {
     testSubassembly: ['???', '??', '?'],
-    filterCriteria: optionConfig2,
+    searchParamList: optionConfig2,
     column: columnConfig2
   }
 }
