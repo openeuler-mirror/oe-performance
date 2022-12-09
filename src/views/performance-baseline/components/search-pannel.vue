@@ -99,8 +99,8 @@ const handleQueryChange = () => {
   })
   newQuery['scene'] = route.query.scene as string
   newQuery['testSubassembly'] = selectedSuite.value
-  router.replace({
-    path: '/normalBaseline/list',
+  router.push({
+    path: '/baseline/list',
     query: { ...newQuery }
   })
 }

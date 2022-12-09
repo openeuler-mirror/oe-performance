@@ -8,7 +8,7 @@ import { staticRoutes, asyncRoutes } from './static'
 
 const allowList:RouteRecordName[] = ['login']
 const loginRoute = '/user/login'
-const indexRoute = '/index'
+const indexRoute = '/'
 
 const { userInfo, loadUserInfo } = useUserInfo(pinia)
 

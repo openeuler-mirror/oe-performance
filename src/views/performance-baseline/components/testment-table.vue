@@ -111,7 +111,7 @@
       </el-table-column>
       <el-table-column prop="detail" label="详细数据" fixed="right">
         <template #default="scope">
-          <router-link :to="`/normalBaseline/detail/${scope.row.submit_id}`">
+          <router-link :to="`/baseline/detail/${scope.row.submit_id}`">
             <el-button link type="primary">
               <span>查看</span>
             </el-button>

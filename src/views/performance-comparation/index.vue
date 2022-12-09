@@ -78,7 +78,7 @@ import { getDetail } from '@/api/detail'
 
 const performanceStore= usePerformanceData()
 
-let componentVisible = ref(true)
+let componentVisible = ref(false)
 let modalVisible = ref(false)
 let baseDecorationVisible = ref(false)
 let selectedOSBase = ref('')
@@ -103,6 +103,7 @@ onMounted(() => {
   // 如果这里拿不到store中的数据, 应跳转回表格页
   console.log(performanceStore.comparationList)
  
+  componentVisible.value = true
   // todo:后续接入真实数据
   getDetail(3)
     .then(res => {

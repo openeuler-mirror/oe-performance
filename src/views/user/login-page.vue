@@ -49,7 +49,7 @@ const loginRequest = () => {
   userInfoStore.userLogin(loginForm.username, loginForm.password)
     .then(() => {
       ElMessage.success('登陆成功')
-      router.push('/normalBaseline/list')
+      router.push({ name: 'baseline-list' })
     }).catch((err) => {
       ElMessage.error(err.message)
     })

@@ -558,7 +558,7 @@
             <el-descriptions-item label="case result id">
               <router-link
                 class="work-load-detail"
-                :to="{ name:'workloadDetail' }"
+                :to="{ name:'baseline-workloadDetail' }"
                 ><span>查看详情</span>
               </router-link>
             </el-descriptions-item>
@@ -699,12 +699,13 @@ onMounted(async () => {
   // todo: 当获取不到Detail时（用户直接通过submit_id进入详情页），需要根据submit_id获取一下jobs并组织。
   detailData = performanceData[router.currentRoute.value.params.submit_id]
   console.log(detailData, detailData && detailData.arch) // 测试是否能拿到数据
-  
+  // 
   loading.value = true
   // todo: 请替换成真实数据
   let res = await getDetail(10)
   const { code, results } = res.data
   if (code === 200) {
+    console.log(results[0])
     state.detailInfo = results[0]
     loading.value = false
   }
