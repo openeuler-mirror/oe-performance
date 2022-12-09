@@ -55,7 +55,7 @@ import { ref,reactive,onMounted } from 'vue'
 import { getApplicationList } from '@/api/center/index.ts'
 import { Search } from '@element-plus/icons-vue'
 import { useRouter, useRoute } from 'vue-router'
-import  ApplicationTable  from '../components/application-table.vue'
+import  ApplicationTable  from './components/application-table.vue'
 import RePoUploader from '@/components/uploader/RePoUploader.vue'
 
 const router = useRouter()

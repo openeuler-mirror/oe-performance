@@ -53,7 +53,7 @@
        </el-table-column>
        <el-table-column fixed label="TaskID" width="110">
          <template #default="scope">
-             <router-link :to="`/submitTest/testTask/resultDetails/${scope.row.date}`">
+             <router-link :to="`/testTask/taskDetails/${scope.row.date}`">
                 <el-button link="" type="primary">
                 <span>{{ scope.row.date }}</span>
               </el-button>

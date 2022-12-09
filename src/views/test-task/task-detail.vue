@@ -118,7 +118,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { Result } from './interface'
-import TaskDoughnut from './components/TaskDoughnut.vue';
+import TaskDoughnut from './components/task-doughnut.vue';
 const resultName = ref('#29206 w3pGT1xdmCorhS099')
 
 

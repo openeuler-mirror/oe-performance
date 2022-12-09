@@ -111,7 +111,7 @@
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue'
-import exampleDrawer from './components/exampleDrawer.vue'
+import exampleDrawer from './components/test-case-drawer.vue'
 
 const radioModule = ref('unixbench')
 

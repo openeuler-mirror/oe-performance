@@ -91,7 +91,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'application/applicationList',
             name: 'applicationList',
-            component: () => import('@/views/user-center/list/user-list.vue'),
+            component: () => import('@/views/user-center/user-list/index.vue'),
             meta: {
               title: 'applicationList'
             }
@@ -99,7 +99,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'application/applicationProgress',
             name: 'applicationProgress',
-            component: () => import('@/views/user-center/progress/user-progress.vue'),
+            component: () => import('@/views/user-center/user-progress/index.vue'),
             meta: {
               title: 'applicationProgress'
             }
@@ -107,7 +107,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'approval/approveList',
             name: 'approveList',
-            component: () => import('@/views/user-center/list/user-list.vue'),
+            component: () => import('@/views/user-center/user-list/index.vue'),
             meta: {
               title: 'approveList'
             }
@@ -115,7 +115,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'approval/approvalprogress',
             name: 'approvalprogress',
-            component: () => import('@/views/user-center/progress/user-progress.vue'),
+            component: () => import('@/views/user-center/user-progress/index.vue'),
             meta: {
               title: 'approvalprogress'
             }
@@ -134,7 +134,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'taskList',
             name: 'taskList',
-            component: () => import('@/views/test/task-list.vue'),
+            component: () => import('@/views/test-task/task-list.vue'),
             meta: {
               title: 'taskList'
             }
@@ -142,7 +142,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'createTask',
             name: 'createTask',
-            component: () => import('@/views/test/create-task.vue'),
+            component: () => import('@/views/test-task/create-task.vue'),
             meta: {
               title: 'createTask'
             }
@@ -150,7 +150,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'taskDetails/:task_id',
             name: 'taskDetail',
-            component: () => import('@/views/test/task-detail.vue'),
+            component: () => import('@/views/test-task/task-detail.vue'),
             meta: {
               title: 'taskDetail'
             }
