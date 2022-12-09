@@ -33,33 +33,20 @@
             <template #title>
               <span>基础性能基线</span>
             </template>
-            <el-menu-item index="/normalBaseline/list">CPU</el-menu-item>
-            <el-menu-item index="/normalBaseline/list">内存</el-menu-item>
-            <el-menu-item index="/normalBaseline/list">存储</el-menu-item>
-            <el-menu-item index="/normalBaseline/list">网络</el-menu-item>
-            <el-menu-item index="/normalBaseline/list">基础库</el-menu-item>
+            <el-menu-item index="2-1">CPU</el-menu-item>
+            <el-menu-item index="2-2">内存</el-menu-item>
+            <el-menu-item index="2-3">存储</el-menu-item>
+            <el-menu-item index="2-4">网络</el-menu-item>
+            <el-menu-item index="2-5">基础库</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="3">
-            <template #title>
-              <span>对比检索</span>
-            </template>
-            <el-menu-item index="/comparativeSearch/basicPerformance">基础性能</el-menu-item>
-            <el-menu-item index="3-2">解决方案</el-menu-item>
-          </el-sub-menu>
-          <el-sub-menu index="4">
-            <template #title>
-              <span>提交测试</span>
-            </template>
-              <el-menu-item index="/submitTest/testTask">测试任务</el-menu-item>
-              <el-menu-item index="/submitTest/cpuTest">CPU</el-menu-item>
-          </el-sub-menu>
-          <el-sub-menu index="4">
             <template #title>
               <span>我的申请</span>
             </template>
             <el-menu-item index="/userCenter/application/applicationList">所有申请</el-menu-item>
+            <el-menu-item index="3-2">新建申请</el-menu-item>
           </el-sub-menu>
-          <el-sub-menu index="5">
+          <el-sub-menu index="4">
             <template #title>
               <span>我的审批</span>
             </template>
@@ -94,65 +81,59 @@ const userLogout = () => {
 
 </script>
 <style scoped lang="scss">
-$header-height: 56px;
-$breadcrumb-nav-height: 32px;
-.basic-layout-header {
-  display: flex;
-  height: $header-height;
-  line-height: $header-height;
-  background: var(--oe-perf-color-primary);
-  color: var(--oe-perf-font-color);
-  justify-content: space-between;
-  .header-left {
+  $header-height: 56px;
+  $breadcrumb-nav-height: 32px;
+  .basic-layout-header {
     display: flex;
     height: $header-height;
     line-height: $header-height;
     background: var(--oe-perf-color-primary);
     color: var(--oe-perf-font-color);
     justify-content: space-between;
-    .logo {
-      width: 250px;
-      font-size: 24px;
-      padding-left: 50px;
+    .header-left {
+      display: flex;
+      .logo {
+        width: 250px;
+        font-size: 24px;
+        padding-left: 50px;
+      }
+    }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      padding-left: var(--oe-perf-padding);
+      .nav-item {
+        height: 36px;
+        line-height: 36px;
+        cursor: pointer;
+        &:not(:first-child) {
+          margin-left: 20px;
+        }
+        &.active {
+          border-bottom: 2px solid var(--oe-perf-font-color);
+        }
+      }
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      .logout-btn {
+        margin-left: 10px;
+        cursor: pointer;
+      }
     }
   }
-  .header-right {
-    display: flex;
-    align-items: center;
-    .logout-btn {
-      margin-left: 10px;
-      cursor: pointer;
-    }
-  }
-  .header-nav {
-    display: flex;
-    align-items: center;
+  .breadcrumb-nav {
+    height: $breadcrumb-nav-height;
+    line-height: $breadcrumb-nav-height;
     padding-left: var(--oe-perf-padding);
-    .nav-item {
-      height: 36px;
-      line-height: 36px;
-      cursor: pointer;
-      &:not(:first-child) {
-        margin-left: 20px;
-      }
-      &.active {
-        border-bottom: 2px solid var(--oe-perf-font-color);
-      }
-    }
   }
-  
-}
-.breadcrumb-nav {
-  height: $breadcrumb-nav-height;
-  line-height: $breadcrumb-nav-height;
-  padding-left: var(--oe-perf-padding);
-}
-.el-main {
-  padding: 0;
-}
-.basic-layout-content {
-  min-height: calc(100vh - $header-height - $breadcrumb-nav-height);
-  background: var(--oe-perf-bg-layout);
-  padding: var(--oe-perf-padding);
-}
+  .el-main {
+    padding: 0;
+  }
+  .basic-layout-content {
+    height: calc(100vh - $header-height - $breadcrumb-nav-height);
+    background: var(--oe-perf-bg-layout);
+    padding: var(--oe-perf-padding);
+  }
 </style>
