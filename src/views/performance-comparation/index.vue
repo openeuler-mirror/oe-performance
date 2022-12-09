@@ -61,9 +61,15 @@
 </template>
   
 <script setup lang="ts">
-import CompareChart from './components/compare-chart.vue'
-import { getDetail } from '@/api/detail'
 import { onMounted, reactive, ref } from 'vue'
+import CompareChart from './components/compare-chart.vue'
+
+import { usePerformanceData } from '@/stores/performanceData'
+
+import { getDetail } from '@/api/detail'
+
+const performanceStore= usePerformanceData()
+const camparationList = ref([])
 
 let componentVisible = ref(true)
 let modalVisible = ref(false)
@@ -85,6 +91,11 @@ let tableData2 = reactive([
 ])
 
 onMounted(() => {
+  // 获取store中的输入数据，并赋值给一个新变量
+  // 如果这里拿不到store中的数据, 应跳转回表格页
+  console.log(performanceStore.comparationList)
+ 
+  // todo:后续接入真实数据
   getDetail(3)
     .then(res => {
       res.data.results.forEach((item:any) => {

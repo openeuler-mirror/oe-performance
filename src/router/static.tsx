@@ -70,17 +70,17 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             }
           },
           {
-            path: '/normalBaseline/detail/:guid',
+            path: '/normalBaseline/detail/:submit_id',
             name: 'detail',
-            component: () => import('@/views/detail/baseline-detail.vue'),
+            component: () => import('@/views/performance-detail/index.vue'),
             meta: {
               title: 'detail'
             }
           },
           {
-            path: '/normalBaseline/detail/:guid/workloadDetail',
+            path: '/normalBaseline/detail/:submit_id/workloadDetail',
             name: 'workloadDetail',
-            component: () => import('@/views/detail/workload-detail.vue'),
+            component: () => import('@/views/performance-detail/workload-detail.vue'),
             meta: {
               title: 'workloadDetail'
             }
@@ -98,7 +98,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'basicPerformance',
             name: 'basicPerformance',
-            component: () => import('@/views/compare/comparation-basic-performance.vue'),
+            component: () => import('@/views/performance-comparation/index.vue'),
             meta: {
               title: 'basicPerformance'
             }
