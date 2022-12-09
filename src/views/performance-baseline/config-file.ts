@@ -700,16 +700,16 @@ export const sceneConfig = {
       prop: 'basic'
     }
   ],
-  contrast: [
-    {
-      label: '基础性能',
-      prop: 'basicPerformance'
-    },
-    {
-      label: '解决方案',
-      prop: 'solution'
-    }
-  ]
+  // contrast: [
+  //   {
+  //     label: '基础性能',
+  //     prop: 'basicPerformance'
+  //   },
+  //   {
+  //     label: '解决方案',
+  //     prop: 'solution'
+  //   }
+  // ]
 }
 
 export interface configItem {

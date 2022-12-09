@@ -87,11 +87,20 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         children: [
           {
             path: 'basicPerformance',
-            name: 'basicPerformance',
+            name: 'performanceCompare',
             component: () =>
               import('@/views/performance-comparation/index.vue'),
             meta: {
               title: 'basicPerformance'
+            }
+          },
+          {
+            path: 'solution',
+            name: 'solutionCompare',
+            component: () =>
+              import('@/views/performance-comparation/index.vue'),
+            meta: {
+              title: 'solution'
             }
           }
         ]
@@ -139,45 +148,45 @@ const asyncRoutes: Array<RouteRecordRaw> = [
         ]  
       },
       {
-        path: '/submitTest',
-        name: 'submitTest',
+        path: '/testTask',
+        name: 'testTask',
         component: RouteView,
         meta: {
-          title: 'submitTest'
+          title: 'testTask'
         },
         children: [
           {
-            path: '/submitTest/cpuTest',
-            name: 'cpuTest',
-            component: () => import('@/views/test/CpuTest.vue'),
+            path: '/testTask/taskList',
+            name: 'taskList',
+            component: () => import('@/views/test/task-list.vue'),
             meta: {
-              title: 'cpuTest'
+              title: 'taskList'
             }
           },
           {
-            path: '/submitTest/testTask',
-            name: 'testTask',
-            component: () => import('@/views/test/TestTask.vue'),
+            path: '/testTask/createTask',
+            name: 'createTask',
+            component: () => import('@/views/test/create-task.vue'),
             meta: {
-              title: 'testTask'
+              title: 'createTask'
             }
           },
           {
             path: '/submitTest/testTask/resultDetails/:task_id',
-            name: 'resultDetails',
-            component: () => import('@/views/test/ResultDetails.vue'),
+            name: 'taskDetail',
+            component: () => import('@/views/test/task-detail.vue'),
             meta: {
-              title: 'resultDetails'
+              title: 'taskDetail'
             }
           },
         ]
       }
     ]
   },
-  // {
-  //   path: '/:path(.*)*',
-  //   redirect: '/404'
-  // },
+  {
+    path: '/:path(.*)*',
+    redirect: '/404'
+  },
   {
     path: '/404',
     name: 'notFound',

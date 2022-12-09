@@ -47,31 +47,27 @@
             <template #title>
               <span>对比检索</span>
             </template>
-            <el-menu-item
-              v-for="(item, index) in sceneConfig.contrast"
-              :key="index"
-              :index="item.prop"
-              >{{ item.label }}</el-menu-item
-            >
+              <el-menu-item index="performanceCompare">基础性能</el-menu-item>
+              <el-menu-item index="solutionCompare">解决方案</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="4">
             <template #title>
               <span>提交测试</span>
             </template>
-              <el-menu-item index="/submitTest/testTask">测试任务</el-menu-item>
-              <el-menu-item index="/submitTest/cpuTest">CPU</el-menu-item>
-          </el-sub-menu>
-          <el-sub-menu index="4">
-            <template #title>
-              <span>我的申请</span>
-            </template>
-            <el-menu-item index="/userCenter/application/applicationList">所有申请</el-menu-item>
+              <el-menu-item index="taskList">测试任务</el-menu-item>
+              <el-menu-item index="createTask">提交测试</el-menu-item>
           </el-sub-menu>
           <el-sub-menu index="5">
             <template #title>
+              <span>我的申请</span>
+            </template>
+            <el-menu-item index="applicationList">所有申请</el-menu-item>
+          </el-sub-menu>
+          <el-sub-menu index="6">
+            <template #title>
               <span>我的审批</span>
             </template>
-            <el-menu-item index="/userCenter/approval/approveList">所有审批</el-menu-item>
+            <el-menu-item index="approveList">所有审批</el-menu-item>
           </el-sub-menu>
         </el-menu>
       </el-aside>
@@ -107,15 +103,16 @@ const userLogout = () => {
     })
 }
 
-const handleChangeScene = (index: string) => {
-  // if (index.indexOf('normalBaseline') > -1) {
-  router.replace({
-    path: '/normalBaseline/list',
-    query: { ...route.query, scene: index }
-  })
-  // } else {
-  //   router.push(index)
-  // }
+const handleChangeScene = (index: string, indexPath: [subMenuIndex: string, menuItemIndex: string]) => {
+  // 只有前两项才需要控制参数
+  if (indexPath[0] === '1' || indexPath[0] === '2') {
+    router.replace({
+      path: '/normalBaseline/list',
+      query: { ...route.query, scene: index }
+    })
+  } else {
+    router.push({ name: index })
+  }
   
 }
 
@@ -123,7 +120,7 @@ onMounted(() => {
   if (route.query.scene) {
     currentKey.value = route.query.scene as string
   } else {
-    handleChangeScene('bigData')
+    currentKey.value = route.name
   }
 })
 
