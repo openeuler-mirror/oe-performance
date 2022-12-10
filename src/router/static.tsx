@@ -1,4 +1,4 @@
-import { RouteRecordRaw, RouterView } from 'vue-router'
+import { RouteRecordRaw } from 'vue-router'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -76,6 +76,11 @@ const asyncRoutes: Array<RouteRecordRaw> = [
                 }
               }
             ]
+          },
+          {
+            path: 'dataAccess',
+            name: 'dataAccess',
+            component: import('@/views/data-access/index.vue'),
           }
         ]
       },
