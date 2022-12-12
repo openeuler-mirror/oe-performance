@@ -3,6 +3,14 @@ export const testParamsMap = {
     'pp.stream.nr_threads',
     'pp.stream.array_size',
     'pp.stream.omp'
+  ],
+  unixbench: [
+    'pp.unixbench.nr_task'
+  ],
+  lmbench: [
+    'pp.lmbench.mode',
+    'pp.lmbench.nr_thread',
+    'pp.lmbench.test_memory_size'
   ]
 }
 
@@ -12,6 +20,62 @@ export const kpiListMap = {
     'stream.triad_bandwidth_MBps',
     'stream.add_bandwidth_MBps',
     'stream.scale_bandwidth_MBps'
+  ],
+  unixbench: [
+    'unixbench.Dhrystone_2_using_register_variables',
+    'unixbench.Double-Precision_Whetstone',
+    'unixbench.Execl_Throughput',
+    'unixbench.File_Copy_1024_bufsize_2000_maxblocks',
+    'unixbench.File_Copy_256_bufsize_500_maxblocks',
+    'unixbench.File_Copy_4096_bufsize_8000_maxblocks',
+    'unixbench.Pipe_Throughput',
+    'unixbench.Pipe-based_Context_Switching',
+    'unixbench.Process_Creation',
+    'unixbench.Shell_Scripts_(1_concurrent)',
+    'unixbench.Shell_Scripts_(8_concurrent)',
+    'unixbench.System_Call_Overhead',
+    'unixbench.System_Benchmarks_Index_Score'
+  ],
+  lmbench: [
+    'lmbench.syscall.syscall.latency.us',
+    'lmbench.syscall.stat.latency.us',
+    'lmbench.syscall.open/close.latency.us',
+    'lmbench.null_io',
+    'lmbench.Process.fork+exit.latency.us',
+    'lmbench.Process.fork+execve.latency.us',
+    'lmbench.Process.fork+/bin/sh.latency.us',
+    'lmbench3.Select.100tcp.latency.us',
+    'lmbench.sig_inst',
+    'lmbench.sig_hndl',
+    'lmbench.PIPE.latency.us',
+    'lmbench.AF_UNIX.sock.stream.latency.us',
+    'lmbench.UDP.usinglocalhost.latency.us',
+    'lmbench.TCP.localhost.latency',
+    'lmbench.CONNECT.localhost.latency.us',
+    'lmbench.PIPE.bandwidth.MB/sec',
+    'lmbench.AF_UNIX.sock.stream.bandwidth.MB/sec',
+    'lmbench.TCP.socket.bandwidth.10MB.MB/sec',
+    'lmbench.FILE.read.bandwidth.MB/sec',
+    'lmbench.MMAP.read.bandwidth.MB/sec',
+    'lmbench.BCOPY.libc.bandwidth.MB/sec',
+    'lmbench.BCOPY.unrolled.bandwidth.MB/sec',
+    'lmbench.BCOPY.memory_read.bandwidth.MB/sec',
+    'lmbench.BCOPY.memory_write.bandwidth.MB/sec',
+    'lmbench.CTX.2P.0K.latency.us',
+    'lmbench.CTX.2P.16K.latency.us',
+    'lmbench.CTX.2P.64K.latency.us',
+    'lmbench.CTX.8P.16K.latency.us',
+    'lmbench.CTX.8P.64K.latency.us',
+    'lmbench.CTX.16P.16K.latency.us',
+    'lmbench.CTX.16P.64K.latency.us',
+    'lmbench.Mmap_Latency',
+    'lmbench.Prot_Fault',
+    'lmbench.Pagefaults.ms',
+    'lmbench.Select.100fd.latency.us',
+    'lmbench.L1_$',
+    'lmbench.L2_$',
+    'lmbench.Main_mem',
+    'lmbench.Rand_mem'
   ]
 }
 
@@ -35,6 +99,254 @@ export const tableColumnMap = {
         {
           label: 'scale',
           prop: 'stream.scale_bandwidth_MBps'
+        },
+      ]
+    }
+  ],
+  unixbench: [
+    {
+      tableName: '单核',
+      dataMode: 'byIndex',
+      column: [
+        {
+          label: 'Dhrystone_2_using_register_variables',
+          prop: 'unixbench.Dhrystone_2_using_register_variables'
+        },
+        {
+          label: 'Double-Precision_Whetstone',
+          prop: 'unixbench.Double-Precision_Whetstone'
+        },
+        {
+          label: 'Execl_Throughput',
+          prop: 'unixbench.Execl_Throughput'
+        },
+        {
+          label: 'File_Copy_1024_bufsize_2000_maxblocks',
+          prop: 'unixbench.File_Copy_1024_bufsize_2000_maxblocks'
+        },
+        {
+          label: 'File_Copy_256_bufsize_500_maxblocks',
+          prop: 'unixbench.File_Copy_256_bufsize_500_maxblocks'
+        },
+        {
+          label: 'File_Copy_4096_bufsize_8000_maxblocks',
+          prop: 'unixbench.File_Copy_4096_bufsize_8000_maxblocks'
+        },
+        {
+          label: 'Pipe_Throughput',
+          prop: 'unixbench.Pipe_Throughput'
+        },
+        {
+          label: 'Pipe-based_Context_Switching',
+          prop: 'unixbench.Pipe-based_Context_Switching'
+        },
+        {
+          label: 'Process_Creation',
+          prop: 'unixbench.Process_Creation'
+        },
+        {
+          label: 'Shell_Scripts_(1_concurrent)',
+          prop: 'unixbench.Shell_Scripts_(1_concurrent)'
+        },
+        {
+          label: 'Shell_Scripts_(8_concurrent)',
+          prop: 'unixbench.Shell_Scripts_(8_concurrent)'
+        },
+        {
+          label: 'System_Call_Overhead',
+          prop: 'unixbench.System_Call_Overhead'
+        },
+        {
+          label: 'System_Benchmarks_Index_Score',
+          prop: 'unixbench.System_Benchmarks_Index_Score'
+        },
+      ]
+    }
+  ],
+  lmbench: [
+    {
+      tableName: 'Processor_Processes',
+      column: [
+        {
+          label: 'syscall.syscall.latency.us',
+          prop: 'lmbench.syscall.syscall.latency.us'
+        },
+        {
+          label: 'syscall.stat.latency.us',
+          prop: 'lmbench.syscall.stat.latency.us'
+        },
+        {
+          label: 'syscall.open/close.latency.us',
+          prop: 'lmbench.syscall.open/close.latency.us'
+        },
+        {
+          label: 'null_io',
+          prop: 'lmbench.null_io'
+        },
+        {
+          label: 'Process.fork+exit.latency.us',
+          prop: 'lmbench.Process.fork+exit.latency.us'
+        },
+        {
+          label: 'Process.fork+execve.latency.us',
+          prop: 'lmbench.Process.fork+execve.latency.us'
+        },
+        {
+          label: 'Process.fork+/bin/sh.latency.us',
+          prop: 'lmbench.Process.fork+/bin/sh.latency.us'
+        },
+        {
+          label: 'Select.100tcp.latency.us',
+          prop: 'lmbench3.Select.100tcp.latency.us'
+        },
+        {
+          label: 'sig_inst',
+          prop: 'lmbench.sig_inst'
+        },
+        {
+          label: 'sig_hndl',
+          prop: 'lmbench.sig_hndl'
+        },
+      ]
+    },
+    {
+      tableName: 'local_latencies',
+      column: [
+        {
+          label: 'PIPE.latency.us',
+          prop: 'lmbench.PIPE.latency.us'
+        },
+        {
+          label: 'AF_UNIX.sock.stream.latency.us',
+          prop: 'lmbench.AF_UNIX.sock.stream.latency.us'
+        },
+        {
+          label: 'UDP.usinglocalhost.latency.us',
+          prop: 'lmbench.UDP.usinglocalhost.latency.us'
+        },
+        {
+          label: 'TCP.localhost.latency',
+          prop: 'lmbench.TCP.localhost.latency'
+        },
+        {
+          label: 'CONNECT.localhost.latency.us',
+          prop: 'lmbench.CONNECT.localhost.latency.us'
+        },
+      ]
+    },
+    {
+      tableName: 'local_bandwidths',
+      column: [
+        {
+          label: 'PIPE.bandwidth.MB/sec',
+          prop: 'lmbench.PIPE.bandwidth.MB/sec'
+        },
+        {
+          label: 'AF_UNIX.sock.stream.bandwidth.MB/sec',
+          prop: 'lmbench.AF_UNIX.sock.stream.bandwidth.MB/sec'
+        },
+        {
+          label: 'TCP.socket.bandwidth.10MB.MB/sec',
+          prop: 'lmbench.TCP.socket.bandwidth.10MB.MB/sec'
+        },
+        {
+          label: 'FILE.read.bandwidth.MB/sec',
+          prop: 'lmbench.FILE.read.bandwidth.MB/sec'
+        },
+        {
+          label: 'MMAP.read.bandwidth.MB/sec',
+          prop: 'lmbench.MMAP.read.bandwidth.MB/sec'
+        },
+        {
+          label: 'BCOPY.libc.bandwidth.MB/sec',
+          prop: 'lmbench.BCOPY.libc.bandwidth.MB/sec'
+        },
+        {
+          label: 'BCOPY.unrolled.bandwidth.MB/sec',
+          prop: 'lmbench.BCOPY.unrolled.bandwidth.MB/sec'
+        },
+        {
+          label: 'BCOPY.memory_read.bandwidth.MB/sec',
+          prop: 'lmbench.BCOPY.memory_read.bandwidth.MB/sec'
+        },
+        {
+          label: 'BCOPY.memory_write.bandwidth.MB/sec',
+          prop: 'lmbench.BCOPY.memory_write.bandwidth.MB/sec'
+        },
+      ]
+    },
+    {
+      tableName: 'Context_switching_ctxsw',
+      column: [
+        {
+          label: 'CTX.2P.0K.latency.us',
+          prop: 'lmbench.CTX.2P.0K.latency.us'
+        },
+        {
+          label: 'CTX.2P.16K.latency.us',
+          prop: 'lmbench.CTX.2P.16K.latency.us'
+        },
+        {
+          label: 'CTX.2P.64K.latency.us',
+          prop: 'lmbench.CTX.2P.64K.latency.us'
+        },
+        {
+          label: 'CTX.8P.16K.latency.us',
+          prop: 'lmbench.CTX.8P.16K.latency.us'
+        },
+        {
+          label: 'CTX.8P.64K.latency.us',
+          prop: 'lmbench.CTX.8P.64K.latency.us'
+        },
+        {
+          label: 'CTX.16P.16K.latency.us',
+          prop: 'lmbench.CTX.16P.16K.latency.us'
+        },
+        {
+          label: 'CTX.16P.64K.latency.us',
+          prop: 'lmbench.CTX.16P.64K.latency.us'
+        },
+      ]
+    },
+    {
+      tableName: 'File_&_VM_latencies',
+      column: [
+        {
+          label: 'Mmap_Latency',
+          prop: 'lmbench.Mmap_Latency'
+        },
+        {
+          label: 'Prot_Fault',
+          prop: 'lmbench.Prot_Fault'
+        },
+        {
+          label: 'Pagefaults.ms',
+          prop: 'lmbench.Pagefaults.ms'
+        },
+        {
+          label: 'Select.100fd.latency.us',
+          prop: 'lmbench.Select.100fd.latency.us'
+        },
+      ]
+    },
+    {
+      tableName: 'Memory_latencies',
+      column: [
+        {
+          label: 'L1_$',
+          prop: 'lmbench.L1_$'
+        },
+        {
+          label: 'L2_$',
+          prop: 'lmbench.L2_$'
+        },
+        {
+          label: 'Main_mem',
+          prop: 'lmbench.Main_mem'
+        },
+        {
+          label: 'Rand_mem',
+          prop: 'lmbench.Rand_mem'
         },
       ]
     }

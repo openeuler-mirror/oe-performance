@@ -642,7 +642,6 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import WorkloadTableSection from './workload-table-section.vue'
 import { BaselineDetail } from './interface'
 
 import { usePerformanceData } from '@/stores/performanceData'

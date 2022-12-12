@@ -715,7 +715,7 @@ export interface configItem {
 
 export const config: configItem = {
   bigData: {
-    testSubassembly: ['unixbench', 'lmbench3', 'stream'],
+    testSubassembly: ['unixbench', 'lmbench', 'stream'],
     searchParamList: optionConfig,
     column: columnConfig
   },

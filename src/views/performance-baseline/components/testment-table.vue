@@ -319,12 +319,12 @@ const getAllJobsData = (idList:any[]) => {
       query: {
         size: 10000, // 取全量
         // 只取必要的字段
-        _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
-          'os', 'os_version', 'arch', 'kernel',
-          'testbox', 'tbox_group',
-          'pp', 'stats',
-          'job_state', 'time'
-        ],
+        // _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
+        //   'os', 'os_version', 'arch', 'kernel',
+        //   'testbox', 'tbox_group',
+        //   'pp', 'stats',
+        //   'job_state', 'time'
+        // ],
         query: {
           term: {
             submit_id: idObj.submit_id
@@ -332,8 +332,8 @@ const getAllJobsData = (idList:any[]) => {
         }
       },
     }).then((res) => {      
-      const resultObj = combineJobs(res.data.hits.hits)
-      performanceStore.setPerformanceData(idObj.submit_id,resultObj)
+      const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
+      performanceStore.setPerformanceData(idObj.submit_id,resultObj) // save submit data to store
       tempArr[idx] = resultObj
     }).catch((err) => {
       ElMessage({

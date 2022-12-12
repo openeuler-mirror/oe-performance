@@ -53,10 +53,12 @@ const getAllData = (params: searchParams) => {
           // 'testbox': params.testbox,
           // 'memory': params.memory
           must: matchCases,
-          // must: [
-          //   { match: {suite: 'unixbench'} },
-          // ]
-        }
+          // "must_not":{
+          //   "exists":{
+          //     "field":"errid"
+          //   }
+          // }
+        },
       },
       aggs: {
         jobs_terms: {

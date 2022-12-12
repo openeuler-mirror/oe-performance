@@ -43,7 +43,7 @@ const getTableData = (groupData) => {
       const kpiValue = groupData[ppKey][kpi].reduce(function(prev, curr){
         return prev + curr
       })/groupData[ppKey][kpi].length // 获取kpi的平均值
-      ppObj[kpi] = kpiValue
+      ppObj[kpi] = kpiValue.toFixed(2)
     })
     ppObj['li-testcase'] = ppKey
     resultArr.push(ppObj)
