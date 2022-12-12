@@ -183,18 +183,19 @@ ejobs样例(类YAML伪代码):
 
 	for each suite:
 	for ejob in ejobs[suite]:
+		program = suite  # 通常一个job suite只跑一个workload program
 		copy ejob to a new job
-		job.testcase = job.test
+		job.pp.$program.testcase = job.pp.$program.test
 
 		delete all (kpis in kpiMaps/kpiMapFuncs) from ejob
 		for each matching kpi in kpiMaps/kpiMapFuncs:
 			copy job to a new tjob
-			tjob.testcase = map($kpi).testcase
+			tjob.pp.$suite.testcase = map($kpi).testcase
 			tjob["stats.$suite.$(map($kpi).kpi)"] = ejob["stats.$suite.$kpi"]
 			tjobs[suite] += tjob
 
 以上映射之后的tjobs所含对象数量会比ejobs多
-ejob.test会被转为tjob.testcase
+ejob.pp.$program.test会被转为tjob.pp.$program.testcase
 后续的各页面呈现，统一使用tjobs。
 
 ## UI需求: URL可分享
