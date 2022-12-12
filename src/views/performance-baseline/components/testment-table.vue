@@ -150,6 +150,8 @@ import { getPerformanceData } from '@/api/performance'
 // import { allColumns } from '../test-data'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 
+import { combineJobs } from '@/views/data-access/utils.js'
+
 export interface Column {
   label: string
   prop: string
@@ -315,7 +317,14 @@ const getAllJobsData = (idList:any[]) => {
     getPerformanceData({
       index: 'jobs',
       query: {
-        size: 10000, // 取全量
+        size: 5, // 取全量
+        // 只取必要的字段
+        _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
+          'os', 'os_version', 'arch', 'kernel',
+          'testbox', 'tbox_group',
+          'pp', 'stats',
+          'job_state', 'time'
+        ],
         query: {
           term: {
             submit_id: idObj.submit_id
@@ -340,16 +349,6 @@ const getAllJobsData = (idList:any[]) => {
     })
   })
   return tempArr
-}
-
-const combineJobs = (jobList:any[]) => {
-  // 在这里实现jobs的混合和映射逻辑，生成完整的一条submit_id对象
-  // 暂时取第一条数据,不做整理
-  const item = jobList[0]._source
-  item['submit_time'] = new Date(item['submit_time']).toLocaleString()
-  // 组合参数
-  item['os_release'] = `${item['os']} ${item['os_version']}`
-  return item
 }
 
 const idList = ref(<any>[])
