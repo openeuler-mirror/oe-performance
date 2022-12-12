@@ -37,17 +37,15 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             component: () => import('@/views/performance-detail/index.vue'),
             meta: {
               title: 'detail'
-            },
-            children: [
-              {
-                path: 'workloadDetail',
-                name: 'baseline-workloadDetail',
-                component: () => import('@/views/performance-detail/workload-detail.vue'),
-                meta: {
-                  title: 'workloadDetail'
-                }
-              }
-            ]
+            }
+          },
+          {
+            path: 'detail/:submit_id/workloadDetail',
+            name: 'baseline-workloadDetail',
+            component: () => import('@/views/performance-detail/workload-table-section.vue'),
+            meta: {
+              title: 'workloadDetail'
+            }
           },
           {
             path: 'comparativeSearch',

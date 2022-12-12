@@ -317,7 +317,7 @@ const getAllJobsData = (idList:any[]) => {
     getPerformanceData({
       index: 'jobs',
       query: {
-        size: 5, // 取全量
+        size: 10000, // 取全量
         // 只取必要的字段
         _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
           'os', 'os_version', 'arch', 'kernel',

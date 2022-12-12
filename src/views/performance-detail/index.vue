@@ -635,14 +635,14 @@
         </section>
       </div></el-card
     >
-    <WorkloadTableSection :groupData="detailData.groupData" :suite="detailData.suite"></WorkloadTableSection>
+    <!--<WorkloadTableSection :groupData="detailData.groupData" :suite="detailData.suite"></WorkloadTableSection>-->
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import WorkloadTableSection from './components/workload-table-section.vue'
+import WorkloadTableSection from './workload-table-section.vue'
 import { BaselineDetail } from './interface'
 
 import { usePerformanceData } from '@/stores/performanceData'

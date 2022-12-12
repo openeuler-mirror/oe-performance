@@ -10,13 +10,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import TestmentTable from './components/testment-table.vue'
 import SearchPannel from './components/search-pannel.vue'
 
-import { getPerformanceData, getTestBoxes } from '@/api/performance'
+import { getPerformanceData } from '@/api/performance'
 
 const data = ref<any[]>([])
 const submitDataLoading = ref(false)
@@ -27,7 +27,7 @@ const getAllData = (params: searchParams) => {
   submitDataLoading.value = true
 
   const matchCases = []
-
+  // 组织选择参数为es QUERY的请求格式
   Object.keys(params).forEach(paramKey => {
     if (params[paramKey]) {
       const matchObj = {}
@@ -40,7 +40,7 @@ const getAllData = (params: searchParams) => {
 
   matchCases.push({ match: {job_state: 'finished'} })
 
-  // 获取unixbench下的submitID list
+  // 获取选择的套件下的submitID list
   getPerformanceData({
     'index': 'jobs',
     'query': {
@@ -151,10 +151,6 @@ const getSubmitId = () => {
       submitDataLoading.value = false
     })
 }
-
-onMounted(() => {
-  getTestBoxes()
-})
 </script>
 
 <style></style>

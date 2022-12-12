@@ -76,13 +76,14 @@ const e2tConverter = (ejobs) => {
     Object.keys(kpiMaps['stream']).forEach(kpi => {
       const tempJob = JSON.parse(JSON.stringify(ejob))
       tempJob.testcase = kpiMaps['stream'][kpi].testcase // 列名
-      tempJob[`pp.${'stream'}.${kpiMaps['stream'][kpi].kpi}`] = ejob[`pp.${'stream'}.${kpi}`]
+      tempJob[`stats.${'stream'}.${kpiMaps['stream'][kpi].kpi}`] = ejob[`stats.${'stream'}.${kpi}`]
     })
   })
 }
 
 onMounted(() => {
   // 获取主机列表和信息
+  // todo: 后续删除。目前已将testbox的请求切换到baseline-layout中进行公共请求。请求结果存到store中。
   getTestBoxes().then(res => {
     const testboxListRaw = res.data.hits.hits.map(rawItem => rawItem._source)
     testboxListRaw.forEach(testboxItem => {

@@ -35,7 +35,7 @@
       </el-menu>
     </el-aside>
     <el-main>
-      <div class="breadcrumb-nav">面包屑/导航</div>
+      <div class="breadcrumb-nav" @click="router.go(-1)">&lt;&lt;返回</div>
       <div class="sub-layout-content">
         <router-view></router-view>
       </div>
@@ -43,9 +43,14 @@
   </el-container>
 </template>
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { sceneConfig } from '@/views/performance-baseline/config-file'
 import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useTestboxStore } from '@/stores/performanceData'
+import { sceneConfig } from '@/views/performance-baseline/config-file'
+
+import { getTestBoxes } from '@/api/performance'
+
+const testboxStore = useTestboxStore()
 
 const router = useRouter()
 const route = useRoute()
@@ -64,12 +69,23 @@ const handleChangeScene = (index: string, indexPath: [subMenuIndex: string, menu
   
 }
 
+// 获取主机列表和信息
+const getTestboxData = () => {
+  getTestBoxes().then(res => {
+    const testboxListRaw = res.data.hits.hits.map(rawItem => rawItem._source)
+    testboxStore.setTestboxData(testboxListRaw)
+    console.log('ok: ', testboxStore.testboxMap)
+  })
+}
+
 onMounted(() => {
   if (route.query.scene) {
     currentKey.value = route.query.scene as string
   } else {
     currentKey.value = String(route.name)
   }
+
+  getTestboxData()
 })
 
 </script>
