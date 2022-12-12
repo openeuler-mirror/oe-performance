@@ -190,7 +190,7 @@ ejobs样例(类YAML伪代码):
 		for each matching kpi in kpiMaps/kpiMapFuncs:
 			copy job to a new tjob
 			tjob.testcase = map($kpi).testcase
-			tjob["pp.$suite.$(map($kpi).kpi)"] = ejob["pp.$suite.$kpi"]
+			tjob["stats.$suite.$(map($kpi).kpi)"] = ejob["stats.$suite.$kpi"]
 			tjobs[suite] += tjob
 
 以上映射之后的tjobs所含对象数量会比ejobs多
