@@ -172,7 +172,7 @@ jobModel = {
                 },
 
                 // 测试套特定param，以pp.打头
-                'pp.fio.rw': {
+                'pp.fio-setup-basic.rw': {
                         'read':         '顺序读',
                         'write':        '顺序写',
                         'rw':           '顺序混合读写',
