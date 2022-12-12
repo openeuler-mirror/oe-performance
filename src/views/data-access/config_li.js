@@ -14,3 +14,29 @@ export const kpiListMap = {
     'stream.scale_bandwidth_MBps'
   ]
 }
+
+export const tableColumnMap = {
+  stream: [
+    {
+      tableName: 'Function',
+      column: [
+        {
+          label: 'copy',
+          prop: 'stream.copy_bandwidth_MBps'
+        },
+        {
+          label: 'triad',
+          prop: 'stream.triad_bandwidth_MBps'
+        },
+        {
+          label: 'add',
+          prop: 'stream.add_bandwidth_MBps'
+        },
+        {
+          label: 'scale',
+          prop: 'stream.scale_bandwidth_MBps'
+        },
+      ]
+    }
+  ]
+}

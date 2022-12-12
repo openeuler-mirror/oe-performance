@@ -203,8 +203,8 @@ const checkAllColumn = ref(true)
 const selectedTableRows = ref(<{}[]>[])
 
 const currentPage = ref(1)
-const pageSize = ref(10)
-const pageSizes = ref([] as number[])
+const pageSize = ref(5)
+const pageSizes = ref([10, 20, 50])
 const total = ref(1)
 const small = ref(false)
 const background = ref(false)
@@ -359,9 +359,9 @@ watchEffect(() => {
   // 数据分页
   idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
   total.value = props.dataList.length
-  for (let i = 0; total.value > i * 10; i++) {
-    pageSizes.value.push((i + 1) * 10)
-  }
+  // for (let i = 0; total.value > i * 10; i++) {
+  //   pageSizes.value.push((i + 1) * 10)
+  // }
 })
 
 // 当前页数据变化时，获取jobs数据

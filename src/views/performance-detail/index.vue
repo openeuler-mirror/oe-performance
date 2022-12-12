@@ -635,12 +635,14 @@
         </section>
       </div></el-card
     >
+    <WorkloadTableSection :groupData="detailData.groupData" :suite="detailData.suite"></WorkloadTableSection>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import WorkloadTableSection from './components/workload-table-section.vue'
 import { BaselineDetail } from './interface'
 
 import { usePerformanceData } from '@/stores/performanceData'
@@ -650,7 +652,7 @@ import { getDetail } from '@/api/detail'
 const router = useRouter()
 const { performanceData } = usePerformanceData()
 
-let detailData = reactive({})
+const detailData = ref({})
 
 let state = reactive({
   detailInfo: {} as BaselineDetail
@@ -697,8 +699,8 @@ const handlerCollapse = (flag: string) => {
 
 onMounted(async () => {
   // todo: 当获取不到Detail时（用户直接通过submit_id进入详情页），需要根据submit_id获取一下jobs并组织。
-  detailData = performanceData[router.currentRoute.value.params.submit_id]
-  console.log(detailData, detailData && detailData.arch) // 测试是否能拿到数据
+  detailData.value = performanceData[router.currentRoute.value.params.submit_id]
+  console.log('datailData', detailData.value) // 测试是否能拿到数据
   // 
   loading.value = true
   // todo: 请替换成真实数据
