@@ -11,6 +11,10 @@ export const testParamsMap = {
     'pp.lmbench.mode',
     'pp.lmbench.nr_thread',
     'pp.lmbench.test_memory_size'
+  ],
+  netperf: [
+    'pp.netperf.test',
+    'pp.netperf.send_size'
   ]
 }
 
@@ -76,7 +80,17 @@ export const kpiListMap = {
     'lmbench.L2_$',
     'lmbench.Main_mem',
     'lmbench.Rand_mem'
+  ],
+  netperf: [
+    'netperf.Throughput_tps'
   ]
+}
+
+export const tableMode = {
+  stream: 'defualt',
+  unixbench: 'index',
+  lmbench: 'default',
+  netperf: 'mix'
 }
 
 export const tableColumnMap = {
@@ -106,7 +120,7 @@ export const tableColumnMap = {
   unixbench: [
     {
       tableName: '单核',
-      dataMode: 'byIndex',
+      mode: 'byIndex',
       column: [
         {
           label: 'Dhrystone_2_using_register_variables',
@@ -348,6 +362,56 @@ export const tableColumnMap = {
           label: 'Rand_mem',
           prop: 'lmbench.Rand_mem'
         },
+      ]
+    }
+  ],
+  netperf: [
+    {
+      tableName: 'TCP_STREAM',
+      mode: 'mixPP',
+      mixPP: ['pp.netperf.test=TCP_STREAM'], // 除了某个pp以外，将其他pp作为属性合并到一条数据中
+      column: [
+        {label: '1', prop: 'pp.netperf.send_size=1'},
+        {label: '64', prop: 'pp.netperf.send_size=64'},
+        {label: '128', prop: 'pp.netperf.send_size=128'},
+        {label: '256', prop: 'pp.netperf.send_size=256'},
+        {label: '512', prop: 'pp.netperf.send_size=512'},
+        {label: '1024', prop: 'pp.netperf.send_size=1024'},
+        {label: '1500', prop: 'pp.netperf.send_size=1500'},
+        {label: '2048', prop: 'pp.netperf.send_size=2048'},
+        {label: '4096', prop: 'pp.netperf.send_size=4096'},
+        {label: '9000', prop: 'pp.netperf.send_size=9000'},
+        {label: '16384', prop: 'pp.netperf.send_size=16384'},
+        {label: '32768', prop: 'pp.netperf.send_size=32768'},
+      ]
+    },
+    {
+      tableName: 'UDP_STREAM',
+      mode: 'mixPP',
+      mixPP: ['pp.netperf.test=TCP_STREAM'],
+      column: [
+        {label: '1', prop: 'pp.netperf.send_size=1'},
+        {label: '64', prop: 'pp.netperf.send_size=64'},
+        {label: '128', prop: 'pp.netperf.send_size=128'},
+        {label: '256', prop: 'pp.netperf.send_size=256'},
+        {label: '512', prop: 'pp.netperf.send_size=512'},
+        {label: '1024', prop: 'pp.netperf.send_size=1024'},
+        {label: '1500', prop: 'pp.netperf.send_size=1500'},
+        {label: '2048', prop: 'pp.netperf.send_size=2048'},
+        {label: '4096', prop: 'pp.netperf.send_size=4096'},
+        {label: '9000', prop: 'pp.netperf.send_size=9000'},
+        {label: '16384', prop: 'pp.netperf.send_size=16384'},
+        {label: '32768', prop: 'pp.netperf.send_size=32768'},
+      ]
+    },
+    {
+      tableName: 'Protocol_kind',
+      mode: 'mixPP',
+      mixPP: [],
+      column: [
+        {label: 'TCP_RR', prop: 'pp.netperf.test=TCP_RR'},
+        {label: 'UDP_RR', prop: 'pp.netperf.test=UDP_RR'},
+        {label: 'TCP_CRR', prop: 'pp.netperf.test=TCP_CRR'}
       ]
     }
   ]

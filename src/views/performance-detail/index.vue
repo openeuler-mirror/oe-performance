@@ -555,7 +555,7 @@
               <span>{{ state.detailInfo.case_result.testcase_name }}</span>
             </el-descriptions-item>
 
-            <el-descriptions-item label="case result id">
+            <el-descriptions-item label="workload">
               <router-link
                 class="work-load-detail"
                 :to="{ name:'baseline-workloadDetail' }"

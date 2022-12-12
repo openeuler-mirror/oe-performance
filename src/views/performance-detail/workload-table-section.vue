@@ -34,35 +34,14 @@ const { performanceData } = usePerformanceData()
 const detailData = ref({})
 const tableData = ref([])
 
-const getTableData = (groupData) => {
-  console.log('rawData: ', groupData)
-  const resultArr = []
-  Object.keys(groupData).forEach(ppKey => {
-    const ppObj = {}
-    Object.keys(groupData[ppKey]).forEach(kpi => {
-      const kpiValue = groupData[ppKey][kpi].reduce(function(prev, curr){
-        return prev + curr
-      })/groupData[ppKey][kpi].length // 获取kpi的平均值
-      ppObj[kpi] = kpiValue.toFixed(2)
-    })
-    ppObj['li-testcase'] = ppKey
-    resultArr.push(ppObj)
-  })
-  console.log('tableData: ', resultArr)
-  return resultArr
-}
-
-// watchEffect(() => {
-//   tableData.value = getTableData(performanceData.g || {})
-// })
-
 onMounted(() => {
   // 从store中获取详情数据。
   // todo: 如果store中没有，需要发送请求获取
   const submitId = router.currentRoute.value.params.submit_id
   if (performanceData[submitId]) {
     detailData.value = performanceData[submitId]
-    tableData.value = getTableData(detailData.value.groupData)
+    console.log(performanceData[submitId])
+    tableData.value = detailData.value.tableData
   }
 })
 </script>

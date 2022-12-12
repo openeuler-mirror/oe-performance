@@ -725,7 +725,7 @@ export const config: configItem = {
     column: columnConfig2
   },
   distributedStorage: {
-    testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
+    testSubassembly: ['netperf', 'lmbench3', 'iperf'],
     searchParamList: optionConfig,
     column: columnConfig
   },

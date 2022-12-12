@@ -3,8 +3,6 @@ import flattenObj from '@/utils/utils'
 
 import { testParamsMap, kpiListMap } from '@/views/data-access/config_li.js'
 
-import { useTestboxStore } from '@/stores/performanceData'
-
 export const combineJobs = (jobList) => {
   const tempList = jobList.map(job => job._source)
     .map(job => prePrecessJob(job))
@@ -13,6 +11,7 @@ export const combineJobs = (jobList) => {
   // 公共属性目前没有筛选，取得全量
   const tempSubmit = reactive(tempList[0])
   tempSubmit['groupData'] = ppGroup
+  tempSubmit['tableData'] = mapGroupDataToTableData(ppGroup)
   return tempSubmit
 }
 // 数据预处理、合成公共数据
@@ -54,4 +53,23 @@ const groupDataByTestparam = (dataList) => {
     }
   })
   return resultObj
+}
+
+const mapGroupDataToTableData = (ppGroup) => {
+  console.log('rawData: ', ppGroup)
+  const resultArr = []
+  
+  Object.keys(ppGroup).forEach(ppKey => {
+    const ppObj = {}
+    Object.keys(ppGroup[ppKey]).forEach(kpi => {
+      const kpiValue = ppGroup[ppKey][kpi].reduce(function(prev, curr){
+        return prev + curr
+      })/ppGroup[ppKey][kpi].length // 获取kpi的平均值
+      ppObj[kpi] = kpiValue.toFixed(2)
+    })
+    ppObj['li-testcase'] = ppKey
+    resultArr.push(ppObj)
+  })
+  console.log('tableData: ', resultArr)
+  return resultArr
 }
