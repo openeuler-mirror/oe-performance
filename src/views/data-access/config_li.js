@@ -87,10 +87,10 @@ export const kpiListMap = {
 }
 
 export const tableMode = {
-  stream: 'defualt',
-  unixbench: 'index',
+  stream: 'default',
+  unixbench: 'unixbench',
   lmbench: 'default',
-  netperf: 'mix'
+  netperf: 'netperf'
 }
 
 export const tableColumnMap = {

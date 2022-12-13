@@ -1,7 +1,7 @@
 import { reactive } from 'vue'
 import flattenObj from '@/utils/utils'
 
-import { testParamsMap, kpiListMap } from '@/views/data-access/config_li.js'
+import { testParamsMap, kpiListMap, tableMode, tableColumnMap } from '@/views/data-access/config_li.js'
 
 export const combineJobs = (jobList) => {
   const tempList = jobList.map(job => job._source)
@@ -11,7 +11,7 @@ export const combineJobs = (jobList) => {
   // 公共属性目前没有筛选，取得全量
   const tempSubmit = reactive(tempList[0])
   tempSubmit['groupData'] = ppGroup
-  tempSubmit['tableData'] = mapGroupDataToTableData(ppGroup)
+  tempSubmit['tableDatas'] = mapGroupDataToTableData(ppGroup, tempSubmit.suite)
   return tempSubmit
 }
 // 数据预处理、合成公共数据
@@ -55,21 +55,35 @@ const groupDataByTestparam = (dataList) => {
   return resultObj
 }
 
-const mapGroupDataToTableData = (ppGroup) => {
+const mapGroupDataToTableData = (ppGroup, suite) => {
   console.log('rawData: ', ppGroup)
+  const tableDatas = {}
   const resultArr = []
   
-  Object.keys(ppGroup).forEach(ppKey => {
-    const ppObj = {}
-    Object.keys(ppGroup[ppKey]).forEach(kpi => {
-      const kpiValue = ppGroup[ppKey][kpi].reduce(function(prev, curr){
-        return prev + curr
-      })/ppGroup[ppKey][kpi].length // 获取kpi的平均值
-      ppObj[kpi] = kpiValue.toFixed(2)
+  switch (tableMode[suite]) {
+  case 'unixbench':  // 表格分成两组数据，一组展示单核，一组展示多核
+    console.log(ppGroup)
+      
+    break;
+  default:
+    // 基于ppKey区分每条数据。每个kpi作为每条数据的属性。
+    Object.keys(ppGroup).forEach(ppKey => {
+      const ppObj = {}
+      Object.keys(ppGroup[ppKey]).forEach(kpi => {
+        const kpiValue = ppGroup[ppKey][kpi].reduce(function(prev, curr){
+          return prev + curr
+        })/ppGroup[ppKey][kpi].length // 获取kpi的平均值
+        ppObj[kpi] = kpiValue.toFixed(2)
+      })
+      ppObj['li-testcase'] = ppKey
+      resultArr.push(ppObj)
     })
-    ppObj['li-testcase'] = ppKey
-    resultArr.push(ppObj)
-  })
-  console.log('tableData: ', resultArr)
-  return resultArr
+    tableColumnMap[suite].forEach(tableInfo => {
+      tableDatas[tableInfo.tableName] = resultArr
+    })
+    break;
+  }
+  
+  console.log('tableData: ', tableDatas)
+  return tableDatas
 }

@@ -1,10 +1,10 @@
 <template>
-  <div class="baseline-detail-workload-tables">
+  <div class="baseline-detail-workload-tables" v-loading="loading">
     <el-card class="">
       <div v-for="tableInfo in tableColumnMap[detailData.suite]||[]" :key="tableInfo.tableName">
           表格： {{ tableInfo.tableName }}
           <el-table
-            :data="tableData"
+            :data="tableDatas[tableInfo.tableName]"
             border
           >
             <el-table-column label="测试用例" prop="li-testcase"></el-table-column>
@@ -33,7 +33,7 @@ const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
 
 const detailData = ref({})
-const tableData = ref([])
+const tableDatas = ref([])
 const loading = ref(false)
 
 onMounted(() => {
@@ -43,7 +43,7 @@ onMounted(() => {
   if (performanceData[submitId]) {
     detailData.value = performanceData[submitId]
     console.log(performanceData[submitId])
-    tableData.value = detailData.value.tableData
+    tableDatas.value = detailData.value.tableDatas
   } else {
     loading.value = true
     getPerformanceData({
@@ -67,7 +67,7 @@ onMounted(() => {
       const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
       setPerformanceData(submitId, resultObj) // save submit data to store
       detailData.value = resultObj
-      tableData.value = resultObj.tableData
+      tableDatas.value = resultObj.tableDatas
     }).catch((err) => {
       ElMessage({
         message: err.message,
