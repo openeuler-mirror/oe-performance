@@ -31,7 +31,7 @@ const getTestParamsName = (job) => {
   let keyStringArr = []
   const mapList = testParamsMap[job.suite] || []
   mapList.forEach(key => {
-    keyStringArr.push(`${key}=${job[key]}`)
+    job[key] && keyStringArr.push(`${key}=${job[key]}`)
   })
   return keyStringArr.join(',')
 }
@@ -63,7 +63,21 @@ const mapGroupDataToTableData = (ppGroup, suite) => {
   switch (tableMode[suite]) {
   case 'unixbench':  // 表格分成两组数据，一组展示单核，一组展示多核
     console.log(ppGroup)
-      
+    Object.keys(ppGroup).forEach(ppKey => {
+      const ppObj = {}
+      Object.keys(ppGroup[ppKey]).forEach(kpi => {
+        const kpiValue = ppGroup[ppKey][kpi].reduce(function(prev, curr){
+          return prev + curr
+        })/ppGroup[ppKey][kpi].length // 获取kpi的平均值
+        ppObj[kpi] = kpiValue.toFixed(2)
+      })
+      ppObj['li-testcase'] = ppKey
+      if (ppKey.split('=')[1] === '1') {
+        tableDatas['单核'] = [ppObj]
+      } else {
+        tableDatas['多核'] = [ppObj]
+      }
+    })
     break;
   default:
     // 基于ppKey区分每条数据。每个kpi作为每条数据的属性。

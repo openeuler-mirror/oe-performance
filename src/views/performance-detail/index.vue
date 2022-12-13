@@ -740,16 +740,16 @@ onMounted(async () => {
       loading.value = false
     })
   }
-  // // 
-  // loading.value = true
-  // // todo: 请替换成真实数据
-  // let res = await getDetail(10)
-  // const { code, results } = res.data
-  // if (code === 200) {
-  //   console.log(results[0])
-  //   state.detailInfo = results[0]
-  //   loading.value = false
-  // }
+  // 
+  loading.value = true
+  // todo: 请替换成真实数据
+  let res = await getDetail(10)
+  const { code, results } = res.data
+  if (code === 200) {
+    console.log(results[0])
+    state.detailInfo = results[0]
+    loading.value = false
+  }
 })
 </script>
 

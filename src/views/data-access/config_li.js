@@ -120,7 +120,63 @@ export const tableColumnMap = {
   unixbench: [
     {
       tableName: '单核',
-      mode: 'byIndex',
+      column: [
+        {
+          label: 'Dhrystone_2_using_register_variables',
+          prop: 'unixbench.Dhrystone_2_using_register_variables'
+        },
+        {
+          label: 'Double-Precision_Whetstone',
+          prop: 'unixbench.Double-Precision_Whetstone'
+        },
+        {
+          label: 'Execl_Throughput',
+          prop: 'unixbench.Execl_Throughput'
+        },
+        {
+          label: 'File_Copy_1024_bufsize_2000_maxblocks',
+          prop: 'unixbench.File_Copy_1024_bufsize_2000_maxblocks'
+        },
+        {
+          label: 'File_Copy_256_bufsize_500_maxblocks',
+          prop: 'unixbench.File_Copy_256_bufsize_500_maxblocks'
+        },
+        {
+          label: 'File_Copy_4096_bufsize_8000_maxblocks',
+          prop: 'unixbench.File_Copy_4096_bufsize_8000_maxblocks'
+        },
+        {
+          label: 'Pipe_Throughput',
+          prop: 'unixbench.Pipe_Throughput'
+        },
+        {
+          label: 'Pipe-based_Context_Switching',
+          prop: 'unixbench.Pipe-based_Context_Switching'
+        },
+        {
+          label: 'Process_Creation',
+          prop: 'unixbench.Process_Creation'
+        },
+        {
+          label: 'Shell_Scripts_(1_concurrent)',
+          prop: 'unixbench.Shell_Scripts_(1_concurrent)'
+        },
+        {
+          label: 'Shell_Scripts_(8_concurrent)',
+          prop: 'unixbench.Shell_Scripts_(8_concurrent)'
+        },
+        {
+          label: 'System_Call_Overhead',
+          prop: 'unixbench.System_Call_Overhead'
+        },
+        {
+          label: 'System_Benchmarks_Index_Score',
+          prop: 'unixbench.System_Benchmarks_Index_Score'
+        },
+      ]
+    },
+    {
+      tableName: '多核',
       column: [
         {
           label: 'Dhrystone_2_using_register_variables',
@@ -368,8 +424,6 @@ export const tableColumnMap = {
   netperf: [
     {
       tableName: 'TCP_STREAM',
-      mode: 'mixPP',
-      mixPP: ['pp.netperf.test=TCP_STREAM'], // 除了某个pp以外，将其他pp作为属性合并到一条数据中
       column: [
         {label: '1', prop: 'pp.netperf.send_size=1'},
         {label: '64', prop: 'pp.netperf.send_size=64'},
@@ -406,8 +460,6 @@ export const tableColumnMap = {
     },
     {
       tableName: 'Protocol_kind',
-      mode: 'mixPP',
-      mixPP: [],
       column: [
         {label: 'TCP_RR', prop: 'pp.netperf.test=TCP_RR'},
         {label: 'UDP_RR', prop: 'pp.netperf.test=UDP_RR'},
