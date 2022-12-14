@@ -12,6 +12,7 @@ export const combineJobs = (jobList) => {
   const tempSubmit = reactive(tempList[0])
   tempSubmit['groupData'] = ppGroup
   tempSubmit['tableDatas'] = mapGroupDataToTableData(ppGroup, tempSubmit.suite)
+  console.log('submitIdData: ', tempSubmit)
   return tempSubmit
 }
 // 数据预处理、合成公共数据
