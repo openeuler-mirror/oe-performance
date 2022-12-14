@@ -28,20 +28,20 @@ const onSearch = () => {
   getPerformanceData({
     'index': 'jobs',
     'query': {
-      size: 10000,  // 需要分suite获取
+      size: 10000,
       _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
         'os', 'os_version', 'arch', 'kernel',
-        'testbox', 'tbox_group',
-        'pp', 'stats',
-        'job_state', 'time'
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'time'
       ],
       'query': {
         bool: {
           must: [
-            { match: { suite: 'stream' }},
-            { match: { testbox: '2288hv5-2s40p-256g--b1004' } }
+            { terms: { suite: ['stream', 'netperf']} }, // 对应皮遏制文件，目前只能查到这几个数据 
+            // { match: { suite: 'stream' }},  // 测试，指定suite
+            { match: { testbox: 'taishan200-2280-2s48p-384g--a1006' } },
+            { 'range': {'time': {'gte': 'now-10d/d'} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试s
           ],
-        }
+        },
       }
     },
   }).then(res => {
@@ -51,34 +51,62 @@ const onSearch = () => {
       // 增加需组装的参数
       tempFlattenItem['osv'] = `${tempFlattenItem.os}@${tempFlattenItem.os_version}`
       // 保存硬件信息
-      const tempHardwareInfo = allHostsMap[tempFlattenItem.testbox]
-      tempFlattenItem['hw.nr_cpu'] = tempHardwareInfo.cpu.nr_cpu
-      tempFlattenItem['hw.nr_node'] = tempHardwareInfo.cpu.nr_node
-      tempFlattenItem['hw.memory'] = tempHardwareInfo.memory.all_memory_size
-      // 保存
-      const { suite } = tempFlattenItem
-      if (ejobs[suite]) {
-        ejobs[suite].push(tempFlattenItem)
-        ejobsMap[suite][tempFlattenItem.id] = tempFlattenItem
-      } else {
-        ejobs[suite] = [tempFlattenItem]
-        ejobsMap[suite] = {}
-        ejobsMap[suite][tempFlattenItem.id] = tempFlattenItem
-      }
+      addHardwareInfoToJob(tempFlattenItem)
+      // 生成ejobs
+      constructEjobData(tempFlattenItem)
+      // 转换为tjobs
     })
     console.log('ejobs: ', ejobs, ejobsMap)
+    e2tConverter(ejobs)
   })
 }
 
+const addHardwareInfoToJob = (job) => {
+  const hardwareInfo = allHostsMap[job.testbox] || {}
+  job['hw.nr_cpu'] = hardwareInfo.cpu && hardwareInfo.cpu.nr_cpu
+  job['hw.nr_node'] = hardwareInfo.cpu && hardwareInfo.cpu.nr_node
+  job['hw.memory'] = hardwareInfo.memory && hardwareInfo.memory.all_memory_size
+}
+
+const constructEjobData = (job) => {
+  const { suite } = job
+  if (ejobs[suite]) {
+    ejobs[suite].push(job)
+    ejobsMap[suite][job.id] = job
+  } else {
+    ejobs[suite] = [job]
+    ejobsMap[suite] = {}
+    ejobsMap[suite][job.id] = job
+  }
+}
+
 const e2tConverter = (ejobs) => {
-  // for each
-  ejobs['stream'].forEach(ejob => {
-    Object.keys(kpiMaps['stream']).forEach(kpi => {
-      const tempJob = JSON.parse(JSON.stringify(ejob))
-      tempJob.testcase = kpiMaps['stream'][kpi].testcase // 列名
-      tempJob[`stats.${'stream'}.${kpiMaps['stream'][kpi].kpi}`] = ejob[`stats.${'stream'}.${kpi}`]
+  Object.keys(ejobs).forEach((suiteKey:string) => {
+    ejobs[suiteKey].forEach(ejob => {
+      const program = ejob.suite
+      const tempJob =  JSON.parse(JSON.stringify(ejob))
+      tempJob[`pp.${program}.testcase`] = ejob[`pp.${program}.test`] || '' // 如果有test，设为默认值
+      Object.keys(kpiMaps[suiteKey]).forEach(kpi => { // 遍历所有kpi，每个kpi生成一个tjob
+        const tjob = JSON.parse(JSON.stringify(tempJob))
+        tjob[`pp.${suiteKey}.testcase`] = kpiMaps[suiteKey][kpi].testcase  // todo，libmicro需要调用func生成结果
+        tjob[`stats.${suiteKey}.${kpiMaps['stream'][kpi].kpi}`] = ejob[`stats.${suiteKey}.${kpi}`]
+        if (tjobs[suiteKey]) {
+          tjobs[suiteKey].push(tjob)
+        } else {
+          tjobs[suiteKey] = [tjob]
+        }
+      })
     })
+    console.log('tjobs:', tjobs)
   })
+  // for each
+  // ejobs['stream'].forEach(ejob => {
+  //   Object.keys(kpiMaps['stream']).forEach(kpi => {
+  //     const tempJob = JSON.parse(JSON.stringify(ejob))
+  //     tempJob.testcase = kpiMaps['stream'][kpi].testcase // 列名
+  //     tempJob[`stats.${'stream'}.${kpiMaps['stream'][kpi].kpi}`] = ejob[`stats.${'stream'}.${kpi}`]
+  //   })
+  // })
 }
 
 onMounted(() => {
@@ -89,7 +117,7 @@ onMounted(() => {
     testboxListRaw.forEach(testboxItem => {
       allHostsMap[testboxItem.id] = testboxItem
     })
-    console.log(allHostsMap)
+    console.log('allHost: ', allHostsMap)
   })
   // 获取job中的通用筛选项
   getJobValueList()
