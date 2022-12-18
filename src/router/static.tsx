@@ -78,7 +78,10 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'dataAccess',
             name: 'dataAccess',
-            component: import('@/views/data-access/index.vue'),
+            component: () => import('@/views/data-access/index.vue'),
+            meta: {
+              title: 'dataAccess'
+            }
           }
         ]
       },

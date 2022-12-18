@@ -1,3 +1,20 @@
+export const jobModel = {
+  kpis: {
+    'stats.stream.bandwidth_MBps':                  { direction: 1,  label: '内存带宽(MBps)' },
+    'stats.netperf.Throughput_Mbps':                { direction: 1,  label: '网络带宽(MBps)' },
+    'stats.netperf.Throughput_Tps':                 { direction: 1,  label: '请求转换率(应答次数/s)' },
+    'stats.unixbench.score':                        { direction: 1,  label: '综合跑分' },
+    'stats.lmbench.local_bandwidths':               { direction: 1,  label: '内存映射、拷贝及读写带宽(MB/s)' },
+    'stats.lmbench.Processor_Processes.latency':    { direction: -1, label: 'CPU、进程常用操作延迟(us)' },
+    'stats.lmbench.local_latencies':                { direction: -1, label: '本地通信延迟(us)' },
+    'stats.lmbench.Context_switching_ctxsw':        { direction: -1, label: '进程上下文切换开销(us)' },
+    'stats.lmbench.File_&_VM_latencies':            { direction: -1, label: '内存映射延迟(us)' },
+    'stats.lmbench.Memory_latencies':               { direction: -1, label: '主存及缓存延迟(us)' },
+    'stats.libmicro.usecs_per_call':                { direction: -1, label: '系统调用延迟(us)' },
+  },
+}
+
+// suite中的键代表实际报出的各个结果；kpi代表这个结果归属的表格（名）；testcase对应表格的列
 export const kpiMaps = {
   stream: {
     add_bandwidth_MBps:     { kpi: 'bandwidth_MBps', testcase: 'add'        },
@@ -104,4 +121,31 @@ export const kpiMapFuncs = {
       kpi: 'usecs_per_call',
     }
   },
+}
+
+// kpi 代表table某个table
+export const suiteTables = {
+  netperf: [
+    { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'TCP_STREAM' }         },
+    { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'UDP_STREAM' }         },
+    { kpi: 'Throughput_Tps',  x_param: 'test'                                               },
+  ],
+  stream: [{
+    kpi: 'bandwidth_MBps',
+    x_param: 'testcase',
+  }],
+  unixbench: [
+    { kpi: 'score', x_param: 'testcase', filters: { nr_task: '1' }          },
+    { kpi: 'score', x_param: 'testcase', filters: { nr_task: '100%' }       },
+  ],
+  lmbench: [
+    { kpi: 'local_bandwidths',              x_param: 'testcase' },
+    { kpi: 'Processor_Processes.latency',   x_param: 'testcase' },
+    { kpi: 'local_latencies',               x_param: 'testcase' },
+    { kpi: 'Context_switching_ctxsw',       x_param: 'testcase' },
+    { kpi: 'File_&_VM_latencies',           x_param: 'testcase' },
+    { kpi: 'Memory_latencies',              x_param: 'testcase' },
+  ],
+  libmicro: [
+  ],
 }

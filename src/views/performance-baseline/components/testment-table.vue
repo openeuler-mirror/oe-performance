@@ -331,7 +331,7 @@ const getAllJobsData = (idList:any[]) => {
           }
         }
       },
-    }).then((res) => {      
+    }).then((res) => {
       const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
       performanceStore.setPerformanceData(idObj.submit_id,resultObj) // save submit data to store
       tempArr[idx] = resultObj
