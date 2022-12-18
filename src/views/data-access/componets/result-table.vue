@@ -31,19 +31,13 @@ const props = defineProps({
 // 这里可以指定表格顺序
 const tableListOrder = [
   'stream',
-  'netperf'
+  'netperf',
+  'lmbench',
+  'unixbench'
 ]
 const tableConfigs = ref({})
 
 const tableDatas = ref({})
-
-// const tableDataList = computed(() => {
-//   console.log(222)
-//   if (props.tjobs.state === '1'){
-//     return generateTableConfigsAndData(props.tjobs)
-//   }
-//   return {}
-// })
 
 watch(
   () => props.tjobs,
@@ -73,28 +67,52 @@ const generateTableConfigsAndData = (tjobs) => {
       const tempDataObj = {} // 当前os的数据
       tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
         // 将tjob中能根据x_param匹配到的值作为表格的列
-        const columnName = (tjob[`pp.${suite}.${tableConfig.x_param}`] || '').toString()
-        if (columnName && !tempColumn.filter(col => col.prop === columnName)[0]){
-          tempColumn.push({
-            label: columnName,
-            prop: columnName
-          })
-        }
-        // 拼装数据
-        if (tempDataObj[columnName]) {
-          tempDataObj[columnName].push(tjob[`stats.${suite}.${tableConfig.kpi}`])
-        } else {
-          tempDataObj[columnName] = [tjob[`stats.${suite}.${tableConfig.kpi}`]]
-        }
+        const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
+        if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
+        // 根据col获取对应的数据
+        getValueFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataObj)
       })
       // 拼装好的数据进行赋值
       tempConfig['column'] = tempColumn
-      tempTableDataList.push(calculateValues(tempDataObj))
+      tempTableDataList.push(calculateValues(tempDataObj)) // 计算平均值
       tableConfigs.value[suite].push(tempConfig)
       tableDatas.value[suite][tableIndex] = tempTableDataList
+      console.log(suite, tempConfig['tableName'], tempTableDataList)
     })
   })
   return {}
+}
+
+const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
+  if (!tjob[`stats.${suite}.${tableConfig.kpi}`]) {
+    return '' // 如果当前tjob不存在当前表格对应的kpi值，说明当前tjob没有对应当前表格的列名。
+  }
+  const columnName = (tjob[`pp.${suite}.${tableConfig.x_param}`] || '').toString()
+  if (columnName && !tempColumn.filter(col => col.prop === columnName)[0]){
+    tempColumn.push({
+      label: columnName,
+      prop: columnName
+    })
+  }
+  return columnName
+}
+
+const getValueFromTjobByCol = (tjob, suite, columnName, tableConfig, tempDataObj) => {
+  if (tableConfig.filters) {
+    const filterKey = Object.keys(tableConfig.filters)[0]
+    let filteredValue = tjob[`pp.${suite}.${filterKey}`]
+    if (suite === 'unixbench') { // unixbench过滤器的值需要特殊处理，除了nr_task=1的，都为100%
+      filteredValue = filteredValue === 1 ? '1' : '100%'
+    }
+    if (filteredValue !== tableConfig.filters[filterKey]) {
+      return  // 如果有过滤器的情况下，过滤其中的值如果不匹配则忽略当前数据
+    }
+  }
+  if (tempDataObj[columnName]) {
+    tempDataObj[columnName].push(tjob[`stats.${suite}.${tableConfig.kpi}`])
+  } else {
+    tempDataObj[columnName] = [tjob[`stats.${suite}.${tableConfig.kpi}`]]
+  }
 }
 
 const calculateValues = (obj) => {

@@ -2,7 +2,7 @@ export const jobModel = {
   kpis: {
     'stats.stream.bandwidth_MBps':                  { direction: 1,  label: '内存带宽(MBps)' },
     'stats.netperf.Throughput_Mbps':                { direction: 1,  label: '网络带宽(MBps)' },
-    'stats.netperf.Throughput_Tps':                 { direction: 1,  label: '请求转换率(应答次数/s)' },
+    'stats.netperf.Throughput_tps':                 { direction: 1,  label: '请求转换率(应答次数/s)' },
     'stats.unixbench.score':                        { direction: 1,  label: '综合跑分' },
     'stats.lmbench.local_bandwidths':               { direction: 1,  label: '内存映射、拷贝及读写带宽(MB/s)' },
     'stats.lmbench.Processor_Processes.latency':    { direction: -1, label: 'CPU、进程常用操作延迟(us)' },
@@ -62,6 +62,20 @@ export const kpiMaps = {
     'L2_$':             { kpi: 'Memory_latencies', testcase: 'L2_$'     },
     'Main_mem':         { kpi: 'Memory_latencies', testcase: 'Main_mem' },
     'Rand_mem':         { kpi: 'Memory_latencies', testcase: 'Rand_mem' },
+  },
+  unixbench: {
+    'Dhrystone_2_using_register_variables': { kpi: 'score', testcase: 'Dhrystone_2_using_register_variables' },
+    'Double-Precision_Whetstone': { kpi: 'score', testcase: 'Double-Precision_Whetstone' },
+    'Execl_Throughput': { kpi: 'score', testcase: 'Execl_Throughput' },
+    'File_Copy_1024_bufsize_2000_maxblocks': { kpi: 'score', testcase: 'File_Copy_1024_bufsize_2000_maxblocks' },
+    'File_Copy_256_bufsize_500_maxblocks': { kpi: 'score', testcase: 'File_Copy_256_bufsize_500_maxblocks' },
+    'File_Copy_4096_bufsize_8000_maxblocks': { kpi: 'score', testcase: 'File_Copy_4096_bufsize_8000_maxblocks' },
+    'Pipe-based_Context_Switching': { kpi: 'score', testcase: 'Pipe-based_Context_Switching' },
+    'Pipe_Throughput': { kpi: 'score', testcase: 'Pipe_Throughput' },
+    'Process_Creation': { kpi: 'score', testcase: 'Process_Creation' },
+    'Shell_Scripts_(1_concurrent)': { kpi: 'score', testcase: 'Shell_Scripts_(1_concurrent)' },
+    'Shell_Scripts_(8_concurrent)': { kpi: 'score', testcase: 'Shell_Scripts_(8_concurrent)' },
+    'System_Call_Overhead': { kpi: 'score', testcase: 'System_Call_Overhead' },
   }
 }
 
@@ -96,12 +110,12 @@ export const kpiMapFuncs = {
   //   stats.unixbench.Shell_Scripts_(1_concurrent)
   //   stats.unixbench.Shell_Scripts_(8_concurrent)
   //   stats.unixbench.System_Call_Overhead
-  unixbench: function (kpi) {
-    return {
-      kpi: 'score',
-      testcase: kpi,  // can do this in caller: .replace('stats.unixbench.', '')
-    }
-  },
+  // unixbench: function (kpi) {
+  //   return {
+  //     kpi: 'score',
+  //     testcase: kpi,  // can do this in caller: .replace('stats.unixbench.', '')
+  //   }
+  // },
   libmicro: function (kpi) {
     // https://github.com/rzezeski/libMicro/blob/master/bench.sh has the group info
     let testgroup = libmicroGroups[libmicroGroups.length - 1]
@@ -128,7 +142,7 @@ export const suiteTables = {
   netperf: [
     { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'TCP_STREAM' }         },
     { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'UDP_STREAM' }         },
-    { kpi: 'Throughput_Tps',  x_param: 'test'                                               },
+    { kpi: 'Throughput_tps',  x_param: 'test'                                               },
   ],
   stream: [{
     kpi: 'bandwidth_MBps',

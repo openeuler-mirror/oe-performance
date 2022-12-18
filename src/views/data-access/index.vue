@@ -40,16 +40,19 @@ const onSearch = () => {
       'query': {
         bool: {
           must: [
-            { terms: { suite: ['stream', 'netperf', 'lmbench']} }, // 对应皮遏制文件，目前只能查到这几个数据 
+            { terms: { suite: ['stream', 'netperf', 'lmbench', 'unixbench']} }, // 对应皮遏制文件，目前只能查到这几个数据 
             // { match: { suite: 'stream' }},  // 测试，指定suite
-            { match: { testbox: 'taishan200-2280-2s48p-384g--a1006' } },
+            // { match: { testbox: 'taishan200-2280-2s48p-384g--a1006' } },
             { 'range': {'time': {'gte': 'now-10d/d'} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试s
           ],
         },
       }
     },
   }).then(res => {
-    res.data.hits.hits.forEach(item => {
+    res.data.hits.hits.filter(item => {
+      // 去掉没有stats的job数据
+      return item._source.stats && Object.keys(item._source.stats).length > 0
+    }).forEach(item => {
       // jobs转换成ejobs
       const tempFlattenItem = flattenObj(item._source)
       // 增加需组装的参数
@@ -93,7 +96,7 @@ const e2tConverter = (ejobs) => {
       tempJob[`pp.${program}.testcase`] = ejob[`pp.${program}.test`] || '' // 如果有test，设为默认值
       
       // 如果配置文件kpiMaps中没有映射关系，则直接使用不做转换
-      if (!kpiMaps[suiteKey]) {
+      if (!kpiMaps[suiteKey] && !kpiMapFuncs[suiteKey]) {
         const tjob = JSON.parse(JSON.stringify(tempJob))
         if (tjobs[suiteKey]) {
           tjobs[suiteKey].push(tjob)
@@ -103,16 +106,20 @@ const e2tConverter = (ejobs) => {
         return
       }
       // 有配置文件的话，进行转换
-      Object.keys(kpiMaps[suiteKey]).forEach(kpi => { // 遍历所有kpi，每个kpi生成一个tjob
-        const tjob = JSON.parse(JSON.stringify(tempJob))
-        tjob[`pp.${suiteKey}.testcase`] = kpiMaps[suiteKey][kpi].testcase  // todo，libmicro需要调用func生成结果
-        tjob[`stats.${suiteKey}.${kpiMaps[suiteKey][kpi].kpi}`] = ejob[`stats.${suiteKey}.${kpi}`]
-        if (tjobs[suiteKey]) {
-          tjobs[suiteKey].push(tjob)
-        } else {
-          tjobs[suiteKey] = [tjob]
-        }
-      })
+      if (kpiMaps[suiteKey]) {
+        Object.keys(kpiMaps[suiteKey]).forEach(kpi => { // 遍历所有kpi，每个kpi生成一个tjob
+          const tjob = JSON.parse(JSON.stringify(tempJob))
+          tjob[`pp.${suiteKey}.testcase`] = kpiMaps[suiteKey][kpi].testcase  // todo，libmicro需要调用func生成结果
+          tjob[`stats.${suiteKey}.${kpiMaps[suiteKey][kpi].kpi}`] = ejob[`stats.${suiteKey}.${kpi}`]
+          if (tjobs[suiteKey]) {
+            tjobs[suiteKey].push(tjob)
+          } else {
+            tjobs[suiteKey] = [tjob]
+          }
+        })
+      } else { // 如果kpiMaps中没有匹配，则使用kpiMapFuncs
+        
+      }
     })
   })
   inputData.value = tjobs

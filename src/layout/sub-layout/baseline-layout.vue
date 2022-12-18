@@ -74,7 +74,7 @@ const getTestboxData = () => {
   getTestBoxes().then(res => {
     const testboxListRaw = res.data.hits.hits.map(rawItem => rawItem._source)
     testboxStore.setTestboxData(testboxListRaw)
-    console.log('ok: ', testboxStore.testboxMap)
+    console.log('baseline-layout: ', testboxStore.testboxMap)
   })
 }
 
