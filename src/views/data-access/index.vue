@@ -5,11 +5,11 @@
     <div>
         <el-button @click="onSearch">查询</el-button>
     </div>
-    <result-table :tjobs="inputData"></result-table>
+    <result-table :tjobsAll="inputData"></result-table>
 </template>
     
 <script setup lang="ts">
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, watch } from 'vue'
 import ResultTable from './componets/result-table.vue'
 import flattenObj from '@/utils/utils'
 
@@ -20,27 +20,75 @@ import { kpiMaps, kpiMapFuncs } from './config.js'
 // testbox字典
 const allHostsMap = reactive({})
 // ejobs
-const ejobs = reactive({})
-const ejobsMap = reactive({})
+const ejobsAll = reactive({})
+const ejobsMapAll = reactive({})
 // tjobs
-const tjobs = reactive({})
+const tjobsAll = reactive({})
 
 let inputData = ref({})
 
+/**
+os
+: 
+"openeuler"
+os_version
+: 
+"22.03-LTS-SP1-RC2-iso"
+osv
+: 
+"openeuler@22.03-LTS-SP1-RC2-iso"
+======================
+os: "centos"
+os_version: "7.6.1810"
+osv: centos@7.6.1810
+ */
 // 获取jobs数据
+
+const searchParams = {
+  os: [
+    'openeuler', 'centos'
+  ],
+  os_version: [
+    '22.03-LTS-SP1-RC2-iso', '22.03-LTS-SP1-RC3-iso'
+  ]
+}
+
+const dataLoadCount = ref(0)
+
 const onSearch = () => {
+  dataLoadCount.value = 0
+  searchParams.os.forEach((os, idx) => {
+    dataLoadCount.value++
+    getTotalData(os, searchParams.os_version[idx])
+  })
+}
+
+watch(
+  () => dataLoadCount.value,
+  () => {
+    if (dataLoadCount.value === 0) {
+      inputData.value = tjobsAll
+    }
+  }
+)
+
+const getTotalData = (os, osVersion) => {
+  const ejobs = {}
+  const ejobsMap = {}
+  const tjobs = {}
   getPerformanceData({
     'index': 'jobs',
     'query': {
       size: 10000,
-      _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
-        'os', 'os_version', 'arch', 'kernel',
+      _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'arch', 'kernel',
         'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'time'
       ],
       'query': {
         bool: {
           must: [
             { terms: { suite: ['stream', 'netperf', 'lmbench', 'unixbench']} }, // 对应皮遏制文件，目前只能查到这几个数据 
+            { match: { 'os_version': osVersion }}, 
+            // { match: { os_version: osVersion }}, 
             // { match: { suite: 'stream' }},  // 测试，指定suite
             // { match: { testbox: 'taishan200-2280-2s48p-384g--a1006' } },
             { 'range': {'time': {'gte': 'now-10d/d'} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试s
@@ -49,22 +97,27 @@ const onSearch = () => {
       }
     },
   }).then(res => {
+    let _osv = ''
     res.data.hits.hits.filter(item => {
       // 去掉没有stats的job数据
       return item._source.stats && Object.keys(item._source.stats).length > 0
     }).forEach(item => {
-      // jobs转换成ejobs
-      const tempFlattenItem = flattenObj(item._source)
-      // 增加需组装的参数
-      tempFlattenItem['osv'] = `${tempFlattenItem.os}@${tempFlattenItem.os_version}`
+      const tempFlattenItem = flattenObj(item._source)       // jobs转换成ejobs
+      tempFlattenItem['osv'] = `${tempFlattenItem.os}@${tempFlattenItem.os_version}` // 增加需组装的参数
+      _osv = tempFlattenItem['osv']
       // 保存硬件信息
       addHardwareInfoToJob(tempFlattenItem)
       // 生成ejobs
-      constructEjobData(tempFlattenItem)
+      constructEjobData(tempFlattenItem, ejobs, ejobsMap)
       // 转换为tjobs
     })
     console.log('ejobs: ', ejobs, ejobsMap)
-    e2tConverter(ejobs)
+    e2tConverter(ejobs, tjobs)
+    ejobsAll[_osv] = ejobs
+    ejobsMapAll[_osv] = ejobsMap
+    tjobsAll[_osv] = tjobs
+  }).finally(() => {
+    dataLoadCount.value--
   })
 }
 
@@ -75,7 +128,7 @@ const addHardwareInfoToJob = (job) => {
   job['hw.memory'] = hardwareInfo.memory && hardwareInfo.memory.all_memory_size
 }
 
-const constructEjobData = (job) => {
+const constructEjobData = (job, ejobs, ejobsMap) => {
   const { suite } = job
   if (ejobs[suite]) {
     ejobs[suite].push(job)
@@ -87,8 +140,7 @@ const constructEjobData = (job) => {
   }
 }
 
-const e2tConverter = (ejobs) => {
-  console.log('tjobs1: ',tjobs)
+const e2tConverter = (ejobs, tjobs) => {
   Object.keys(ejobs).forEach((suiteKey:string) => {
     ejobs[suiteKey].forEach(ejob => {
       const program = ejob.suite
@@ -122,8 +174,7 @@ const e2tConverter = (ejobs) => {
       }
     })
   })
-  inputData.value = tjobs
-  console.log('tjobs:', tjobs, inputData)
+  console.log('tjobs:', tjobs)
 }
 
 onMounted(() => {

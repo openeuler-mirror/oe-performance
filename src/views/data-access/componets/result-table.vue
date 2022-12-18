@@ -22,7 +22,7 @@ import { ref, watch } from 'vue'
 import { jobModel, suiteTables } from '@/views/data-access/config'
 
 const props = defineProps({
-  tjobs: {
+  tjobsAll: {
     type: Object,
     default: () => {}
   }
@@ -40,11 +40,15 @@ const tableConfigs = ref({})
 const tableDatas = ref({})
 
 watch(
-  () => props.tjobs,
-  () => generateTableConfigsAndData(props.tjobs)
+  () => props.tjobsAll,
+  () => {
+    Object.keys(props.tjobsAll).forEach(osv => {
+      generateTableConfigsAndData(props.tjobsAll[osv], osv)
+    })
+  }
 )
 
-const generateTableConfigsAndData = (tjobs) => {
+const generateTableConfigsAndData = (tjobs, osv) => {
   tableListOrder.forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
     if (!tableConfigs.value[suite]) {tableConfigs.value[suite] = []}
@@ -63,7 +67,7 @@ const generateTableConfigsAndData = (tjobs) => {
       const tableName = `${filterName || ''}${labelName}${directionName > 0 ? '（越大越好）':'（越小越好）'}`
       tempConfig['tableName'] = tableName
 
-      const tempColumn = []
+      const tempColumn = [{ label: tableConfig.kpi, prop: 'dataId' }]
       const tempDataObj = {} // 当前os的数据
       tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
         // 将tjob中能根据x_param匹配到的值作为表格的列
@@ -72,15 +76,34 @@ const generateTableConfigsAndData = (tjobs) => {
         // 根据col获取对应的数据
         getValueFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataObj)
       })
-      // 拼装好的数据进行赋值
+      // 赋值列
       tempConfig['column'] = tempColumn
-      tempTableDataList.push(calculateValues(tempDataObj)) // 计算平均值
-      tableConfigs.value[suite].push(tempConfig)
+      setTableColConfig(tempConfig, suite, tableIndex)
+      
+      // 拼装好的数据进行赋值
+      const calculatedObj = calculateValues(tempDataObj)
+      calculatedObj['dataId'] = osv // 添加数据名称
+      tempTableDataList.push(calculatedObj) // 计算平均值
       tableDatas.value[suite][tableIndex] = tempTableDataList
-      console.log(suite, tempConfig['tableName'], tempTableDataList)
     })
   })
-  return {}
+}
+
+const setTableColConfig = (tempConfig, suite, tableIndex) => {
+  if (tableConfigs.value[suite][tableIndex]) {
+    const oldCols = tableConfigs.value[suite][tableIndex].column
+    const newCols = tempConfig.column
+    const tempCols = [...oldCols]
+    newCols.forEach(col => {
+      if (!oldCols.filter(item => item.label === col.label)[0]) {
+        tempCols.push(col)
+      }
+    })
+    tempConfig.column = tempCols
+    tableConfigs.value[suite][tableIndex] = tempConfig
+  } else {
+    tableConfigs.value[suite].push(tempConfig)
+  }
 }
 
 const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
