@@ -51,22 +51,20 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watchEffect } from 'vue'
+import { ref, onMounted, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePerformanceData } from '@/stores/performanceData'
 import { config, sceneConfig, optionBind } from '../config-file'
 import { jobModel } from '/data-model'
 import { queryBySystemParam, queryCriteria } from '@/api/detail'
 import { ElMessage } from 'element-plus'
+import { getSearchParams, getJobValueList } from '@/api/performance'
 
 const selectedSuite = ref('unixbench')
 
 const performanceStore = usePerformanceData()
 
 const emit = defineEmits<{
-  // 在此处收集查询菜单中的查询条件，整理后去请求全量的submit_id列表
-  // 如果用户选择了机器配置类的条件，则需要先根据机器配置去获取对应的主机列表。
-  // 然后通过主机列表和其他条件去查询submit_id列表
   (event: 'search', params: searchParams): void
 }>()
 
@@ -98,7 +96,76 @@ const handleQueryChange = () => {
     query: { ...newQuery }
   })
 }
+// 获取搜索条件
+const getRawSearchParams = () => {
+  getSearchParams({
+    index: 'jobs',
+    query: {
+      size: 0,
+      _source: ['submit_id', 'suite'],
+      query: {
+        bool: {
+          must: [
+            { match: { suite: selectedSuite.value } },
+            { exists: { field: 'submit_id' } }
+          ]
+        }
+      },
+      aggs: {
+        uid_aggs: {
+          terms: {
+            field: 'submit_id',
+            size: 10000
+          },
+          aggs: {
+            my_top_hits: {
+              top_hits: {
+                _source: {
+                  includes: ['suite',
+                    'submit_id',
+                    'os',
+                    'os_version',
+                    'nr_cpu',
+                    'memory',
+                    'testbox',
+                    'kernel_version',
+                    'nr_node',
+                    'job_stage',
+                    'job_health']
+                },
+                size: 1 // 查询配置是通用配置，只取其中的第一个job的数据做处理
+              }
+            }
+          }
+        }
+      }
+    }
+  }).then(res => {
+    const rawData = res.data.aggregations.uid_aggs.buckets.map(
+      (sub_item: any) => sub_item.my_top_hits.hits.hits[0]._source
+    )
+    setSearchOptions(rawData)
+  })
+}
 
+const setSearchOptions = (testResultCommonParamsList: any) => {
+  filterCriteria.value.forEach(paramKey => {
+    testResultCommonParamsList.forEach((submitItem: any) => {
+      if (
+        submitItem[paramKey] &&
+        !optionConfig[paramKey].fieldSettings.listValues.filter(
+          (option: any) => submitItem[paramKey] === option.value
+        )[0]
+      ) {
+        optionConfig[paramKey].fieldSettings.listValues.push({
+          label: submitItem[paramKey],
+          value: submitItem[paramKey]
+        })
+      }
+    })
+  })
+  console.log('筛选数据: ', optionConfig)
+}
 const handleCriteriaChange = (paramKey: any, param: string) => {
   let index: number
   const tag = optionConfig[paramKey].origin
@@ -172,7 +239,7 @@ const handleSearch = () => {
         ElMessage.error(err)
       })
   }
-  emit('search', { os: 'openEuler', suite: selectedSuite.value })
+  emit('search', { ...systemParams, ...caseParams, suite: selectedSuite.value })
 }
 
 watchEffect(() => {
@@ -208,6 +275,9 @@ onMounted(() => {
       }
     }
   })
+
+  getRawSearchParams()
+  getJobValueList()
 })
 </script>
 

@@ -172,7 +172,7 @@ export const jobModel = {
                 },
 
                 // 测试套特定param，以pp.打头
-                'pp.fio.rw': {
+                'pp.fio-setup-basic.rw': {
                         'read':         '顺序读',
                         'write':        '顺序写',
                         'rw':           '顺序混合读写',
@@ -316,7 +316,7 @@ const suiteTables = {
         netperf: [
                 { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'TCP_STREAM' }         },
                 { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'UDP_STREAM' }         },
-                { kpi: 'Throughput_Tps',  x_param: 'test'                                               },
+                { kpi: 'Throughput_tps',  x_param: 'test'                                               },
         ],
         stream: [{
                 kpi: 'bandwidth_MBps',

@@ -1,4 +1,4 @@
-import { RouteRecordRaw, RouterView } from 'vue-router'
+import { RouteRecordRaw } from 'vue-router'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -37,17 +37,15 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             component: () => import('@/views/performance-detail/index.vue'),
             meta: {
               title: 'detail'
-            },
-            children: [
-              {
-                path: 'workloadDetail',
-                name: 'baseline-workloadDetail',
-                component: () => import('@/views/performance-detail/workload-detail.vue'),
-                meta: {
-                  title: 'workloadDetail'
-                }
-              }
-            ]
+            }
+          },
+          {
+            path: 'detail/:submit_id/workloadDetail',
+            name: 'baseline-workloadDetail',
+            component: () => import('@/views/performance-detail/workload-table-section.vue'),
+            meta: {
+              title: 'workloadDetail'
+            }
           },
           {
             path: 'comparativeSearch',
@@ -76,6 +74,14 @@ const asyncRoutes: Array<RouteRecordRaw> = [
                 }
               }
             ]
+          },
+          {
+            path: 'dataAccess',
+            name: 'dataAccess',
+            component: () => import('@/views/data-access/index.vue'),
+            meta: {
+              title: 'dataAccess'
+            }
           }
         ]
       },

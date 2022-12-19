@@ -9,6 +9,8 @@
       <div class="main-title">
         <span>unixbench信息总览 >> UUID: test324802348</span>
       </div>
+      <!--不应该是没有数据时，用某个属性来隐藏全部数据内容，这种写法是不合适的-->
+      <!--请在具体展示字段或者取值时去判空-->
       <div class="main-info" v-if="state.detailInfo.product !== undefined">
         <!-- 结果信息 -->
         <section class="result-info main-item">
@@ -555,7 +557,7 @@
               <span>{{ state.detailInfo.case_result.testcase_name }}</span>
             </el-descriptions-item>
 
-            <el-descriptions-item label="case result id">
+            <el-descriptions-item label="workload">
               <router-link
                 class="work-load-detail"
                 :to="{ name:'baseline-workloadDetail' }"
@@ -635,22 +637,26 @@
         </section>
       </div></el-card
     >
+    <!--<WorkloadTableSection :groupData="detailData.groupData" :suite="detailData.suite"></WorkloadTableSection>-->
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { BaselineDetail } from './interface'
 
 import { usePerformanceData } from '@/stores/performanceData'
-
+import { getPerformanceData } from '@/api/performance'
 import { getDetail } from '@/api/detail'
 
-const router = useRouter()
-const { performanceData } = usePerformanceData()
+import { combineJobs } from '@/views/data-access/utils.js'
 
-let detailData = reactive({})
+const router = useRouter()
+const { performanceData, setPerformanceData } = usePerformanceData()
+
+const detailData = ref({})
 
 let state = reactive({
   detailInfo: {} as BaselineDetail
@@ -697,8 +703,43 @@ const handlerCollapse = (flag: string) => {
 
 onMounted(async () => {
   // todo: 当获取不到Detail时（用户直接通过submit_id进入详情页），需要根据submit_id获取一下jobs并组织。
-  detailData = performanceData[router.currentRoute.value.params.submit_id]
-  console.log(detailData, detailData && detailData.arch) // 测试是否能拿到数据
+  const submitId = router.currentRoute.value.params.submit_id
+  if (performanceData[submitId]) {
+    detailData.value = performanceData[submitId]
+    // state.detailInfo = detailData.value
+    console.log('datailData', detailData.value) // 测试是否能拿到数据
+  } else {
+    loading.value = true
+    getPerformanceData({
+      index: 'jobs',
+      query: {
+        size: 10000,
+        // 只取必要的字段, 确认具体字段对应额后配置
+        // _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
+        //   'os', 'os_version', 'arch', 'kernel',
+        //   'testbox', 'tbox_group',
+        //   'pp', 'stats',
+        //   'job_state', 'time'
+        // ],
+        query: {
+          term: {
+            submit_id: submitId
+          }
+        }
+      },
+    }).then(res => {
+      const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
+      setPerformanceData(submitId, resultObj) // save submit data to store
+      // state.detailInfo = resultObj
+    }).catch((err) => {
+      ElMessage({
+        message: err.message,
+        type: 'error'
+      })
+    }).finally(() => {
+      loading.value = false
+    })
+  }
   // 
   loading.value = true
   // todo: 请替换成真实数据

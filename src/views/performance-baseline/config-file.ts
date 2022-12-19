@@ -1,12 +1,44 @@
 import { ref } from 'vue'
 export const columnConfig = [
   {
-    label: '测试用例名称',
-    prop: 'submit_id'
+    label: '操作系统',
+    prop: 'os_release'  // 需要拼接
+  },
+  {
+    label: '测试机',
+    prop: 'testbox'
+  },
+  {
+    label: '系统架构',
+    prop: 'os_arch'
+  },
+  {
+    label: 'CPU核数',
+    prop: 'nr_cpu'
+  },
+  {
+    label: 'CPU内核',
+    prop: 'kernel_version'
+  },
+  {
+    label: '内存配置',
+    prop: 'memory'
+  },
+  {
+    label: '操作系统页表大小',
+    prop: 'nr_node'
+  },
+  {
+    label: '提交时间',
+    prop: 'submit_time'
+  },
+  {
+    label: '创建人',
+    prop: 'created_by'
   },
   {
     label: '测试人',
-    prop: 'my_account'
+    prop: 'tested_by'
   },
   {
     label: '服务器型号',
@@ -27,10 +59,6 @@ export const columnConfig = [
   {
     label: '操作系统页表大小',
     prop: ''
-  },
-  {
-    label: '内存型号',
-    prop: 'memory'
   },
   {
     label: '测试模型',
