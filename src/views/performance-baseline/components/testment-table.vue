@@ -60,9 +60,9 @@
               v-model="tableColumn"
               @change="handleCheckedTableCloumn">
               <el-checkbox
-                v-for="item in allColumn"
+                v-for="(item, index) in allColumn"
                 :label="item"
-                :key="item"
+                :key="index"
                 >{{ item.label }}</el-checkbox
               >
             </el-checkbox-group>

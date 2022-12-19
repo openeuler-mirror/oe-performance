@@ -51,6 +51,7 @@ const route = useRoute()
 const currentKey = ref('bigData')
 
 const handleChangeScene = (index: string, indexPath: [subMenuIndex: string, menuItemIndex: string]) => {
+  console.log(indexPath)
   // 只有前两项才需要控制参数
   if (indexPath[0] === '1' || indexPath[0] === '2') {
     router.push({
@@ -60,14 +61,13 @@ const handleChangeScene = (index: string, indexPath: [subMenuIndex: string, menu
   } else {
     router.push({ name: index })
   }
-  
 }
 
 onMounted(() => {
   if (route.query.scene) {
     currentKey.value = route.query.scene as string
   } else {
-    currentKey.value = String(route.name)
+    handleChangeScene('bigData', ['1', 'bigData'])
   }
 })
 

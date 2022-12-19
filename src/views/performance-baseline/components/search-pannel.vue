@@ -1,58 +1,48 @@
 <template>
   <div class="performance-baseline-test-subassembly">
-    <el-row :gutter="25" class="subassembly-btn">
-      <el-col :span="2"
-        ><span class="general-font-style">测试组件:</span></el-col
-      >
-      <el-col :span="22">
-        <el-radio-group v-model="selectedSuite" class="ml-4">
-          <el-radio-button
-            v-for="(item, index) in testSubassembly"
-            :key="index"
-            :label="item" />
-        </el-radio-group>
-      </el-col>
-    </el-row>
-    <el-row :gutter="25">
-      <el-col :span="2"
-        ><span class="general-font-style">筛选内容:</span></el-col
-      >
-      <el-col :span="6" class="filter-criteria-col">
-        <div class="filter-criteria">
-          <el-row
-            :gutter="8"
-            v-for="(options, index) in filterCriteria"
-            :key="index">
-            <el-col
-              :span="6"
-              v-for="(option, secIndex) in options"
-              :key="secIndex">
-              <span class="general-font-style">{{ option.title + ':' }}</span>
-              <el-select
-                v-model="option.bindValue"
-                @clear="handleClearCriteria(option.paramKey, option.tag)"
-                clearable
-                size="small">
-                <el-option
-                  v-for="item in option.options"
-                  @click="handleCriteriaChange(option, item.value)"
-                  :label="item.label"
-                  :value="item.value"
-                  :key="item.value" />
-              </el-select>
-            </el-col>
-          </el-row>
+    <div class="subassembly">
+      <span>测试组件:</span>
+      <el-radio-group v-model="selectedSuite" class="subassembly-btn">
+        <el-radio-button
+          v-for="(item, index) in testSubassembly"
+          :key="index"
+          :label="item" />
+      </el-radio-group>
+    </div>
+    <div class="filter-content">
+      <span>筛选内容:</span>
+      <div class="filter-criteria">
+        <div
+          class="filter-item"
+          v-for="(paramKey, index) in filterCriteria"
+          :key="index">
+          <span>{{ optionConfig[paramKey].label + ':' }}</span>
+          <el-select
+            class="filter-values"
+            v-model="optionBind[paramKey]"
+            @clear="handleClearCriteria(paramKey)"
+            clearable
+            size="small">
+            <el-option
+              v-for="(item, listIndex) in optionConfig[paramKey].fieldSettings
+                .listValues"
+              @click="handleCriteriaChange(paramKey, item.value)"
+              :label="item.label || item.value"
+              :value="item.value"
+              :key="listIndex" />
+          </el-select>
         </div>
-      </el-col>
-    </el-row>
+      </div>
+    </div>
     <el-row :gutter="20" justify="center">
-      <el-col :span="2"><el-button>重置</el-button></el-col>
+      <el-col :span="2"
+        ><el-button @click="handleReset">重置</el-button></el-col
+      >
       <el-col :span="2">
         <el-button
           type="primary"
           @click="handleSearch"
-          :disabled="performanceStore.loadingStatus.searchLoading"
-          >
+          :disabled="performanceStore.loadingStatus.searchLoading">
           搜索
         </el-button>
       </el-col>
@@ -64,12 +54,14 @@
 import { onMounted, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePerformanceData } from '@/stores/performanceData'
-import { config, sceneConfig } from '../config-file'
+import { config, sceneConfig, optionBind } from '../config-file'
+import { jobModel } from '/data-model'
+import { queryBySystemParam, queryCriteria } from '@/api/detail'
+import { ElMessage } from 'element-plus'
 
 const selectedSuite = ref('unixbench')
 
 const performanceStore = usePerformanceData()
-
 
 const emit = defineEmits<{
   // 在此处收集查询菜单中的查询条件，整理后去请求全量的submit_id列表
@@ -81,15 +73,17 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 const testSubassembly = ref([] as string[])
-const filterCriteria = ref([] as any[])
+const filterCriteria = ref([] as string[])
+const optionConfig = jobModel.fields
 
 const systemParams = [] as any[]
 const caseParams = [] as any[]
 
 interface queryItem {
   [key: string]: string
-} 
+}
 const handleQueryChange = () => {
+  // 将筛选条件添加到url中
   const newQuery = {} as queryItem
   caseParams.forEach((item: any) => {
     newQuery[item.paramKey] = item.value
@@ -105,23 +99,24 @@ const handleQueryChange = () => {
   })
 }
 
-const handleCriteriaChange = (value: any, param: string) => {
+const handleCriteriaChange = (paramKey: any, param: string) => {
   let index: number
-  if (value.tag === 'system') {
-    index = systemParams.findIndex(item => item.paramKey === value.paramKey)
+  const tag = optionConfig[paramKey].origin
+  if (tag === 'hosts') {
+    index = systemParams.findIndex(item => item.paramKey === paramKey)
     if (index === -1) {
       systemParams.push({
-        paramKey: value.paramKey,
+        paramKey: paramKey,
         value: param
       })
     } else {
       systemParams[index].value = param
     }
-  } else {
-    index = caseParams.findIndex(item => item.paramKey === value.paramKey)
+  } else if (tag === 'jobs') {
+    index = caseParams.findIndex(item => item.paramKey === paramKey)
     if (index === -1) {
       caseParams.push({
-        paramKey: value.paramKey,
+        paramKey: paramKey,
         value: param
       })
     } else {
@@ -129,39 +124,54 @@ const handleCriteriaChange = (value: any, param: string) => {
     }
   }
 }
-const handleClearCriteria = (paramKey: string, tag: string) => {
-  if (tag === 'system') {
-    systemParams.splice(systemParams.findIndex(item => item.paramKey === paramKey), 1)
+const handleClearCriteria = (paramKey: string) => {
+  const tag = optionConfig[paramKey].origin
+  if (tag === 'hosts') {
+    systemParams.splice(
+      systemParams.findIndex(item => item.paramKey === paramKey),
+      1
+    )
   } else {
-    caseParams.splice(caseParams.findIndex(item => item.paramKey === paramKey), 1)
+    caseParams.splice(
+      caseParams.findIndex(item => item.paramKey === paramKey),
+      1
+    )
   }
 }
-// const handleQueryCriteria = () => {
-//   const submitCaseParams = [] as any[]
-//   caseParams.forEach((elem: any) => {
-//     submitCaseParams.push(elem.options)
-//   })
-//   if (systemParams.length > 0) {
-//     console.log('submit1')
-//     const submitSystemParams = [] as any[]
-//     systemParams.forEach((elem: any) => {
-//       submitSystemParams.push(elem.options)
-//     })
-//     queryBySystemParam(submitSystemParams).then(res => {
-//       queryCriteria(submitCaseParams, res.data).then(resCase => {
-//         filterData.value = resCase.data
-//       })
-//     })
-//   } else {
-//     console.log('submit2')
-//     queryCriteria(submitCaseParams).then(resCase => {
-//       filterData.value = resCase.data
-//     })
-//   }
-// }
+
+const handleReset = () => {
+  systemParams.length = 0
+  caseParams.length = 0
+  filterCriteria.value.forEach((paramKey: string) => {
+    optionBind.value[paramKey] = ''
+  })
+}
 
 const handleSearch = () => {
   handleQueryChange()
+  if (systemParams.length > 0) {
+    queryBySystemParam(systemParams)
+      .then(submitIdRes => {
+        queryCriteria(caseParams, submitIdRes.data)
+          .then(res => {
+            console.log(res)
+          })
+          .catch(err => {
+            ElMessage.error(err)
+          })
+      })
+      .catch(err => {
+        ElMessage.error(err)
+      })
+  } else {
+    queryCriteria(caseParams)
+      .then(res => {
+        console.log(res)
+      })
+      .catch(err => {
+        ElMessage.error(err)
+      })
+  }
   emit('search', { os: 'openEuler', suite: selectedSuite.value })
 }
 
@@ -171,21 +181,32 @@ watchEffect(() => {
   for (key in sceneConfig) {
     if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
       testSubassembly.value = config[scene as string].testSubassembly || []
-      filterCriteria.value = config[scene as string].filterCriteria.value || []
+      filterCriteria.value = Object.keys(jobModel.fields)
     }
   }
 })
 
 onMounted(() => {
-  selectedSuite.value = route.query.testSubassembly ? route.query.testSubassembly as string : 'unixbench'
+  // 初始化页面时已经存在筛选条件的情况
+  selectedSuite.value = route.query.testSubassembly
+    ? (route.query.testSubassembly as string)
+    : 'unixbench'
   const keys = Object.keys(route.query)
   keys.forEach((key: string) => {
-    filterCriteria.value.forEach((item: any[]) => {
-      const index = item.findIndex(criteriaItem => criteriaItem.paramKey === key)
-      if (index !== -1) {
-        item[index].bindValue = route.query[key]
+    if (filterCriteria.value.findIndex(paramKey => paramKey === key) !== -1) {
+      optionBind.value[key] = route.query[key] as string
+      if (optionConfig[key].origin === 'hosts') {
+        systemParams.push({
+          paramKey: key,
+          value: route.query[key] as string
+        })
+      } else if (optionConfig[key].origin === 'jobs') {
+        systemParams.push({
+          paramKey: key,
+          value: route.query[key] as string
+        })
       }
-    })
+    }
   })
 })
 </script>
@@ -200,10 +221,6 @@ onMounted(() => {
 }
 .filter-criteria {
   width: 1200px;
-  :deep(.el-select--small) {
-    position: absolute;
-    left: 100px;
-  }
 }
 
 .general-btn {
@@ -225,9 +242,34 @@ onMounted(() => {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
 }
-.general-font-style {
+
+.subassembly-btn {
+  margin-left: 20px;
+}
+
+.filter-content {
+  margin: 10px 0 10px 0;
+  display: flex;
+  width: 100%;
+
+  .filter-criteria {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 20px;
+    .filter-item {
+      min-width: 200px;
+      width: 20%;
+      display: flex;
+      justify-content: space-between;
+      margin: 0 20px 5px 0;
+      .filter-values {
+        width: 60%;
+      }
+    }
+  }
+}
+span {
   font-size: 14px;
-  justify-content: space-between;
-  // align-self: flex-end;
+  min-width: 60px;
 }
 </style>

@@ -11,7 +11,7 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "allowJs": false,
+    "allowJs": true,
     "noEmit": true,
     "types": ["element-plus/global", "webpack-env"],
     "paths": {

@@ -1,7 +1,7 @@
 // vim: set et:
 
 /* eslint-disable */
-jobModel = {
+export const jobModel = {
         // 以下fields字段的格式参见
         // https://www.npmjs.com/package/react-awesome-query-builder
         // https://github.com/ukrbublik/react-awesome-query-builder/blob/HEAD/CONFIG.adoc
@@ -191,7 +191,7 @@ const libmicroGroups = [
 ]
 
 // suite => function(kpi) => Map with keys (testcase, kpi)
-kpiMapFuncs = {
+const kpiMapFuncs = {
         // unixbench raw output:
         //              System Benchmarks Index Values               BASELINE       RESULT    INDEX
         //   Dhrystone 2 using register variables         116700.0 1216141306.0 104210.9
@@ -256,7 +256,7 @@ kpiMapFuncs = {
 // { kpi: 'usecs_per_call', testcase: 'getpid', testgroup: 'get' }
 
 // suite => Map with keys (testcase, kpi)
-kpiMaps = {
+const kpiMaps = {
         stream: {
                 add_bandwidth_MBps:     { kpi: 'bandwidth_MBps', testcase: 'add'        },
                 copy_bandwidth_MBps:    { kpi: 'bandwidth_MBps', testcase: 'copy'       },
@@ -312,7 +312,7 @@ kpiMaps = {
 
 }
 
-suiteTables = {
+const suiteTables = {
         netperf: [
                 { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'TCP_STREAM' }         },
                 { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'UDP_STREAM' }         },
