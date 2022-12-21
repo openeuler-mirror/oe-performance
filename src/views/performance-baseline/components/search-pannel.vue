@@ -54,7 +54,6 @@ import { useRoute, useRouter } from 'vue-router'
 import { usePerformanceData } from '@/stores/performanceData'
 import { config } from '../config-file'
 import { jobModel } from '/data-model'
-import { queryBySystemParam } from '@/api/detail'
 import { ElMessage } from 'element-plus'
 import { getJobValueList } from '@/api/performance'
 
@@ -70,103 +69,18 @@ const emit = defineEmits<{
 }>()
 
 const fieldsConfigs = jobModel.fields
+const suiteList = ref([] as string[])
 
 const selectedSuite = ref('unixbench')
 
-const suiteList = ref([] as string[])
-// const fieldList = ref([] as string[])
-const systemParams = [] as any[]
-const caseParams = [] as any[]
-
-const fieldOrigin = {}
-const hostFieldList = []
-const jobFieldList = []
+const fieldOrigin = {} // 字典，用来判断某个field字段的origin
+const hostFieldList = [] // 中间数据，用来循环host类型的field字段
+const jobFieldList = [] // 中间数据，用来循环job类型的field字段
 
 const searchParams = ref({})
 
 interface queryItem {
   [key: string]: string
-}
-
-// 获取搜索条件
-const getFieldsOptions = () => {
-  getJobValueList({jobFieldList}).then((res) => {
-    const aggs = res.data.aggregations || {}
-    Object.keys(aggs).forEach(field => {
-      // 通过请求获取的可选项
-      const listValues = aggs[field].buckets.map(item => {
-        return {
-          value:item.key
-        }
-      })
-      // default可选项
-      const staticValues = fieldsConfigs[field].fieldSettings.listValues || []
-      addNewOptionValues(staticValues, listValues)
-    })
-  })
-}
-// 将inputArr中与sourceArr不同的选项追加到sourceArr中
-const addNewOptionValues = (sourceArr, inputArr) => {
-  // 只需要m+n的运算复杂度
-  const sourceMap = {}
-  sourceArr.forEach(item => sourceMap[item.value] = true)
-  inputArr.forEach(inputItem => {
-    if (!sourceMap[inputItem.value]) {
-      sourceArr.push(inputItem)
-    }
-  })
-}
-
-const handleReset = () => {
-  searchParams.value = {}
-}
-
-const handleSearch = () => {
-  // 记录查询条件到url上
-  setQueryToUrl()
-  const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
-  console.log(hostParams, jobParams)
-  return 
-
-  // if (systemParams.length > 0) {
-  //   // 如果有选择硬件配置，则先通过硬件信息查询testbox列表
-  //   queryBySystemParam(systemParams)
-  //     .then(res => { // testboxIdList
-  //       emit('search', { ...systemParams, ...caseParams, suite: selectedSuite.value })
-  //     })
-  //     .catch(err => {
-  //       ElMessage.error(err)
-  //     })
-  // } else {
-  //   emit('search', { ...caseParams, suite: selectedSuite.value })
-  // }
-}
-
-// 将筛选条件添加到url中
-const setQueryToUrl = () => {
-  const newQuery = {} as queryItem
-  Object.keys(searchParams.value).forEach(field => {
-    newQuery[field] = searchParams.value[field]
-  })
-  newQuery['scence'] = route.query.scence as string
-  newQuery['suite'] = selectedSuite.value
-  router.push({
-    path: '/baseline/list',
-    query: { ...newQuery }
-  })
-}
-// 将查询参数区分成主机参数和一般参数
-const splitParamsByOrigin = (paramObj) => {
-  const hostParams = {}
-  const jobParams = {}
-  Object.keys(paramObj).forEach(field => {
-    if (fieldOrigin[field] === 'hosts') {
-      hostParams[field] = paramObj[field]
-    } else {
-      jobParams[field] = paramObj[field]
-    }
-  })
-  return { hostParams, jobParams }
 }
 
 // 页面初始化方法
@@ -219,6 +133,95 @@ const setFieldSelection = () => {
   })
 }
 
+// 获取搜索条件
+const getFieldsOptions = () => {
+  getJobValueList({jobFieldList}).then((res) => {
+    const aggs = res.data.aggregations || {}
+    Object.keys(aggs).forEach(field => {
+      // 通过请求获取的可选项
+      const listValues = aggs[field].buckets.map(item => {
+        return {
+          value:item.key
+        }
+      })
+      // default可选项
+      const staticValues = fieldsConfigs[field].fieldSettings.listValues || []
+      addNewOptionValues(staticValues, listValues)
+    })
+  })
+}
+// 将inputArr中与sourceArr不同的选项追加到sourceArr中
+const addNewOptionValues = (sourceArr, inputArr) => {
+  // 只需要m+n的运算复杂度
+  const sourceMap = {}
+  sourceArr.forEach(item => sourceMap[item.value] = true)
+  inputArr.forEach(inputItem => {
+    if (!sourceMap[inputItem.value]) {
+      sourceArr.push(inputItem)
+    }
+  })
+}
+
+// 获取主机相关搜索条件。
+const getHostOptions = () => {
+  // todo: 从store中获取主机信息
+  // 合并主机数据，提出各个field的可选项
+  // 通过addNewOptionValues将可选项追加到对应的field下 
+}
+
+const handleReset = () => {
+  searchParams.value = {}
+}
+
+const handleSearch = () => {
+  // 记录查询条件到url上
+  setQueryToUrl()
+  const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
+  console.log(hostParams, jobParams)
+  // todo: 请求逻辑待实现
+  emit('search', { ...hostParams, ...jobParams, suite: selectedSuite.value })
+
+  // if (systemParams.length > 0) {
+  //   // 如果有选择硬件配置，则先通过硬件信息查询testbox列表
+  //   queryBySystemParam(systemParams)
+  //     .then(res => { // testboxIdList
+  //       emit('search', { ...systemParams, ...caseParams, suite: selectedSuite.value })
+  //     })
+  //     .catch(err => {
+  //       ElMessage.error(err)
+  //     })
+  // } else {
+  //   emit('search', { ...caseParams, suite: selectedSuite.value })
+  // }
+}
+
+// 将筛选条件添加到url中
+const setQueryToUrl = () => {
+  const newQuery = {} as queryItem
+  Object.keys(searchParams.value).forEach(field => {
+    newQuery[field] = searchParams.value[field]
+  })
+  newQuery['scence'] = route.query.scence as string
+  newQuery['suite'] = selectedSuite.value
+  router.push({
+    path: '/baseline/list',
+    query: { ...newQuery }
+  })
+}
+// 将查询参数区分成主机参数和一般参数
+const splitParamsByOrigin = (paramObj) => {
+  const hostParams = {}
+  const jobParams = {}
+  Object.keys(paramObj).forEach(field => {
+    if (fieldOrigin[field] === 'hosts') {
+      hostParams[field] = paramObj[field]
+    } else {
+      jobParams[field] = paramObj[field]
+    }
+  })
+  return { hostParams, jobParams }
+}
+
 // 当场景切换时，初始化页面
 watch(
   () => route.query.scence,
@@ -230,6 +233,7 @@ watch(
 onMounted(() => {
   initailizing()
   getFieldsOptions()
+  getHostOptions()
 })
 </script>
 

@@ -83,8 +83,8 @@ const getTestboxData = () => {
 }
 
 onMounted(() => {
-  if (route.query.scene) {
-    currentKey.value = route.query.scene as string
+  if (route.query.scence) {
+    currentKey.value = route.query.scence as string
   } else {
     handleMenuClick('bigData', ['baseline-solution', 'bigData'])
   }
