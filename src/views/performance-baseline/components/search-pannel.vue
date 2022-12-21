@@ -1,58 +1,46 @@
 <template>
   <div class="performance-baseline-test-subassembly">
-    <el-row :gutter="25" class="subassembly-btn">
-      <el-col :span="2"
-        ><span class="general-font-style">测试组件:</span></el-col
-      >
-      <el-col :span="22">
-        <el-radio-group v-model="selectedSuite" class="ml-4">
-          <el-radio-button
-            v-for="(item, index) in testSubassembly"
-            :key="index"
-            :label="item" />
-        </el-radio-group>
-      </el-col>
-    </el-row>
-    <el-row :gutter="25">
-      <el-col :span="2"
-        ><span class="general-font-style">筛选内容:</span></el-col
-      >
-      <el-col :span="22" class="filter-criteria-col">
-        <div class="filter-criteria">
-          <el-row :gutter="8">
-            <el-col
-              :span="6"
-              :xs="{span:24}"
-              :sm="{span:12}"
-              :lg="{span:6}"
-              v-for="(param, index) in searchParamList"
-              :key="index">
-              <span class="general-font-style">{{ param.title + ':' }}</span>
-              <el-select
-                v-model="param.bindValue"
-                @clear="clearParamValue(param.paramKey, param.tag)"
-                clearable
-                size="small">
-                <el-option
-                  v-for="item in param.options"
-                  @click="selectParamValue(param, item.value)"
-                  :label="item.label"
-                  :value="item.value"
-                  :key="item.value" />
-              </el-select>
-            </el-col>
-          </el-row>
+    <div class="subassembly">
+      <span>测试组件:</span>
+      <el-radio-group v-model="selectedSuite" class="subassembly-btn">
+        <el-radio-button
+          v-for="(item, index) in suiteList"
+          :key="index"
+          :label="item" />
+      </el-radio-group>
+    </div>
+    <div class="filter-content">
+      <span>筛选内容:</span>
+      <div class="filter-criteria">
+        <div
+          class="filter-item"
+          v-for="(paramKey, index) in Object.keys(fieldsConfigs)"
+          :key="index">
+          <span>{{ `${fieldsConfigs[paramKey].label}:` }}</span>
+          <el-select
+            class="filter-values"
+            v-model="searchParams[paramKey]"
+            clearable
+            size="small"
+          >
+            <el-option
+              v-for="(item, listIndex) in fieldsConfigs[paramKey].fieldSettings.listValues"
+              :label="item.label || item.value"
+              :value="item.value"
+              :key="listIndex" />
+          </el-select>
         </div>
-      </el-col>
-    </el-row>
+      </div>
+    </div>
     <el-row :gutter="20" justify="center">
-      <el-col :span="2"><el-button>重置</el-button></el-col>
+      <el-col :span="2"
+        ><el-button @click="handleReset">重置</el-button></el-col
+      >
       <el-col :span="2">
         <el-button
           type="primary"
           @click="handleSearch"
-          :disabled="performanceStore.loadingStatus.searchLoading"
-          >
+          :disabled="performanceStore.loadingStatus.searchLoading">
           搜索
         </el-button>
       </el-col>
@@ -61,15 +49,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, watchEffect } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePerformanceData } from '@/stores/performanceData'
+import { config } from '../config-file'
+import { jobModel } from '/data-model'
+import { ElMessage } from 'element-plus'
+import { getJobValueList } from '@/api/performance'
 
-import { getSearchParams, getJobValueList } from '@/api/performance'
+// import { optionBind } from './search-pannel-config'
 
-import { config, sceneConfig } from '../config-file'
-
-const selectedSuite = ref('unixbench')
+const route = useRoute()
+const router = useRouter()
 
 const performanceStore = usePerformanceData()
 
@@ -77,177 +68,172 @@ const emit = defineEmits<{
   (event: 'search', params: searchParams): void
 }>()
 
-const route = useRoute()
-const router = useRouter()
-const testSubassembly = ref([] as string[])
-const searchParamList = ref([] as any[])
+const fieldsConfigs = jobModel.fields
+const suiteList = ref([] as string[])
 
-const systemParams = [] as any[]
-const caseParams = [] as any[]
+const selectedSuite = ref('unixbench')
+
+const fieldOrigin = {} // 字典，用来判断某个field字段的origin
+const hostFieldList = [] // 中间数据，用来循环host类型的field字段
+const jobFieldList = [] // 中间数据，用来循环job类型的field字段
+
+const searchParams = ref({})
 
 interface queryItem {
   [key: string]: string
 }
 
-// 获取搜索条件
-const getRawSearchParams = () => {
-  getSearchParams({
-    index: 'jobs',
-    query: {
-      size: 0,
-      _source: ['submit_id', 'suite'],
-      query: {
-        bool: {
-          must: [
-            {match: {suite: selectedSuite.value}},
-            {exists: {field: 'submit_id'}}
-          ]
-        }
-      },
-      aggs: {
-        uid_aggs: {
-          terms: {
-            field: 'submit_id',
-            size: 10000,
-          },
-          aggs: {
-            my_top_hits: {
-              top_hits: {
-                _source: {
-                  includes: ['suite', 'submit_id', 'os', 'os_version', 'nr_cpu', 'memory', 'testbox', 'kernel_version', 'nr_node', 'job_stage', 'job_health']
-                },
-                size: 1 // 查询配置是通用配置，只取其中的第一个job的数据做处理
-              }
-            }
-          }
-        }
-      }
+// 页面初始化方法
+const initailizing = () => {
+  setFeildsData()
+  setSuiteList()
+  setDefaultSuite()
+  setFieldSelection()
+}
+// 根据当前场景，显示不同的suite可选项
+const setSuiteList = () => {
+  const { scence } = route.query
+  if (!scence) return
+  const matchSenceConfig = config[String(scence)]
+  if (!matchSenceConfig) return
+  suiteList.value = matchSenceConfig.suiteList || []
+}
+// 设置默认选中的suite，如果url中有，则使用url的
+const setDefaultSuite = () => {
+  const { suite } = route.query
+  if (suite && suiteList.value.indexOf(String(suite)) > -1) {
+    selectedSuite.value = String(suite)
+  } else {
+    selectedSuite.value = suiteList.value[0]
+  }
+}
+// 设置可查询项
+const setFeildsData = () => {
+  const fieldKeys = Object.keys(fieldsConfigs)
+
+  // 设置field类型字典，便于快速识别field类型
+  fieldKeys.forEach(field => {
+    fieldOrigin[field] = jobModel.fields[field].origin
+    if (jobModel.fields[field].origin === 'hosts') {
+      hostFieldList.push(field)
     }
-  }).then((res) => {
-    const rawData = res.data.aggregations.uid_aggs.buckets.map(sub_item => sub_item.my_top_hits.hits.hits[0]._source)
-    console.log('粗粒度筛选数据: ', rawData)
-    setSearchOptions(rawData)
+    if (jobModel.fields[field].origin === 'jobs') {
+      jobFieldList.push(field)
+    }
+  })
+}
+// url上查询条件回填至查询项上
+const setFieldSelection = () => {
+  const fieldKeys = Object.keys(fieldsConfigs)
+  const { scence, suite, ...fields } = route.query
+  Object.keys(fields).forEach(fieldKey => {
+    if (fieldKeys.indexOf(fieldKey) > -1) { // 只添加当前选择框中存在的field选择
+      searchParams.value[fieldKey] = fields[fieldKey]
+    }
   })
 }
 
-const setSearchOptions = (testResultCommonParamsList: any) => {
-  searchParamList.value.forEach(param => {
-    testResultCommonParamsList.forEach(submitItem => {
-      if (submitItem[param.paramKey] 
-      && !param.options.filter(option => submitItem[param.paramKey] === option.value)[0]) {
-        param.options.push({
-          label: submitItem[param.paramKey],
-          value: submitItem[param.paramKey]
-        })
-      }
+// 获取搜索条件
+const getFieldsOptions = () => {
+  getJobValueList({jobFieldList}).then((res) => {
+    const aggs = res.data.aggregations || {}
+    Object.keys(aggs).forEach(field => {
+      // 通过请求获取的可选项
+      const listValues = aggs[field].buckets.map(item => {
+        return {
+          value:item.key
+        }
+      })
+      // default可选项
+      const staticValues = fieldsConfigs[field].fieldSettings.listValues || []
+      addNewOptionValues(staticValues, listValues)
     })
   })
-  console.log('筛选数据: ', searchParamList.value)
+}
+// 将inputArr中与sourceArr不同的选项追加到sourceArr中
+const addNewOptionValues = (sourceArr, inputArr) => {
+  // 只需要m+n的运算复杂度
+  const sourceMap = {}
+  sourceArr.forEach(item => sourceMap[item.value] = true)
+  inputArr.forEach(inputItem => {
+    if (!sourceMap[inputItem.value]) {
+      sourceArr.push(inputItem)
+    }
+  })
 }
 
-const selectParamValue = (value: any, param: string) => {
-  let index: number
-  if (value.tag === 'system') {
-    index = systemParams.findIndex(item => item.paramKey === value.paramKey)
-    if (index === -1) {
-      systemParams.push({
-        paramKey: value.paramKey,
-        value: param
-      })
-    } else {
-      systemParams[index].value = param
-    }
-  } else {
-    index = caseParams.findIndex(item => item.paramKey === value.paramKey)
-    if (index === -1) {
-      caseParams.push({
-        paramKey: value.paramKey,
-        value: param
-      })
-    } else {
-      caseParams[index].value = param
-    }
-  }
+// 获取主机相关搜索条件。
+const getHostOptions = () => {
+  // todo: 从store中获取主机信息
+  // 合并主机数据，提出各个field的可选项
+  // 通过addNewOptionValues将可选项追加到对应的field下 
 }
-const clearParamValue = (paramKey: string, tag: string) => {
-  if (tag === 'system') {
-    systemParams.splice(systemParams.findIndex(item => item.paramKey === paramKey), 1)
-  } else {
-    caseParams.splice(caseParams.findIndex(item => item.paramKey === paramKey), 1)
-  }
-}
-// const handleQueryCriteria = () => {
-//   const submitCaseParams = [] as any[]
-//   caseParams.forEach((elem: any) => {
-//     submitCaseParams.push(elem.options)
-//   })
-//   if (systemParams.length > 0) {
-//     console.log('submit1')
-//     const submitSystemParams = [] as any[]
-//     systemParams.forEach((elem: any) => {
-//       submitSystemParams.push(elem.options)
-//     })
-//     queryBySystemParam(submitSystemParams).then(res => {
-//       queryCriteria(submitCaseParams, res.data).then(resCase => {
-//         filterData.value = resCase.data
-//       })
-//     })
-//   } else {
-//     console.log('submit2')
-//     queryCriteria(submitCaseParams).then(resCase => {
-//       filterData.value = resCase.data
-//     })
-//   }
-// }
 
+const handleReset = () => {
+  searchParams.value = {}
+}
+
+const handleSearch = () => {
+  // 记录查询条件到url上
+  setQueryToUrl()
+  const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
+  console.log(hostParams, jobParams)
+  // todo: 请求逻辑待实现
+  emit('search', { ...hostParams, ...jobParams, suite: selectedSuite.value })
+
+  // if (systemParams.length > 0) {
+  //   // 如果有选择硬件配置，则先通过硬件信息查询testbox列表
+  //   queryBySystemParam(systemParams)
+  //     .then(res => { // testboxIdList
+  //       emit('search', { ...systemParams, ...caseParams, suite: selectedSuite.value })
+  //     })
+  //     .catch(err => {
+  //       ElMessage.error(err)
+  //     })
+  // } else {
+  //   emit('search', { ...caseParams, suite: selectedSuite.value })
+  // }
+}
+
+// 将筛选条件添加到url中
 const setQueryToUrl = () => {
   const newQuery = {} as queryItem
-  caseParams.forEach((item: any) => {
-    newQuery[item.paramKey] = item.value
+  Object.keys(searchParams.value).forEach(field => {
+    newQuery[field] = searchParams.value[field]
   })
-  systemParams.forEach((item: any) => {
-    newQuery[item.paramKey] = item.value
-  })
-  newQuery['scene'] = route.query.scene as string
-  newQuery['testSubassembly'] = selectedSuite.value
-  router.replace({
+  newQuery['scence'] = route.query.scence as string
+  newQuery['suite'] = selectedSuite.value
+  router.push({
     path: '/baseline/list',
     query: { ...newQuery }
   })
 }
-
-const handleSearch = () => {
-  const searchParams = reactive({})
-  searchParamList.value.forEach(item => {
-    searchParams[item.paramKey] = item.bindValue
+// 将查询参数区分成主机参数和一般参数
+const splitParamsByOrigin = (paramObj) => {
+  const hostParams = {}
+  const jobParams = {}
+  Object.keys(paramObj).forEach(field => {
+    if (fieldOrigin[field] === 'hosts') {
+      hostParams[field] = paramObj[field]
+    } else {
+      jobParams[field] = paramObj[field]
+    }
   })
-  setQueryToUrl()
-  emit('search', { ...searchParams, suite: selectedSuite.value})
+  return { hostParams, jobParams }
 }
 
-watchEffect(() => {
-  const scene = route.query.scene ? route.query.scene : 'bigData'
-  let key: keyof typeof sceneConfig
-  for (key in sceneConfig) {
-    if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
-      testSubassembly.value = config[scene as string].testSubassembly || []
-      searchParamList.value = config[scene as string].searchParamList.value || []
-    }
+// 当场景切换时，初始化页面
+watch(
+  () => route.query.scence,
+  () => {
+    initailizing()
   }
-})
+)
 
 onMounted(() => {
-  selectedSuite.value = route.query.testSubassembly ? route.query.testSubassembly as string : 'unixbench'
-  const keys = Object.keys(route.query)
-  keys.forEach((key: string) => {
-    const matchedObj = searchParamList.value.filter(paramItem => paramItem.paramKey === key)[0]
-    if (matchedObj) {
-      matchedObj.bindValue = route.query[key]
-    }
-  })
-
-  getRawSearchParams()
-  getJobValueList()
+  initailizing()
+  getFieldsOptions()
+  getHostOptions()
 })
 </script>
 
@@ -260,10 +246,7 @@ onMounted(() => {
   margin: 0 0 5px 0;
 }
 .filter-criteria {
-  :deep(.el-select--small) {
-    position: absolute;
-    left: 100px;
-  }
+  width: 1200px;
 }
 
 .general-btn {
@@ -285,9 +268,34 @@ onMounted(() => {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
 }
-.general-font-style {
+
+.subassembly-btn {
+  margin-left: 20px;
+}
+
+.filter-content {
+  margin: 10px 0 10px 0;
+  display: flex;
+  width: 100%;
+
+  .filter-criteria {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: 20px;
+    .filter-item {
+      min-width: 200px;
+      width: 20%;
+      display: flex;
+      justify-content: space-between;
+      margin: 0 20px 5px 0;
+      .filter-values {
+        width: 60%;
+      }
+    }
+  }
+}
+span {
   font-size: 14px;
-  justify-content: space-between;
-  // align-self: flex-end;
+  min-width: 60px;
 }
 </style>

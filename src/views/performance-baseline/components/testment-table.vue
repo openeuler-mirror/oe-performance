@@ -11,7 +11,9 @@
           @click="handleComaration"
           >对比</el-button
         >
-        <el-button type="primary" class="button" @click="handleExportCsv">导出</el-button>
+        <el-button type="primary" class="button" @click="handleExportCsv"
+          >导出</el-button
+        >
       </div>
       <el-input
         v-model="input"
@@ -60,9 +62,9 @@
               v-model="tableColumn"
               @change="handleCheckedTableCloumn">
               <el-checkbox
-                v-for="item in allColumn"
+                v-for="(item, index) in allColumn"
                 :label="item"
-                :key="item"
+                :key="index"
                 >{{ item.label }}</el-checkbox
               >
             </el-checkbox-group>
@@ -97,10 +99,13 @@
       :data="tableData"
       v-loading="tableLoading || submitDataLoading"
       :header-cell-style="{ background: 'rgb(243,243,243)' }"
-      @selection-change="handleSelectionChange"
-    >
+      @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="30" />
-      <el-table-column fixed="left" width="150" label="数据来源" prop="submit_id">
+      <el-table-column
+        fixed="left"
+        width="150"
+        label="数据来源"
+        prop="submit_id">
       </el-table-column>
       <el-table-column
         v-for="(item, index) in tableColumn"
@@ -301,8 +306,8 @@ const handleReFresh = () => {
 
 // 获取并合并jobs的逻辑
 // todo: 这段逻辑可以考虑一直store中
-const getAllJobsData = (idList:any[]) => {
-  const tempArr:any[] = reactive(Object.assign([],idList))
+const getAllJobsData = (idList: any[]) => {
+  const tempArr: any[] = reactive(Object.assign([], idList))
   // todo: 每次遍历请求前，应取消之前所有未完成的请求
   idList.forEach((idObj: any, idx: number) => {
     // 如果之前已经获得过数据则不再重复请求
@@ -330,12 +335,12 @@ const getAllJobsData = (idList:any[]) => {
             submit_id: idObj.submit_id
           }
         }
-      },
-    }).then((res) => {
+      }
+    }).then(res => {
       const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
-      performanceStore.setPerformanceData(idObj.submit_id,resultObj) // save submit data to store
+      performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
       tempArr[idx] = resultObj
-    }).catch((err) => {
+    }).catch(err => {
       ElMessage({
         message: err.message,
         type: 'error'
@@ -386,24 +391,24 @@ const handleExportCsv = () => {
   } else {
     const data = []
     // 这里要深拷贝,不然影响列的字段
-    const titleData:any[] = JSON.parse(JSON.stringify(allColumn))
+    const titleData: any[] = JSON.parse(JSON.stringify(allColumn))
     titleData.splice(0, 0, { label: '数据来源', prop: 'submit_id' })
-    const title = titleData.map<string>((item:any) => item.label).join(',')
-    const keys = titleData.map<string>((item:any) => item.prop)
+    const title = titleData.map<string>((item: any) => item.label).join(',')
+    const keys = titleData.map<string>((item: any) => item.prop)
     data.push(`${title}\r\n`)
-    selectedTableRows.value.forEach((item:any) => {
-      const temp:string[] = []
-      keys.forEach((key:string) => {
+    selectedTableRows.value.forEach((item: any) => {
+      const temp: string[] = []
+      keys.forEach((key: string) => {
         temp.push(item[key])
       })
       const tmpStr = temp.join(',')
       data.push(`${tmpStr}\r\n`)
     })
     const dataString = data.join('')
-    const blob = new Blob([`\uFEFF${dataString}`],{
+    const blob = new Blob([`\uFEFF${dataString}`], {
       type: 'text/csv;charset=utf-8'
-    }) 
-    downloadBlobFile(blob,'导出.csv')
+    })
+    downloadBlobFile(blob, '导出.csv')
   }
 }
 </script>
