@@ -1,30 +1,30 @@
 <template>
   <el-container>
     <el-aside width="250px">
-      <el-menu :default-active="currentKey" @select="handleChangeScene">
-        <el-sub-menu index="1">
+      <el-menu :default-active="currentKey" @select="handleMenuClick">
+        <el-sub-menu index="baseline-solution">
           <template #title>
             <span>解决方案性能基线</span>
           </template>
           <el-menu-item
-            v-for="(item, index) in sceneConfig.solution"
+            v-for="(item, index) in scenceConfig.solution"
             :key="index"
             :index="item.prop"
             >{{ item.label }}</el-menu-item
           >
         </el-sub-menu>
-        <el-sub-menu index="2">
+        <el-sub-menu index="baseline-basic">
           <template #title>
             <span>基础性能基线</span>
           </template>
           <el-menu-item
-            v-for="(item, index) in sceneConfig.basic"
+            v-for="(item, index) in scenceConfig.basic"
             :key="index"
             :index="item.prop"
             >{{ item.label }}</el-menu-item
           >
         </el-sub-menu>
-        <el-sub-menu index="3">
+        <el-sub-menu index="comparation">
           <template #title>
             <span>对比检索</span>
           </template>
@@ -46,7 +46,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTestboxStore } from '@/stores/performanceData'
-import { sceneConfig } from '@/views/performance-baseline/config-file'
+import { scenceConfig } from '@/views/performance-baseline/config-file'
 
 import { getTestBoxes } from '@/api/performance'
 
@@ -56,16 +56,15 @@ const router = useRouter()
 const route = useRoute()
 const currentKey = ref('bigData')
 
-const handleChangeScene = (
+const handleMenuClick = (
   index: string,
   indexPath: [subMenuIndex: string, menuItemIndex: string]
 ) => {
-  console.log(indexPath)
   // 只有前两项才需要控制参数
-  if (indexPath[0] === '1' || indexPath[0] === '2') {
+  if (indexPath[0] === 'baseline-solution' || indexPath[0] === 'baseline-basic') {
     router.push({
       path: '/baseline/list',
-      query: { ...route.query, scene: index }
+      query: { ...route.query, scence: index }
     })
   } else {
     router.push({ name: index })
@@ -87,7 +86,7 @@ onMounted(() => {
   if (route.query.scene) {
     currentKey.value = route.query.scene as string
   } else {
-    handleChangeScene('bigData', ['1', 'bigData'])
+    handleMenuClick('bigData', ['baseline-solution', 'bigData'])
   }
 
   getTestboxData()

@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+
 export const columnConfig = [
   {
     label: '操作系统',
@@ -329,24 +329,7 @@ export const columnConfig2 = [
   }
 ]
 
-export interface bindValue {
-  [key: string]: string
-}
-
-export const optionBind = ref({
-  'suite': '',
-  'submit_id': '',
-  'group_id': '',
-  'tags': '',
-  'osv': '',
-  'os_arch': '',
-  'testbox': '',
-  'hw.nr_cpu': '',
-  'hw.nr_node': '',
-  'hw.memory': '',
-} as bindValue)
-
-export const sceneConfig = {
+export const scenceConfig = {
   solution: [
     {
       label: '大数据',
@@ -382,16 +365,6 @@ export const sceneConfig = {
       label: '基础库',
       prop: 'basic'
     }
-  ],
-  contrast: [
-    {
-      label: '基础性能',
-      prop: 'basicPerformance'
-    },
-    {
-      label: '解决方案',
-      prop: 'solution'
-    }
   ]
 }
 
@@ -401,43 +374,43 @@ export interface configItem {
 
 export const config: configItem = {
   bigData: {
-    testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
+    suiteList: ['unixbench', 'lmbench3', 'stream'],
     column: columnConfig
   },
   dataBase: {
-    testSubassembly: ['???', '??', '?'],
+    suiteList: ['???', '??', '?'],
     column: columnConfig2
   },
   distributedStorage: {
-    testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
+    suiteList: ['unixbench', 'lmbench3', 'iperf'],
     column: columnConfig
   },
   cpu: {
-    testSubassembly: ['???', '??', '?'],
+    suiteList: ['???', '??', '?'],
     column: columnConfig2
   },
   memory: {
-    testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
+    suiteList: ['unixbench', 'lmbench3', 'iperf'],
     column: columnConfig
   },
   storage: {
-    testSubassembly: ['???', '??', '?'],
+    suiteList: ['???', '??', '?'],
     column: columnConfig2
   },
   network: {
-    testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
+    suiteList: ['unixbench', 'lmbench3', 'iperf'],
     column: columnConfig
   },
   basic: {
-    testSubassembly: ['???', '??', '?'],
+    suiteList: ['???', '??', '?'],
     column: columnConfig2
   },
   basicPerformance: {
-    testSubassembly: ['unixbench', 'lmbench3', 'iperf'],
+    suiteList: ['unixbench', 'lmbench3', 'iperf'],
     column: columnConfig
   },
   solution: {
-    testSubassembly: ['???', '??', '?'],
+    suiteList: ['???', '??', '?'],
     column: columnConfig2
   }
 }
