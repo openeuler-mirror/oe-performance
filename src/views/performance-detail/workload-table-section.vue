@@ -1,8 +1,8 @@
 <template>
   <div class="baseline-detail-workload-tables" v-loading="loading">
-    <el-card class="">
-      <div v-for="tableInfo in tableColumnMap[detailData.suite]||[]" :key="tableInfo.tableName">
-          表格： {{ tableInfo.tableName }}
+    <!-- <el-card class=""> -->
+      <div class="table-wrap" v-for="tableInfo in tableColumnMap[detailData.suite]||[]" :key="tableInfo.tableName">
+          <div class="tableName">{{ tableInfo.tableName }}</div>
           <el-table
             :data="tableDatas[tableInfo.tableName]"
             border
@@ -16,7 +16,7 @@
             </el-table-column>
           </el-table>
         </div>
-    </el-card>
+    <!-- </el-card> -->
   </div>
 </template>
     
@@ -84,5 +84,14 @@ onMounted(() => {
   .pp-group-section {
     border-bottom: 1px solid #ccc;
     margin-bottom: 20px;
+  }
+  .baseline-detail-workload-tables{
+    .table-wrap{
+      margin-bottom: 30px;
+      .tableName{
+      margin-bottom: 10px;
+    }
+    }
+    
   }
 </style>

@@ -42,7 +42,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'detail/:submit_id/workloadDetail',
             name: 'baseline-workloadDetail',
-            component: () => import('@/views/performance-detail/workload-table-section.vue'),
+            component: () => import('@/views/performance-detail/workload-detail.vue'),
             meta: {
               title: 'workloadDetail'
             }
