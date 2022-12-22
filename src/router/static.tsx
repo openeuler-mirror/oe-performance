@@ -140,7 +140,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'taskList',
             name: 'taskList',
-            component: () => import('@/views/test-task/task-list.vue'),
+            component: () => import('@/views/test-task/index.vue'),
             meta: {
               title: 'taskList'
             }

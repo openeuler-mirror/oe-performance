@@ -176,9 +176,9 @@ const props = defineProps({
   }
 })
 
-const performanceStore = usePerformanceData()
 const router = useRouter()
 const route = useRoute()
+const performanceStore = usePerformanceData()
 
 const input = ref('')
 const selectedOption = ref('')

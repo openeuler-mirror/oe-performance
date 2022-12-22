@@ -40,27 +40,25 @@
      <el-table
        ref="multipleTableRef"
        :data="tableData"
+       v-loading="tableLoading"
        :default-sort="{ prop: 'date', order: 'descending' }"
        style="width: 100%; margin-top: 30px;"
        @selection-change="handleSelectionChange"
      >
-       <el-table-column type="selection"/>
-       <el-table-column fixed width="58">
+       <el-table-column width="58">
          <template #default>
           <el-icon size="20px" @click="changeStar"><Star /></el-icon>
           <!-- <el-icon size="20px"><StarFilled /></el-icon> -->
          </template>
        </el-table-column>
-       <el-table-column fixed label="TaskID" width="110">
+       <el-table-column fixed label="TaskID" width="110" prop="submit_id">
          <template #default="scope">
-             <router-link :to="`/testTask/taskDetails/${scope.row.date}`">
-                <el-button link="" type="primary">
-                <span>{{ scope.row.date }}</span>
-              </el-button>
+             <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
+                {{ scope.row.submit_id }}
             </router-link>
         </template>
        </el-table-column>
-       <el-table-column prop="name" label="Task名称" fixed width="90" show-overflow-tooltip/>
+       <el-table-column prop="name" label="Task名称" width="90" show-overflow-tooltip/>
        <el-table-column
              label="审批状态"
              width="100"
@@ -135,32 +133,120 @@
       class="pagination"
       v-model:currentPage="currentPage"
       v-model:page-size="pageSize"
-      :page-sizes="[10, 20, 30, 40]"
-      :small="small"
-      :disabled="disabled"
-      :background="background"
+      :page-sizes="pageSizes"
+      :small="false"
       layout="prev, pager, next, sizes, jumper"
-      :total="10"
+      :total="total"
       @size-change="handleSizeChange"
-      @current-change="handleCurrentChange" />
+      @current-change="handleCurrentChange"
+    />
 </template>
 <script lang="ts" setup>
-import { ref } from 'vue'
-import { ElTable } from 'element-plus'
+// dep
+import { ref, reactive, watch, watchEffect } from 'vue'
+import { ElTable, ElMessage } from 'element-plus'
 import { Star, Search } from '@element-plus/icons-vue'
+// store
+import { usePerformanceData } from '@/stores/performanceData'
+// api
+import { getPerformanceData } from '@/api/performance'
+// type
 import type { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults'
 import { User } from '../interface'
+// utils
+import { combineJobs } from '@/views/data-access/utils.js'
 
-// const props = defineProps({
-//   activeTab: String
-// })
+const props = defineProps({
+  allData: {
+    type: Array,
+    default: () => []
+  }
+})
+
+const performanceStore = usePerformanceData()
+
+const idList = ref(<any>[])
+const tableData = ref([])
+const requestCount = ref(0)
+const tableLoading = ref(false)
+
+// 分页参数
+const currentPage = ref(1)
+const pageSize = ref(5)
+const pageSizes = ref([10, 20, 50])
+const total = ref(0)
 
 const radio = ref('1')
 const select = ref('Task ID')
 
-
 const number = ref('423')
 const searchInput = ref('')
+
+// 根据pagination自动分页
+watchEffect(() => {
+  const startIndex = (currentPage.value - 1) * pageSize.value
+  // 数据分页
+  idList.value = props.allData.slice(startIndex, startIndex + pageSize.value)
+  total.value = props.allData.length
+})
+
+// 当前页数据idList变化时，获取每个id下的jobs数据。然后更新tableData数据
+// todo: 此处和performancebaseline共用job组合逻辑，可以考虑统一抽出来。
+watch(idList, () => {
+  tableData.value = getAllJobsData(idList.value)
+  console.log('taskList data: ', tableData.value)
+})
+
+const getAllJobsData = (idList: any[]) => {
+  const tempArr: any[] = reactive(Object.assign([], idList))
+  // todo: 每次遍历请求前，应取消之前所有未完成的请求
+  idList.forEach((idObj: any, idx: number) => {
+    // 如果之前已经获得过数据则不再重复请求
+    if (performanceStore.performanceData[idObj.submit_id]) {
+      tempArr[idx] = performanceStore.performanceData[idObj.submit_id]
+      return
+    }
+    // 根据submitId获取它的jobs
+    requestCount.value += 1
+    tableLoading.value = true
+    performanceStore.changeLoadingStatus(true)
+    getPerformanceData({
+      index: 'jobs',
+      query: {
+        size: 10000, // 取全量
+        // 只取必要的字段
+        // _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
+        //   'os', 'os_version', 'arch', 'kernel',
+        //   'testbox', 'tbox_group',
+        //   'pp', 'stats',
+        //   'job_state', 'time'
+        // ],
+        query: {
+          term: {
+            submit_id: idObj.submit_id
+          }
+        }
+      }
+    }).then(res => {
+      const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
+      performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
+      tempArr[idx] = resultObj
+    }).catch(err => {
+      ElMessage({
+        message: err.message,
+        type: 'error'
+      })
+    }).finally(() => {
+      requestCount.value -= 1
+      if (requestCount.value === 0) {
+        tableLoading.value = false
+        performanceStore.changeLoadingStatus(false)
+      }
+    })
+  })
+  return tempArr
+}
+
 
 const selectRadio = (label: any) => {
   console.log(label, '切换任务类型的处理')
@@ -186,67 +272,16 @@ const handleSelectionChange = (val: User[]) => {
   
 }
 
-
 const changeStar = () => {
   console.log('点击收藏处理')
 }
 
-// 分页
-const currentPage = ref(1)
-const pageSize = ref(10)
-const small = ref(false)
-const background = ref(false)
-const disabled = ref(false)
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
 const handleCurrentChange = (val: number) => {
   console.log(`current page: ${val}`)
 }
-const tableData: User[] = [
-  {
-    date: '2016-05-03',
-    name: 'Tm',
-    approval: 'Fail',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-02',
-    name: 'TA',
-    approval: 'Fail',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-04',
-    name: 'Am',
-    approval: 'Complete',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-01 09:00:12',
-    name: 'IC',
-    approval: 'Pending',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-08',
-    name: 'Tc',
-    approval: 'Fail',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-06',
-    name: 'cm',
-    approval: 'Complete',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-  {
-    date: '2016-05-07',
-    name: 'bm',
-    approval: 'Pending',
-    address: 'No. 189, Grove St, Los Angeles',
-  },
-]
 </script>
 
 <style lang="scss" scoped>

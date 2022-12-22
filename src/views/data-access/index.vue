@@ -188,7 +188,7 @@ onMounted(() => {
     console.log('allHost: ', allHostsMap)
   })
   // 获取job中的通用筛选项
-  getJobValueList()
+  // getJobValueList()
 })
 
 </script>

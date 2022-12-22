@@ -6,7 +6,50 @@ const api = {
   removeApplication: '/usercenter/application/removeApplication',
   testScenario: '/usercenter/new/getscenario',
   newApplication: '/usercenter/new',
-  approvalAction: '/usercenter/approval/approvalAction'
+  approvalAction: '/usercenter/approval/approvalAction',
+
+  // 通用es接口
+  requestDataApi: '/data-api/search'
+}
+
+export function getTaskStatusCounts() {
+  return createAxios({
+    url: api.requestDataApi,
+    method: 'post',
+    data: {
+      index: 'jobs',
+      query: {
+        'size': 0,
+        'query': {
+          'range': {
+            'time': {
+              'gte': 'now-10d/d'
+            }
+          }
+        },
+        'aggs': {
+          'job_stage': {
+            'terms': {
+              'field': 'job_stage',
+              'size': 100
+            }
+          },
+          'job_state': {
+            'terms': {
+              'field': 'job_state',
+              'size': 100
+            }
+          },
+          'job_health': {
+            'terms': {
+              'field': 'job_health',
+              'size': 100
+            }
+          }
+        }
+      }
+    }
+  })
 }
 
 export function getApplicationList() {
