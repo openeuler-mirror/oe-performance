@@ -147,7 +147,7 @@ import {
   MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
-import { config, sceneConfig } from '../config-file'
+import { config, scenceConfig } from '../config-file'
 import { ElMessage } from 'element-plus'
 import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
@@ -224,11 +224,11 @@ onMounted(() => {
 })
 
 watchEffect(() => {
-  const scene = route.query.scene ? route.query.scene : 'bigData'
-  let key: keyof typeof sceneConfig
-  for (key in sceneConfig) {
-    if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
-      allColumn.value = config[scene as string].column
+  const scence = route.query.scence ? route.query.scence : 'bigData'
+  let key: keyof typeof scenceConfig
+  for (key in scenceConfig) {
+    if (scenceConfig[key].findIndex(item => item.prop === scence) !== -1) {
+      allColumn.value = config[scence as string].column
       tableColumn.value = allColumn.value
     }
   }

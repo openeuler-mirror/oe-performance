@@ -53,7 +53,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePerformanceData } from '@/stores/performanceData'
 import { config } from '../config-file'
-import { jobModel } from '/data-model'
+import { jobModel } from '@/model/data-model'
 import { ElMessage } from 'element-plus'
 import { getJobValueList } from '@/api/performance'
 
