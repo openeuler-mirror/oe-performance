@@ -2,7 +2,7 @@
   <div>
     <el-card class="baseline-detail" v-loading="loading">
       <div class="main-title">
-        <span>unixbench信息总览 >> UUID: test324802348</span>
+        <span>{{ detailData.suite }}信息总览 >> UUID: test324802348</span>
       </div>
       <!--不应该是没有数据时，用某个属性来隐藏全部数据内容，这种写法是不合适的-->
       <!--请在具体展示字段或者取值时去判空-->
@@ -12,23 +12,37 @@
           <div class="sub-title">结果信息</div>
           <el-descriptions :column="1" border>
             <el-descriptions-item label="guid" class-name="col-value">
-              <!-- <span>{{ state.detailInfo.guid }}</span> -->
+              <!-- <!~~ <span>{{ state.detailInfo.guid }}</span> ~~> -->
             </el-descriptions-item>
 
             <el-descriptions-item label="审核人">
-              <!-- <span>{{ state.detailInfo.created_by }}</span> -->
+              <!-- <!~~ <span>{{ state.detailInfo.created_by }}</span> ~~> -->
             </el-descriptions-item>
 
             <el-descriptions-item label="测试人">
-              <!-- <span>{{ state.detailInfo.tested_by }}</span> -->
+              <!-- <!~~ <span>{{ state.detailInfo.tested_by }}</span> ~~> -->
             </el-descriptions-item>
 
             <el-descriptions-item label="task_belongs_type">
-              <!-- <span>{{ state.detailInfo.task_belongs_type }}</span> -->
+              <!-- <!~~ <span>{{ state.detailInfo.task_belongs_type }}</span> ~~> -->
             </el-descriptions-item>
 
             <el-descriptions-item label="task_belongs_id">
-              <!-- <span>{{ state.detailInfo.task_belongs_id }}</span> -->
+              <!-- <!~~ <span>{{ state.detailInfo.task_belongs_id }}</span> ~~> -->
+            </el-descriptions-item>
+            <el-descriptions-item label="提交时间" class-name="col-value">
+              <span>{{ detailData.submit_date }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item label="提交 id" class-name="col-value">
+              <span>{{ detailData.submit_id }}</span>
+            </el-descriptions-item>
+
+            <el-descriptions-item label="提交人" class-name="col-value">
+              <span>{{ detailData.subqueue }}</span>
+            </el-descriptions-item>
+
+            <el-descriptions-item label="测试模型" class-name="col-value">
+              <span>{{ detailData.testbox }}</span>
             </el-descriptions-item>
           </el-descriptions>
         </section>
@@ -45,7 +59,7 @@
             </el-descriptions-item>
 
             <!-- 服务器型号 -->
-            <el-descriptions-item :span="2">
+            <el-descriptions-item :span="4">
               <template #label>
                 <span>服务器型号</span>
                 <span>
@@ -63,10 +77,10 @@
             </el-descriptions-item>
 
             <!-- 处理器（CPU配置） -->
-            <el-descriptions-item :span="2">
+            <el-descriptions-item :span="4">
               <template #label>
                 <!-- 根据展开项是否为空添加手型交互 -->
-               <div :class="{'td-item': false}" @click="handlerCollapse('cpu')">
+               <div :class="{'td-item': true}" @click="handlerCollapse('cpu')">
                 <span>处理器（CPU配置）</span>
                 <span>
                   <el-tooltip
@@ -80,7 +94,7 @@
                 </span>
                 <span 
                 class="arrowIcon" 
-                v-if="false">
+                v-if="true">
                   <el-icon v-show="cpuCollpase"><ArrowRightBold /></el-icon>
                   <el-icon v-show="!cpuCollpase"><ArrowDownBold /></el-icon>
                 </span>
@@ -90,24 +104,14 @@
             </el-descriptions-item>
             <!-- CPU详情 -->
             <!-- #region -->
-            <!-- <el-descriptions-item
+            <el-descriptions-item
               v-if="!cpuCollpase"
               label-class-name="sub-item"
               class-name="sub-item">
               <template #label>
                 <span class="label">CPU刷新频率（MHz）</span>
               </template>
-              <span class="label">{{ 2500 }}</span>
-            </el-descriptions-item>
-
-            <el-descriptions-item
-              v-if="!cpuCollpase"
-              label-class-name="sub-item"
-              class-name="sub-item">
-              <template #label>
-                <span class="label">cpus</span>
-              </template>
-              <span class="label">{{ 80 }}</span>
+              <span class="label">{{  }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -117,7 +121,18 @@
               <template #label>
                 <span class="label">threads</span>
               </template>
-              <span class="label">{{ 80 }}</span>
+              <span class="label">{{  }}</span>
+            </el-descriptions-item>
+
+            <el-descriptions-item
+              v-if="!cpuCollpase"
+              label-class-name="sub-item"
+              class-name="sub-item"
+              >
+              <template #label>
+                <span class="label">series</span>
+              </template>
+              <span class="label">{{ }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -125,10 +140,22 @@
               label-class-name="sub-item"
               class-name="sub-item">
               <template #label>
-                <span class="label">series</span>
+                <span class="label">cpu数</span>
               </template>
-              <span class="label">{{ 'NULL' }}</span>
-            </el-descriptions-item> -->
+              <span class="label">{{ detailData.nr_cpu }}</span>
+            </el-descriptions-item>
+
+            <el-descriptions-item
+              v-if="!cpuCollpase"
+              label-class-name="sub-item"
+              class-name="sub-item"
+              :span="2"
+              >
+              <template #label>
+                <span class="label">核数</span>
+              </template>
+              <span class="label">{{ detailData.nr_node }}</span>
+            </el-descriptions-item>
             <!-- #endregion -->
 
             <!-- 内存配置 -->
@@ -391,7 +418,7 @@
               class-name="col-value">
               <template #label>
                <div :class="{'td-item': true}" @click="handlerCollapse('os')">
-                <span>操作系统版本</span>
+                <span>操作系统</span>
                 <span>
                   <el-tooltip
                     effect="dark"
@@ -413,53 +440,15 @@
             </el-descriptions-item>
             <!-- 软件配置详情 -->
             <!-- #region -->
-            <el-descriptions-item
-              v-if="!osCollpase"
-              label-class-name="sub-item"
-              class-name="sub-item">
-              <template #label>
-                <span class="label">os_arch</span>
-              </template>
-              <span class="label">{{ detailData.os_arch }}</span>
-            </el-descriptions-item>
 
             <el-descriptions-item
-              v-if="!osCollpase"
-              label-class-name="sub-item"
-              class-name="sub-item">
-              <template #label>
-                <span class="label">os_mount</span>
-              </template>
-              <span class="label">{{ detailData.os_mount }}</span>
-            </el-descriptions-item>
-
-            <el-descriptions-item
-              v-if="!osCollpase"
-              label-class-name="sub-item"
-              class-name="sub-item">
-              <template #label>
-                <span class="label">os_release</span>
-              </template>
-              <span class="label">{{ detailData.os_release }}</span>
-            </el-descriptions-item>
-
-            <el-descriptions-item
-              v-if="!osCollpase"
-              label-class-name="sub-item"
-              class-name="sub-item">
-              <template #label>
-                <span class="label">os_version</span>
-              </template>
-              <span class="label">{{ detailData.os_version }}</span>
-            </el-descriptions-item>
-            <!-- <el-descriptions-item
               v-if="!osCollpase"
               label-class-name="sub-item"
               class-name="sub-item">
               <template #label>
                 <span class="label">系统内核</span>
               </template>
-              <span class="label">{{ 'kernel-4.19.91-23.4.an8' }}</span>
+              <span class="label">{{  }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -469,7 +458,7 @@
               <template #label>
                 <span class="label">编译器版本</span>
               </template>
-              <span class="label">{{ 'V3.4.30' }}</span>
+              <span class="label">{{  }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -479,7 +468,7 @@
               <template #label>
                 <span class="label">GLIBC版本</span>
               </template>
-              <span class="label">{{ '2.28' }}</span>
+              <span class="label">{{  }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -489,7 +478,7 @@
               <template #label>
                 <span class="label">JDK版本</span>
               </template>
-              <span class="label">{{ '23.43.56' }}</span>
+              <span class="label">{{  }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -499,7 +488,7 @@
               <template #label>
                 <span class="label">内核参数</span>
               </template>
-              <span class="label">{{ '80' }}</span>
+              <span class="label">{{  }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -509,7 +498,7 @@
               <template #label>
                 <span class="label">NUMA</span>
               </template>
-              <span class="label">{{ 'NULL' }}</span>
+              <span class="label">{{  }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -519,7 +508,7 @@
               <template #label>
                 <span class="label">命令行</span>
               </template>
-              <span class="label">{{ '80' }}</span>
+              <span class="label">{{  }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -529,8 +518,27 @@
               <template #label>
                 <span class="label">文件系统</span>
               </template>
-              <span class="label">{{ 'ext4' }}</span>
-            </el-descriptions-item> -->
+              <span class="label">{{  }}</span>
+            </el-descriptions-item>
+            <el-descriptions-item
+              v-if="!osCollpase"
+              label-class-name="sub-item"
+              class-name="sub-item">
+              <template #label>
+                <span class="label">系统架构</span>
+              </template>
+              <span class="label">{{ detailData.os_arch }}</span>
+            </el-descriptions-item>
+
+            <el-descriptions-item
+              v-if="!osCollpase"
+              label-class-name="sub-item"
+              class-name="sub-item">
+              <template #label>
+                <span class="label">版本</span>
+              </template>
+              <span class="label">{{ detailData.os_version }}</span>
+            </el-descriptions-item>
             <!-- #endregion -->
           </el-descriptions>
         </section>
