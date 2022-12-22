@@ -2,8 +2,8 @@
    <el-row>
      <el-col :span="15">
          <el-radio-group
-           v-model="radio"
-           @change ="selectRadio">
+           v-model="taskStatus"
+           @change ="selectTaskStatus">
              <el-radio-button label="1">全部任务({{ number }})</el-radio-button>
              <el-radio-button label="2">Pending({{ number }})</el-radio-button>
              <el-radio-button label="3">Running({{ number }})</el-radio-button>
@@ -43,7 +43,6 @@
        v-loading="tableLoading"
        :default-sort="{ prop: 'date', order: 'descending' }"
        style="width: 100%; margin-top: 30px;"
-       @selection-change="handleSelectionChange"
      >
        <el-table-column width="58">
          <template #default>
@@ -176,7 +175,7 @@ const pageSize = ref(5)
 const pageSizes = ref([10, 20, 50])
 const total = ref(0)
 
-const radio = ref('1')
+const taskStatus = ref('1')
 const select = ref('Task ID')
 
 const number = ref('423')
@@ -248,7 +247,7 @@ const getAllJobsData = (idList: any[]) => {
 }
 
 
-const selectRadio = (label: any) => {
+const selectTaskStatus = (label: any) => {
   console.log(label, '切换任务类型的处理')
 }
 // , column: TableColumnCtx<User>
@@ -265,12 +264,6 @@ const filterHandler = (
   return row[propertyKey] === value
 }
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
-const multipleSelection = ref<User[]>([])
-
-const handleSelectionChange = (val: User[]) => {
-  multipleSelection.value = val
-  
-}
 
 const changeStar = () => {
   console.log('点击收藏处理')
