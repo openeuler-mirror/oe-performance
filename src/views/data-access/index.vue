@@ -23,7 +23,7 @@ import flattenObj from '@/utils/utils'
 
 import { getPerformanceData, getTestBoxes } from '@/api/performance'
 
-import { kpiMaps, kpiMapFuncs } from './config.js'
+import { kpiMaps, kpiMapFuncs, addtionalKpiMaps } from './config.js'
 
 const dimension = ref('osv')
 
@@ -80,12 +80,12 @@ const getTotalData = () => {
       'query': {
         bool: {
           must: [
-            { terms: { suite: ['unixbench']} }, // 对应配置文件，目前只能查到这几个数据
+            { terms: { suite: ['libmicro']} }, // 对应配置文件，目前只能查到这几个数据
             // { terms: { os_version: ['22.03-LTS-SP1-RC4-iso'/* , '22.03-LTS-SP1-RC3-iso', '8.6-GA-iso'*/] }},
             // { match: { os_version: osVersion }}, 
             // { match: { suite: 'stream' }},  // 测试，指定suite
             // { match: { testbox: 'taishan200-2280-2s48p-384g--a1006' } },
-            { 'range': {'time': {'gte': 'now-10d/d'} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试s
+            { 'range': {'time': {'gte': 'now-100d/d'} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试s
           ],
         },
       }
@@ -164,7 +164,18 @@ const e2tConverter = (ejobs, tjobs) => {
           }
         })
       } else if (kpiMapFuncs[suiteKey]) { // 如果kpiMaps中没有匹配，则使用kpiMapFuncs
-        console.log(11)
+        if (!addtionalKpiMaps[suiteKey]) return
+        addtionalKpiMaps[suiteKey].forEach(kpi => {
+          const tjob = JSON.parse(JSON.stringify(tempJob))
+          tjob[`pp.${suiteKey}.testcase`] = kpiMapFuncs[suiteKey](kpi).testcase
+          tjob[`pp.${suiteKey}.testgroup`] = kpiMapFuncs[suiteKey](kpi).testgroup
+          tjob[`stats.${suiteKey}.${kpiMapFuncs[suiteKey](kpi).kpi}`] = ejob[`stats.${suiteKey}.${kpi}`]
+          if (tjobs[suiteKey]) {
+            tjobs[suiteKey].push(tjob)
+          } else {
+            tjobs[suiteKey] = [tjob]
+          }
+        })
       }
     })
   })

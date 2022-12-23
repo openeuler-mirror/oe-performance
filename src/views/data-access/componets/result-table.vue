@@ -37,7 +37,8 @@ const tableListOrder = [
   'stream',
   'netperf',
   'lmbench',
-  'unixbench'
+  'unixbench',
+  'libmicro'
 ]
 const tableConfigs = ref({})
 
@@ -57,7 +58,7 @@ watch(
   }
 )
 
-const generateTableConfigsAndData = (tjobs, dimension) => {
+const generateTableConfigsAndData = (tjobs, dimension:string) => {
   tableDatas.value = {}
   tableListOrder.forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
