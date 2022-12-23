@@ -80,12 +80,12 @@ const getTotalData = () => {
       'query': {
         bool: {
           must: [
-            { terms: { suite: ['libmicro']} }, // 对应配置文件，目前只能查到这几个数据
+            { terms: { suite: ['stream', 'netperf', 'lmbench', 'unixbench', 'libmicro']} }, // 对应配置文件，目前只能查到这几个数据
             // { terms: { os_version: ['22.03-LTS-SP1-RC4-iso'/* , '22.03-LTS-SP1-RC3-iso', '8.6-GA-iso'*/] }},
             // { match: { os_version: osVersion }}, 
             // { match: { suite: 'stream' }},  // 测试，指定suite
             // { match: { testbox: 'taishan200-2280-2s48p-384g--a1006' } },
-            { 'range': {'time': {'gte': 'now-100d/d'} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试s
+            { 'range': {'time': {'gte': 'now-50d/d'} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试s
           ],
         },
       }

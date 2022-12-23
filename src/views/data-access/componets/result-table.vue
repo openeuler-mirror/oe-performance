@@ -6,7 +6,15 @@
         {{ config.tableName }}
         <el-table border :data="tableDatas[suite][tableIdx]">
           <el-table-column
-            v-for="item in config.column"
+            :prop="config.column[0].prop"
+            :label="config.column[0].label"
+            :key="config.column[0].prop"
+            width="200"
+            fixed
+          >
+          </el-table-column>
+          <el-table-column
+            v-for="item in config.column.slice(1)"
             :prop="item.prop"
             :label="item.label"
             :key="item.prop">
@@ -128,6 +136,9 @@ const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
   if (!tjob[`stats.${suite}.${tableConfig.kpi}`]) {
     return '' // 如果当前tjob不存在当前表格对应的kpi值，说明当前tjob没有对应当前表格的列名。
   }
+  if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
+    return
+  }
   const columnName = (tjob[`pp.${suite}.${tableConfig.x_param}`] || '').toString()
   // 如果这个column已经存在在tempColumn中的话，就不用重新赋值了。
   if (columnName && !tempColumn.filter(col => col.prop === columnName)[0]){
@@ -140,16 +151,8 @@ const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
 }
 
 const setValuesFromTjobByCol = (tjob, suite, columnName, tableConfig, tempDataObj) => {
-  // 如果当前表格有filters的话，需要通过filters来判断是否要获取当前数据的值。
-  if (tableConfig.filters) {
-    const filterKey = Object.keys(tableConfig.filters)[0]
-    let filteredValue = tjob[`pp.${suite}.${filterKey}`]
-    if (suite === 'unixbench') { // unixbench过滤器的值需要特殊处理，除了nr_task=1的，都为100%
-      filteredValue = filteredValue === 1 ? '1' : '100%'
-    }
-    if (filteredValue !== tableConfig.filters[filterKey]) {
-      return  // 如果有过滤器的情况下，过滤其中的值如果不匹配则忽略当前数据
-    }
+  if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
+    return
   }
   
   if (tempDataObj[columnName]) {
@@ -178,6 +181,22 @@ const calculateValues = (obj) => {
     }
   })
   return tempObj
+}
+
+const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
+  // 如果当前表格有filters的话，需要通过filters来判断是否要获取当前数据的值。
+  if (tableConfig.filters) {
+    const filterKey = Object.keys(tableConfig.filters)[0]
+    let filteredValue = tjob[`pp.${suite}.${filterKey}`]
+    if (suite === 'unixbench') { // unixbench过滤器的值需要特殊处理，除了nr_task=1的，都为100%
+      filteredValue = filteredValue === 1 ? '1' : '100%'
+    }
+    if (filteredValue !== tableConfig.filters[filterKey]) {
+      return false // 如果有过滤器的情况下，过滤其中的值如果不匹配则忽略当前数据
+    }
+    return true
+  }
+  return true
 }
 </script>
   

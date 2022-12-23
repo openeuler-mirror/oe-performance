@@ -62,21 +62,6 @@ export const kpiMaps = {
     'L2_$':             { kpi: 'Memory_latencies', testcase: 'L2_$'     },
     'Main_mem':         { kpi: 'Memory_latencies', testcase: 'Main_mem' },
     'Rand_mem':         { kpi: 'Memory_latencies', testcase: 'Rand_mem' },
-  },
-  // 自己根据新的pr追加的
-  unixbench: {
-    'Dhrystone_2_using_register_variables': { kpi: 'score', testcase: 'Dhrystone_2_using_register_variables' },
-    'Double-Precision_Whetstone': { kpi: 'score', testcase: 'Double-Precision_Whetstone' },
-    'Execl_Throughput': { kpi: 'score', testcase: 'Execl_Throughput' },
-    'File_Copy_1024_bufsize_2000_maxblocks': { kpi: 'score', testcase: 'File_Copy_1024_bufsize_2000_maxblocks' },
-    'File_Copy_256_bufsize_500_maxblocks': { kpi: 'score', testcase: 'File_Copy_256_bufsize_500_maxblocks' },
-    'File_Copy_4096_bufsize_8000_maxblocks': { kpi: 'score', testcase: 'File_Copy_4096_bufsize_8000_maxblocks' },
-    'Pipe-based_Context_Switching': { kpi: 'score', testcase: 'Pipe-based_Context_Switching' },
-    'Pipe_Throughput': { kpi: 'score', testcase: 'Pipe_Throughput' },
-    'Process_Creation': { kpi: 'score', testcase: 'Process_Creation' },
-    'Shell_Scripts_(1_concurrent)': { kpi: 'score', testcase: 'Shell_Scripts_(1_concurrent)' },
-    'Shell_Scripts_(8_concurrent)': { kpi: 'score', testcase: 'Shell_Scripts_(8_concurrent)' },
-    'System_Call_Overhead': { kpi: 'score', testcase: 'System_Call_Overhead' },
   }
 }
 
@@ -117,12 +102,12 @@ export const kpiMapFuncs = {
   //   stats.unixbench.Shell_Scripts_(1_concurrent)
   //   stats.unixbench.Shell_Scripts_(8_concurrent)
   //   stats.unixbench.System_Call_Overhead
-  // unixbench: function (kpi) {
-  //   return {
-  //     kpi: 'score',
-  //     testcase: kpi,  // can do this in caller: .replace('stats.unixbench.', '')
-  //   }
-  // },
+  unixbench: function (kpi) {
+    return {
+      kpi: 'score',
+      testcase: kpi,  // can do this in caller: .replace('stats.unixbench.', '')
+    }
+  },
   libmicro: function (kpi) {
     // https://github.com/rzezeski/libMicro/blob/master/bench.sh has the group info
     let testgroup = libmicroGroups[libmicroGroups.length - 1]
@@ -183,6 +168,20 @@ for (const group of libmicroGroups) {
 // ========================
 // 部分使用kpiMapFuncs 映射的数据，没有提供kpi列表，目前暂时通过这个数据来给出kpi
 export const addtionalKpiMaps = {
+  unixbench: [
+    'Dhrystone_2_using_register_variables',
+    'Double-Precision_Whetstone',
+    'Execl_Throughput',
+    'File_Copy_1024_bufsize_2000_maxblocks',
+    'File_Copy_256_bufsize_500_maxblocks',
+    'File_Copy_4096_bufsize_8000_maxblocks',
+    'Pipe-based_Context_Switching',
+    'Pipe_Throughput',
+    'Process_Creation',
+    'Shell_Scripts_(1_concurrent)',
+    'Shell_Scripts_(8_concurrent)',
+    'System_Call_Overhead'
+  ],
   libmicro: [
     'getpid',
     'getenv',
