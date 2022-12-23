@@ -43,23 +43,28 @@ const tableConfigs = ref({})
 
 const tableDatas = ref({})
 
+// todo: 集成图表展示后，合并watchEffect
 watch(
   () => props.tjobsAll,
   () => {
-    generateTableConfigsAndData(props.tjobsAll)
+    generateTableConfigsAndData(props.tjobsAll, props.dimension)
+  }
+)
+watch(
+  () => props.dimension,
+  () => {
+    generateTableConfigsAndData(props.tjobsAll, props.dimension)
   }
 )
 
-const generateTableConfigsAndData = (tjobs) => {
+const generateTableConfigsAndData = (tjobs, dimension) => {
+  tableDatas.value = {}
   tableListOrder.forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
     if (!tableConfigs.value[suite]) {tableConfigs.value[suite] = []}
     if (!tableDatas.value[suite]) {tableDatas.value[suite] = []}
     tableConfigsInSuite.forEach((tableConfig: Array<Object>, tableIndex: number) => { // 配置每个table的配置
-      const tempConfig = {
-        tableName: '',
-        column: []
-      }
+      const tempConfig = { tableName: '', column: [] }
       const tempTableDataList = tableDatas.value[suite][tableIndex] || [] // 拿到每个表格对应的数据list
       // 生成表格名
       const filterName = tableConfig.filters
@@ -73,7 +78,8 @@ const generateTableConfigsAndData = (tjobs) => {
       const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
       tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
         // 1、拿到当前tjob的维度值
-        const dimensionValue = tjob[props.dimension]
+        const dimensionValue = tjob[dimension]
+        if (!dimensionValue) return // 没有对应维度的话退出
         // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
         const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
         if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。

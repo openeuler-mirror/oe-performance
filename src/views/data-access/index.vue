@@ -3,9 +3,17 @@
         数据测试
     </div>
     <div>
+      数据维度
+      <el-radio-group v-model="dimension">
+        <el-radio-button label="osv" />
+        <el-radio-button label="testbox" />
+        <el-radio-button label="tags" />
+      </el-radio-group>
+    </div>
+    <div>
         <el-button @click="onSearch">查询</el-button>
     </div>
-    <result-table :tjobsAll="inputData"></result-table>
+    <result-table :tjobsAll="inputData" :dimension="dimension"></result-table>
 </template>
     
 <script setup lang="ts">
@@ -17,6 +25,8 @@ import { getPerformanceData, getTestBoxes } from '@/api/performance'
 
 import { kpiMaps, kpiMapFuncs } from './config.js'
 
+const dimension = ref('osv')
+
 // testbox字典
 const allHostsMap = reactive({})
 // ejobs
@@ -26,7 +36,6 @@ const ejobsMap = {}
 const tjobs = {}
 
 let inputData = ref({})
-
 /**
 os
 : 
@@ -71,8 +80,8 @@ const getTotalData = () => {
       'query': {
         bool: {
           must: [
-            { terms: { suite: ['stream', 'netperf', 'lmbench', 'unixbench']} }, // 对应皮遏制文件，目前只能查到这几个数据
-            { terms: { os_version: ['22.03-LTS-SP1-RC4-iso', '22.03-LTS-SP1-RC3-iso', '8.6-GA-iso'] }},
+            { terms: { suite: ['unixbench']} }, // 对应配置文件，目前只能查到这几个数据
+            // { terms: { os_version: ['22.03-LTS-SP1-RC4-iso'/* , '22.03-LTS-SP1-RC3-iso', '8.6-GA-iso'*/] }},
             // { match: { os_version: osVersion }}, 
             // { match: { suite: 'stream' }},  // 测试，指定suite
             // { match: { testbox: 'taishan200-2280-2s48p-384g--a1006' } },
@@ -154,8 +163,8 @@ const e2tConverter = (ejobs, tjobs) => {
             tjobs[suiteKey] = [tjob]
           }
         })
-      } else { // 如果kpiMaps中没有匹配，则使用kpiMapFuncs
-        
+      } else if (kpiMapFuncs[suiteKey]) { // 如果kpiMaps中没有匹配，则使用kpiMapFuncs
+        console.log(11)
       }
     })
   })

@@ -63,6 +63,7 @@ export const kpiMaps = {
     'Main_mem':         { kpi: 'Memory_latencies', testcase: 'Main_mem' },
     'Rand_mem':         { kpi: 'Memory_latencies', testcase: 'Rand_mem' },
   },
+  // 自己根据新的pr追加的
   unixbench: {
     'Dhrystone_2_using_register_variables': { kpi: 'score', testcase: 'Dhrystone_2_using_register_variables' },
     'Double-Precision_Whetstone': { kpi: 'score', testcase: 'Double-Precision_Whetstone' },
