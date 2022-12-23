@@ -25,6 +25,10 @@ const props = defineProps({
   tjobsAll: {
     type: Object,
     default: () => {}
+  },
+  dimension: {  // 数据组织维度
+    type: String,
+    default: 'testbox'
   }
 })
 
@@ -42,13 +46,11 @@ const tableDatas = ref({})
 watch(
   () => props.tjobsAll,
   () => {
-    Object.keys(props.tjobsAll).forEach(osv => {
-      generateTableConfigsAndData(props.tjobsAll[osv], osv)
-    })
+    generateTableConfigsAndData(props.tjobsAll)
   }
 )
 
-const generateTableConfigsAndData = (tjobs, osv) => {
+const generateTableConfigsAndData = (tjobs) => {
   tableListOrder.forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
     if (!tableConfigs.value[suite]) {tableConfigs.value[suite] = []}
@@ -58,7 +60,7 @@ const generateTableConfigsAndData = (tjobs, osv) => {
         tableName: '',
         column: []
       }
-      const tempTableDataList = tableDatas.value[suite][tableIndex] || [] // 每个表格对应的数据
+      const tempTableDataList = tableDatas.value[suite][tableIndex] || [] // 拿到每个表格对应的数据list
       // 生成表格名
       const filterName = tableConfig.filters
         && `${Object.keys(tableConfig.filters)[0]}=${tableConfig.filters[Object.keys(tableConfig.filters)[0]]}`
@@ -67,23 +69,32 @@ const generateTableConfigsAndData = (tjobs, osv) => {
       const tableName = `${filterName || ''}${labelName}${directionName > 0 ? '（越大越好）':'（越小越好）'}`
       tempConfig['tableName'] = tableName
 
-      const tempColumn = [{ label: tableConfig.kpi, prop: 'dataId' }]
-      const tempDataObj = {} // 当前os的数据
+      const tempColumn = [{ label: tableConfig.kpi, prop: 'dimensionId' }]
+      const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
       tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
-        // 将tjob中能根据x_param匹配到的值作为表格的列
+        // 1、拿到当前tjob的维度值
+        const dimensionValue = tjob[props.dimension]
+        // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
         const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
         if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
-        // 根据col获取对应的数据
-        getValueFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataObj)
+        // 3、根据col获取对应的数据设置在tempDataMap[dimensionValue]上
+        if (!tempDataMap[dimensionValue]) {
+        // 如果是一个新的demision，则初始化一下数据
+          tempDataMap[dimensionValue] = {}
+        }
+        setValuesFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataMap[dimensionValue])
       })
       // 赋值列
       tempConfig['column'] = tempColumn
       setTableColConfig(tempConfig, suite, tableIndex)
       
       // 拼装好的数据进行赋值
-      const calculatedObj = calculateValues(tempDataObj)
-      calculatedObj['dataId'] = osv // 添加数据名称
-      tempTableDataList.push(calculatedObj) // 计算平均值
+      // 需要遍历tempDataMap中的各个dimension，然后push入tempTableataList即可
+      Object.keys(tempDataMap).forEach(dimension => {
+        const calculatedObj = calculateValues(tempDataMap[dimension]) // 计算平均值
+        calculatedObj['dimensionId'] = dimension // 添加数据名称
+        tempTableDataList.push(calculatedObj)
+      })
       tableDatas.value[suite][tableIndex] = tempTableDataList
     })
   })
@@ -111,6 +122,7 @@ const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
     return '' // 如果当前tjob不存在当前表格对应的kpi值，说明当前tjob没有对应当前表格的列名。
   }
   const columnName = (tjob[`pp.${suite}.${tableConfig.x_param}`] || '').toString()
+  // 如果这个column已经存在在tempColumn中的话，就不用重新赋值了。
   if (columnName && !tempColumn.filter(col => col.prop === columnName)[0]){
     tempColumn.push({
       label: columnName,
@@ -120,7 +132,8 @@ const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
   return columnName
 }
 
-const getValueFromTjobByCol = (tjob, suite, columnName, tableConfig, tempDataObj) => {
+const setValuesFromTjobByCol = (tjob, suite, columnName, tableConfig, tempDataObj) => {
+  // 如果当前表格有filters的话，需要通过filters来判断是否要获取当前数据的值。
   if (tableConfig.filters) {
     const filterKey = Object.keys(tableConfig.filters)[0]
     let filteredValue = tjob[`pp.${suite}.${filterKey}`]
@@ -131,6 +144,7 @@ const getValueFromTjobByCol = (tjob, suite, columnName, tableConfig, tempDataObj
       return  // 如果有过滤器的情况下，过滤其中的值如果不匹配则忽略当前数据
     }
   }
+  
   if (tempDataObj[columnName]) {
     tempDataObj[columnName].push(tjob[`stats.${suite}.${tableConfig.kpi}`])
   } else {
