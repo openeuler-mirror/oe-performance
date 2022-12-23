@@ -15,10 +15,16 @@
       </div>
     </div>
   </div>
+  <el-card
+  v-for="suite in Object.keys(tableConfigs)" :key="suite"
+  shadow="hover" :header="suite" style="margin-bottom: 20px">
+    <compare-chart :chartConfigs="tableConfigs[suite]" :chartData="tableDatas[suite]"/>
+  </el-card>
 </template>
     
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import CompareChart from './compare-chart.vue'
 import { jobModel, suiteTables } from '@/views/data-access/config'
 
 const props = defineProps({
@@ -161,4 +167,7 @@ const calculateValues = (obj) => {
 </script>
   
 <style lang="scss" scoped>
+.result-tables {
+  margin-bottom: 20px;
+}
 </style>
