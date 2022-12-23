@@ -13,17 +13,17 @@ import { ref, onMounted, reactive, watch } from 'vue'
 import ResultTable from './componets/result-table.vue'
 import flattenObj from '@/utils/utils'
 
-import { getPerformanceData, getJobValueList, getTestBoxes } from '@/api/performance'
+import { getPerformanceData, getTestBoxes } from '@/api/performance'
 
 import { kpiMaps, kpiMapFuncs } from './config.js'
 
 // testbox字典
 const allHostsMap = reactive({})
 // ejobs
-const ejobsAll = reactive({})
-const ejobsMapAll = reactive({})
+const ejobs = {}
+const ejobsMap = {}
 // tjobs
-const tjobsAll = reactive({})
+const tjobs = {}
 
 let inputData = ref({})
 
@@ -44,38 +44,23 @@ osv: centos@7.6.1810
  */
 // 获取jobs数据
 
-const searchParams = {
-  os: [
-    'openeuler', 'centos'
-  ],
-  os_version: [
-    '22.03-LTS-SP1-RC2-iso', '22.03-LTS-SP1-RC3-iso'
-  ]
-}
-
 const dataLoadCount = ref(0)
 
 const onSearch = () => {
-  dataLoadCount.value = 0
-  searchParams.os.forEach((os, idx) => {
-    dataLoadCount.value++
-    getTotalData(os, searchParams.os_version[idx])
-  })
+  dataLoadCount.value++
+  getTotalData()
 }
 
 watch(
   () => dataLoadCount.value,
   () => {
     if (dataLoadCount.value === 0) {
-      inputData.value = tjobsAll
+      inputData.value = tjobs
     }
   }
 )
 
-const getTotalData = (os, osVersion) => {
-  const ejobs = {}
-  const ejobsMap = {}
-  const tjobs = {}
+const getTotalData = () => {
   getPerformanceData({
     'index': 'jobs',
     'query': {
@@ -86,8 +71,8 @@ const getTotalData = (os, osVersion) => {
       'query': {
         bool: {
           must: [
-            { terms: { suite: ['stream', 'netperf', 'lmbench', 'unixbench']} }, // 对应皮遏制文件，目前只能查到这几个数据 
-            { match: { 'os_version': osVersion }}, 
+            { terms: { suite: ['stream', 'netperf', 'lmbench', 'unixbench']} }, // 对应皮遏制文件，目前只能查到这几个数据
+            { terms: { os_version: ['22.03-LTS-SP1-RC4-iso', '22.03-LTS-SP1-RC3-iso', '8.6-GA-iso'] }},
             // { match: { os_version: osVersion }}, 
             // { match: { suite: 'stream' }},  // 测试，指定suite
             // { match: { testbox: 'taishan200-2280-2s48p-384g--a1006' } },
@@ -104,7 +89,7 @@ const getTotalData = (os, osVersion) => {
     }).forEach(item => {
       const tempFlattenItem = flattenObj(item._source)       // jobs转换成ejobs
       tempFlattenItem['osv'] = `${tempFlattenItem.os}@${tempFlattenItem.os_version}` // 增加需组装的参数
-      _osv = tempFlattenItem['osv']
+      // _osv = tempFlattenItem['osv']
       // 保存硬件信息
       addHardwareInfoToJob(tempFlattenItem)
       // 生成ejobs
@@ -113,9 +98,9 @@ const getTotalData = (os, osVersion) => {
     })
     console.log('ejobs: ', ejobs, ejobsMap)
     e2tConverter(ejobs, tjobs)
-    ejobsAll[_osv] = ejobs
-    ejobsMapAll[_osv] = ejobsMap
-    tjobsAll[_osv] = tjobs
+    // ejobsAll = ejobs
+    // ejobsMapAll  = ejobsMap
+    // tjobsAll = tjobs
   }).finally(() => {
     dataLoadCount.value--
   })

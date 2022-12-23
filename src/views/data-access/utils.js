@@ -10,6 +10,7 @@ export const combineJobs = (jobList) => {
   const tempList = jobList.map(job => job._source)
     .map(job => prePrecessJob(job))
   const ppGroup = groupDataByTestparam(tempList)
+  console.log('testcase map: ', ppGroup)
   // 一个submit下的公共参数都类似，取第一个job的公共属性
   // 公共属性目前没有筛选，取得全量
   const tempSubmit = reactive(tempList[0])
@@ -60,13 +61,11 @@ const groupDataByTestparam = (dataList) => {
 }
 
 const mapGroupDataToTableData = (ppGroup, suite) => {
-  console.log('rawData: ', ppGroup)
   const tableDatas = {}
   const resultArr = []
   
   switch (tableMode[suite]) {
   case 'unixbench':  // 表格分成两组数据，一组展示单核，一组展示多核
-    console.log(ppGroup)
     Object.keys(ppGroup).forEach(ppKey => {
       const ppObj = {}
       Object.keys(ppGroup[ppKey]).forEach(kpi => {

@@ -60,7 +60,7 @@ const handleMenuClick = (
   index: string,
   indexPath: [subMenuIndex: string, menuItemIndex: string]
 ) => {
-  // 只有前两项才需要控制参数
+  // indexPath两项需要特殊处理，只切换scence
   if (indexPath[0] === 'baseline-solution' || indexPath[0] === 'baseline-basic') {
     router.push({
       path: '/baseline/list',
@@ -85,8 +85,11 @@ const getTestboxData = () => {
 onMounted(() => {
   if (route.query.scence) {
     currentKey.value = route.query.scence as string
-  } else {
+  } else if (route.path === '/baseline/list') {
+    // 如果是性能基线页面，但是有没有设置场景值的话，跳转至第一个场景（一般登录第一次进来或者顶部导航切换是没有场景的）
     handleMenuClick('bigData', ['baseline-solution', 'bigData'])
+  }else {
+    currentKey.value = String(route.name || '')
   }
 
   getTestboxData()

@@ -48,7 +48,7 @@ const getDataList = () => {
           must: [ 
             // todo： 后续增加根据任务状态查询
             // 暂时只查询知道格式的套件数据
-            { terms: { suite: ['stream', 'netperf', 'lmbench', 'unixbench']} },
+            { terms: { suite: ['stream']} },
             // 查询最近十天的数据，后续视情况调整。
             { 'range': {'time': {'gte': 'now-10d/d'} } }
           ],
