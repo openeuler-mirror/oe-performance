@@ -1,7 +1,7 @@
 <template>
   <div class="performance-baseline-test-table">
     <div class="handle-pannel">
-      <div>
+      <div class="button-group-1">
         <el-button
           type="primary"
           class="button"
@@ -37,7 +37,7 @@
           <el-button :icon="Search" @click="handleSearchTable" />
         </template>
       </el-input>
-      <div>
+      <div class="button-group-2">
         <el-button
           :icon="RefreshLeft"
           :loading="reFreshLodaing"
@@ -59,13 +59,13 @@
               >全选</el-checkbox
             >
             <el-checkbox-group
-              v-model="tableColumn"
+              v-model="cloumnLabel"
               @change="handleCheckedTableCloumn">
               <el-checkbox
-                v-for="(item, index) in allColumn"
+                v-for="item in allColumnLabel"
                 :label="item"
-                :key="index"
-                >{{ item.label }}</el-checkbox
+                :key="item"
+                >{{ item }}</el-checkbox
               >
             </el-checkbox-group>
           </div>
@@ -89,7 +89,7 @@
     </div>
     <div class="tips">
       <el-icon><WarningFilled color="rgb(16,142,233)" /></el-icon>
-      <span> 已选择{{ selectedTableRows.length }}项 </span>
+      <span> 已选择 {{ selectedTableRows.length }}项 </span>
       <el-divider direction="vertical" />
       <span
         >数据所用"测试用例名称"一致可以进行对比操作(最多勾选5条)，可以导出当前所选数据。</span
@@ -107,13 +107,15 @@
         label="数据来源"
         prop="submit_id">
       </el-table-column>
-      <el-table-column
-        v-for="(item, index) in tableColumn"
-        :prop="item.prop"
-        :label="item.label"
-        :key="index"
-        width="150">
-      </el-table-column>
+      <template v-for="(item, index) in tableColumn">
+        <el-table-column
+          v-if="item.show"
+          :prop="item.prop"
+          :label="item.label"
+          :key="index"
+          width="150">
+        </el-table-column>
+      </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">
         <template #default="scope">
           <router-link :to="`/baseline/detail/${scope.row.submit_id}`">
@@ -138,7 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watchEffect, reactive, watch, onMounted } from 'vue'
+import { PropType, ref, watch, reactive, onMounted, watchEffect } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Search,
@@ -147,19 +149,17 @@ import {
   MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
-import { config, scenceConfig } from '../config-file'
+import { config, sceneConfig } from '../config-file'
 import { ElMessage } from 'element-plus'
 import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
-
-// import { allColumns } from '../test-data'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
-
 import { combineJobs } from '@/views/data-access/utils.js'
 
 export interface Column {
   label: string
   prop: string
+  show: boolean
 }
 export interface TableItem {
   [key: string]: any
@@ -200,9 +200,11 @@ const selectOptions = [
 const tableData = ref<TableItem[]>([])
 let originData: TableItem[] = []
 
-let allColumn = ref([] as Column[])
+const allColumn = ref([] as Column[])
 const tableColumn = ref([] as Column[])
-const isIndeterminate = ref(true)
+const allColumnLabel = ref([] as string[])
+const cloumnLabel = ref([] as string[])
+const isIndeterminate = ref(false)
 const checkAllColumn = ref(true)
 
 const selectedTableRows = ref(<{}[]>[])
@@ -220,19 +222,30 @@ const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
 
 onMounted(() => {
-  // handleTableData(1)
+  initailizeColumn()
 })
 
-watchEffect(() => {
-  const scence = route.query.scence ? route.query.scence : 'bigData'
-  let key: keyof typeof scenceConfig
-  for (key in scenceConfig) {
-    if (scenceConfig[key].findIndex(item => item.prop === scence) !== -1) {
-      allColumn.value = config[scence as string].column
+const initailizeColumn = () => {
+  const scene = route.query.scene ? route.query.scene : 'bigData'
+  let key: keyof typeof sceneConfig
+  for (key in sceneConfig) {
+    if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
+      allColumn.value = config[scene as string].column
+      allColumnLabel.value = allColumn.value.map(item => {
+        return item.label
+      })
       tableColumn.value = allColumn.value
+      cloumnLabel.value = allColumnLabel.value
     }
   }
-})
+}
+
+watch(
+  () => route.query.scene,
+  () => {
+    initailizeColumn
+  }
+)
 // 数据扁平化，便于table展示
 
 // const handleTableData = (page: number) => {
@@ -263,11 +276,24 @@ watchEffect(() => {
 // }
 
 const handlecheckAllColumn = (val: any) => {
-  tableColumn.value = val ? allColumn.value : []
+  if (val) {
+    tableColumn.value.forEach(cloumn => {
+      cloumn.show = true
+    })
+  } else {
+    tableColumn.value.forEach(cloumn => {
+      cloumn.show = false
+    })
+  }
+  cloumnLabel.value = val ? allColumnLabel.value : []
   isIndeterminate.value = false
 }
-const handleCheckedTableCloumn = (value: any) => {
+const handleCheckedTableCloumn = (value: any[]) => {
   const checkedCount = value.length
+  tableColumn.value.forEach(cloumn => {
+    cloumn.show =
+      value.findIndex(item => item === cloumn.label) === -1 ? false : true
+  })
   checkAllColumn.value = checkedCount === allColumn.value.length
   isIndeterminate.value =
     checkedCount > 0 && checkedCount < allColumn.value.length
@@ -323,35 +349,31 @@ const getAllJobsData = (idList: any[]) => {
       index: 'jobs',
       query: {
         size: 10000, // 取全量
-        // 只取必要的字段
-        // _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
-        //   'os', 'os_version', 'arch', 'kernel',
-        //   'testbox', 'tbox_group',
-        //   'pp', 'stats',
-        //   'job_state', 'time'
-        // ],
         query: {
           term: {
             submit_id: idObj.submit_id
           }
         }
       }
-    }).then(res => {
-      const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
-      performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
-      tempArr[idx] = resultObj
-    }).catch(err => {
-      ElMessage({
-        message: err.message,
-        type: 'error'
-      })
-    }).finally(() => {
-      requestCount.value -= 1
-      if (requestCount.value === 0) {
-        tableLoading.value = false
-        performanceStore.changeLoadingStatus(false)
-      }
     })
+      .then(res => {
+        const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
+        performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
+        tempArr[idx] = resultObj
+      })
+      .catch(err => {
+        ElMessage({
+          message: err.message,
+          type: 'error'
+        })
+      })
+      .finally(() => {
+        requestCount.value -= 1
+        if (requestCount.value === 0) {
+          tableLoading.value = false
+          performanceStore.changeLoadingStatus(false)
+        }
+      })
   })
   return tempArr
 }
@@ -421,24 +443,33 @@ a {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  .button {
-    min-width: 90px;
-  }
-  .more-button {
-    margin-left: 12px;
-    min-width: 70px;
-  }
-  .more-icon-button {
-    margin-left: 3px;
-    max-width: 30px;
-  }
-  .input-with-select {
+  flex-wrap: wrap;
+  .button-group-1 {
     min-width: 200px;
+    .button {
+      min-width: 90px;
+    }
+  }
+
+  .input-with-select {
+    margin: 10px 0 10px 0;
+    min-width: 250px;
     width: 35%;
     max-height: 32px;
   }
   .select {
     width: 100px;
+  }
+  .button-group-2 {
+    min-width: 290px;
+    .more-button {
+      margin-left: 12px;
+      min-width: 70px;
+    }
+    .more-icon-button {
+      margin-left: 3px;
+      max-width: 30px;
+    }
   }
 }
 .tips {

@@ -7,7 +7,7 @@
             <span>解决方案性能基线</span>
           </template>
           <el-menu-item
-            v-for="(item, index) in scenceConfig.solution"
+            v-for="(item, index) in sceneConfig.solution"
             :key="index"
             :index="item.prop"
             >{{ item.label }}</el-menu-item
@@ -18,7 +18,7 @@
             <span>基础性能基线</span>
           </template>
           <el-menu-item
-            v-for="(item, index) in scenceConfig.basic"
+            v-for="(item, index) in sceneConfig.basic"
             :key="index"
             :index="item.prop"
             >{{ item.label }}</el-menu-item
@@ -46,7 +46,7 @@
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTestboxStore } from '@/stores/performanceData'
-import { scenceConfig } from '@/views/performance-baseline/config-file'
+import { sceneConfig } from '@/views/performance-baseline/config-file'
 
 import { getTestBoxes } from '@/api/performance'
 
@@ -64,7 +64,7 @@ const handleMenuClick = (
   if (indexPath[0] === 'baseline-solution' || indexPath[0] === 'baseline-basic') {
     router.push({
       path: '/baseline/list',
-      query: { ...route.query, scence: index }
+      query: { ...route.query, scene: index }
     })
   } else {
     router.push({ name: index })
@@ -83,8 +83,8 @@ const getTestboxData = () => {
 }
 
 onMounted(() => {
-  if (route.query.scence) {
-    currentKey.value = route.query.scence as string
+  if (route.query.scene) {
+    currentKey.value = route.query.scene as string
   } else {
     handleMenuClick('bigData', ['baseline-solution', 'bigData'])
   }

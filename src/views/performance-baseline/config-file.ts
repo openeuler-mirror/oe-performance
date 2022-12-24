@@ -1,335 +1,461 @@
+import { jobModel } from '@/model/data-model'
+
+const { suite, ...temp } = jobModel.fields
+const testSuite = suite
+export const fieldsConfig = {testSuite, ...temp} as configItem
 
 export const columnConfig = [
   {
-    label: '操作系统',
-    prop: 'os_release'  // 需要拼接
+    label: '提交编号',
+    prop: 'sbumit_id',
+    show: true
   },
   {
-    label: '测试机',
-    prop: 'testbox'
-  },
-  {
-    label: '系统架构',
-    prop: 'os_arch'
-  },
-  {
-    label: 'CPU核数',
-    prop: 'nr_cpu'
-  },
-  {
-    label: 'CPU内核',
-    prop: 'kernel_version'
-  },
-  {
-    label: '内存配置',
-    prop: 'memory'
-  },
-  {
-    label: '操作系统页表大小',
-    prop: 'nr_node'
+    label: '提交日期',
+    prop: 'submit_date',
+    show: true
   },
   {
     label: '提交时间',
-    prop: 'submit_time'
-  },
-  {
-    label: '创建人',
-    prop: 'created_by'
-  },
-  {
-    label: '测试人',
-    prop: 'tested_by'
-  },
-  {
-    label: '服务器型号',
-    prop: ''
-  },
-  {
-    label: '数据状态',
-    prop: 'job_state'
-  },
-  {
-    label: 'CPU总核数',
-    prop: ''
-  },
-  {
-    label: 'CPU频率MHz',
-    prop: ''
-  },
-  {
-    label: '操作系统页表大小',
-    prop: ''
-  },
-  {
-    label: '测试模型',
-    prop: 'model_name'
-  },
-  {
-    label: '命令行',
-    prop: ''
-  },
-  {
-    label: '单位(描述)',
-    prop: ''
-  },
-  {
-    label: '指标',
-    prop: ''
-  },
-  {
-    label: 'CPU总线程数',
-    prop: ''
-  },
-  {
-    label: '所属系列',
-    prop: ''
-  },
-  {
-    label: 'CPU配置',
-    prop: ''
-  },
-  {
-    label: '内存配置',
-    prop: ''
-  },
-  {
-    label: '硬盘配置',
-    prop: ''
-  },
-  {
-    label: '硬盘型号',
-    prop: ''
-  },
-  {
-    label: 'Raid卡配置',
-    prop: ''
-  },
-  {
-    label: 'Raid组',
-    prop: ''
-  },
-  {
-    label: '网卡配置',
-    prop: ''
-  },
-  {
-    label: 'PSU配置',
-    prop: ''
-  },
-  {
-    label: '风扇配置',
-    prop: ''
-  },
-  {
-    label: '板卡配置',
-    prop: ''
-  },
-  {
-    label: 'BMC版本',
-    prop: ''
-  },
-  {
-    label: 'BIOS版本',
-    prop: ''
-  },
-  {
-    label: 'BIOS配置详情',
-    prop: ''
+    prop: 'submit_time',
+    show: true
   },
   {
     label: '操作系统',
-    prop: ''
+    prop: 'os_release',  // 需要拼接
+    show: true
   },
   {
-    label: '系统内核',
-    prop: ''
+    label: '测试机',
+    prop: 'testbox',
+    show: true
   },
   {
-    label: '编译器版本',
-    prop: ''
+    label: '系统架构',
+    prop: 'os_arch',
+    show: true
   },
   {
-    label: '测试工具版本',
-    prop: ''
+    label: 'CPU核数',
+    prop: 'nr_cpu',
+    show: true
   },
   {
-    label: 'GLIBC版本',
-    prop: ''
+    label: 'CPU内核',
+    prop: 'kernel_version',
+    show: true
   },
   {
-    label: 'JDK版本',
-    prop: ''
+    label: '内存配置',
+    prop: 'memory',
+    show: true
   },
   {
-    label: 'numa信息',
-    prop: ''
+    label: '操作系统页表大小',
+    prop: 'nr_node',
+    show: true
   },
   {
-    label: '性能数据',
-    prop: ''
+    label: '创建人',
+    prop: 'created_by',
+    show: true
+  },
+  {
+    label: '测试人',
+    prop: 'tested_by',
+    show: true
+  },
+  {
+    label: '服务器型号',
+    prop: '',
+    show: true
+  },
+  {
+    label: '数据状态',
+    prop: 'job_state',
+    show: true
+  },
+  {
+    label: 'CPU总核数',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'CPU频率MHz',
+    prop: '',
+    show: true
+  },
+  {
+    label: '操作系统页表大小',
+    prop: '',
+    show: true
   },
   {
     label: '测试模型',
-    prop: ''
+    prop: 'model_name',
+    show: true
+  },
+  {
+    label: '命令行',
+    prop: '',
+    show: true
+  },
+  {
+    label: '单位(描述)',
+    prop: '',
+    show: true
+  },
+  {
+    label: '指标',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'CPU总线程数',
+    prop: '',
+    show: true
+  },
+  {
+    label: '所属系列',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'CPU配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: '硬盘配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: '硬盘型号',
+    prop: 'model_name',
+    show: true
+  },
+  {
+    label: 'Raid卡配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'Raid组',
+    prop: '',
+    show: true
+  },
+  {
+    label: '网卡配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'PSU配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: '风扇配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: '板卡配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'BMC版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'BIOS版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'BIOS配置详情',
+    prop: '',
+    show: true
+  },
+  {
+    label: '系统内核',
+    prop: '',
+    show: true
+  },
+  {
+    label: '编译器版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: '测试工具版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'GLIBC版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'JDK版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'numa信息',
+    prop: '',
+    show: true
+  },
+  {
+    label: '性能数据',
+    prop: 'perf-profile',
+    show: true
+  },
+  {
+    label: '测试模型',
+    prop: '',
+    show: true
   },
   {
     label: '创建时间',
-    prop: ''
+    prop: '',
+    show: true
   }
 ]
 
 export const columnConfig2 = [
   {
-    label: '测试用例名称2',
-    prop: 'submit_id'
+    label: '提交编号',
+    prop: 'sbumit_id',
+    show: true
   },
   {
-    label: '测试人2',
-    prop: 'my_account'
+    label: '提交日期',
+    prop: 'submit_date',
+    show: true
   },
   {
-    label: '服务器型号2',
-    prop: ''
-  },
-  {
-    label: '数据状态2',
-    prop: 'job_state'
-  },
-  {
-    label: 'CPU总核数2',
-    prop: ''
-  },
-  {
-    label: 'CPU频率MHz',
-    prop: ''
-  },
-  {
-    label: '操作系统页表大小',
-    prop: ''
-  },
-  {
-    label: '内存型号',
-    prop: 'memory'
-  },
-  {
-    label: '测试模型',
-    prop: 'model_name'
-  },
-  {
-    label: '命令行',
-    prop: ''
-  },
-  {
-    label: '单位(描述)',
-    prop: ''
-  },
-  {
-    label: '指标',
-    prop: ''
-  },
-  {
-    label: 'CPU总线程数',
-    prop: ''
-  },
-  {
-    label: '所属系列',
-    prop: ''
-  },
-  {
-    label: 'CPU配置',
-    prop: ''
-  },
-  {
-    label: '内存配置',
-    prop: ''
-  },
-  {
-    label: '硬盘配置',
-    prop: ''
-  },
-  {
-    label: '硬盘型号',
-    prop: ''
-  },
-  {
-    label: 'Raid卡配置',
-    prop: ''
-  },
-  {
-    label: 'Raid组',
-    prop: ''
-  },
-  {
-    label: '网卡配置',
-    prop: ''
-  },
-  {
-    label: 'PSU配置',
-    prop: ''
-  },
-  {
-    label: '风扇配置',
-    prop: ''
-  },
-  {
-    label: '板卡配置',
-    prop: ''
-  },
-  {
-    label: 'BMC版本',
-    prop: ''
-  },
-  {
-    label: 'BIOS版本',
-    prop: ''
-  },
-  {
-    label: 'BIOS配置详情',
-    prop: ''
+    label: '提交时间',
+    prop: 'submit_time',
+    show: true
   },
   {
     label: '操作系统',
-    prop: ''
+    prop: 'os_release',  // 需要拼接
+    show: true
   },
   {
-    label: '系统内核',
-    prop: ''
+    label: '测试机',
+    prop: 'testbox',
+    show: true
   },
   {
-    label: '编译器版本',
-    prop: ''
+    label: '系统架构',
+    prop: 'os_arch',
+    show: true
   },
   {
-    label: '测试工具版本',
-    prop: ''
+    label: 'CPU核数',
+    prop: 'nr_cpu',
+    show: true
   },
   {
-    label: 'GLIBC版本',
-    prop: ''
+    label: 'CPU内核',
+    prop: 'kernel_version',
+    show: true
   },
   {
-    label: 'JDK版本',
-    prop: ''
+    label: '内存配置',
+    prop: 'memory',
+    show: true
   },
   {
-    label: 'numa信息',
-    prop: ''
+    label: '操作系统页表大小',
+    prop: 'nr_node',
+    show: true
   },
   {
-    label: '性能数据',
-    prop: ''
+    label: '创建人',
+    prop: 'created_by',
+    show: true
+  },
+  {
+    label: '测试人',
+    prop: 'tested_by',
+    show: true
+  },
+  {
+    label: '服务器型号',
+    prop: '',
+    show: true
+  },
+  {
+    label: '数据状态',
+    prop: 'job_state',
+    show: true
+  },
+  {
+    label: 'CPU总核数',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'CPU频率MHz',
+    prop: '',
+    show: true
+  },
+  {
+    label: '操作系统页表大小',
+    prop: '',
+    show: true
   },
   {
     label: '测试模型',
-    prop: ''
+    prop: 'model_name',
+    show: true
+  },
+  {
+    label: '命令行',
+    prop: '',
+    show: true
+  },
+  {
+    label: '单位(描述)',
+    prop: '',
+    show: true
+  },
+  {
+    label: '指标',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'CPU总线程数',
+    prop: '',
+    show: true
+  },
+  {
+    label: '所属系列',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'CPU配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: '内存配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: '硬盘配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: '硬盘型号',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'Raid卡配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'Raid组',
+    prop: '',
+    show: true
+  },
+  {
+    label: '网卡配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'PSU配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: '风扇配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: '板卡配置',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'BMC版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'BIOS版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'BIOS配置详情',
+    prop: '',
+    show: true
+  },
+  {
+    label: '系统内核',
+    prop: '',
+    show: true
+  },
+  {
+    label: '编译器版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: '测试工具版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'GLIBC版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'JDK版本',
+    prop: '',
+    show: true
+  },
+  {
+    label: 'numa信息',
+    prop: '',
+    show: true
+  },
+  {
+    label: '性能数据',
+    prop: 'perf-profile',
+    show: true
+  },
+  {
+    label: '测试模型',
+    prop: '',
+    show: true
   },
   {
     label: '创建时间',
-    prop: ''
+    prop: '',
+    show: true
   }
 ]
 
-export const scenceConfig = {
+export const sceneConfig = {
   solution: [
     {
       label: '大数据',
