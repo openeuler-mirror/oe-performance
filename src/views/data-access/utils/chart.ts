@@ -36,14 +36,15 @@ const option = function(title:string, data:any[], cases:string[]){
     },
     color: ['#00c853','#2979ff','#1e88e5','#29b6f6','#90caf9'],  
     legend: {
-      top: '8%',
+      x:'center',
+      y: 'bottom',
       type: 'scroll'
     },
-    grid: {
-      top: '20%',
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
+    grid: { // 图表主体区域
+      top: '8%',
+      left: '2%',
+      right: '2%',
+      bottom: '8%',
       containLabel: true
     },
     xAxis: {

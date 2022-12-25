@@ -26,19 +26,22 @@ const option = function(title:string, data:any[], cases:string[]){
     },
     color: ['#00c853','#2979ff','#1e88e5','#29b6f6','#90caf9'],
     legend: {
-      top: '8%',
+      x:'center',
+      y: 'bottom',
       type: 'scroll'
     },
     grid: {
-      top: '20%',
-      left: '3%',
-      right: '4%',
-      bottom: '3%',
+      top: '8%',
+      left: '2%',
+      right: '2%',
+      bottom: '8%',
       containLabel: true
     },
     xAxis: {
       type: 'category',
-      boundaryGap: false,
+      axisLabel: {
+        // interval: 0 // 强制显示所有标签
+      },
       data: cases
     },
     yAxis: {
