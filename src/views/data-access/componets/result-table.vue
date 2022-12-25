@@ -6,7 +6,15 @@
         {{ config.tableName }}
         <el-table border :data="tableDatas[suite][tableIdx]">
           <el-table-column
-            v-for="item in config.column"
+            :prop="config.column[0].prop"
+            :label="config.column[0].label"
+            :key="config.column[0].prop"
+            width="200"
+            fixed
+          >
+          </el-table-column>
+          <el-table-column
+            v-for="item in config.column.slice(1)"
             :prop="item.prop"
             :label="item.label"
             :key="item.prop">
@@ -43,29 +51,35 @@ const tableListOrder = [
   'stream',
   'netperf',
   'lmbench',
-  'unixbench'
+  'unixbench',
+  'libmicro'
 ]
 const tableConfigs = ref({})
 
 const tableDatas = ref({})
 
+// todo: 集成图表展示后，合并watchEffect
 watch(
   () => props.tjobsAll,
   () => {
-    generateTableConfigsAndData(props.tjobsAll)
+    generateTableConfigsAndData(props.tjobsAll, props.dimension)
+  }
+)
+watch(
+  () => props.dimension,
+  () => {
+    generateTableConfigsAndData(props.tjobsAll, props.dimension)
   }
 )
 
-const generateTableConfigsAndData = (tjobs) => {
+const generateTableConfigsAndData = (tjobs, dimension:string) => {
+  tableDatas.value = {}
   tableListOrder.forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
     if (!tableConfigs.value[suite]) {tableConfigs.value[suite] = []}
     if (!tableDatas.value[suite]) {tableDatas.value[suite] = []}
     tableConfigsInSuite.forEach((tableConfig: Array<Object>, tableIndex: number) => { // 配置每个table的配置
-      const tempConfig = {
-        tableName: '',
-        column: []
-      }
+      const tempConfig = { tableName: '', column: [] }
       const tempTableDataList = tableDatas.value[suite][tableIndex] || [] // 拿到每个表格对应的数据list
       // 生成表格名
       const filterName = tableConfig.filters
@@ -79,7 +93,8 @@ const generateTableConfigsAndData = (tjobs) => {
       const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
       tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
         // 1、拿到当前tjob的维度值
-        const dimensionValue = tjob[props.dimension]
+        const dimensionValue = tjob[dimension]
+        if (!dimensionValue) return // 没有对应维度的话退出
         // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
         const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
         if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
@@ -127,6 +142,9 @@ const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
   if (!tjob[`stats.${suite}.${tableConfig.kpi}`]) {
     return '' // 如果当前tjob不存在当前表格对应的kpi值，说明当前tjob没有对应当前表格的列名。
   }
+  if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
+    return
+  }
   const columnName = (tjob[`pp.${suite}.${tableConfig.x_param}`] || '').toString()
   // 如果这个column已经存在在tempColumn中的话，就不用重新赋值了。
   if (columnName && !tempColumn.filter(col => col.prop === columnName)[0]){
@@ -139,16 +157,8 @@ const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
 }
 
 const setValuesFromTjobByCol = (tjob, suite, columnName, tableConfig, tempDataObj) => {
-  // 如果当前表格有filters的话，需要通过filters来判断是否要获取当前数据的值。
-  if (tableConfig.filters) {
-    const filterKey = Object.keys(tableConfig.filters)[0]
-    let filteredValue = tjob[`pp.${suite}.${filterKey}`]
-    if (suite === 'unixbench') { // unixbench过滤器的值需要特殊处理，除了nr_task=1的，都为100%
-      filteredValue = filteredValue === 1 ? '1' : '100%'
-    }
-    if (filteredValue !== tableConfig.filters[filterKey]) {
-      return  // 如果有过滤器的情况下，过滤其中的值如果不匹配则忽略当前数据
-    }
+  if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
+    return
   }
   
   if (tempDataObj[columnName]) {
@@ -177,6 +187,22 @@ const calculateValues = (obj) => {
     }
   })
   return tempObj
+}
+
+const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
+  // 如果当前表格有filters的话，需要通过filters来判断是否要获取当前数据的值。
+  if (tableConfig.filters) {
+    const filterKey = Object.keys(tableConfig.filters)[0]
+    let filteredValue = tjob[`pp.${suite}.${filterKey}`]
+    if (suite === 'unixbench') { // unixbench过滤器的值需要特殊处理，除了nr_task=1的，都为100%
+      filteredValue = filteredValue === 1 ? '1' : '100%'
+    }
+    if (filteredValue !== tableConfig.filters[filterKey]) {
+      return false // 如果有过滤器的情况下，过滤其中的值如果不匹配则忽略当前数据
+    }
+    return true
+  }
+  return true
 }
 </script>
   
