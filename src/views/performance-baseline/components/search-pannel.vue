@@ -1,6 +1,6 @@
 <template>
-  <div class="performance-baseline-test-subassembly">
-    <el-row class="subassembly">
+  <div class="performance-baseline-search-pannel">
+    <el-row class="suite-selection">
       <el-col :span="2">
         <span>测试组件:</span>
       </el-col>
@@ -13,27 +13,25 @@
         </el-radio-group>
       </el-col>
     </el-row>
-    <el-row class="filter-content">
+    <el-row class="search-field-section">
       <el-col :span="2">
         <span>筛选内容:</span>
       </el-col>
       <el-col :span="22">
         <el-row
-          class="filter-criteria"
+          class="react-row"
           v-for="(subField, fieldIndex) in fieldsListForRender"
           :key="fieldIndex">
           <el-col
             :xs="24"
             :sm="12"
-            :md="8"
             :lg="6"
-            :xl="6"
-            class="filter-item"
+            class="field-item"
             v-for="(paramKey, index) in Object.keys(subField)"
             :key="index">
             <span>{{ `${subField[paramKey].label}:` }}</span>
             <el-select
-              class="filter-values"
+              class="field-selection"
               v-model="searchParams[paramKey]"
               clearable
               size="small">
@@ -49,17 +47,13 @@
       </el-col>
     </el-row>
     <el-row justify="center">
-      <el-col :span="2"
-        ><el-button @click="handleReset">重置</el-button></el-col
-      >
-      <el-col :span="2">
-        <el-button
-          type="primary"
-          @click="handleSearch"
-          :disabled="performanceStore.loadingStatus.searchLoading">
-          搜索
-        </el-button>
-      </el-col>
+      <el-button @click="handleReset">重置</el-button>
+      <el-button
+        type="primary"
+        @click="handleSearch"
+        :disabled="performanceStore.loadingStatus.searchLoading">
+        搜索
+      </el-button>
     </el-row>
   </div>
 </template>
@@ -270,10 +264,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .el-col {
-  border-radius: 4px;
-}
-.el-row {
-  margin: 0 0 5px 0;
+  margin-bottom: 5px;
 }
 
 .general-btn {
@@ -296,12 +287,12 @@ onMounted(() => {
   border-bottom-right-radius: 5px;
 }
 
-.filter-content {
-  .filter-criteria {
-    .filter-item {
+.search-field-section {
+  .react-row {
+    .field-item {
       position: relative;
     }
-    .filter-values {
+    .field-selection {
       position: absolute;
       right: 20px;
       width: 60%;
