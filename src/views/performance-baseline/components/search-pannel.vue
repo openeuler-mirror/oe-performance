@@ -1,38 +1,54 @@
 <template>
   <div class="performance-baseline-test-subassembly">
-    <div class="subassembly">
-      <span>测试组件:</span>
-      <el-radio-group v-model="selectedSuite" class="subassembly-btn">
-        <el-radio-button
-          v-for="(item, index) in suiteList"
-          :key="index"
-          :label="item" />
-      </el-radio-group>
-    </div>
-    <div class="filter-content">
-      <span>筛选内容:</span>
-      <div class="filter-criteria">
-        <div
-          class="filter-item"
-          v-for="(paramKey, index) in Object.keys(fieldsConfigs)"
-          :key="index">
-          <span>{{ `${fieldsConfigs[paramKey].label}:` }}</span>
-          <el-select
-            class="filter-values"
-            v-model="searchParams[paramKey]"
-            clearable
-            size="small"
-          >
-            <el-option
-              v-for="(item, listIndex) in fieldsConfigs[paramKey].fieldSettings.listValues"
-              :label="item.label || item.value"
-              :value="item.value"
-              :key="listIndex" />
-          </el-select>
-        </div>
-      </div>
-    </div>
-    <el-row :gutter="20" justify="center">
+    <el-row class="subassembly">
+      <el-col :span="2">
+        <span>测试组件:</span>
+      </el-col>
+      <el-col :span="22">
+        <el-radio-group v-model="selectedSuite">
+          <el-radio-button
+            v-for="(item, index) in suiteList"
+            :key="index"
+            :label="item" />
+        </el-radio-group>
+      </el-col>
+    </el-row>
+    <el-row class="filter-content">
+      <el-col :span="2">
+        <span>筛选内容:</span>
+      </el-col>
+      <el-col :span="22">
+        <el-row
+          class="filter-criteria"
+          v-for="(subField, fieldIndex) in fieldsListForRender"
+          :key="fieldIndex">
+          <el-col
+            :xs="24"
+            :sm="12"
+            :md="8"
+            :lg="6"
+            :xl="6"
+            class="filter-item"
+            v-for="(paramKey, index) in Object.keys(subField)"
+            :key="index">
+            <span>{{ `${subField[paramKey].label}:` }}</span>
+            <el-select
+              class="filter-values"
+              v-model="searchParams[paramKey]"
+              clearable
+              size="small">
+              <el-option
+                v-for="(item, listIndex) in subField[paramKey].fieldSettings
+                  .listValues"
+                :label="item.label || item.value"
+                :value="item.value"
+                :key="listIndex" />
+            </el-select>
+          </el-col>
+        </el-row>
+      </el-col>
+    </el-row>
+    <el-row justify="center">
       <el-col :span="2"
         ><el-button @click="handleReset">重置</el-button></el-col
       >
@@ -52,12 +68,8 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { usePerformanceData } from '@/stores/performanceData'
-import { config } from '../config-file'
-import { jobModel } from '@/model/data-model'
-import { ElMessage } from 'element-plus'
+import { config, fieldsConfig } from '../config-file'
 import { getJobValueList } from '@/api/performance'
-
-// import { optionBind } from './search-pannel-config'
 
 const route = useRoute()
 const router = useRouter()
@@ -68,33 +80,51 @@ const emit = defineEmits<{
   (event: 'search', params: searchParams): void
 }>()
 
-const fieldsConfigs = jobModel.fields
-const suiteList = ref([] as string[])
+const fieldsListForRender = ref([])
 
+const suiteList = ref([] as string[])
 const selectedSuite = ref('unixbench')
 
-const fieldOrigin = {} // 字典，用来判断某个field字段的origin
+const fieldOrigin = {} as objectItem // 字典，用来判断某个field字段的origin
 const hostFieldList = [] // 中间数据，用来循环host类型的field字段
-const jobFieldList = [] // 中间数据，用来循环job类型的field字段
+const jobFieldList = [] as any // 中间数据，用来循环job类型的field字段
 
-const searchParams = ref({})
+const searchParams = ref({} as objectItem)
 
-interface queryItem {
+interface objectItem {
   [key: string]: string
+}
+
+// 修改fieldConfig的格式，方便展示
+const initailizefieldsList = () => {
+  const fieldKeys = Object.keys(fieldsConfig)
+  const len = Math.ceil(fieldKeys.length / 4)
+  let temp = []
+  for (let i = 0; i < len; i++) {
+    const tempSec = {} as any
+    for (let j = 0; j < 4 && i * 4 + j < fieldKeys.length; j++) {
+      tempSec[fieldKeys[i * 4 + j]] = fieldsConfig[fieldKeys[i * 4 + j]]
+    }
+    temp.push(tempSec)
+  }
+  console.log(temp)
+  return temp
 }
 
 // 页面初始化方法
 const initailizing = () => {
+  fieldsListForRender.value = initailizefieldsList()
   setFeildsData()
   setSuiteList()
   setDefaultSuite()
   setFieldSelection()
 }
+
 // 根据当前场景，显示不同的suite可选项
 const setSuiteList = () => {
-  const { scence } = route.query
-  if (!scence) return
-  const matchSenceConfig = config[String(scence)]
+  const { scene } = route.query
+  if (!scene) return
+  const matchSenceConfig = config[String(scene)]
   if (!matchSenceConfig) return
   suiteList.value = matchSenceConfig.suiteList || []
 }
@@ -109,52 +139,53 @@ const setDefaultSuite = () => {
 }
 // 设置可查询项
 const setFeildsData = () => {
-  const fieldKeys = Object.keys(fieldsConfigs)
+  const fieldKeys = Object.keys(fieldsConfig)
 
   // 设置field类型字典，便于快速识别field类型
   fieldKeys.forEach(field => {
-    fieldOrigin[field] = jobModel.fields[field].origin
-    if (jobModel.fields[field].origin === 'hosts') {
+    fieldOrigin[field] = fieldsConfig[field].origin
+    if (fieldsConfig[field].origin === 'hosts') {
       hostFieldList.push(field)
     }
-    if (jobModel.fields[field].origin === 'jobs') {
+    if (fieldsConfig[field].origin === 'jobs') {
       jobFieldList.push(field)
     }
   })
 }
 // url上查询条件回填至查询项上
 const setFieldSelection = () => {
-  const fieldKeys = Object.keys(fieldsConfigs)
-  const { scence, suite, ...fields } = route.query
+  const fieldKeys = Object.keys(fieldsConfig)
+  const { scene, suite, ...fields } = route.query
   Object.keys(fields).forEach(fieldKey => {
-    if (fieldKeys.indexOf(fieldKey) > -1) { // 只添加当前选择框中存在的field选择
-      searchParams.value[fieldKey] = fields[fieldKey]
+    if (fieldKeys.indexOf(fieldKey) > -1) {
+      // 只添加当前选择框中存在的field选择
+      searchParams.value[fieldKey] = fields[fieldKey] as string
     }
   })
 }
 
 // 获取搜索条件
 const getFieldsOptions = () => {
-  getJobValueList({jobFieldList}).then((res) => {
+  getJobValueList({ jobFieldList }).then(res => {
     const aggs = res.data.aggregations || {}
     Object.keys(aggs).forEach(field => {
       // 通过请求获取的可选项
-      const listValues = aggs[field].buckets.map(item => {
+      const listValues = aggs[field].buckets.map((item: any) => {
         return {
-          value:item.key
+          value: item.key
         }
       })
       // default可选项
-      const staticValues = fieldsConfigs[field].fieldSettings.listValues || []
+      const staticValues = fieldsConfig[field].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
     })
   })
 }
 // 将inputArr中与sourceArr不同的选项追加到sourceArr中
-const addNewOptionValues = (sourceArr, inputArr) => {
+const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
   // 只需要m+n的运算复杂度
-  const sourceMap = {}
-  sourceArr.forEach(item => sourceMap[item.value] = true)
+  const sourceMap = {} as any
+  sourceArr.forEach(item => (sourceMap[item.value] = true))
   inputArr.forEach(inputItem => {
     if (!sourceMap[inputItem.value]) {
       sourceArr.push(inputItem)
@@ -166,7 +197,7 @@ const addNewOptionValues = (sourceArr, inputArr) => {
 const getHostOptions = () => {
   // todo: 从store中获取主机信息
   // 合并主机数据，提出各个field的可选项
-  // 通过addNewOptionValues将可选项追加到对应的field下 
+  // 通过addNewOptionValues将可选项追加到对应的field下
 }
 
 const handleReset = () => {
@@ -197,11 +228,11 @@ const handleSearch = () => {
 
 // 将筛选条件添加到url中
 const setQueryToUrl = () => {
-  const newQuery = {} as queryItem
+  const newQuery = {} as objectItem
   Object.keys(searchParams.value).forEach(field => {
     newQuery[field] = searchParams.value[field]
   })
-  newQuery['scence'] = route.query.scence as string
+  newQuery['scene'] = route.query.scene as string
   newQuery['suite'] = selectedSuite.value
   router.push({
     path: '/baseline/list',
@@ -209,9 +240,9 @@ const setQueryToUrl = () => {
   })
 }
 // 将查询参数区分成主机参数和一般参数
-const splitParamsByOrigin = (paramObj) => {
-  const hostParams = {}
-  const jobParams = {}
+const splitParamsByOrigin = (paramObj: objectItem) => {
+  const hostParams = {} as objectItem
+  const jobParams = {} as objectItem
   Object.keys(paramObj).forEach(field => {
     if (fieldOrigin[field] === 'hosts') {
       hostParams[field] = paramObj[field]
@@ -224,7 +255,7 @@ const splitParamsByOrigin = (paramObj) => {
 
 // 当场景切换时，初始化页面
 watch(
-  () => route.query.scence,
+  () => route.query.scene,
   () => {
     initailizing()
   }
@@ -240,13 +271,9 @@ onMounted(() => {
 <style scoped lang="scss">
 .el-col {
   border-radius: 4px;
-  position: relative;
 }
 .el-row {
   margin: 0 0 5px 0;
-}
-.filter-criteria {
-  width: 1200px;
 }
 
 .general-btn {
@@ -269,28 +296,15 @@ onMounted(() => {
   border-bottom-right-radius: 5px;
 }
 
-.subassembly-btn {
-  margin-left: 20px;
-}
-
 .filter-content {
-  margin: 10px 0 10px 0;
-  display: flex;
-  width: 100%;
-
   .filter-criteria {
-    display: flex;
-    flex-wrap: wrap;
-    margin-left: 20px;
     .filter-item {
-      min-width: 200px;
-      width: 20%;
-      display: flex;
-      justify-content: space-between;
-      margin: 0 20px 5px 0;
-      .filter-values {
-        width: 60%;
-      }
+      position: relative;
+    }
+    .filter-values {
+      position: absolute;
+      right: 20px;
+      width: 60%;
     }
   }
 }
