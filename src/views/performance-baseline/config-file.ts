@@ -1,8 +1,7 @@
 import { jobModel } from '@/model/data-model'
 
 const { suite, ...temp } = jobModel.fields
-const testSuite = suite
-export const fieldsConfig = {testSuite, ...temp} as configItem
+export const fieldsConfig = {...temp} as configItem
 
 export const columnConfig = [
   {

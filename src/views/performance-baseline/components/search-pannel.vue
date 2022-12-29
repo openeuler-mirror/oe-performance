@@ -23,11 +23,10 @@
           v-for="(subField, fieldIndex) in fieldsValue"
           :key="fieldIndex">
           <el-col
-            :xs="6"
-            :sm="6"
-            :md="6"
+            :xs="24"
+            :sm="12"
+            :md="8"
             :lg="6"
-            :xl="6"
             class="filter-item"
             v-for="(paramKey, index) in Object.keys(subField)"
             :key="index">
