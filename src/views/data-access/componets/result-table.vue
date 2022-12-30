@@ -20,13 +20,19 @@
             :key="item.prop">
           </el-table-column>
         </el-table>
+        <el-card v-if="tableDatas[suite][tableIdx].length !== 0" shadow="hover" style="margin-bottom:20px">
+          <compare-chart
+          :chartConfigs="tableConfigs[suite][tableIdx]"
+          :chartData="tableDatas[suite][tableIdx]"/>
+        </el-card>
       </div>
     </div>
   </div>
 </template>
     
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, Ref } from 'vue'
+import CompareChart from './compare-chart.vue'
 import { jobModel, suiteTables } from '@/views/data-access/config'
 
 const props = defineProps({
@@ -48,9 +54,9 @@ const tableListOrder = [
   'unixbench',
   'libmicro'
 ]
-const tableConfigs = ref({})
+const tableConfigs:Ref<any> = ref({})
 
-const tableDatas = ref({})
+const tableDatas:Ref<any> = ref({})
 
 // todo: 集成图表展示后，合并watchEffect
 watch(
@@ -201,4 +207,10 @@ const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
 </script>
   
 <style lang="scss" scoped>
+:deep(.el-card__body) {
+  padding-bottom: 0px;
+}
+.el-table {
+  margin-bottom: 20px;
+}
 </style>
