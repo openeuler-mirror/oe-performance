@@ -24,6 +24,7 @@
             >{{ item.label }}</el-menu-item
           >
         </el-sub-menu>
+        <!--
         <el-sub-menu index="comparation">
           <template #title>
             <span>对比检索</span>
@@ -31,6 +32,7 @@
           <el-menu-item index="performanceCompare">基础性能</el-menu-item>
           <el-menu-item index="solutionCompare">解决方案</el-menu-item>
         </el-sub-menu>
+        -->
         <el-menu-item index="dataAccess">数据接入</el-menu-item>
       </el-menu>
     </el-aside>

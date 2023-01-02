@@ -1,6 +1,6 @@
 <template>
   <div class="oe-perf-section">
-    <search-pannel @search="getAllData"></search-pannel>
+    <search-pannel @search="getAllData" suiteByScene></search-pannel>
   </div>
   <div class="oe-perf-section">
     <testment-table
@@ -14,7 +14,7 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 import TestmentTable from './components/testment-table.vue'
-import SearchPannel from './components/search-pannel.vue'
+import SearchPannel from '@/views/search-pannel/index.vue'
 
 import { getPerformanceData } from '@/api/performance'
 

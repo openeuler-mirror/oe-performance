@@ -1,9 +1,3 @@
-import { jobModel } from '@/model/data-model'
-
-const { suite, ...others } = jobModel.fields
-
-export const fieldsConfig = { ...others } as configItem
-
 export const columnConfig = [
   {
     label: '提交编号',
@@ -494,49 +488,39 @@ export const sceneConfig = {
   ]
 }
 
-export interface configItem {
+export interface configObject {
   [key: string]: any
 }
 
-export const config: configItem = {
+export const config: configObject = {
   bigData: {
-    suiteList: ['unixbench', 'lmbench3', 'stream'],
     column: columnConfig
   },
   dataBase: {
-    suiteList: ['???', '??', '?'],
     column: columnConfig2
   },
   distributedStorage: {
-    suiteList: ['unixbench', 'lmbench3', 'iperf'],
     column: columnConfig
   },
   cpu: {
-    suiteList: ['???', '??', '?'],
     column: columnConfig2
   },
   memory: {
-    suiteList: ['unixbench', 'lmbench3', 'iperf'],
     column: columnConfig
   },
   storage: {
-    suiteList: ['???', '??', '?'],
     column: columnConfig2
   },
   network: {
-    suiteList: ['unixbench', 'lmbench3', 'iperf'],
     column: columnConfig
   },
   basic: {
-    suiteList: ['???', '??', '?'],
     column: columnConfig2
   },
   basicPerformance: {
-    suiteList: ['unixbench', 'lmbench3', 'iperf'],
     column: columnConfig
   },
   solution: {
-    suiteList: ['???', '??', '?'],
     column: columnConfig2
   }
 }

@@ -1,11 +1,12 @@
 <template>
   <div class="performance-baseline-search-pannel">
-    <el-row class="suite-selection">
+    <!--测试组件只在性能基线页面中使用-->
+    <el-row class="suite-selection" v-if="suiteByScene">
       <el-col :span="2">
         <span>测试组件:</span>
       </el-col>
       <el-col :span="22">
-        <el-radio-group v-model="selectedSuite">
+        <el-radio-group v-model="searchParams['suite']">
           <el-radio-button
             v-for="(item, index) in suiteList"
             :key="index"
@@ -13,6 +14,7 @@
         </el-radio-group>
       </el-col>
     </el-row>
+    <!--测试组件 end-->
     <el-row class="search-field-section">
       <el-col :span="2">
         <span>筛选内容:</span>
@@ -50,8 +52,7 @@
       <el-button @click="handleReset">重置</el-button>
       <el-button
         type="primary"
-        @click="handleSearch"
-        :disabled="performanceStore.loadingStatus.searchLoading">
+        @click="handleSearch">
         搜索
       </el-button>
     </el-row>
@@ -61,23 +62,27 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { usePerformanceData } from '@/stores/performanceData'
-import { config, fieldsConfig } from '../config-file'
+import { suiteConfig, fieldsConfig } from './config'
 import { getJobValueList } from '@/api/performance'
 
-const route = useRoute()
-const router = useRouter()
-
-const performanceStore = usePerformanceData()
+const props = defineProps({
+  suiteByScene: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const emit = defineEmits<{
   (event: 'search', params: searchParams): void
 }>()
 
+const route = useRoute()
+const router = useRouter()
+
 const fieldsListForRender = ref([])
 
 const suiteList = ref([] as string[])
-const selectedSuite = ref('unixbench')
+// uite = ref('unixbench')
 
 const fieldOrigin = {} as objectItem // 字典，用来判断某个field字段的origin
 const hostFieldList = [] // 中间数据，用来循环host类型的field字段
@@ -91,7 +96,10 @@ interface objectItem {
 
 // 修改fieldConfig的格式，方便展示
 const initailizefieldsList = () => {
-  const fieldKeys = Object.keys(fieldsConfig)
+  let fieldKeys = Object.keys(fieldsConfig)
+  if (props.suiteByScene) {
+    fieldKeys = fieldKeys.filter(key => key !== 'suite')
+  }
   const len = Math.ceil(fieldKeys.length / 4)
   let temp = []
   for (let i = 0; i < len; i++) {
@@ -109,28 +117,14 @@ const initailizefieldsList = () => {
 const initailizing = () => {
   fieldsListForRender.value = initailizefieldsList()
   setFeildsData()
-  setSuiteList()
-  setDefaultSuite()
   setFieldSelection()
-}
 
-// 根据当前场景，显示不同的suite可选项
-const setSuiteList = () => {
-  const { scene } = route.query
-  if (!scene) return
-  const matchSenceConfig = config[String(scene)]
-  if (!matchSenceConfig) return
-  suiteList.value = matchSenceConfig.suiteList || []
-}
-// 设置默认选中的suite，如果url中有，则使用url的
-const setDefaultSuite = () => {
-  const { suite } = route.query
-  if (suite && suiteList.value.indexOf(String(suite)) > -1) {
-    selectedSuite.value = String(suite)
-  } else {
-    selectedSuite.value = suiteList.value[0]
+  if (props.suiteByScene) {
+    setSuiteList()
+    setDefaultSuite()
   }
 }
+
 // 设置可查询项
 const setFeildsData = () => {
   const fieldKeys = Object.keys(fieldsConfig)
@@ -149,13 +143,32 @@ const setFeildsData = () => {
 // url上查询条件回填至查询项上
 const setFieldSelection = () => {
   const fieldKeys = Object.keys(fieldsConfig)
-  const { scene, suite, ...fields } = route.query
+  const { scene, ...fields } = route.query
   Object.keys(fields).forEach(fieldKey => {
     if (fieldKeys.indexOf(fieldKey) > -1) {
       // 只添加当前选择框中存在的field选择
       searchParams.value[fieldKey] = fields[fieldKey] as string
     }
   })
+}
+// 性能基线页面中:
+// 根据当前场景，显示不同的suite可选项
+const setSuiteList = () => {
+  const { scene } = route.query
+  if (!scene) return
+  const matchSenceConfig = suiteConfig[String(scene)]
+  if (!matchSenceConfig) return
+  suiteList.value = matchSenceConfig.suiteList || []
+}
+// 性能基线页面中:
+// 设置默认选中的suite，如果url中有，则使用url的
+const setDefaultSuite = () => {
+  const { suite } = route.query
+  if (suite && suiteList.value.indexOf(String(suite)) > -1) {
+    searchParams.value['suite'] = String(suite)
+  } else {
+    searchParams.value['suite'] = suiteList.value[0]
+  }
 }
 
 // 获取搜索条件
@@ -204,7 +217,7 @@ const handleSearch = () => {
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
   console.log(hostParams, jobParams)
   // todo: 请求逻辑待实现
-  emit('search', { ...hostParams, ...jobParams, suite: selectedSuite.value })
+  emit('search', { ...hostParams, ...jobParams })
 
   // if (systemParams.length > 0) {
   //   // 如果有选择硬件配置，则先通过硬件信息查询testbox列表
@@ -227,7 +240,6 @@ const setQueryToUrl = () => {
     newQuery[field] = searchParams.value[field]
   })
   newQuery['scene'] = route.query.scene as string
-  newQuery['suite'] = selectedSuite.value
   router.push({
     path: '/baseline/list',
     query: { ...newQuery }
