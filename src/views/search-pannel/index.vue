@@ -52,7 +52,9 @@
       <el-button @click="handleReset">重置</el-button>
       <el-button
         type="primary"
-        @click="handleSearch">
+        @click="handleSearch"
+        :loading="searchLoading"
+        >
         搜索
       </el-button>
     </el-row>
@@ -67,6 +69,10 @@ import { getJobValueList } from '@/api/performance'
 
 const props = defineProps({
   suiteByScene: {
+    type: Boolean,
+    default: false
+  },
+  searchLoading: {
     type: Boolean,
     default: false
   }
@@ -241,7 +247,7 @@ const setQueryToUrl = () => {
   })
   newQuery['scene'] = route.query.scene as string
   router.push({
-    path: '/baseline/list',
+    path: route.path,
     query: { ...newQuery }
   })
 }

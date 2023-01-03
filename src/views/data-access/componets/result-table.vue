@@ -31,7 +31,7 @@
 </template>
     
 <script setup lang="ts">
-import { ref, watch, Ref } from 'vue'
+import { ref, Ref, watchEffect } from 'vue'
 import CompareChart from './compare-chart.vue'
 import { jobModel, suiteTables } from '@/views/data-access/config'
 
@@ -57,20 +57,6 @@ const tableListOrder = [
 const tableConfigs:Ref<any> = ref({})
 
 const tableDatas:Ref<any> = ref({})
-
-// todo: 集成图表展示后，合并watchEffect
-watch(
-  () => props.tjobsAll,
-  () => {
-    generateTableConfigsAndData(props.tjobsAll, props.dimension)
-  }
-)
-watch(
-  () => props.dimension,
-  () => {
-    generateTableConfigsAndData(props.tjobsAll, props.dimension)
-  }
-)
 
 const generateTableConfigsAndData = (tjobs, dimension:string) => {
   tableDatas.value = {}
@@ -204,6 +190,11 @@ const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
   }
   return true
 }
+
+// 当表格数据或者展示维度切换时，更新表格配置数据
+watchEffect(() => {
+  generateTableConfigsAndData(props.tjobsAll, props.dimension)
+})
 </script>
   
 <style lang="scss" scoped>

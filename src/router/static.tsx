@@ -21,6 +21,22 @@ const asyncRoutes: Array<RouteRecordRaw> = [
     component: () => import('@/layout/basic-layout.vue'),
     children: [
       {
+        path: 'comparation',
+        name: 'comparationLayout',
+        redirect: '/comparation/result',
+        component: () => import('@/layout/sub-layout/comparation-layout.vue'),
+        children: [
+          {
+            path: 'result',
+            name: 'resultComparation',
+            component: () => import('@/views/data-access/index.vue'),
+            meta: {
+              title: 'resultComparation'
+            }
+          }
+        ]
+      },
+      {
         path: 'baseline',
         name: 'baselineLayout',
         redirect: '/baseline/list',
@@ -47,6 +63,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
               title: 'workloadDetail'
             }
           },
+          // 旧的对比检索页面已隐藏，后续可能废弃掉
           {
             path: 'comparativeSearch',
             name: 'comparativeSearch',

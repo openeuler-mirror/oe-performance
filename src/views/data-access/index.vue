@@ -1,23 +1,23 @@
 <template>
+  <div class="oe-perf-section">
+    <search-pannel @search="onSearch" :searchLoading="searchLoading"/>
     <div>
-        数据测试
-    </div>
-    <div>
-      数据维度
+      对比维度
       <el-radio-group v-model="dimension">
         <el-radio-button label="osv" />
         <el-radio-button label="testbox" />
         <el-radio-button label="tags" />
       </el-radio-group>
     </div>
-    <div>
-        <el-button @click="onSearch">查询</el-button>
-    </div>
+  </div>
+  <div class="oe-perf-section">
     <result-table :tjobsAll="inputData" :dimension="dimension"></result-table>
+  </div>
 </template>
     
 <script setup lang="ts">
 import { ref, onMounted, reactive, watch } from 'vue'
+import SearchPannel from '@/views/search-pannel/index.vue'
 import ResultTable from './componets/result-table.vue'
 import flattenObj from '@/utils/utils'
 
@@ -36,6 +36,7 @@ const ejobsMap = {}
 const tjobs = {}
 
 let inputData = ref({})
+const searchLoading = ref(false)
 /**
 os
 : 
@@ -52,24 +53,12 @@ os_version: "7.6.1810"
 osv: centos@7.6.1810
  */
 // 获取jobs数据
-
-const dataLoadCount = ref(0)
-
 const onSearch = () => {
-  dataLoadCount.value++
   getTotalData()
 }
 
-watch(
-  () => dataLoadCount.value,
-  () => {
-    if (dataLoadCount.value === 0) {
-      inputData.value = tjobs
-    }
-  }
-)
-
 const getTotalData = () => {
+  searchLoading.value = true
   getPerformanceData({
     'index': 'jobs',
     'query': {
@@ -107,11 +96,9 @@ const getTotalData = () => {
     })
     console.log('ejobs: ', ejobs, ejobsMap)
     e2tConverter(ejobs, tjobs)
-    // ejobsAll = ejobs
-    // ejobsMapAll  = ejobsMap
-    // tjobsAll = tjobs
+    inputData.value = tjobs
   }).finally(() => {
-    dataLoadCount.value--
+    searchLoading.value = false
   })
 }
 
