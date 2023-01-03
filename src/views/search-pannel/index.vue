@@ -65,7 +65,9 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { suiteConfig, fieldsConfig } from './config'
-import { getJobValueList } from '@/api/performance'
+import { useTestboxStore } from '@/stores/performanceData'
+
+import { getJobValueList, getTestBoxes, getTestboxBySearchParams } from '@/api/performance'
 
 const props = defineProps({
   suiteByScene: {
@@ -85,7 +87,9 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 
-const fieldsListForRender = ref([])
+const testboxStore = useTestboxStore()
+
+const fieldsListForRender = ref([] as string[])
 
 const suiteList = ref([] as string[])
 // uite = ref('unixbench')
@@ -115,7 +119,6 @@ const initailizefieldsList = () => {
     }
     temp.push(tempSec)
   }
-  console.log(temp)
   return temp
 }
 
@@ -194,6 +197,14 @@ const getFieldsOptions = () => {
     })
   })
 }
+// 获取主机相关搜索条件。
+const getHostOptions = () => {
+  // 获取所有主机信息存在store中
+  getTestboxData().then(() => {
+    // 合并主机数据，提出各个field的可选项
+    // 通过addNewOptionValues将可选项追加到对应的field下
+  })
+}
 // 将inputArr中与sourceArr不同的选项追加到sourceArr中
 const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
   // 只需要m+n的运算复杂度
@@ -206,13 +217,6 @@ const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
   })
 }
 
-// 获取主机相关搜索条件。
-const getHostOptions = () => {
-  // todo: 从store中获取主机信息
-  // 合并主机数据，提出各个field的可选项
-  // 通过addNewOptionValues将可选项追加到对应的field下
-}
-
 const handleReset = () => {
   searchParams.value = {}
 }
@@ -221,22 +225,14 @@ const handleSearch = () => {
   // 记录查询条件到url上
   setQueryToUrl()
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
-  console.log(hostParams, jobParams)
-  // todo: 请求逻辑待实现
-  emit('search', { ...hostParams, ...jobParams })
+  
+  if (Object.keys(hostParams).length > 0) {
+    getTestboxBySearchParams(hostParams).then(res => {
 
-  // if (systemParams.length > 0) {
-  //   // 如果有选择硬件配置，则先通过硬件信息查询testbox列表
-  //   queryBySystemParam(systemParams)
-  //     .then(res => { // testboxIdList
-  //       emit('search', { ...systemParams, ...caseParams, suite: selectedSuite.value })
-  //     })
-  //     .catch(err => {
-  //       ElMessage.error(err)
-  //     })
-  // } else {
-  //   emit('search', { ...caseParams, suite: selectedSuite.value })
-  // }
+    })
+  } else {
+    emit('search', jobParams)
+  }
 }
 
 // 将筛选条件添加到url中
@@ -263,6 +259,16 @@ const splitParamsByOrigin = (paramObj: objectItem) => {
     }
   })
   return { hostParams, jobParams }
+}
+
+// 获取主机列表和信息
+const getTestboxData = () => {
+  return getTestBoxes().then(res => {
+    const testboxListRaw = res.data.hits.hits.map(
+      (rawItem: any) => rawItem._source
+    )
+    testboxStore.setTestboxData(testboxListRaw)
+  })
 }
 
 // 当场景切换时，初始化页面

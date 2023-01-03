@@ -172,13 +172,13 @@ const e2tConverter = (ejobs, tjobs) => {
 onMounted(() => {
   // 获取主机列表和信息
   // todo: 后续删除。目前已将testbox的请求切换到baseline-layout中进行公共请求。请求结果存到store中。
-  getTestBoxes().then(res => {
-    const testboxListRaw = res.data.hits.hits.map(rawItem => rawItem._source)
-    testboxListRaw.forEach(testboxItem => {
-      allHostsMap[testboxItem.id] = testboxItem
-    })
-    console.log('allHost: ', allHostsMap)
-  })
+  // getTestBoxes().then(res => {
+  //   const testboxListRaw = res.data.hits.hits.map(rawItem => rawItem._source)
+  //   testboxListRaw.forEach(testboxItem => {
+  //     allHostsMap[testboxItem.id] = testboxItem
+  //   })
+  //   console.log('allHost: ', allHostsMap)
+  // })
   // 获取job中的通用筛选项
   // getJobValueList()
 })

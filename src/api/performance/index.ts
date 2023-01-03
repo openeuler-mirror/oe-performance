@@ -103,3 +103,36 @@ export function getJobValueList(params:any) {
     }
   })
 }
+
+interface anyObj {
+  [propName: string]: any
+}
+export function getTestboxBySearchParams(params: anyObj) {
+  const mustCasees = <anyObj>[]
+  Object.keys(params).forEach(paramKey => {
+    if (params[paramKey]) {
+      const matchObj:anyObj = {}
+      matchObj[paramKey] = params[paramKey]
+      mustCasees.push({
+        match: matchObj
+      })
+    }
+  })
+
+  const query = {
+    size: 1000,
+    query: {
+      bool: {
+        must: mustCasees
+      }
+    }
+  }
+  return createAxios({
+    url: api.requestDataApi,
+    method: 'post',
+    data: {
+      index: 'machine_info',
+      query
+    }
+  })
+}

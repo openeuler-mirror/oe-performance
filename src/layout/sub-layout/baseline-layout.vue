@@ -47,12 +47,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useTestboxStore } from '@/stores/performanceData'
-import { sceneConfig } from '@/views/performance-baseline/config-file'
-
-import { getTestBoxes } from '@/api/performance'
-
-const testboxStore = useTestboxStore()
+import { sceneConfig } from '@/views/performance-baseline/config-file' 
 
 const router = useRouter()
 const route = useRoute()
@@ -73,17 +68,6 @@ const handleMenuClick = (
   }
 }
 
-// 获取主机列表和信息
-const getTestboxData = () => {
-  getTestBoxes().then(res => {
-    const testboxListRaw = res.data.hits.hits.map(
-      (rawItem: any) => rawItem._source
-    )
-    testboxStore.setTestboxData(testboxListRaw)
-    console.log('baseline-layout: ', testboxStore.testboxMap)
-  })
-}
-
 onMounted(() => {
   if (route.query.scence) {
     currentKey.value = route.query.scence as string
@@ -93,8 +77,6 @@ onMounted(() => {
   } else {
     currentKey.value = String(route.name || '')
   }
-
-  getTestboxData()
 })
 </script>
 <style scoped lang="scss">
