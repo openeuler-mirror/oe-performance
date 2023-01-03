@@ -4,7 +4,7 @@
 import { reactive } from 'vue'
 import flattenObj from '@/utils/utils'
 
-import { testParamsMap, kpiListMap, tableMode, tableColumnMap } from '@/views/data-access/config_li.js'
+import { testParamsMap, kpiListMap, tableMode, tableColumnMap } from '@/views/performance-baseline/config_li.js'
 
 export const combineJobs = (jobList) => {
   const tempList = jobList.map(job => job._source)

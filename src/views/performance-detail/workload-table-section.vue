@@ -26,8 +26,8 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
-import { tableColumnMap } from '@/views/data-access/config_li.js'
-import { combineJobs } from '@/views/data-access/utils.js'
+import { tableColumnMap } from '@/views/performance-baseline/config_li.js'
+import { combineJobs } from '@/views/performance-baseline/utils.js'
 
 const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()

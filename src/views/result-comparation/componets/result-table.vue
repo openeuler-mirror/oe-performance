@@ -1,39 +1,46 @@
 <template>
   <div class="result-tables">
-    <div v-for="suite in Object.keys(tableConfigs)" :key="suite">
-      {{ suite }}
-      <div v-for="(config, tableIdx) in tableConfigs[suite]" :key="config.tableName">
-        {{ config.tableName }}
-        <el-table border :data="tableDatas[suite][tableIdx]">
-          <el-table-column
-            :prop="config.column[0].prop"
-            :label="config.column[0].label"
-            :key="config.column[0].prop"
-            width="200"
-            fixed
-          >
-          </el-table-column>
-          <el-table-column
-            v-for="item in config.column.slice(1)"
-            :prop="item.prop"
-            :label="item.label"
-            :key="item.prop">
-          </el-table-column>
-        </el-table>
-        <el-card v-if="tableDatas[suite][tableIdx].length !== 0" shadow="hover" style="margin-bottom:20px">
-          <compare-chart
-          :chartConfigs="tableConfigs[suite][tableIdx]"
-          :chartData="tableDatas[suite][tableIdx]"/>
-        </el-card>
-      </div>
-    </div>
+    <el-tabs v-model="tabName">
+      <el-tab-pane
+        v-for="suite in Object.keys(tableConfigs)"
+        :label="suite"
+        :name="suite"
+        :key="suite"
+      >
+        {{ suite }}
+        <div v-for="(config, tableIdx) in tableConfigs[suite]" :key="config.tableName">
+          {{ config.tableName }}
+          <el-table border :data="tableDatas[suite][tableIdx]">
+            <el-table-column
+              :prop="config.column[0].prop"
+              :label="config.column[0].label"
+              :key="config.column[0].prop"
+              width="200"
+              fixed
+            >
+            </el-table-column>
+            <el-table-column
+              v-for="item in config.column.slice(1)"
+              :prop="item.prop"
+              :label="item.label"
+              :key="item.prop">
+            </el-table-column>
+          </el-table>
+          <el-card v-if="tableDatas[suite][tableIdx].length !== 0" shadow="hover" style="margin-bottom:20px">
+            <compare-chart
+            :chartConfigs="tableConfigs[suite][tableIdx]"
+            :chartData="tableDatas[suite][tableIdx]"/>
+          </el-card>
+        </div>
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
     
 <script setup lang="ts">
 import { ref, Ref, watchEffect } from 'vue'
 import CompareChart from './compare-chart.vue'
-import { jobModel, suiteTables } from '@/views/data-access/config'
+import { jobModel, suiteTables } from '../config'
 
 const props = defineProps({
   tjobsAll: {
@@ -54,6 +61,7 @@ const tableListOrder = [
   'unixbench',
   'libmicro'
 ]
+const tabName = ref('stream')
 const tableConfigs:Ref<any> = ref({})
 
 const tableDatas:Ref<any> = ref({})

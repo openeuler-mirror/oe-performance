@@ -29,7 +29,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'result',
             name: 'resultComparation',
-            component: () => import('@/views/data-access/index.vue'),
+            component: () => import('@/views/result-comparation/index.vue'),
             meta: {
               title: 'resultComparation'
             }
@@ -61,43 +61,6 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             component: () => import('@/views/performance-detail/workload-detail.vue'),
             meta: {
               title: 'workloadDetail'
-            }
-          },
-          // 旧的对比检索页面已隐藏，后续可能废弃掉
-          {
-            path: 'comparativeSearch',
-            name: 'comparativeSearch',
-            component: RouteView,
-            meta: {
-              title: 'comparativeSearch'
-            },
-            children: [
-              {
-                path: 'basicPerformance',
-                name: 'performanceCompare',
-                component: () =>
-                  import('@/views/performance-comparation/index.vue'),
-                meta: {
-                  title: 'basicPerformance'
-                }
-              },
-              {
-                path: 'solution',
-                name: 'solutionCompare',
-                component: () =>
-                  import('@/views/performance-comparation/index.vue'),
-                meta: {
-                  title: 'solution'
-                }
-              }
-            ]
-          },
-          {
-            path: 'dataAccess',
-            name: 'dataAccess',
-            component: () => import('@/views/data-access/index.vue'),
-            meta: {
-              title: 'dataAccess'
             }
           }
         ]

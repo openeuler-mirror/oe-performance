@@ -25,7 +25,7 @@ export function getTestBoxes() {
     url: api.requestDataApi,
     method: 'post',
     data: {
-      index: 'machine_info',
+      index: 'hosts',
       query: {}
     }
   })
@@ -103,6 +103,30 @@ export function getJobValueList(params:any) {
     }
   })
 }
+export function getHostValueList(params:any) {
+  const { hostFieldList } = params
+  const aggs: Aggs = {}
+  hostFieldList.forEach((field:string) => {
+    aggs[field] = {
+      terms: {
+        field: field,
+        size: 100
+      }
+    }
+  })
+  const query = {
+    size: 1000,
+    aggs
+  }
+  return createAxios({
+    url: api.requestDataApi,
+    method: 'post',
+    data: {
+      index: 'hosts',
+      query
+    }
+  })
+}
 
 interface anyObj {
   [propName: string]: any
@@ -131,7 +155,7 @@ export function getTestboxBySearchParams(params: anyObj) {
     url: api.requestDataApi,
     method: 'post',
     data: {
-      index: 'machine_info',
+      index: 'hosts',
       query
     }
   })

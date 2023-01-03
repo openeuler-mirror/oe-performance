@@ -710,7 +710,7 @@ import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 // import { getDetail } from '@/api/detail'
 
-import { combineJobs } from '@/views/data-access/utils.js'
+import { combineJobs } from '@/views/performance-baseline/utils.js'
 
 const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()

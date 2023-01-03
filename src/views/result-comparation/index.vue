@@ -10,18 +10,19 @@
       </el-radio-group>
     </div>
   </div>
-  <div class="oe-perf-section">
-    <result-table :tjobsAll="inputData" :dimension="dimension"></result-table>
+  <div class="oe-perf-section" v-loading="searchLoading">
+    <div v-if="!isSearched" class="banner-text">请搜索数据进行对比</div>
+    <result-table v-else :tjobsAll="inputData" :dimension="dimension"></result-table>
   </div>
 </template>
     
 <script setup lang="ts">
-import { ref, onMounted, reactive, watch } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import ResultTable from './componets/result-table.vue'
 import flattenObj from '@/utils/utils'
 
-import { getPerformanceData, getTestBoxes } from '@/api/performance'
+import { getPerformanceData } from '@/api/performance'
 
 import { kpiMaps, kpiMapFuncs, addtionalKpiMaps } from './config.js'
 
@@ -37,6 +38,8 @@ const tjobs = {}
 
 let inputData = ref({})
 const searchLoading = ref(false)
+
+const isSearched = ref(false)
 /**
 os
 : 
@@ -98,6 +101,7 @@ const getTotalData = () => {
     e2tConverter(ejobs, tjobs)
     inputData.value = tjobs
   }).finally(() => {
+    isSearched.value = true
     searchLoading.value = false
   })
 }
@@ -186,4 +190,7 @@ onMounted(() => {
 </script>
   
 <style lang="scss" scoped>
+.banner-text {
+  text-align: center;
+}
 </style>

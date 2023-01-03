@@ -154,7 +154,7 @@ import { ElMessage } from 'element-plus'
 import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
-import { combineJobs } from '@/views/data-access/utils.js'
+import { combineJobs } from '@/views/performance-baseline/utils.js'
 
 export interface Column {
   label: string

@@ -153,7 +153,7 @@ import { getPerformanceData } from '@/api/performance'
 import type { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults'
 import { User } from '../interface'
 // utils
-import { combineJobs } from '@/views/data-access/utils.js'
+import { combineJobs } from '@/views/performance-baseline/utils.js'
 
 const props = defineProps({
   allData: {

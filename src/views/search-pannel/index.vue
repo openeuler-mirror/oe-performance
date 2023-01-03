@@ -67,7 +67,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { suiteConfig, fieldsConfig } from './config'
 import { useTestboxStore } from '@/stores/performanceData'
 
-import { getJobValueList, getTestBoxes, getTestboxBySearchParams } from '@/api/performance'
+import { getJobValueList, getHostValueList, getTestboxBySearchParams, getTestBoxes } from '@/api/performance'
 
 const props = defineProps({
   suiteByScene: {
@@ -95,7 +95,7 @@ const suiteList = ref([] as string[])
 // uite = ref('unixbench')
 
 const fieldOrigin = {} as objectItem // 字典，用来判断某个field字段的origin
-const hostFieldList = [] // 中间数据，用来循环host类型的field字段
+const hostFieldList = [] as any // 中间数据，用来循环host类型的field字段
 const jobFieldList = [] as any // 中间数据，用来循环job类型的field字段
 
 const searchParams = ref({} as objectItem)
@@ -200,9 +200,20 @@ const getFieldsOptions = () => {
 // 获取主机相关搜索条件。
 const getHostOptions = () => {
   // 获取所有主机信息存在store中
-  getTestboxData().then(() => {
-    // 合并主机数据，提出各个field的可选项
-    // 通过addNewOptionValues将可选项追加到对应的field下
+  const fieldList = hostFieldList.map((field:string) => field.replace('hw.', ''))
+  getHostValueList({ hostFieldList: fieldList }).then(res => {
+    const aggs = res.data.aggregations || {}
+    Object.keys(aggs).forEach(field => {
+      // 通过请求获取的可选项
+      const listValues = aggs[field].buckets.map((item: any) => {
+        return {
+          value: item.key
+        }
+      })
+      // default可选项
+      const staticValues = fieldsConfig[`hw.${field}`].fieldSettings.listValues || []
+      addNewOptionValues(staticValues, listValues)
+    })
   })
 }
 // 将inputArr中与sourceArr不同的选项追加到sourceArr中
@@ -261,16 +272,6 @@ const splitParamsByOrigin = (paramObj: objectItem) => {
   return { hostParams, jobParams }
 }
 
-// 获取主机列表和信息
-const getTestboxData = () => {
-  return getTestBoxes().then(res => {
-    const testboxListRaw = res.data.hits.hits.map(
-      (rawItem: any) => rawItem._source
-    )
-    testboxStore.setTestboxData(testboxListRaw)
-  })
-}
-
 // 当场景切换时，初始化页面
 watch(
   () => route.query.scene,
@@ -283,6 +284,8 @@ onMounted(() => {
   initailizing()
   getFieldsOptions()
   getHostOptions()
+
+  getTestBoxes()
 })
 </script>
 
