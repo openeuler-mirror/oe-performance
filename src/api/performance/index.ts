@@ -83,8 +83,9 @@ export function getJobValueList(params:any) {
       }
     }
   })
+  // aggs['nr_cpu'] = {terms: {field: 'nr_cpu', size:100}}
   const query = {
-    size: 0,
+    size: 10,
     query: {
       range: {
         time: {
@@ -109,7 +110,7 @@ export function getHostValueList(params:any) {
   hostFieldList.forEach((field:string) => {
     aggs[field] = {
       terms: {
-        field: field,
+        field: `${field}`,
         size: 100
       }
     }
