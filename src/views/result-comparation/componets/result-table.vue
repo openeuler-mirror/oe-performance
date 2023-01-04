@@ -6,6 +6,7 @@
         :label="suite"
         :name="suite"
         :key="suite"
+        lazy
       >
         {{ suite }}
         <div v-for="(config, tableIdx) in tableConfigs[suite]" :key="config.tableName">

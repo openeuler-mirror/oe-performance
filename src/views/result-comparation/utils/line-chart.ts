@@ -58,5 +58,6 @@ export default function (container:HTMLElement, title:string, data:any) {
   window.addEventListener('resize', () => {
     myChart.resize()
   })
+  return myChart
 }
 

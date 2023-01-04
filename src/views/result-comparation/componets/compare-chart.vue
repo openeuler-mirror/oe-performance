@@ -10,7 +10,7 @@
 </template>
   
 <script setup lang="ts">
-import { defineProps, onMounted } from 'vue'
+import { defineProps, onMounted, ref, Ref } from 'vue'
 import Chart from '../utils/chart'
 import lineChart from '../utils/line-chart'
 
@@ -20,9 +20,12 @@ const props = defineProps<{
 }>()
 // console.log(props.chartConfigs)
 // console.log(props.chartData)
+const chart1:Ref<any> = ref(null)
+const chart2:Ref<any> = ref(null)
+
 onMounted(() => {
-  Chart(<HTMLElement>document.getElementById(props.chartConfigs['tableName'] + 1), props.chartConfigs['tableName'], props.chartData)
-  lineChart(<HTMLElement>document.getElementById(props.chartConfigs['tableName'] + 2), props.chartConfigs['tableName'], props.chartData)
+  chart1.value = Chart(<HTMLElement>document.getElementById(props.chartConfigs['tableName'] + 1), props.chartConfigs['tableName'], props.chartData)
+  chart2.value = lineChart(<HTMLElement>document.getElementById(props.chartConfigs['tableName'] + 2), props.chartConfigs['tableName'], props.chartData)
 })
 </script>
   
