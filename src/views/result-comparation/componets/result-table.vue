@@ -1,6 +1,6 @@
 <template>
   <div class="result-tables">
-    <el-tabs v-model="tabName">
+    <el-tabs v-model="tabName" @tabChange="handleTabChange">
       <el-tab-pane
         v-for="suite in Object.keys(tableConfigs)"
         :label="suite"
@@ -39,7 +39,7 @@
 </template>
     
 <script setup lang="ts">
-import { ref, Ref, watchEffect } from 'vue'
+import { ref, Ref, watchEffect, nextTick } from 'vue'
 import CompareChart from './compare-chart.vue'
 import { jobModel, suiteTables } from '../config'
 
@@ -198,6 +198,13 @@ const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
     return true
   }
   return true
+}
+
+const handleTabChange = () => {
+  nextTick(() => {
+    const event = new Event('resize')
+    window.dispatchEvent(event)
+  })
 }
 
 // 当表格数据或者展示维度切换时，更新表格配置数据
