@@ -10,7 +10,7 @@
 </template>
   
 <script setup lang="ts">
-import { defineProps, onMounted, ref, Ref, watch } from 'vue'
+import { defineProps, onMounted, watch } from 'vue'
 import Chart from '../utils/chart'
 import lineChart from '../utils/line-chart'
 
@@ -20,13 +20,14 @@ const props = defineProps<{
 }>()
 // console.log(props.chartConfigs)
 // console.log(props.chartData)
-const chart1:Ref<any> = ref(null)
-const chart2:Ref<any> = ref(null)
+// 这里不要用响应式,不然图表更新后,tooltip和legend失效
+let chart1:any = null
+let chart2:any = null
 
 onMounted(() => {
-  chart1.value = Chart(<HTMLElement>document.getElementById(props.chartConfigs['tableName'] + 1),
+  chart1 = Chart(<HTMLElement>document.getElementById(props.chartConfigs['tableName'] + 1),
     props.chartConfigs['tableName'], props.chartData)
-  chart2.value = lineChart(<HTMLElement>document.getElementById(props.chartConfigs['tableName'] + 2),
+  chart2 = lineChart(<HTMLElement>document.getElementById(props.chartConfigs['tableName'] + 2),
     props.chartConfigs['tableName'], props.chartData)
 })
 
@@ -57,19 +58,19 @@ watch(() => props.chartData, (newVal) => {
     )
   })
 
-  chart1.value.option['yAxis'] = {
+  chart1.option['yAxis'] = {
     type: 'category',
     data: Object.keys(newVal[0]).filter(item => item !== 'dimensionId')
   }
-  chart1.value.option['series'] = series1
-  chart1.value.chart.setOption(chart1.value.option, true)
+  chart1.option['series'] = series1
+  chart1.chart.setOption(chart1.option, true)
 
-  chart2.value.option['xAxis'] = {
+  chart2.option['xAxis'] = {
     type: 'category',
     data: Object.keys(newVal[0]).filter(item => item !== 'dimensionId')
   }
-  chart2.value.option['series'] = series2
-  chart2.value.chart.setOption(chart2.value.option, true)
+  chart2.option['series'] = series2
+  chart2.chart.setOption(chart2.option, true)
 })
 </script>
   
