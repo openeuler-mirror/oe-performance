@@ -58,17 +58,11 @@ watch(() => props.chartData, (newVal) => {
     )
   })
 
-  chart1.option['yAxis'] = {
-    type: 'category',
-    data: Object.keys(newVal[0]).filter(item => item !== 'dimensionId')
-  }
+  chart1.option['yAxis']['data'] = Object.keys(newVal[0]).filter(item => item !== 'dimensionId')
   chart1.option['series'] = series1
   chart1.chart.setOption(chart1.option, true)
 
-  chart2.option['xAxis'] = {
-    type: 'category',
-    data: Object.keys(newVal[0]).filter(item => item !== 'dimensionId')
-  }
+  chart2.option['xAxis']['data'] = Object.keys(newVal[0]).filter(item => item !== 'dimensionId')
   chart2.option['series'] = series2
   chart2.chart.setOption(chart2.option, true)
 })
