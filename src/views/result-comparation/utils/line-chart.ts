@@ -40,7 +40,26 @@ const option = function(title:string, data:any[], cases:string[]){
     xAxis: {
       type: 'category',
       axisLabel: {
-        // interval: 0 // 强制显示所有标签
+        interval: 0, // 强制显示所有标签
+        formatter: (value:string) => {
+          let str = ''
+          const eachLineLetter = 6
+          const rowNum = Math.ceil(value.length / eachLineLetter)
+
+          if (rowNum > 1) {
+            for (let i = 0; i < rowNum; i++) {
+              let temp = ''
+              const start = i * eachLineLetter
+              const end = start + eachLineLetter
+
+              temp = i === (rowNum - 1) ? value.substring(start, end):`${value.substring(start, end)}\n`
+              str += temp
+            }
+            return str
+          } else {
+            return value
+          }
+        }
       },
       data: cases
     },
@@ -58,5 +77,9 @@ export default function (container:HTMLElement, title:string, data:any) {
   window.addEventListener('resize', () => {
     myChart.resize()
   })
+  return {
+    chart: myChart,
+    option: option(title, data, cases)
+  }
 }
 
