@@ -1,7 +1,7 @@
 // vim: set et:
 
 /* eslint-disable */
-export const jobModel = {
+jobModel = {
         // 以下fields字段的格式参见
         // https://www.npmjs.com/package/react-awesome-query-builder
         // https://github.com/ukrbublik/react-awesome-query-builder/blob/HEAD/CONFIG.adoc
@@ -184,14 +184,14 @@ export const jobModel = {
         },
 }
 
-const libmicroGroups = [
+libmicroGroups = [
         'c_', 'get', 'malloc', 'memcpy', 'memset', 'mmap', 'mprot', 'pipe', 'poll',
         'pread', 'pwrite', 'read', 'select', 'str', 'unmap', 'write', 'writev',
         'Miscellaneous' // all the others, keep it the last element
 ]
 
 // suite => function(kpi) => Map with keys (testcase, kpi)
-const kpiMapFuncs = {
+kpiMapFuncs = {
         // unixbench raw output:
         //              System Benchmarks Index Values               BASELINE       RESULT    INDEX
         //   Dhrystone 2 using register variables         116700.0 1216141306.0 104210.9
@@ -256,7 +256,7 @@ const kpiMapFuncs = {
 // { kpi: 'usecs_per_call', testcase: 'getpid', testgroup: 'get' }
 
 // suite => Map with keys (testcase, kpi)
-const kpiMaps = {
+kpiMaps = {
         stream: {
                 add_bandwidth_MBps:     { kpi: 'bandwidth_MBps', testcase: 'add'        },
                 copy_bandwidth_MBps:    { kpi: 'bandwidth_MBps', testcase: 'copy'       },
@@ -312,7 +312,7 @@ const kpiMaps = {
 
 }
 
-const suiteTables = {
+suiteTables = {
         netperf: [
                 { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'TCP_STREAM' }         },
                 { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'UDP_STREAM' }         },
