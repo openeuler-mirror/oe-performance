@@ -184,7 +184,7 @@ jobModel = {
         },
 }
 
-libmicroGroups = [
+const libmicroGroups = [
         'c_', 'get', 'malloc', 'memcpy', 'memset', 'mmap', 'mprot', 'pipe', 'poll',
         'pread', 'pwrite', 'read', 'select', 'str', 'unmap', 'write', 'writev',
         'Miscellaneous' // all the others, keep it the last element
@@ -316,7 +316,7 @@ suiteTables = {
         netperf: [
                 { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'TCP_STREAM' }         },
                 { kpi: 'Throughput_Mbps', x_param: 'send_size', filters: { test: 'UDP_STREAM' }         },
-                { kpi: 'Throughput_tps',  x_param: 'test'                                               },
+                { kpi: 'Throughput_Tps',  x_param: 'test'                                               },
         ],
         stream: [{
                 kpi: 'bandwidth_MBps',
@@ -345,5 +345,3 @@ for (const group of libmicroGroups) {
                 filters: { testgroup: group }
         })
 }
-
-// console.log((suiteTables.libmicro))
