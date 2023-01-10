@@ -65,7 +65,6 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { suiteConfig, fieldsConfig } from './config'
-import { useTestboxStore } from '@/stores/performanceData'
 
 import { getJobValueList, getHostValueList, getTestboxBySearchParams, getTestBoxes } from '@/api/performance'
 
@@ -87,12 +86,11 @@ const emit = defineEmits<{
 const route = useRoute()
 const router = useRouter()
 
-const testboxStore = useTestboxStore()
-
 const fieldsListForRender = ref([] as string[])
 
 const suiteList = ref([] as string[])
 // uite = ref('unixbench')
+const testboxList = ref([])
 
 const fieldOrigin = {} as objectItem // 字典，用来判断某个field字段的origin
 const hostFieldList = [] as any // 中间数据，用来循环host类型的field字段
@@ -199,22 +197,29 @@ const getFieldsOptions = () => {
 }
 // 获取主机相关搜索条件。
 const getHostOptions = () => {
-  // 获取所有主机信息存在store中
   const fieldList = hostFieldList.map((field:string) => field.replace('hw.', ''))
-  getHostValueList({ hostFieldList: fieldList }).then(res => {
-    const aggs = res.data.aggregations || {}
-    Object.keys(aggs).forEach(field => {
-      // 通过请求获取的可选项
-      const listValues = aggs[field].buckets.map((item: any) => {
-        return {
-          value: item.key
+  getTestBoxes().then((testboxRes => {
+    testboxList.value = testboxRes.data.hits.hits.map(item => {
+      return {
+        testboxId: item._id,
+        ...item._source
+      }
+    })
+    fieldList.forEach(field => {
+      const listValues = []
+      const repeatMap = {}
+      testboxList.value.forEach(testbox => {
+        if (testbox[field] && !repeatMap[testbox[field]]) {
+          listValues.push({
+            value: testbox[field]
+          })
+          repeatMap[testbox[field]] = 1
         }
       })
-      // default可选项
       const staticValues = fieldsConfig[`hw.${field}`].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
     })
-  })
+  }))
 }
 // 将inputArr中与sourceArr不同的选项追加到sourceArr中
 const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
@@ -236,10 +241,18 @@ const handleSearch = () => {
   // 记录查询条件到url上
   setQueryToUrl()
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
-  
   if (Object.keys(hostParams).length > 0) {
-    getTestboxBySearchParams(hostParams).then(res => {
-
+    const testboxSearchList = []
+    Object.keys(hostParams).forEach(hostFieldKey => {
+      const tempKey = hostFieldKey.replace('hw.', '')
+      const tempIdList = testboxList.value.filter(testbox => {
+        return testbox[tempKey] && testbox[tempKey] === hostParams[hostFieldKey]})
+        .map(testbox => testbox.testboxId)
+      testboxSearchList.push(...tempIdList)
+    })
+    emit('search', {
+      ...jobParams,
+      testboxByParams: testboxSearchList
     })
   } else {
     emit('search', jobParams)
@@ -250,7 +263,7 @@ const handleSearch = () => {
 const setQueryToUrl = () => {
   const newQuery = {} as objectItem
   Object.keys(searchParams.value).forEach(field => {
-    newQuery[field] = searchParams.value[field]
+    searchParams.value[field] && (newQuery[field] = searchParams.value[field])
   })
   newQuery['scene'] = route.query.scene as string
   router.push({
@@ -284,8 +297,6 @@ onMounted(() => {
   initailizing()
   getFieldsOptions()
   getHostOptions()
-
-  getTestBoxes()
 })
 </script>
 

@@ -136,8 +136,9 @@ export function getTestboxBySearchParams(params: anyObj) {
   const mustCasees = <anyObj>[]
   Object.keys(params).forEach(paramKey => {
     if (params[paramKey]) {
+      const searchKey = paramKey.replace('hw.', '')
       const matchObj:anyObj = {}
-      matchObj[paramKey] = params[paramKey]
+      matchObj[searchKey] = params[paramKey]
       mustCasees.push({
         match: matchObj
       })
