@@ -1,7 +1,7 @@
 <template>
   <div class="performance-baseline-test-table">
     <div class="handle-pannel">
-      <div>
+      <div class="button-group-1">
         <el-button
           type="primary"
           class="button"
@@ -11,7 +11,9 @@
           @click="handleComaration"
           >对比</el-button
         >
-        <el-button type="primary" class="button" @click="handleExportCsv">导出</el-button>
+        <el-button type="primary" class="button" @click="handleExportCsv"
+          >导出</el-button
+        >
       </div>
       <el-input
         v-model="input"
@@ -35,7 +37,7 @@
           <el-button :icon="Search" @click="handleSearchTable" />
         </template>
       </el-input>
-      <div>
+      <div class="button-group-2">
         <el-button
           :icon="RefreshLeft"
           :loading="reFreshLodaing"
@@ -57,13 +59,13 @@
               >全选</el-checkbox
             >
             <el-checkbox-group
-              v-model="tableColumn"
+              v-model="cloumnLabel"
               @change="handleCheckedTableCloumn">
               <el-checkbox
-                v-for="item in allColumn"
+                v-for="item in allColumnLabel"
                 :label="item"
                 :key="item"
-                >{{ item.label }}</el-checkbox
+                >{{ item }}</el-checkbox
               >
             </el-checkbox-group>
           </div>
@@ -87,7 +89,7 @@
     </div>
     <div class="tips">
       <el-icon><WarningFilled color="rgb(16,142,233)" /></el-icon>
-      <span> 已选择{{ selectedTableRows.length }}项 </span>
+      <span> 已选择 {{ selectedTableRows.length }}项 </span>
       <el-divider direction="vertical" />
       <span
         >数据所用"测试用例名称"一致可以进行对比操作(最多勾选5条)，可以导出当前所选数据。</span
@@ -97,18 +99,23 @@
       :data="tableData"
       v-loading="tableLoading || submitDataLoading"
       :header-cell-style="{ background: 'rgb(243,243,243)' }"
-      @selection-change="handleSelectionChange"
-    >
+      @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="30" />
-      <el-table-column fixed="left" width="150" label="数据来源" prop="submit_id">
-      </el-table-column>
       <el-table-column
-        v-for="(item, index) in tableColumn"
-        :prop="item.prop"
-        :label="item.label"
-        :key="index"
-        width="150">
+        fixed="left"
+        width="150"
+        label="数据来源"
+        prop="submit_id">
       </el-table-column>
+      <template v-for="(item, index) in tableColumn">
+        <el-table-column
+          v-if="item.show"
+          :prop="item.prop"
+          :label="item.label"
+          :key="index"
+          width="150">
+        </el-table-column>
+      </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">
         <template #default="scope">
           <router-link :to="`/baseline/detail/${scope.row.submit_id}`">
@@ -133,7 +140,7 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watchEffect, reactive, watch, onMounted } from 'vue'
+import { PropType, ref, watch, reactive, onMounted, watchEffect } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Search,
@@ -146,13 +153,13 @@ import { config, sceneConfig } from '../config-file'
 import { ElMessage } from 'element-plus'
 import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
-
-// import { allColumns } from '../test-data'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
+import { combineJobs } from '@/views/performance-baseline/utils.js'
 
 export interface Column {
   label: string
   prop: string
+  show: boolean
 }
 export interface TableItem {
   [key: string]: any
@@ -169,9 +176,9 @@ const props = defineProps({
   }
 })
 
-const performanceStore = usePerformanceData()
 const router = useRouter()
 const route = useRoute()
+const performanceStore = usePerformanceData()
 
 const input = ref('')
 const selectedOption = ref('')
@@ -193,16 +200,18 @@ const selectOptions = [
 const tableData = ref<TableItem[]>([])
 let originData: TableItem[] = []
 
-let allColumn = ref([] as Column[])
+const allColumn = ref([] as Column[])
 const tableColumn = ref([] as Column[])
-const isIndeterminate = ref(true)
+const allColumnLabel = ref([] as string[])
+const cloumnLabel = ref([] as string[])
+const isIndeterminate = ref(false)
 const checkAllColumn = ref(true)
 
 const selectedTableRows = ref(<{}[]>[])
 
 const currentPage = ref(1)
-const pageSize = ref(10)
-const pageSizes = ref([] as number[])
+const pageSize = ref(5)
+const pageSizes = ref([10, 20, 50])
 const total = ref(1)
 const small = ref(false)
 const background = ref(false)
@@ -213,19 +222,30 @@ const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
 
 onMounted(() => {
-  // handleTableData(1)
+  initailizeColumn()
 })
 
-watchEffect(() => {
+const initailizeColumn = () => {
   const scene = route.query.scene ? route.query.scene : 'bigData'
   let key: keyof typeof sceneConfig
   for (key in sceneConfig) {
     if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
       allColumn.value = config[scene as string].column
+      allColumnLabel.value = allColumn.value.map(item => {
+        return item.label
+      })
       tableColumn.value = allColumn.value
+      cloumnLabel.value = allColumnLabel.value
     }
   }
-})
+}
+
+watch(
+  () => route.query.scene,
+  () => {
+    initailizeColumn
+  }
+)
 // 数据扁平化，便于table展示
 
 // const handleTableData = (page: number) => {
@@ -256,11 +276,24 @@ watchEffect(() => {
 // }
 
 const handlecheckAllColumn = (val: any) => {
-  tableColumn.value = val ? allColumn.value : []
+  if (val) {
+    tableColumn.value.forEach(cloumn => {
+      cloumn.show = true
+    })
+  } else {
+    tableColumn.value.forEach(cloumn => {
+      cloumn.show = false
+    })
+  }
+  cloumnLabel.value = val ? allColumnLabel.value : []
   isIndeterminate.value = false
 }
-const handleCheckedTableCloumn = (value: any) => {
+const handleCheckedTableCloumn = (value: any[]) => {
   const checkedCount = value.length
+  tableColumn.value.forEach(cloumn => {
+    cloumn.show =
+      value.findIndex(item => item === cloumn.label) === -1 ? false : true
+  })
   checkAllColumn.value = checkedCount === allColumn.value.length
   isIndeterminate.value =
     checkedCount > 0 && checkedCount < allColumn.value.length
@@ -299,8 +332,8 @@ const handleReFresh = () => {
 
 // 获取并合并jobs的逻辑
 // todo: 这段逻辑可以考虑一直store中
-const getAllJobsData = (idList:any[]) => {
-  const tempArr:any[] = reactive(Object.assign([],idList))
+const getAllJobsData = (idList: any[]) => {
+  const tempArr: any[] = reactive(Object.assign([], idList))
   // todo: 每次遍历请求前，应取消之前所有未完成的请求
   idList.forEach((idObj: any, idx: number) => {
     // 如果之前已经获得过数据则不再重复请求
@@ -321,33 +354,28 @@ const getAllJobsData = (idList:any[]) => {
             submit_id: idObj.submit_id
           }
         }
-      },
-    }).then((res) => {      
-      const resultObj = combineJobs(res.data.hits.hits)
-      performanceStore.setPerformanceData(idObj.submit_id,resultObj)
-      tempArr[idx] = resultObj
-    }).catch((err) => {
-      ElMessage({
-        message: err.message,
-        type: 'error'
-      })
-    }).finally(() => {
-      requestCount.value -= 1
-      if (requestCount.value === 0) {
-        tableLoading.value = false
-        performanceStore.changeLoadingStatus(false)
       }
     })
+      .then(res => {
+        const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
+        performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
+        tempArr[idx] = resultObj
+      })
+      .catch(err => {
+        ElMessage({
+          message: err.message,
+          type: 'error'
+        })
+      })
+      .finally(() => {
+        requestCount.value -= 1
+        if (requestCount.value === 0) {
+          tableLoading.value = false
+          performanceStore.changeLoadingStatus(false)
+        }
+      })
   })
   return tempArr
-}
-
-const combineJobs = (jobList:any[]) => {
-  // 在这里实现jobs的混合和映射逻辑，生成完整的一条submit_id对象
-  // 暂时取第一条数据,不做整理
-  const item = jobList[0]._source
-  item['submit_time'] = new Date(item['submit_time']).toLocaleString()  
-  return item
 }
 
 const idList = ref(<any>[])
@@ -358,9 +386,9 @@ watchEffect(() => {
   // 数据分页
   idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
   total.value = props.dataList.length
-  for (let i = 0; total.value > i * 10; i++) {
-    pageSizes.value.push((i + 1) * 10)
-  }
+  // for (let i = 0; total.value > i * 10; i++) {
+  //   pageSizes.value.push((i + 1) * 10)
+  // }
 })
 
 // 当前页数据变化时，获取jobs数据
@@ -385,24 +413,24 @@ const handleExportCsv = () => {
   } else {
     const data = []
     // 这里要深拷贝,不然影响列的字段
-    const titleData:any[] = JSON.parse(JSON.stringify(allColumn))
+    const titleData: any[] = JSON.parse(JSON.stringify(allColumn))
     titleData.splice(0, 0, { label: '数据来源', prop: 'submit_id' })
-    const title = titleData.map<string>((item:any) => item.label).join(',')
-    const keys = titleData.map<string>((item:any) => item.prop)
+    const title = titleData.map<string>((item: any) => item.label).join(',')
+    const keys = titleData.map<string>((item: any) => item.prop)
     data.push(`${title}\r\n`)
-    selectedTableRows.value.forEach((item:any) => {
-      const temp:string[] = []
-      keys.forEach((key:string) => {
+    selectedTableRows.value.forEach((item: any) => {
+      const temp: string[] = []
+      keys.forEach((key: string) => {
         temp.push(item[key])
       })
       const tmpStr = temp.join(',')
       data.push(`${tmpStr}\r\n`)
     })
     const dataString = data.join('')
-    const blob = new Blob([`\uFEFF${dataString}`],{
+    const blob = new Blob([`\uFEFF${dataString}`], {
       type: 'text/csv;charset=utf-8'
-    }) 
-    downloadBlobFile(blob,'导出.csv')
+    })
+    downloadBlobFile(blob, '导出.csv')
   }
 }
 </script>
@@ -415,24 +443,33 @@ a {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  .button {
-    min-width: 90px;
-  }
-  .more-button {
-    margin-left: 12px;
-    min-width: 70px;
-  }
-  .more-icon-button {
-    margin-left: 3px;
-    max-width: 30px;
-  }
-  .input-with-select {
+  flex-wrap: wrap;
+  .button-group-1 {
     min-width: 200px;
+    .button {
+      min-width: 90px;
+    }
+  }
+
+  .input-with-select {
+    margin: 10px 0 10px 0;
+    min-width: 250px;
     width: 35%;
     max-height: 32px;
   }
   .select {
     width: 100px;
+  }
+  .button-group-2 {
+    min-width: 290px;
+    .more-button {
+      margin-left: 12px;
+      min-width: 70px;
+    }
+    .more-icon-button {
+      margin-left: 3px;
+      max-width: 30px;
+    }
   }
 }
 .tips {

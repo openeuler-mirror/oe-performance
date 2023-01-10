@@ -13,9 +13,10 @@
             :default-active="currentKey"
             router
           >
-            <el-menu-item key="h-1" index="/baseline">性能基线</el-menu-item>
-            <el-menu-item key="h-2" index="/testTask">测试任务</el-menu-item>
-            <el-menu-item key="h-3" index="/userCenter">用户中心</el-menu-item>
+            <el-menu-item key="h-1" index="/comparation">对比检索</el-menu-item>
+            <el-menu-item key="h-2" index="/baseline">性能基线</el-menu-item>
+            <el-menu-item key="h-3" index="/testTask">测试任务</el-menu-item>
+            <el-menu-item key="h-4" index="/userCenter">用户中心</el-menu-item>
           </el-menu>
         </div>
       </div>

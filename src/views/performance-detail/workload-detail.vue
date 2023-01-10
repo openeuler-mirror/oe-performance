@@ -15,9 +15,9 @@
       </div>
       <div class="main-info">
         <div class="use-case-info main-item">
-           
+          <workloadTableSection />
           <!-- 用例信息 -->
-          <section class="test-case main-item">
+          <!-- <section class="test-case main-item">
             <div class="sub-title">用例信息</div>
             <el-descriptions :column="2" border>
               <el-descriptions-item label="selinux">
@@ -76,9 +76,9 @@
                 <span>zWX5324242</span>
               </el-descriptions-item>
             </el-descriptions>
-          </section>
+          </section> -->
           <!-- 硬件配置 -->
-          <section class="hardware-configuration main-item">
+          <!-- <section class="hardware-configuration main-item">
             <div class="sub-title">硬件配置</div>
             <el-descriptions :column="2" size="default" border>
               <el-descriptions-item label="服务器型号">
@@ -89,9 +89,9 @@
                 <span>5.06(U4262)</span>
               </el-descriptions-item>
             </el-descriptions>
-          </section>
+          </section> -->
           <!-- 软件配置 -->
-          <section class="software-configuration main-item">
+          <!-- <section class="software-configuration main-item">
             <div class="sub-title">软件配置</div>
             <el-descriptions :column="2" border>
               <el-descriptions-item label="操作系统">
@@ -102,7 +102,7 @@
                 <span>kernel-4.19.91-23.4.an8</span>
               </el-descriptions-item>
             </el-descriptions>
-          </section>
+          </section> -->
         </div>
       </div>
     </el-card>
@@ -110,6 +110,7 @@
 </template>
   
 <script setup lang="ts">
+import workloadTableSection from './workload-table-section.vue'
 </script>
   
 <style lang="scss" scoped>

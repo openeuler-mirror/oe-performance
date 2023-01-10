@@ -1,8 +1,8 @@
 <template>
   <el-container>
     <el-aside width="250px">
-      <el-menu :default-active="currentKey" @select="handleChangeScene">
-        <el-sub-menu index="1">
+      <el-menu :default-active="currentKey" @select="handleMenuClick">
+        <el-sub-menu index="baseline-solution">
           <template #title>
             <span>解决方案性能基线</span>
           </template>
@@ -13,7 +13,7 @@
             >{{ item.label }}</el-menu-item
           >
         </el-sub-menu>
-        <el-sub-menu index="2">
+        <el-sub-menu index="baseline-basic">
           <template #title>
             <span>基础性能基线</span>
           </template>
@@ -24,17 +24,20 @@
             >{{ item.label }}</el-menu-item
           >
         </el-sub-menu>
-        <el-sub-menu index="3">
+        <!--
+        <el-sub-menu index="comparation">
           <template #title>
             <span>对比检索</span>
           </template>
-            <el-menu-item index="performanceCompare">基础性能</el-menu-item>
-            <el-menu-item index="solutionCompare">解决方案</el-menu-item>
+          <el-menu-item index="performanceCompare">基础性能</el-menu-item>
+          <el-menu-item index="solutionCompare">解决方案</el-menu-item>
         </el-sub-menu>
+        <el-menu-item index="dataAccess">数据接入</el-menu-item>
+        -->
       </el-menu>
     </el-aside>
     <el-main>
-      <div class="breadcrumb-nav">面包屑/导航</div>
+      <div class="breadcrumb-nav" @click="router.go(-1)">&lt;&lt;返回</div>
       <div class="sub-layout-content">
         <router-view></router-view>
       </div>
@@ -42,17 +45,20 @@
   </el-container>
 </template>
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
-import { sceneConfig } from '@/views/performance-baseline/config-file'
 import { onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { sceneConfig } from '@/views/performance-baseline/config-file' 
 
 const router = useRouter()
 const route = useRoute()
 const currentKey = ref('bigData')
 
-const handleChangeScene = (index: string, indexPath: [subMenuIndex: string, menuItemIndex: string]) => {
-  // 只有前两项才需要控制参数
-  if (indexPath[0] === '1' || indexPath[0] === '2') {
+const handleMenuClick = (
+  index: string,
+  indexPath: [subMenuIndex: string, menuItemIndex: string]
+) => {
+  // indexPath两项需要特殊处理，只切换scence
+  if (indexPath[0] === 'baseline-solution' || indexPath[0] === 'baseline-basic') {
     router.push({
       path: '/baseline/list',
       query: { ...route.query, scene: index }
@@ -60,28 +66,19 @@ const handleChangeScene = (index: string, indexPath: [subMenuIndex: string, menu
   } else {
     router.push({ name: index })
   }
-  
 }
 
 onMounted(() => {
-  if (route.query.scene) {
-    currentKey.value = route.query.scene as string
+  if (route.query.scence) {
+    currentKey.value = route.query.scence as string
+  } else if (route.path === '/baseline/list') {
+    // 如果是性能基线页面，但是有没有设置场景值的话，跳转至第一个场景（一般登录第一次进来或者顶部导航切换是没有场景的）
+    handleMenuClick('bigData', ['baseline-solution', 'bigData'])
   } else {
-    currentKey.value = String(route.name)
+    currentKey.value = String(route.name || '')
   }
 })
-
 </script>
 <style scoped lang="scss">
-$header-height: 56px;
-$breadcrumb-nav-height: 32px;
-
-.el-main {
-  padding: 0;
-}
-.sub-layout-content {
-  min-height: calc(100vh - $header-height - $breadcrumb-nav-height);
-  background: var(--oe-perf-bg-layout);
-  padding: var(--oe-perf-padding);
-}
+@import '../style.scss'
 </style>

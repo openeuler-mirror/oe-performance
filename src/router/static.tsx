@@ -1,4 +1,4 @@
-import { RouteRecordRaw, RouterView } from 'vue-router'
+import { RouteRecordRaw } from 'vue-router'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -21,6 +21,22 @@ const asyncRoutes: Array<RouteRecordRaw> = [
     component: () => import('@/layout/basic-layout.vue'),
     children: [
       {
+        path: 'comparation',
+        name: 'comparationLayout',
+        redirect: '/comparation/result',
+        component: () => import('@/layout/sub-layout/comparation-layout.vue'),
+        children: [
+          {
+            path: 'result',
+            name: 'resultComparation',
+            component: () => import('@/views/result-comparation/index.vue'),
+            meta: {
+              title: 'resultComparation'
+            }
+          }
+        ]
+      },
+      {
         path: 'baseline',
         name: 'baselineLayout',
         redirect: '/baseline/list',
@@ -37,45 +53,15 @@ const asyncRoutes: Array<RouteRecordRaw> = [
             component: () => import('@/views/performance-detail/index.vue'),
             meta: {
               title: 'detail'
-            },
-            children: [
-              {
-                path: 'workloadDetail',
-                name: 'baseline-workloadDetail',
-                component: () => import('@/views/performance-detail/workload-detail.vue'),
-                meta: {
-                  title: 'workloadDetail'
-                }
-              }
-            ]
+            }
           },
           {
-            path: 'comparativeSearch',
-            name: 'comparativeSearch',
-            component: RouteView,
+            path: 'detail/:submit_id/workloadDetail',
+            name: 'baseline-workloadDetail',
+            component: () => import('@/views/performance-detail/workload-detail.vue'),
             meta: {
-              title: 'comparativeSearch'
-            },
-            children: [
-              {
-                path: 'basicPerformance',
-                name: 'performanceCompare',
-                component: () =>
-                  import('@/views/performance-comparation/index.vue'),
-                meta: {
-                  title: 'basicPerformance'
-                }
-              },
-              {
-                path: 'solution',
-                name: 'solutionCompare',
-                component: () =>
-                  import('@/views/performance-comparation/index.vue'),
-                meta: {
-                  title: 'solution'
-                }
-              }
-            ]
+              title: 'workloadDetail'
+            }
           }
         ]
       },
@@ -134,7 +120,7 @@ const asyncRoutes: Array<RouteRecordRaw> = [
           {
             path: 'taskList',
             name: 'taskList',
-            component: () => import('@/views/test-task/task-list.vue'),
+            component: () => import('@/views/test-task/index.vue'),
             meta: {
               title: 'taskList'
             }

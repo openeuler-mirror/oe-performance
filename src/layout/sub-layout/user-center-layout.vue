@@ -39,15 +39,5 @@ const currentKey = computed({
 </script>
 
 <style scoped lang="scss">
-$header-height: 56px;
-$breadcrumb-nav-height: 32px;
-
-.el-main {
-  padding: 0;
-}
-.sub-layout-content {
-  min-height: calc(100vh - $header-height - $breadcrumb-nav-height);
-  background: var(--oe-perf-bg-layout);
-  padding: var(--oe-perf-padding);
-}
+@import '../style.scss'
 </style>
