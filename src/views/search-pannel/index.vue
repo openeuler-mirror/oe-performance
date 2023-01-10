@@ -53,7 +53,7 @@
       <el-button
         type="primary"
         @click="handleSearch"
-        :loading="searchLoading"
+        :loading="searchLoading || fieldLoadingCount !== 0"
         >
         搜索
       </el-button>
@@ -87,10 +87,10 @@ const route = useRoute()
 const router = useRouter()
 
 const fieldsListForRender = ref([] as string[])
-
 const suiteList = ref([] as string[])
 // uite = ref('unixbench')
 const testboxList = ref([])
+const fieldLoadingCount = ref(0)
 
 const fieldOrigin = {} as objectItem // 字典，用来判断某个field字段的origin
 const hostFieldList = [] as any // 中间数据，用来循环host类型的field字段
@@ -180,6 +180,7 @@ const setDefaultSuite = () => {
 
 // 获取搜索条件
 const getFieldsOptions = () => {
+  fieldLoadingCount.value ++
   getJobValueList({ jobFieldList }).then(res => {
     const aggs = res.data.aggregations || {}
     Object.keys(aggs).forEach(field => {
@@ -193,10 +194,13 @@ const getFieldsOptions = () => {
       const staticValues = fieldsConfig[field].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
     })
+  }).finally(() => {
+    fieldLoadingCount.value --
   })
 }
 // 获取主机相关搜索条件。
 const getHostOptions = () => {
+  fieldLoadingCount.value ++
   const fieldList = hostFieldList.map((field:string) => field.replace('hw.', ''))
   getTestBoxes().then((testboxRes => {
     testboxList.value = testboxRes.data.hits.hits.map(item => {
@@ -219,7 +223,9 @@ const getHostOptions = () => {
       const staticValues = fieldsConfig[`hw.${field}`].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
     })
-  }))
+  })).finally(() => {
+    fieldLoadingCount.value --
+  })
 }
 // 将inputArr中与sourceArr不同的选项追加到sourceArr中
 const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
@@ -250,10 +256,11 @@ const handleSearch = () => {
         .map(testbox => testbox.testboxId)
       testboxSearchList.push(...tempIdList)
     })
-    emit('search', {
-      ...jobParams,
-      testboxByParams: testboxSearchList
-    })
+    const searchParams = { ...jobParams }
+    if (testboxSearchList.length > 0) {
+      searchParams.testboxByParams = testboxSearchList
+    }
+    emit('search', searchParams)
   } else {
     emit('search', jobParams)
   }

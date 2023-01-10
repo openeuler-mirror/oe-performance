@@ -43,7 +43,6 @@ const isSearched = ref(false)
 
 // 获取jobs数据
 const onSearch = (searchParams) => {
-  console.log(11,searchParams)
   getTotalData(searchParams)
 }
 
