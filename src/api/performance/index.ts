@@ -104,6 +104,7 @@ export function getJobValueList(params:any) {
     }
   })
 }
+// host表中的几个数据聚合不到,目前没有使用这个接口
 export function getHostValueList(params:any) {
   const { hostFieldList } = params
   const aggs: Aggs = {}
@@ -132,6 +133,7 @@ export function getHostValueList(params:any) {
 interface anyObj {
   [propName: string]: any
 }
+// 目前是直接获取全量host数据，直接在本地过滤的，暂时没有用这个接口
 export function getTestboxBySearchParams(params: anyObj) {
   const mustCasees = <anyObj>[]
   Object.keys(params).forEach(paramKey => {

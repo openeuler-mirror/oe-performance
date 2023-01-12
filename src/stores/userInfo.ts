@@ -25,6 +25,26 @@ const loadUserInfo = () => {
   userInfo.username = cookie.get('user_name')
 }
 
+const simulateLogin = () => {
+  return new Promise((resolve) => {
+    const in6hours = 1 / 2
+    cookie.set('token', 'res.data.token', {
+      expires: in6hours
+    })
+    cookie.set('user_name', 'admin', {
+      expires: in6hours
+    });
+    resolve('login')
+  })
+}
+const simulateLogout = () => {
+  return new Promise((resolve) => {
+    cookie.remove('token')
+    cookie.remove('user_name')
+    resolve('logout')
+  })
+}
+
 export const useUserInfo = defineStore('user', () => {
   const userLogin = (username: string, password: string) => {
     return new Promise((resolve, reject) => {
@@ -64,5 +84,5 @@ export const useUserInfo = defineStore('user', () => {
     })
   }
 
-  return { userInfo, userLogin, userLogout, resetUserInfo, loadUserInfo }
+  return { userInfo, userLogin, userLogout, resetUserInfo, loadUserInfo, simulateLogin, simulateLogout }
 })

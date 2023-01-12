@@ -36,7 +36,6 @@
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserInfo } from '@/stores/userInfo'
-import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const userInfoStore = useUserInfo()
@@ -50,12 +49,9 @@ const currentKey = computed({
 
 const userLogout = () => {
   userInfoStore
-    .userLogout()
+    .simulateLogout()
     .then(() => {
       router.push('/user/login')
-    })
-    .catch(err => {
-      ElMessage.error(err.message)
     })
 }
 
