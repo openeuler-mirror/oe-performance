@@ -1,3 +1,4 @@
+<!--本页面未使用-->
 <template>
   <div class="oe-perf-login">
     <div class="left-content">
@@ -5,14 +6,31 @@
     </div>
     <div class="right-content">
       <div class="login-container">
-        <h3>openEuler性能看板</h3>
-        <el-button class="login-btn" type="primary" @click="loginRequest">进入系统</el-button>
+        <el-tabs v-model="loginType" class="demo-tabs">
+          <el-tab-pane label="帐号密码登录" name="username">
+            <el-form :model="loginForm" class="username-login-form">
+              <el-form-item label="帐号">
+                <el-input v-model="loginForm.username" />
+              </el-form-item>
+              <el-form-item label="密码">
+                <el-input v-model="loginForm.password" show-password/>
+              </el-form-item>
+              <el-form-item>
+                <el-button class="login-btn" type="primary" @click="loginRequest">登录</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+          <el-tab-pane label="手机号登录" name="tel">
+            <!--待确认是否支持-->
+          </el-tab-pane>
+        </el-tabs>
       </div>
     </div> 
   </div>
 </template>
   
 <script setup lang="ts">
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus'
 
@@ -21,11 +39,20 @@ import { useUserInfo } from '@/stores/userInfo'
 const userInfoStore = useUserInfo()
 const router = useRouter()
 
+const loginType = ref('username')
+
+const loginForm = reactive({
+  username: '',
+  password: ''
+})
+
 const loginRequest = () => {
-  userInfoStore.simulateLogin()
+  userInfoStore.userLogin(loginForm.username, loginForm.password)
     .then(() => {
-      ElMessage.success('登录成功')
+      ElMessage.success('登陆成功')
       router.push({ name: 'baseline-list' })
+    }).catch((err) => {
+      ElMessage.error(err.message)
     })
 }
 </script>
@@ -59,15 +86,17 @@ const loginRequest = () => {
     .login-container {
       position: absolute;
       width: 300px;
-      top: 40vh;
+      top: 30vh;
       left: 50%;
       margin-left: -150px;
-      text-align: center;
       :deep(.el-tabs__header) {
         padding-left: 40px;
       }
       :deep(.el-tabs__nav-wrap:after) {
         display: none;
+      }
+      .username-login-form {
+        margin-top:20px;
       }
       .login-btn {
         margin-top: 30px;

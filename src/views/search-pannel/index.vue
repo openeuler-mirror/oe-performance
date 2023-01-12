@@ -66,7 +66,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { suiteConfig, fieldsConfig } from './config'
 
-import { getJobValueList, getHostValueList, getTestboxBySearchParams, getTestBoxes } from '@/api/performance'
+import { getJobValueList, getTestBoxes } from '@/api/performance'
 
 const props = defineProps({
   suiteByScene: {
