@@ -23,7 +23,6 @@ const submitDataLoading = ref(false)
 
 /* eslint-disable */
 const getAllData = (params: searchParams) => {
-  console.log(params)
   submitDataLoading.value = true
 
   const matchCases = []
