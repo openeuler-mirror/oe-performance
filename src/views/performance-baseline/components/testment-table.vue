@@ -1,7 +1,7 @@
 <template>
   <div class="performance-baseline-test-table">
     <div class="handle-pannel">
-      <div class="button-group-1">
+      <div class="button-group-left">
         <el-button
           type="primary"
           class="button"
@@ -37,7 +37,7 @@
           <el-button :icon="Search" @click="handleSearchTable" />
         </template>
       </el-input>
-      <div class="button-group-2">
+      <div class="button-group-right">
         <el-button
           :icon="RefreshLeft"
           :loading="reFreshLodaing"
@@ -70,6 +70,7 @@
             </el-checkbox-group>
           </div>
         </el-popover>
+        <!--上传功能尚未接入
         <el-dropdown trigger="click">
           <el-button-group>
             <el-button type="primary" class="more-button">更多</el-button>
@@ -85,6 +86,7 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        -->
       </div>
     </div>
     <div class="tips">
@@ -444,7 +446,7 @@ a {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  .button-group-1 {
+  .button-group-left {
     min-width: 200px;
     .button {
       min-width: 90px;
@@ -460,8 +462,7 @@ a {
   .select {
     width: 100px;
   }
-  .button-group-2 {
-    min-width: 290px;
+  .button-group-right {
     .more-button {
       margin-left: 12px;
       min-width: 70px;
