@@ -106,7 +106,7 @@
       <el-table-column
         fixed="left"
         width="150"
-        label="数据来源"
+        label="提交编号"
         prop="submit_id">
       </el-table-column>
       <template v-for="(item, index) in tableColumn">
@@ -357,25 +357,22 @@ const getAllJobsData = (idList: any[]) => {
           }
         }
       }
+    }).then(res => {
+      const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
+      performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
+      tempArr[idx] = resultObj
+    }).catch(err => {
+      ElMessage({
+        message: err.message,
+        type: 'error'
+      })
+    }).finally(() => {
+      requestCount.value -= 1
+      if (requestCount.value === 0) {
+        tableLoading.value = false
+        performanceStore.changeLoadingStatus(false)
+      }
     })
-      .then(res => {
-        const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
-        performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
-        tempArr[idx] = resultObj
-      })
-      .catch(err => {
-        ElMessage({
-          message: err.message,
-          type: 'error'
-        })
-      })
-      .finally(() => {
-        requestCount.value -= 1
-        if (requestCount.value === 0) {
-          tableLoading.value = false
-          performanceStore.changeLoadingStatus(false)
-        }
-      })
   })
   return tempArr
 }
@@ -388,9 +385,6 @@ watchEffect(() => {
   // 数据分页
   idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
   total.value = props.dataList.length
-  // for (let i = 0; total.value > i * 10; i++) {
-  //   pageSizes.value.push((i + 1) * 10)
-  // }
 })
 
 // 当前页数据变化时，获取jobs数据
