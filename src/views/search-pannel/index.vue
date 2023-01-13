@@ -246,7 +246,11 @@ const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
 }
 
 const handleReset = () => {
-  searchParams.value = {}
+  if (props.suiteByScene) {
+    searchParams.value = { suite: searchParams.value.suite }
+  } else {
+    searchParams.value = {}
+  }
 }
 
 const handleSearch = () => {
