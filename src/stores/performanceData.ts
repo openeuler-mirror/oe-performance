@@ -37,8 +37,8 @@ const testboxMap = reactive(<{ [key: string]: any }>{})
 export const useTestboxStore = defineStore('testboxStore', () => {
   const setTestboxData = (list: []) => {
     testboxList.value = list
-    list.forEach((testboxItem:{id:string}) => {
-      testboxMap[testboxItem.id] = testboxItem
+    list.forEach((testboxItem:{testboxId:string}) => {
+      testboxMap[testboxItem.testboxId] = testboxItem
     })
   }
 

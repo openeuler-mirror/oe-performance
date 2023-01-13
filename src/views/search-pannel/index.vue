@@ -67,6 +67,8 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { suiteConfig, fieldsConfig } from './config'
 
+import { useTestboxStore } from '@/stores/performanceData'
+
 import { getJobValueList, getTestBoxes } from '@/api/performance'
 
 const props = defineProps({
@@ -87,6 +89,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
+const testboxStore = useTestboxStore()
 
 const fieldsListForRender = ref([] as string[])
 const suiteList = ref([] as string[])
@@ -211,6 +214,7 @@ const getHostOptions = () => {
         ...item._source
       }
     })
+    testboxStore.setTestboxData(testboxList.value)
     fieldList.forEach(field => {
       const listValues = []
       const repeatMap = {}

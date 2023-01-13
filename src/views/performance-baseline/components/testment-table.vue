@@ -153,7 +153,7 @@ import {
 } from '@element-plus/icons-vue'
 import { config, sceneConfig } from '../config-file'
 import { ElMessage } from 'element-plus'
-import { usePerformanceData } from '@/stores/performanceData'
+import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
@@ -181,6 +181,7 @@ const props = defineProps({
 const router = useRouter()
 const route = useRoute()
 const performanceStore = usePerformanceData()
+const testboxStore = useTestboxStore()
 
 const input = ref('')
 const selectedOption = ref('')
@@ -359,6 +360,7 @@ const getAllJobsData = (idList: any[]) => {
       }
     }).then(res => {
       const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
+      setDeviceInfoToObj(resultObj)
       performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
       tempArr[idx] = resultObj
     }).catch(err => {
@@ -393,6 +395,11 @@ watch(idList, () => {
   originData = JSON.parse(JSON.stringify(tableData.value))
   console.log(tableData.value)
 })
+
+const setDeviceInfoToObj = (resultObj) => {
+  const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
+  resultObj.device =  testbox.device || {}
+}
 
 // 对比
 const handleComaration = () => {

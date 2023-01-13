@@ -80,7 +80,7 @@
             <el-descriptions-item :span="4">
               <template #label>
                 <!-- 根据展开项是否为空添加手型交互 -->
-               <div :class="{'td-item': true}" @click="handlerCollapse('cpu')">
+               <div class="control-label" @click="handlerCollapse('cpu')">
                 <span>处理器（CPU配置）</span>
                 <span>
                   <el-tooltip
@@ -111,7 +111,7 @@
               <template #label>
                 <span class="label">CPU刷新频率（MHz）</span>
               </template>
-              <span class="label">{{  }}</span>
+              <span class="label">{{ detailData?.device?.cpu?.cpu_max_mhz }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -121,7 +121,7 @@
               <template #label>
                 <span class="label">threads</span>
               </template>
-              <span class="label">{{ detailData.nr_threads }}</span>
+              <span class="label">{{ detailData?.device?.cpu?.nr_thread_per_core }}</span>
             </el-descriptions-item>
 
             <el-descriptions-item
@@ -161,7 +161,7 @@
             <!-- 内存配置 -->
             <el-descriptions-item :span="2">
               <template #label>
-              <div :class="{'td-item': false}" @click="handlerCollapse('memory')">
+              <div @click="handlerCollapse('memory')">
                 <span>内存配置</span>
                 <span>
                   <el-tooltip
@@ -172,8 +172,7 @@
                       ><el-icon color="var(--oe-perf-color-secondary)"
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
-                </span>
-                
+                </span>               
                 <span 
                 class="arrowIcon" 
                 v-if="(typeof detailData.memory !== 'string')">
@@ -213,7 +212,7 @@
             <!-- 硬盘配置 -->
             <el-descriptions-item :span="2">
               <template #label>
-               <div :class="{'td-item': false}" @click="handlerCollapse('disk')">
+               <div @click="handlerCollapse('disk')">
                 <span>硬盘配置</span>
                 <span>
                   <el-tooltip
@@ -272,7 +271,7 @@
             <!-- 网卡 -->
             <el-descriptions-item :span="2">
               <template #label>
-                <div :class="{'td-item': false}" @click="handlerCollapse('nic')">
+                <div @click="handlerCollapse('nic')">
                   <span>{{ '网卡' }}</span>
                   <span 
                     class="arrowIcon" 
@@ -288,7 +287,7 @@
             <!-- 电源 -->
             <el-descriptions-item :span="2">
               <template #label>
-                <div :class="{'td-item': false}" @click="handlerCollapse('psu')">
+                <div @click="handlerCollapse('psu')">
                   <span>{{ '电源' }}</span>
                   <span 
                     class="arrowIcon" 
@@ -304,7 +303,7 @@
             <!-- 单板 -->
             <el-descriptions-item :span="2">
               <template #label>
-                <div :class="{'td-item': false}" @click="handlerCollapse('board')">
+                <div @click="handlerCollapse('board')">
                   <span>{{ '单板' }}</span>
                   <span 
                     class="arrowIcon" 
@@ -325,7 +324,7 @@
             <!-- BIOS配置 -->
             <el-descriptions-item :span="2">
               <template #label>
-              <div :class="{'td-item': false}" @click="handlerCollapse('bios')">
+              <div class="control-label" @click="handlerCollapse('bios')">
                 <span>BIOS配置</span>
                 <span>
                   <el-tooltip
@@ -337,9 +336,10 @@
                         ><InfoFilled /></el-icon></span
                   ></el-tooltip>
                 </span>
-                <span 
-                class="arrowIcon" 
-                v-if="false">
+                <span
+                  v-if="detailData?.device?.bios"
+                  class="arrowIcon"
+                >
                   <el-icon v-show="biosCollpase"><ArrowDownBold /></el-icon>
                   <el-icon v-show="!biosCollpase"><ArrowUpBold /></el-icon>
                 </span>
@@ -348,65 +348,33 @@
             </el-descriptions-item>
             <!-- BIOS配置详情 -->
             <!-- #region -->
-            <!-- <el-descriptions-item
+            <el-descriptions-item
               v-if="!biosCollpase"
               label-class-name="sub-item"
               class-name="sub-item">
               <template #label>
                 <span class="label">BIOS版本</span>
               </template>
-              <span class="label">{{ 'lnsydcH2003.72.27(V1.21)' }}</span>
+              <span class="label">{{ detailData?.device?.bios?.version }}</span>
             </el-descriptions-item>
-
             <el-descriptions-item
               v-if="!biosCollpase"
               label-class-name="sub-item"
               class-name="sub-item">
               <template #label>
-                <span class="label">NUMA</span>
+                <span class="label">发布日期</span>
               </template>
-              <span class="label">{{ 'Enable' }}</span>
+              <span class="label">{{ detailData?.device?.bios?.release_date }}</span>
             </el-descriptions-item>
-
             <el-descriptions-item
               v-if="!biosCollpase"
               label-class-name="sub-item"
               class-name="sub-item">
               <template #label>
-                <span class="label">Power</span>
+                <span class="label">厂商</span>
               </template>
-              <span class="label">{{ 'Custom' }}</span>
+              <span class="label">{{ detailData?.device?.bios?.vendor }}</span>
             </el-descriptions-item>
-
-            <el-descriptions-item
-              v-if="!biosCollpase"
-              label-class-name="sub-item"
-              class-name="sub-item">
-              <template #label>
-                <span class="label">Custom Refresh</span>
-              </template>
-              <span class="label">{{ 'Disabled' }}</span>
-            </el-descriptions-item>
-
-            <el-descriptions-item
-              v-if="!biosCollpase"
-              label-class-name="sub-item"
-              class-name="sub-item">
-              <template #label>
-                <span class="label">Hardware Prefetcher</span>
-              </template>
-              <span class="label">{{ 'Enable' }}</span>
-            </el-descriptions-item>
-
-            <el-descriptions-item
-              v-if="!biosCollpase"
-              label-class-name="sub-item"
-              class-name="sub-item">
-              <template #label>
-                <span class="label">Adjacent Cache Prefetch</span>
-              </template>
-              <span class="label">{{ 'Enable' }}</span>
-            </el-descriptions-item> -->
             <!-- #endregion -->
           </el-descriptions>
         </section>
@@ -420,7 +388,7 @@
               :span="2"
               class-name="col-value">
               <template #label>
-               <div :class="{'td-item': true}" @click="handlerCollapse('os')">
+               <div class="control-label" @click="handlerCollapse('os')">
                 <span>操作系统</span>
                 <span>
                   <el-tooltip
@@ -713,14 +681,15 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 // import { BaselineDetail } from './interface'
 
-import { usePerformanceData } from '@/stores/performanceData'
-import { getPerformanceData } from '@/api/performance'
+import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
+import { getPerformanceData, getTestBoxes } from '@/api/performance'
 // import { getDetail } from '@/api/detail'
 
 import { combineJobs } from '@/views/performance-baseline/utils.js'
 
 const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
+const testboxStore = useTestboxStore()
 
 const detailData = ref<any>({})
 // let detailInfo = reactive({})
@@ -749,48 +718,59 @@ const handlerCollapse = (flag: string) => {
   collapseItem.value = !collapseItem.value
 }
 
+const getJobData = (submitId) => {
+  loading.value = true
+  getPerformanceData({
+    index: 'jobs',
+    query: {
+      size: 10000,
+      query: {
+        term: {
+          submit_id: submitId
+        }
+      }
+    },
+  }).then(res => {
+    const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
+    setDeviceInfoToObj(resultObj)
+    setPerformanceData(submitId, resultObj) // save submit data to store
+    // state.detailInfo = resultObj
+    detailData.value = resultObj
+  }).catch((err) => {
+    ElMessage({
+      message: err.message,
+      type: 'error'
+    })
+  }).finally(() => {
+    loading.value = false
+  })
+}
+
 onMounted(() => {
   // todo: 当获取不到Detail时（用户直接通过submit_id进入详情页），需要根据submit_id获取一下jobs并组织。
   const submitId = router.currentRoute.value.params.submit_id
   if (performanceData[submitId]) {
     detailData.value = performanceData[submitId]
-    // state.detailInfo = detailData.value
-    // detailInfo.value = performanceData[submitId]
-    console.log('datailData', detailData.value) // 测试是否能拿到数据
   } else {
-    loading.value = true
-    getPerformanceData({
-      index: 'jobs',
-      query: {
-        size: 10000,
-        // 只取必要的字段, 确认具体字段对应额后配置
-        // _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
-        //   'os', 'os_version', 'arch', 'kernel',
-        //   'testbox', 'tbox_group',
-        //   'pp', 'stats',
-        //   'job_state', 'time'
-        // ],
-        query: {
-          term: {
-            submit_id: submitId
-          }
+    getTestBoxes().then(testboxRes => {
+      let testboxList = []
+      testboxList = testboxRes.data.hits.hits.map(item => {
+        return {
+          testboxId: item._id,
+          ...item._source
         }
-      },
-    }).then(res => {
-      const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
-      setPerformanceData(submitId, resultObj) // save submit data to store
-      // state.detailInfo = resultObj
-      detailData.value = resultObj
-    }).catch((err) => {
-      ElMessage({
-        message: err.message,
-        type: 'error'
       })
-    }).finally(() => {
-      loading.value = false
+      testboxStore.setTestboxData(testboxList)
+      getJobData(submitId)
     })
   }
+  console.log('datailData', detailData.value)
 })
+
+const setDeviceInfoToObj = (resultObj) => {
+  const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
+  resultObj.device =  testbox.device || {}
+}
 </script>
 
 <style lang="scss" scoped>
@@ -812,7 +792,7 @@ onMounted(() => {
       padding-top: var(--oe-perf-padding-small);
       padding-bottom: var(--oe-perf-padding-small);
       overflow: hidden;
-      .td-item{
+      .control-label{
         cursor: pointer;
       }
 

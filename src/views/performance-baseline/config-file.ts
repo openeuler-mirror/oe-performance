@@ -6,7 +6,7 @@ export const columnConfig = [
   },
   {
     label: 'CPU频率',
-    prop: 'nr_max_mhz',
+    prop: 'device.cpu.cpu_max_mhz',
     show: true
   },
   {
