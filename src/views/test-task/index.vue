@@ -1,26 +1,23 @@
 <template>
   <el-card shadow="always">
     <el-tabs v-model="activeName" class="demo-tabs" @tab-change="handleChange">
-    <el-tab-pane label="全部任务" name="全部任务">
-      <TaskTable
-        :allData="dataList"
-        ></TaskTable>
+    <el-tab-pane label="全部任务" name="allTask">
     </el-tab-pane>
-    <el-tab-pane label="我创建的任务" name="我创建的任务">
-      <TaskTable
-        :allData="dataList"
-      ></TaskTable>
+    <el-tab-pane label="我创建的任务" name="myTask">
     </el-tab-pane>
-    <el-tab-pane label="我的收藏" name="我的收藏">
-      <TaskTable
-        :allData="dataList"
-      ></TaskTable>
+    <el-tab-pane label="我的收藏" name="myCollection">
     </el-tab-pane>
   </el-tabs>
+  <div>
+    <TaskTable
+      :allData="dataList"
+    ></TaskTable>
+  </div>
  </el-card>
 </template>
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import type { TabPaneName } from 'element-plus'
 import { ElMessage } from 'element-plus'
 import TaskTable from './components/task-table.vue';
@@ -28,16 +25,24 @@ import TaskTable from './components/task-table.vue';
 import { getTaskStatusCounts } from '@/api/center'
 import { getPerformanceData } from '@/api/performance'
 
-const activeName = ref('全部任务')
-const dataList = ref([1])
+const router = useRouter()
+
+const activeName = ref('allTask')
+const dataList = ref([])
 
 const handleChange = (tab: TabPaneName) => {
-  console.log(tab,'active改变了')
-  // todo: 所有数据通过本页面管理；
+  activeName.value = tab
+  router.push({
+    name: 'taskList',
+    query: {
+      type: activeName.value
+    }
+  })
   // 当切换tab时，根据不同tab的状态去获取新的任务列表数据
+  getDataList(activeName.value)
 }
 
-const getDataList = () => {
+const getDataList = (type: string) => {
   // 获取选择的套件下的submitID list
   getPerformanceData({
     'index': 'jobs',
@@ -46,7 +51,7 @@ const getDataList = () => {
       'query': {
         bool: {
           must: [ 
-            // todo： 后续增加根据任务状态查询
+            // todo： 根据type进行查询
             // 暂时只查询知道格式的套件数据
             { terms: { suite: ['stream']} },
             // 查询最近十天的数据，后续视情况调整。
@@ -59,8 +64,17 @@ const getDataList = () => {
           terms: {
             field: 'submit_id',
             size: 10000 // 取全量
+          },
+          aggs: {
+            my_top_hits: {
+              top_hits: {
+                _source: {
+                  includes: ['suite', 'submit_id', 'os', 'os_version', 'nr_cpu', 'testbox', 'kernel_version', 'nr_node', 'job_stage', 'job_health']
+                }
+              }
+            }
           }
-        }
+        },
       }
     },
   }).then((res) => {
@@ -77,11 +91,21 @@ const getDataList = () => {
 }
 
 onMounted(() => {
+  if (!router.currentRoute.value.query.type) {
+    router.replace({
+      name: 'taskList',
+      query: {
+        type: activeName.value
+      }
+    })
+  }
   // 测试job的几个状态的可选值
   getTaskStatusCounts()
   // 获取数据
-  getDataList()
+  getDataList(activeName.value)
 })
+
+
 
 </script>
 

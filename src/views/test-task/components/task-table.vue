@@ -192,6 +192,7 @@ watchEffect(() => {
 // 当前页数据idList变化时，获取每个id下的jobs数据。然后更新tableData数据
 // todo: 此处和performancebaseline共用job组合逻辑，可以考虑统一抽出来。
 watch(idList, () => {
+  console.log(11, idList)
   tableData.value = getAllJobsData(idList.value)
   console.log('taskList data: ', tableData.value)
 })
@@ -213,13 +214,6 @@ const getAllJobsData = (idList: any[]) => {
       index: 'jobs',
       query: {
         size: 10000, // 取全量
-        // 只取必要的字段
-        // _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
-        //   'os', 'os_version', 'arch', 'kernel',
-        //   'testbox', 'tbox_group',
-        //   'pp', 'stats',
-        //   'job_state', 'time'
-        // ],
         query: {
           term: {
             submit_id: idObj.submit_id

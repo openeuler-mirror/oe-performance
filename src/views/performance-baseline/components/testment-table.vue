@@ -336,45 +336,49 @@ const handleReFresh = () => {
 // 获取并合并jobs的逻辑
 // todo: 这段逻辑可以考虑一直store中
 const getAllJobsData = (idList: any[]) => {
+  tableLoading.value = true
   const tempArr: any[] = reactive(Object.assign([], idList))
-  // todo: 每次遍历请求前，应取消之前所有未完成的请求
-  idList.forEach((idObj: any, idx: number) => {
-    // 如果之前已经获得过数据则不再重复请求
-    if (performanceStore.performanceData[idObj.submit_id]) {
-      tempArr[idx] = performanceStore.performanceData[idObj.submit_id]
-      return
-    }
-    // 根据submitId获取它的jobs
-    requestCount.value += 1
-    tableLoading.value = true
-    performanceStore.changeLoadingStatus(true)
-    getPerformanceData({
-      index: 'jobs',
-      query: {
-        size: 10000, // 取全量
-        query: {
-          term: {
-            submit_id: idObj.submit_id
+  getPerformanceData({
+    'index': 'jobs',
+    'query': {
+      size: 0,
+      'query': {
+        bool: {
+          must: [
+            { terms: { submit_id: idList.map(item => item.submit_id)} },
+          ],
+        },
+      },
+      aggs: {
+        submit_list: { 
+          terms: { field: 'submit_id', size: 10000 },  // 取全量 
+          aggs: { 
+            job_list: { top_hits: { _source: {} } }
           }
-        }
+        },
       }
-    }).then(res => {
-      const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
-      setDeviceInfoToObj(resultObj)
-      performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
-      tempArr[idx] = resultObj
-    }).catch(err => {
-      ElMessage({
-        message: err.message,
-        type: 'error'
-      })
-    }).finally(() => {
-      requestCount.value -= 1
-      if (requestCount.value === 0) {
-        tableLoading.value = false
-        performanceStore.changeLoadingStatus(false)
+    },
+  }).then(res => {
+    const submitResult = res?.data?.aggregations?.submit_list?.buckets?.map(subItem => {
+      return {
+        submitId: subItem.key,
+        jobList: subItem?.job_list?.hits?.hits
       }
     })
+    submitResult.forEach((submitItem, idx) => {
+      if (performanceStore.performanceData[submitItem.submitId]) {
+        tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
+        return
+      }
+      const submitData = combineJobs(submitItem.jobList)
+      setDeviceInfoToObj(submitData)
+      performanceStore.setPerformanceData(submitItem.submitId, submitData)
+      tempArr[idx] = submitData
+    })
+  }).catch(err => {
+    ElMessage({ message: err.message, type: 'error' })
+  }).finally(() => {
+    tableLoading.value = false
   })
   return tempArr
 }
