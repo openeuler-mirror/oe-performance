@@ -100,12 +100,14 @@
     <el-table
       :data="tableData"
       v-loading="tableLoading || submitDataLoading"
+      stripe
       :header-cell-style="{ background: 'rgb(243,243,243)' }"
-      @selection-change="handleSelectionChange">
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="30" />
       <el-table-column
         fixed="left"
-        width="150"
+        width="200"
         label="提交编号"
         prop="submit_id">
       </el-table-column>
@@ -115,7 +117,7 @@
           :prop="item.prop"
           :label="item.label"
           :key="index"
-          width="150">
+          :width="item.width">
         </el-table-column>
       </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">
@@ -249,34 +251,6 @@ watch(
     initailizeColumn
   }
 )
-// 数据扁平化，便于table展示
-
-// const handleTableData = (page: number) => {
-//   let start = (page - 1) * 5
-//   let end =
-//     props.dataList.length <= start + 5 ? props.dataList.length : start + 5
-//   const temp = []
-//   for (let i = start; i < end; i++) {
-//     temp.push(flattenObj(props.dataList[i]))
-//   }
-//   tableData.value = temp
-//   originData = JSON.parse(JSON.stringify(tableData.value))
-// }
-
-// const flattenObj = (ob: any) => {
-//   let result = <TableItem>{}
-//   for (const i in ob) {
-//     if (typeof ob[i] === 'object' && !Array.isArray(ob[i])) {
-//       const temp = flattenObj(ob[i])
-//       for (const j in temp) {
-//         result[`${i}_${j}`] = temp[j]
-//       }
-//     } else {
-//       result[i] = ob[i]
-//     }
-//   }
-//   return result
-// }
 
 const handlecheckAllColumn = (val: any) => {
   if (val) {
@@ -334,7 +308,6 @@ const handleReFresh = () => {
 }
 
 // 获取并合并jobs的逻辑
-// todo: 这段逻辑可以考虑一直store中
 const getAllJobsData = (idList: any[]) => {
   tableLoading.value = true
   const tempArr: any[] = reactive(Object.assign([], idList))

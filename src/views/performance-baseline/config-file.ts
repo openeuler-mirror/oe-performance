@@ -2,7 +2,8 @@ export const columnConfig = [
   {
     label: '服务器型号',
     prop: 'testbox',
-    show: true
+    show: true,
+    width: 260,
   },
   {
     label: 'CPU频率',
@@ -15,19 +16,22 @@ export const columnConfig = [
     show: true
   },
   {
-    label: 'CPU配置',
+    label: 'CPU型号',
     prop: 'model_name',
-    show: true
+    show: true,
+    width: 300
   },
   {
     label: '操作系统',
     prop: 'osv',  // 需要拼接
-    show: true
+    show: true,
+    width: 260
   },
   {
     label: '系统内核',
     prop: 'kernel_version',
-    show: true
+    show: true,
+    width: 300
   },
   {
     label: '性能数据',
@@ -312,30 +316,30 @@ export const config: configObject = {
     column: columnConfig
   },
   dataBase: {
-    column: columnConfig2
+    column: columnConfig
   },
   distributedStorage: {
     column: columnConfig
   },
   cpu: {
-    column: columnConfig2
+    column: columnConfig
   },
   memory: {
     column: columnConfig
   },
   storage: {
-    column: columnConfig2
+    column: columnConfig
   },
   network: {
     column: columnConfig
   },
   basic: {
-    column: columnConfig2
+    column: columnConfig
   },
   basicPerformance: {
     column: columnConfig
   },
   solution: {
-    column: columnConfig2
+    column: columnConfig
   }
 }

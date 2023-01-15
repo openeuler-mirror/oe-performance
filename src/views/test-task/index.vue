@@ -79,8 +79,6 @@ const getDataList = (type: string) => {
       message: err.message,
       type: 'error'
     })
-  }).finally(() => {
-    console.log('rawData: ', dataList)
   })
 }
 

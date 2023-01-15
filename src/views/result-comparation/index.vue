@@ -20,7 +20,7 @@
 import { ref, reactive } from 'vue'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import ResultTable from './componets/result-table.vue'
-import flattenObj from '@/utils/utils'
+import { flattenObj } from '@/utils/utils'
 
 import { useTestboxStore } from '@/stores/performanceData'
 

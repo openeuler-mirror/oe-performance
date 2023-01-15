@@ -19,8 +19,8 @@
              <template #prepend>
                <el-select v-model="select" placeholder="Select" style="width: 115px">
                  <el-option label="Task ID" value="1" />
-                 <el-option label="Task Name" value="2" />
-                 <el-option label="Creator" value="3" />
+                 <el-option label="Task Name" value="2" disabled/>
+                 <el-option label="Creator" value="3" disabled/>
                </el-select>
              </template>
              <template #append>
@@ -43,6 +43,7 @@
        v-loading="tableLoading"
        :default-sort="{ prop: 'date', order: 'descending' }"
        style="width: 100%; margin-top: 30px;"
+       stripe
      >
        <!--<el-table-column width="58">
          <template #default>
@@ -50,14 +51,15 @@
             <el-icon size="20px"><StarFilled /></el-icon>
          </template>
        </el-table-column>-->
-       <el-table-column fixed label="TaskID" width="200" prop="submit_id">
-         <template #default="scope">
-             <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
-                {{ scope.row.submit_id }}
-            </router-link>
+       <el-table-column fixed label="TaskID" prop="submit_id">
+        <template #default="scope">
+          <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
+            {{ scope.row.submit_id }}
+          </router-link>
         </template>
        </el-table-column>
        <el-table-column prop="suite" label="Suite" width="90" show-overflow-tooltip/>
+       <!--以下字段未确认
        <el-table-column
              label="审批状态"
              width="100"
@@ -86,46 +88,55 @@
            </el-col>
           </el-row>
         </template>
-       </el-table-column>
-       <el-table-column
-          prop="date"
-          label="测试类型"
-          width="100"
-          :filters="[
-          { text: 'Am', value: 'Am' },
-          { text: 'Tm', value: 'Tm' },
-          { text: '2016-05-03', value: '2016-05-03' },
-          { text: '2016-05-04', value: '2016-05-04' },
-        ]"
-        :filter-method="filterHandler"/>
-       <el-table-column prop="name" :formatter="formatter" width="140">
-         <template #header>
-           总计/成功/失败
-           <el-tooltip
-             class="box-item"
-             effect="dark"
-             content="Top Center prompts info"
-             placement="top">
-             <el-icon><QuestionFilled /></el-icon>
-           </el-tooltip>
-         </template>
-       </el-table-column>
-       <el-table-column prop="address" label="所属项目" width="165" show-overflow-tooltip />
-       <el-table-column prop="date" label="创建人" />
-       <el-table-column prop="date" sortable label="创建时间" width="165"/>
-       <el-table-column prop="date" sortable label="完成时间" width="165">
+      </el-table-column>
+      <el-table-column
+        prop="date"
+        label="测试类型"
+        width="100"
+        :filters="[
+        { text: 'Am', value: 'Am' },
+        { text: 'Tm', value: 'Tm' },
+        { text: '2016-05-03', value: '2016-05-03' },
+        { text: '2016-05-04', value: '2016-05-04' },
+      ]"
+      :filter-method="filterHandler"/>
+      -->
+      <el-table-column width="140">
+        <template #header>
+          总计/成功/失败
+        </template>
         <template #default="scope">
-          <div>
-            {{scope.row.date}}
-          </div>
-         </template>
-       </el-table-column>
-       <el-table-column prop="detail" label="操作" fixed="right" width="120px">
-         <template #default>
-           <el-button link type="primary">重跑</el-button>
-           <el-button link type="primary">删除</el-button>
-         </template>
-       </el-table-column>
+         <div class="state-counts">
+           <span class="total-state">{{ scope.row?.jobStateData?.all || '-' }}</span>
+           /
+           <span class="finished-state">{{ scope.row?.jobStateData?.finished || '-' }}</span>
+           /
+           <span class="failed-state">{{ scope.row?.jobStateData?.failed || '-' }}</span>
+         </div>
+        </template>
+      </el-table-column>
+      <!--
+      <el-table-column prop="address" label="所属项目" width="165" show-overflow-tooltip />
+      <el-table-column prop="date" label="创建人" />
+      -->
+      <el-table-column label="创建时间" wdith="170">
+        <template #default="scope">
+          {{ scope.row.submit_time && formatDate(new Date(scope.row.submit_time), 'yyyy/MM/dd hh:mm:ss') }}
+        </template>
+      </el-table-column>
+      <el-table-column label="完成时间" wdith="170">
+        <template #default="scope">
+          {{ scope.row.submit_time && formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') }}
+        </template>
+      </el-table-column>
+      <!--
+      <el-table-column prop="detail" label="操作" fixed="right" width="120px">
+        <template #default>
+          <el-button link type="primary">重跑</el-button>
+          <el-button link type="primary">删除</el-button>
+        </template>
+      </el-table-column>
+      -->
      </el-table>
    </el-row>
    <el-pagination
@@ -153,6 +164,7 @@ import { getPerformanceData } from '@/api/performance'
 import type { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults'
 import { User } from '../interface'
 // utils
+import { formatDate } from '@/utils/utils'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
 
 const props = defineProps({
@@ -195,7 +207,7 @@ watchEffect(() => {
 // todo: 此处和performancebaseline共用job组合逻辑，可以考虑统一抽出来。
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
-  console.log('taskList data: ', tableData.value)
+  console.log(11, tableData.value)
 })
 
 const getAllJobsData = (idList: any[]) => {
@@ -251,10 +263,6 @@ const setDeviceInfoToObj = (resultObj) => {
   resultObj.device =  testbox.device || {}
 }
 
-// , column: TableColumnCtx<User>
-const formatter = (row: User) => {
-  return `${row.name} / ${row.name} / ${row.name}`
-}
 const filterHandler = (
   value: string,
   row: User,
@@ -282,6 +290,18 @@ const handleCurrentChange = (val: number) => {
 .job-state-list {
   :deep(.el-radio-button__inner) {
     cursor: default;
+  }
+}
+
+.state-counts {
+  .total-state {
+    color: var( --oe-perf-color-primary)
+  }
+  .finished-state{
+    color: #43bb57;
+  }
+  .failed-state {
+    color: #f95858;
   }
 }
 .Fail {
