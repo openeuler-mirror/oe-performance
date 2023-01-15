@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-aside width="250px">
+    <el-aside width="150px">
       <el-menu :default-active="currentKey" router>
         <el-menu-item index="/testTask/taskList">测试任务</el-menu-item>
         <el-menu-item index="/testTask/createTask">提交测试</el-menu-item>

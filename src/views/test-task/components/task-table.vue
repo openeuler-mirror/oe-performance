@@ -1,17 +1,17 @@
 <template>
-   <el-row>
-     <el-col :span="15">
-         <el-radio-group
-           v-model="taskStatus"
-           @change ="selectTaskStatus">
-             <el-radio-button label="1">全部任务({{ number }})</el-radio-button>
-             <el-radio-button label="2">Pending({{ number }})</el-radio-button>
-             <el-radio-button label="3">Running({{ number }})</el-radio-button>
-             <el-radio-button label="4">Complete({{ number }})</el-radio-button>
-             <el-radio-button label="5">Fail({{ number }})</el-radio-button>
+   <el-row class="control-row">
+     <el-col :span="24">
+         <el-radio-group class="job-state-list">
+            <el-radio-button label="1">全部Job({{ healthState.allState }})</el-radio-button>
+            <el-radio-button label="4">Finished({{ healthState.finished }})</el-radio-button>
+            <el-radio-button label="5">Fail({{ healthState.failed }})</el-radio-button>
+            <el-radio-button label="3">Running({{ healthState.running }})</el-radio-button>
+            <el-radio-button label="2">Others({{ healthState.others }})</el-radio-button>
          </el-radio-group>
      </el-col>
-     <el-col :span="8">
+    </el-row>
+    <el-row class="control-row">
+     <el-col :span="12">
          <el-input
          v-model="searchInput"
          placeholder="搜索范围"
@@ -44,20 +44,20 @@
        :default-sort="{ prop: 'date', order: 'descending' }"
        style="width: 100%; margin-top: 30px;"
      >
-       <el-table-column width="58">
+       <!--<el-table-column width="58">
          <template #default>
           <el-icon size="20px" @click="changeStar"><Star /></el-icon>
-          <!-- <el-icon size="20px"><StarFilled /></el-icon> -->
+            <el-icon size="20px"><StarFilled /></el-icon>
          </template>
-       </el-table-column>
-       <el-table-column fixed label="TaskID" width="110" prop="submit_id">
+       </el-table-column>-->
+       <el-table-column fixed label="TaskID" width="200" prop="submit_id">
          <template #default="scope">
              <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
                 {{ scope.row.submit_id }}
             </router-link>
         </template>
        </el-table-column>
-       <el-table-column prop="name" label="Task名称" width="90" show-overflow-tooltip/>
+       <el-table-column prop="suite" label="Suite" width="90" show-overflow-tooltip/>
        <el-table-column
              label="审批状态"
              width="100"
@@ -146,7 +146,7 @@ import { ref, reactive, watch, watchEffect } from 'vue'
 import { ElTable, ElMessage } from 'element-plus'
 import { Star, Search } from '@element-plus/icons-vue'
 // store
-import { usePerformanceData } from '@/stores/performanceData'
+import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 // api
 import { getPerformanceData } from '@/api/performance'
 // type
@@ -159,26 +159,28 @@ const props = defineProps({
   allData: {
     type: Array,
     default: () => []
+  },
+  healthState: {
+    type: Object,
+    default: () => {}
   }
 })
 
 const performanceStore = usePerformanceData()
+const testboxStore = useTestboxStore()
 
 const idList = ref(<any>[])
 const tableData = ref([])
-const requestCount = ref(0)
 const tableLoading = ref(false)
 
 // 分页参数
 const currentPage = ref(1)
-const pageSize = ref(5)
+const pageSize = ref(10)
 const pageSizes = ref([10, 20, 50])
 const total = ref(0)
 
-const taskStatus = ref('1')
 const select = ref('Task ID')
 
-const number = ref('423')
 const searchInput = ref('')
 
 // 根据pagination自动分页
@@ -192,58 +194,63 @@ watchEffect(() => {
 // 当前页数据idList变化时，获取每个id下的jobs数据。然后更新tableData数据
 // todo: 此处和performancebaseline共用job组合逻辑，可以考虑统一抽出来。
 watch(idList, () => {
-  console.log(11, idList)
   tableData.value = getAllJobsData(idList.value)
   console.log('taskList data: ', tableData.value)
 })
 
 const getAllJobsData = (idList: any[]) => {
+  tableLoading.value = true
   const tempArr: any[] = reactive(Object.assign([], idList))
-  // todo: 每次遍历请求前，应取消之前所有未完成的请求
-  idList.forEach((idObj: any, idx: number) => {
-    // 如果之前已经获得过数据则不再重复请求
-    if (performanceStore.performanceData[idObj.submit_id]) {
-      tempArr[idx] = performanceStore.performanceData[idObj.submit_id]
-      return
-    }
-    // 根据submitId获取它的jobs
-    requestCount.value += 1
-    tableLoading.value = true
-    performanceStore.changeLoadingStatus(true)
-    getPerformanceData({
-      index: 'jobs',
-      query: {
-        size: 10000, // 取全量
-        query: {
-          term: {
-            submit_id: idObj.submit_id
+  getPerformanceData({
+    'index': 'jobs',
+    'query': {
+      size: 0,
+      'query': {
+        bool: {
+          must: [
+            { terms: { submit_id: idList.map(item => item.submit_id)} },
+          ],
+        },
+      },
+      aggs: {
+        submit_list: { 
+          terms: { field: 'submit_id', size: 10000 },  // 取全量 
+          aggs: { 
+            job_list: { top_hits: { _source: {} } }
           }
-        }
+        },
       }
-    }).then(res => {
-      const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
-      performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
-      tempArr[idx] = resultObj
-    }).catch(err => {
-      ElMessage({
-        message: err.message,
-        type: 'error'
-      })
-    }).finally(() => {
-      requestCount.value -= 1
-      if (requestCount.value === 0) {
-        tableLoading.value = false
-        performanceStore.changeLoadingStatus(false)
+    },
+  }).then(res => {
+    const submitResult = res?.data?.aggregations?.submit_list?.buckets?.map(subItem => {
+      return {
+        submitId: subItem.key,
+        jobList: subItem?.job_list?.hits?.hits
       }
     })
+    submitResult.forEach((submitItem, idx) => {
+      if (performanceStore.performanceData[submitItem.submitId]) {
+        tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
+        return
+      }
+      const submitData = combineJobs(submitItem.jobList)
+      setDeviceInfoToObj(submitData)
+      performanceStore.setPerformanceData(submitItem.submitId, submitData)
+      tempArr[idx] = submitData
+    })
+  }).catch(err => {
+    ElMessage({ message: err.message, type: 'error' })
+  }).finally(() => {
+    tableLoading.value = false
   })
   return tempArr
 }
 
-
-const selectTaskStatus = (label: any) => {
-  console.log(label, '切换任务类型的处理')
+const setDeviceInfoToObj = (resultObj) => {
+  const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
+  resultObj.device =  testbox.device || {}
 }
+
 // , column: TableColumnCtx<User>
 const formatter = (row: User) => {
   return `${row.name} / ${row.name} / ${row.name}`
@@ -259,10 +266,6 @@ const filterHandler = (
 }
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 
-const changeStar = () => {
-  console.log('点击收藏处理')
-}
-
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
@@ -272,6 +275,15 @@ const handleCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+.control-row {
+  margin-bottom:8px;
+}
+
+.job-state-list {
+  :deep(.el-radio-button__inner) {
+    cursor: default;
+  }
+}
 .Fail {
   background-color: rgb(250, 88, 88);
   color: rgb(214, 209, 209);

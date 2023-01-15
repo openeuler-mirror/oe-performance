@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-aside width="250px">
+    <el-aside width="200px">
       <el-menu :default-active="currentKey" @select="handleMenuClick">
         <el-sub-menu index="baseline-solution">
           <template #title>

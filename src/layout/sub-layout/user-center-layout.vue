@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-aside width="250px">
+    <el-aside width="150px">
       <el-menu :default-active="currentKey" router>
         <el-sub-menu index="my-application">
           <template #title>

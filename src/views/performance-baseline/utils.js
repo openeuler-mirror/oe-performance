@@ -45,6 +45,9 @@ const getTestParamsName = (job) => {
 const groupDataByTestparam = (dataList) => {
   const resultObj = {}
   dataList.forEach(job => {
+    if (!kpiListMap[job.suite]) {
+      return
+    }
     const testParamName = job['li-testcase']
     if (resultObj[testParamName]) {
       kpiListMap[job.suite].forEach(kpi => {
@@ -63,6 +66,9 @@ const groupDataByTestparam = (dataList) => {
 const mapGroupDataToTableData = (ppGroup, suite) => {
   const tableDatas = {}
   const resultArr = []
+  if (!tableColumnMap[suite]) {
+    return {}
+  }
   
   switch (tableMode[suite]) {
   case 'unixbench':  // 表格分成两组数据，一组展示单核，一组展示多核

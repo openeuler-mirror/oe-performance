@@ -11,6 +11,7 @@
   <div>
     <TaskTable
       :allData="dataList"
+      :healthState="healthState"
     ></TaskTable>
   </div>
  </el-card>
@@ -29,6 +30,7 @@ const router = useRouter()
 
 const activeName = ref('allTask')
 const dataList = ref([])
+const healthState = ref({})
 
 const handleChange = (tab: TabPaneName) => {
   activeName.value = tab
@@ -39,6 +41,7 @@ const handleChange = (tab: TabPaneName) => {
     }
   })
   // 当切换tab时，根据不同tab的状态去获取新的任务列表数据
+  getJobsState(activeName.value)
   getDataList(activeName.value)
 }
 
@@ -53,7 +56,7 @@ const getDataList = (type: string) => {
           must: [ 
             // todo： 根据type进行查询
             // 暂时只查询知道格式的套件数据
-            { terms: { suite: ['stream']} },
+            // { terms: { suite: ['stream']} },
             // 查询最近十天的数据，后续视情况调整。
             { 'range': {'time': {'gte': 'now-10d/d'} } }
           ],
@@ -64,15 +67,6 @@ const getDataList = (type: string) => {
           terms: {
             field: 'submit_id',
             size: 10000 // 取全量
-          },
-          aggs: {
-            my_top_hits: {
-              top_hits: {
-                _source: {
-                  includes: ['suite', 'submit_id', 'os', 'os_version', 'nr_cpu', 'testbox', 'kernel_version', 'nr_node', 'job_stage', 'job_health']
-                }
-              }
-            }
           }
         },
       }
@@ -90,6 +84,38 @@ const getDataList = (type: string) => {
   })
 }
 
+// 获取job的状态枚举值和属性
+const getJobsState = (type: string) => {
+  getTaskStatusCounts().then((res) => {
+    const tempDataList = res.data.aggregations.job_state.buckets
+    healthState.value = computeJobsHealthAmount(tempDataList)
+  })
+}
+
+const computeJobsHealthAmount = (dataList) => {
+  const dataObj = {}
+  dataList.forEach(healthItem=> {
+    switch (healthItem.key){
+    case 'finished':
+    case 'failed':
+    case 'running':
+      dataObj[healthItem.key] = healthItem.doc_count
+      break
+    default:
+      if (dataObj.others === undefined) {
+        dataObj.others = 0
+      }
+      dataObj.others += healthItem.doc_count
+    }
+  })
+  let allState = 0
+  Object.keys(dataObj).forEach(state => {
+    allState += dataObj[state]
+  })
+  dataObj.allState = allState
+  return dataObj
+}
+
 onMounted(() => {
   if (!router.currentRoute.value.query.type) {
     router.replace({
@@ -99,8 +125,7 @@ onMounted(() => {
       }
     })
   }
-  // 测试job的几个状态的可选值
-  getTaskStatusCounts()
+  getJobsState(activeName.value)
   // 获取数据
   getDataList(activeName.value)
 })
