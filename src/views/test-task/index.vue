@@ -12,6 +12,7 @@
     <TaskTable
       :allData="dataList"
       :healthState="healthState"
+      :parentLoading="dataLoading"
       @search="handleSearch"
     ></TaskTable>
   </div>
@@ -31,6 +32,7 @@ const router = useRouter()
 
 const activeName = ref('allTask')
 const dataList = ref([])
+const dataLoading = ref(false)
 const healthState = ref({})
 
 const searchKey = ref('submit_id')
@@ -62,6 +64,7 @@ const handleSearch = (searchK:string, searchV:string) => {
 }
 
 const getDataList = (type: string) => {
+  dataLoading.value = true
   // 组织搜索条件
   const mustList = []
   mustList.push({ 'range': {'time': {'gte': 'now-10d/d'} } })
@@ -97,6 +100,8 @@ const getDataList = (type: string) => {
       message: err.message,
       type: 'error'
     })
+  }).finally(() => {
+    dataLoading.value =false
   })
 }
 

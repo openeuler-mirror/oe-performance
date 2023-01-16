@@ -41,120 +41,118 @@
      </el-col>
      -->
    </el-row>
-   <el-row>
-     <el-table
-       ref="multipleTableRef"
-       :data="tableData"
-       v-loading="tableLoading"
-       :default-sort="{ prop: 'date', order: 'descending' }"
-       style="width: 100%; margin-top: 30px;"
-       stripe
-     >
-       <!--<el-table-column width="58">
-         <template #default>
-          <el-icon size="20px" @click="changeStar"><Star /></el-icon>
-            <el-icon size="20px"><StarFilled /></el-icon>
-         </template>
-       </el-table-column>-->
-       <el-table-column fixed label="TaskID" prop="submit_id">
-        <template #default="scope">
-          <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
-            {{ scope.row.submit_id }}
-          </router-link>
-        </template>
-       </el-table-column>
-       <el-table-column prop="suite" label="Suite" width="90" show-overflow-tooltip/>
-       <!--以下字段未确认
-       <el-table-column
-             label="审批状态"
-             width="100"
-             :filters="[
-           { text: 'Am', value: 'Am' },
-           { text: 'Tm', value: 'Tm' },
-           { text: '2016-05-03', value: '2016-05-03' },
-           { text: '2016-05-04', value: '2016-05-04' },
-         ]"
-         :filter-method="filterHandler">
+   <div v-loading="tableLoading || parentLoading">
+      <el-table
+        ref="multipleTableRef"
+        :data="tableData"
+        :default-sort="{ prop: 'date', order: 'descending' }"
+        stripe
+      >
+        <!--<el-table-column width="58">
+          <template #default>
+           <el-icon size="20px" @click="changeStar"><Star /></el-icon>
+             <el-icon size="20px"><StarFilled /></el-icon>
+          </template>
+        </el-table-column>-->
+        <el-table-column fixed label="TaskID" prop="submit_id">
          <template #default="scope">
-          <el-row>
-           <el-col :span="21" :class="scope.row.approval">
-            {{scope.row.approval}}
-           </el-col>
-           <el-col :span="3">
-            <span v-if="scope.row.approval=='Pending'">
-              <el-tooltip
-                class="box-item"
-                effect="dark"
-                content="Top Center prompts info"
-                placement="top">
-                <el-icon size="15px"><QuestionFilled /></el-icon>
-              </el-tooltip>
-            </span>
-           </el-col>
-          </el-row>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="date"
-        label="测试类型"
-        width="100"
-        :filters="[
-        { text: 'Am', value: 'Am' },
-        { text: 'Tm', value: 'Tm' },
-        { text: '2016-05-03', value: '2016-05-03' },
-        { text: '2016-05-04', value: '2016-05-04' },
-      ]"
-      :filter-method="filterHandler"/>
-      -->
-      <el-table-column width="140">
-        <template #header>
-          总计/成功/失败
-        </template>
-        <template #default="scope">
-         <div class="state-counts">
-           <span class="total-state">{{ scope.row?.jobStateData?.all || '-' }}</span>
-           /
-           <span class="finished-state">{{ scope.row?.jobStateData?.finished || '-' }}</span>
-           /
-           <span class="failed-state">{{ scope.row?.jobStateData?.failed || '-' }}</span>
-         </div>
-        </template>
-      </el-table-column>
-      <!--
-      <el-table-column prop="address" label="所属项目" width="165" show-overflow-tooltip />
-      <el-table-column prop="date" label="创建人" />
-      -->
-      <el-table-column label="创建时间" wdith="170">
-        <template #default="scope">
-          {{ scope.row.submit_time && formatDate(new Date(scope.row.submit_time), 'yyyy/MM/dd hh:mm:ss') }}
-        </template>
-      </el-table-column>
-      <el-table-column label="完成时间" wdith="170">
-        <template #default="scope">
-          {{ scope.row.submit_time && formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') }}
-        </template>
-      </el-table-column>
-      <!--
-      <el-table-column prop="detail" label="操作" fixed="right" width="120px">
-        <template #default>
-          <el-button link type="primary">重跑</el-button>
-          <el-button link type="primary">删除</el-button>
-        </template>
-      </el-table-column>
-      -->
-     </el-table>
-   </el-row>
-   <el-pagination
-      class="pagination"
-      v-model:currentPage="currentPage"
-      v-model:page-size="pageSize"
-      :page-sizes="pageSizes"
-      :small="false"
-      layout="prev, pager, next, sizes, jumper"
-      :total="total"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    />
+           <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
+             {{ scope.row.submit_id }}
+           </router-link>
+         </template>
+        </el-table-column>
+        <el-table-column prop="suite" label="Suite" width="90" show-overflow-tooltip/>
+        <!--以下字段未确认
+        <el-table-column
+              label="审批状态"
+              width="100"
+              :filters="[
+            { text: 'Am', value: 'Am' },
+            { text: 'Tm', value: 'Tm' },
+            { text: '2016-05-03', value: '2016-05-03' },
+            { text: '2016-05-04', value: '2016-05-04' },
+          ]"
+          :filter-method="filterHandler">
+          <template #default="scope">
+           <el-row>
+            <el-col :span="21" :class="scope.row.approval">
+             {{scope.row.approval}}
+            </el-col>
+            <el-col :span="3">
+             <span v-if="scope.row.approval=='Pending'">
+               <el-tooltip
+                 class="box-item"
+                 effect="dark"
+                 content="Top Center prompts info"
+                 placement="top">
+                 <el-icon size="15px"><QuestionFilled /></el-icon>
+               </el-tooltip>
+             </span>
+            </el-col>
+           </el-row>
+         </template>
+       </el-table-column>
+       <el-table-column
+         prop="date"
+         label="测试类型"
+         width="100"
+         :filters="[
+         { text: 'Am', value: 'Am' },
+         { text: 'Tm', value: 'Tm' },
+         { text: '2016-05-03', value: '2016-05-03' },
+         { text: '2016-05-04', value: '2016-05-04' },
+       ]"
+       :filter-method="filterHandler"/>
+       -->
+       <el-table-column width="140">
+         <template #header>
+           总计/成功/失败
+         </template>
+         <template #default="scope">
+          <div class="state-counts">
+            <span class="total-state">{{ scope.row?.jobStateData?.all || '-' }}</span>
+            /
+            <span class="finished-state">{{ scope.row?.jobStateData?.finished || '-' }}</span>
+            /
+            <span class="failed-state">{{ scope.row?.jobStateData?.failed || '-' }}</span>
+          </div>
+         </template>
+       </el-table-column>
+       <!--
+       <el-table-column prop="address" label="所属项目" width="165" show-overflow-tooltip />
+       <el-table-column prop="date" label="创建人" />
+       -->
+       <el-table-column label="创建时间" wdith="170">
+         <template #default="scope">
+           {{ scope.row.submit_time && formatDate(new Date(scope.row.submit_time), 'yyyy/MM/dd hh:mm:ss') }}
+         </template>
+       </el-table-column>
+       <el-table-column label="完成时间" wdith="170">
+         <template #default="scope">
+           {{ scope.row.submit_time && formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') }}
+         </template>
+       </el-table-column>
+       <!--
+       <el-table-column prop="detail" label="操作" fixed="right" width="120px">
+         <template #default>
+           <el-button link type="primary">重跑</el-button>
+           <el-button link type="primary">删除</el-button>
+         </template>
+       </el-table-column>
+       -->
+      </el-table>
+      <el-pagination
+        class="pagination"
+        v-model:currentPage="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="pageSizes"
+        :small="false"
+        layout="prev, pager, next, sizes, jumper"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
 </template>
 <script lang="ts" setup>
 // dep
@@ -173,6 +171,10 @@ import { formatDate } from '@/utils/utils'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
 
 const props = defineProps({
+  parentLoading: {
+    type: Boolean,
+    default: false
+  },
   allData: {
     type: Array,
     default: () => []
@@ -205,6 +207,7 @@ const emit = defineEmits<{
 
 const onSearch = () => {
   emit('search', searchSelection.value, searchValue.value)
+  currentPage.value = 1
 }
 
 // 根据pagination自动分页

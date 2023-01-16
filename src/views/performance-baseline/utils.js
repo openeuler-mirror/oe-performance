@@ -15,6 +15,7 @@ export const combineJobs = (jobList) => {
   const tempSubmit = reactive(tempList[0])
   // 配置submit对象的属性
   tempSubmit['jobStateData'] = getjobStateData(tempList)
+  tempSubmit['jobList'] = tempList
 
   tempSubmit['groupData'] = ppGroup
   tempSubmit['tableDatas'] = mapGroupDataToTableData(ppGroup, tempSubmit.suite)
