@@ -18,8 +18,7 @@ const props = defineProps<{
   chartConfigs: any,
   chartData: any[]
 }>()
-// console.log(props.chartConfigs)
-// console.log(props.chartData)
+
 // 这里不要用响应式,不然图表更新后,tooltip和legend失效
 let chart1:any = null
 let chart2:any = null
