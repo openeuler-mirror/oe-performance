@@ -12,6 +12,7 @@
     <TaskTable
       :allData="dataList"
       :healthState="healthState"
+      @search="handleSearch"
     ></TaskTable>
   </div>
  </el-card>
@@ -32,6 +33,9 @@ const activeName = ref('allTask')
 const dataList = ref([])
 const healthState = ref({})
 
+const searchKey = ref('submit_id')
+const searchValue = ref('')
+
 const handleChange = (tab: TabPaneName) => {
   activeName.value = tab
   router.push({
@@ -45,7 +49,27 @@ const handleChange = (tab: TabPaneName) => {
   getDataList(activeName.value)
 }
 
+const handleSearch = (searchK:string, searchV:string) => {
+  switch(searchK) {
+  case 'taskId':
+    searchKey.value = 'submit_id'
+    break;
+  default:
+    searchKey.value = searchK
+  }
+  searchValue.value = searchV
+  getDataList(activeName.value)
+}
+
 const getDataList = (type: string) => {
+  // 组织搜索条件
+  const mustList = []
+  mustList.push({ 'range': {'time': {'gte': 'now-10d/d'} } })
+  if (searchValue.value) {
+    const searchObj = {}
+    searchObj[searchKey.value] = searchValue.value
+    mustList.push({ fuzzy: searchObj })
+  }
   // 获取选择的套件下的submitID list
   getPerformanceData({
     'index': 'jobs',
@@ -53,13 +77,7 @@ const getDataList = (type: string) => {
       size: 1,
       'query': {
         bool: {
-          must: [ 
-            // todo： 根据type进行查询
-            // 暂时只查询知道格式的套件数据
-            // { terms: { suite: ['stream']} },
-            // 查询最近十天的数据，后续视情况调整。
-            { 'range': {'time': {'gte': 'now-10d/d'} } }
-          ],
+          must: mustList,
         },
       },
       aggs: {

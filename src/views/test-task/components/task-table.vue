@@ -12,22 +12,26 @@
     </el-row>
     <el-row class="control-row">
      <el-col :span="12">
-         <el-input
-         v-model="searchInput"
-         placeholder="搜索范围"
-         class="input-with-select">
-             <template #prepend>
-               <el-select v-model="select" placeholder="Select" style="width: 115px">
-                 <el-option label="Task ID" value="1" />
-                 <el-option label="Task Name" value="2" disabled/>
-                 <el-option label="Creator" value="3" disabled/>
-               </el-select>
-             </template>
-             <template #append>
-               <el-button :icon="Search" />
-             </template>
+        <el-input
+          v-model="searchValue"
+          placeholder="搜索范围"
+          class="input-with-select"
+          @keyup.enter="onSearch"
+          :disabled="tableLoading"
+        >
+            <template #prepend>
+              <el-select v-model="searchSelection" style="width: 115px">
+                <el-option label="任务ID" value="taskId" />
+                <el-option label="任务名" value="taskName" disabled/>
+                <el-option label="创建者" value="creator" disabled/>
+              </el-select>
+            </template>
+            <template #append>
+              <el-button :icon="Search" :disabled="tableLoading"/>
+            </template>
          </el-input>
      </el-col>
+     <!--
      <el-col :span="1">
        <div class="refresh-icon" style="margin: 5px 0 0 5px;">
         <el-button link="" type="primary">
@@ -35,6 +39,7 @@
         </el-button>
        </div>
      </el-col>
+     -->
    </el-row>
    <el-row>
      <el-table
@@ -153,7 +158,7 @@
 </template>
 <script lang="ts" setup>
 // dep
-import { ref, reactive, watch, watchEffect } from 'vue'
+import { ref, reactive, watch, watchEffect, defineEmits } from 'vue'
 import { ElTable, ElMessage } from 'element-plus'
 import { Star, Search } from '@element-plus/icons-vue'
 // store
@@ -191,9 +196,16 @@ const pageSize = ref(10)
 const pageSizes = ref([10, 20, 50])
 const total = ref(0)
 
-const select = ref('Task ID')
+const searchSelection = ref('taskId')
+const searchValue = ref('')
 
-const searchInput = ref('')
+const emit = defineEmits<{
+  (event: 'search', searchKey: string, searchValue: string): void
+}>()
+
+const onSearch = () => {
+  emit('search', searchSelection.value, searchValue.value)
+}
 
 // 根据pagination自动分页
 watchEffect(() => {
@@ -207,7 +219,6 @@ watchEffect(() => {
 // todo: 此处和performancebaseline共用job组合逻辑，可以考虑统一抽出来。
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
-  console.log(11, tableData.value)
 })
 
 const getAllJobsData = (idList: any[]) => {
