@@ -22,7 +22,7 @@
             <template #prepend>
               <el-select v-model="searchSelection" style="width: 115px">
                 <el-option label="任务ID" value="taskId" />
-                <el-option label="任务名" value="taskName" disabled/>
+                <el-option label="测试套" value="suite"/>
                 <el-option label="创建者" value="creator" disabled/>
               </el-select>
             </template>
@@ -43,9 +43,10 @@
    </el-row>
    <div v-loading="tableLoading || parentLoading">
       <el-table
+        class="task-table"
         ref="multipleTableRef"
         :data="tableData"
-        :default-sort="{ prop: 'date', order: 'descending' }"
+        style="width: 100%"
         stripe
       >
         <!--<el-table-column width="58">
@@ -54,7 +55,7 @@
              <el-icon size="20px"><StarFilled /></el-icon>
           </template>
         </el-table-column>-->
-        <el-table-column fixed label="TaskID" prop="submit_id">
+        <el-table-column label="TaskID" prop="submit_id" fixed min-width="200">
          <template #default="scope">
            <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
              {{ scope.row.submit_id }}
@@ -122,12 +123,12 @@
        <el-table-column prop="address" label="所属项目" width="165" show-overflow-tooltip />
        <el-table-column prop="date" label="创建人" />
        -->
-       <el-table-column label="创建时间" wdith="170">
+       <el-table-column label="创建时间" min-width="170">
          <template #default="scope">
            {{ scope.row.submit_time && formatDate(new Date(scope.row.submit_time), 'yyyy/MM/dd hh:mm:ss') }}
          </template>
        </el-table-column>
-       <el-table-column label="完成时间" wdith="170">
+       <el-table-column label="完成时间" min-width="170">
          <template #default="scope">
            {{ scope.row.submit_time && formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') }}
          </template>
@@ -309,13 +310,23 @@ const handleCurrentChange = (val: number) => {
 
 .state-counts {
   .total-state {
-    color: var( --oe-perf-color-primary)
+    color: var(--oe-perf-color-primary)
   }
   .finished-state{
-    color: #43bb57;
+    color: var(--oe-perf-color-success);
   }
   .failed-state {
-    color: #f95858;
+    color: var(--oe-perf-color-danger);
+  }
+}
+.task-table {
+  :deep(thead th) {
+    background-color: var(--oe-perf-bg-th);
+    color: #333;
+  }
+  :deep(thead th.el-table-fixed-column--left.is-last-column.el-table__cell) {
+    background-color: var(--oe-perf-bg-th);
+    color: #333;
   }
 }
 .Fail {

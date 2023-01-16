@@ -4,6 +4,14 @@
 <script lang="ts" setup>
 import * as echarts from 'echarts';
 import { onMounted, ref } from 'vue'
+
+const props = defineProps({
+  stateData: {
+    type: Object,
+    default: ()=>{}
+  },
+})
+
 const testTaskDoughnut = ref<any>(null)
 
 const success = ref(12)
@@ -20,25 +28,25 @@ const option = {
     bottom: '0',
     data: [
       {
-        name:'通过(111)',
+        name:'Finished',
         textStyle:{
           color: 'rgba(67, 187, 87)'
         }
       },
       {
-        name:'失败',
+        name:'Fail',
         textStyle:{
           color: 'rgba(249, 88, 88, 1)'
         }
       },
       {
-        name:'跳过',
+        name:'Running',
         textStyle:{
           color: 'rgba(51, 51, 51, 1)'
         }
       },
       {
-        name:'警告',
+        name:'Others',
         textStyle:{
           color: 'rgba(255, 166, 52, 1)'
         }
