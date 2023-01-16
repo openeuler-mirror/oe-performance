@@ -3,15 +3,15 @@
     <h2>{{`任务ID: ${detailData?.submit_id || ''}`}}</h2>
     <el-row :gutter="20">
       <el-col :span="18">
-        <el-descriptions>
+        <el-descriptions :column="2">
           <el-descriptions-item label="创建人">{{ detailData.subqueue   }}</el-descriptions-item>
+          <el-descriptions-item label="所属项目"></el-descriptions-item>
           <el-descriptions-item label="创建时间">
             {{formatDate(new Date(detailData.submit_time), 'yyyy/MM/dd hh:mm:ss')}}
           </el-descriptions-item>
           <el-descriptions-item label="完成时间">
             {{formatDate(new Date(detailData.end_time), 'yyyy/MM/dd hh:mm:ss')}}
           </el-descriptions-item>
-          <el-descriptions-item label="所属项目"></el-descriptions-item>
           <el-descriptions-item label="测试机" :span="2">{{ detailData.testbox }}</el-descriptions-item>
         </el-descriptions>
       </el-col>
