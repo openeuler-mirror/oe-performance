@@ -35,6 +35,16 @@
                   <span :class="`state-${scope.row.job_state}`">{{ scope.row.job_state }}</span>
                 </template>
               </el-table-column>
+              <el-table-column prop="job_stage" label="Job Stage" width="120" sortable sortBy="job_stage">
+                <template #default="scope">
+                  <span :class="`state-${scope.row.job_stage}`">{{ scope.row.job_stage }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="job_health" label="Job Health" width="120" sortable sortBy="job_health">
+                <template #default="scope">
+                  <span :class="`state-${scope.row.job_health}`">{{ scope.row.job_health }}</span>
+                </template>
+              </el-table-column>
               <el-table-column label="Test Params" min-width="230" sortable>
                 {{ detailData['li-testcase'] || 'N/A' }}
               </el-table-column>
@@ -67,7 +77,7 @@
           <span class="state-item" style="background-color: #43BB57;">
             {{ scope?.row?.jobStateData?.finished || '0' }}</span>
           <span class="state-item" style="background-color: #F95858;">
-            {{ scope?.row?.jobStateData?.fail || '0' }}</span>
+            {{ scope?.row?.jobStateData?.failed || '0' }}</span>
           <span class="state-item" style="background-color: #FFA634;">
             {{ scope?.row?.jobStateData?.others || '0' }}</span>
         </template>
@@ -103,6 +113,9 @@ const getJobData = (submitId:string) => {
     index: 'jobs',
     query: {
       size: 10000,
+      _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time'
+      ],
       query: {
         term: {
           submit_id: submitId
@@ -113,7 +126,6 @@ const getJobData = (submitId:string) => {
     const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
     setDeviceInfoToObj(resultObj)
     setPerformanceData(submitId, resultObj) // save submit data to store
-    // state.detailInfo = resultObj
     detailData.value = resultObj
     console.log(detailData)
   }).catch((err) => {
