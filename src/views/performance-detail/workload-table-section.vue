@@ -50,13 +50,9 @@ onMounted(() => {
       index: 'jobs',
       query: {
         size: 10000,
-        // 只取必要的字段, 确认具体字段对应额后配置
-        // _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
-        //   'os', 'os_version', 'arch', 'kernel',
-        //   'testbox', 'tbox_group',
-        //   'pp', 'stats',
-        //   'job_state', 'time'
-        // ],
+        _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
+          'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time'
+        ],
         query: {
           term: {
             submit_id: submitId

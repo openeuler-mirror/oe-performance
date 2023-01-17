@@ -72,37 +72,6 @@ const getAllData = (params: searchParams) => {
     submitDataLoading.value = false
   })
 }
-
-const getSubmitId = () => {
-  // 华为的实例，获取job，只展示submit数据
-  getPerformanceData({
-    'index': 'jobs',
-    'query': {
-      'size': 10,
-      '_source': ['submit_id'],
-      'query': {
-        'term': {
-          'suite': 'unixbench'
-        }
-      }
-    }
-  })
-    .then(res => {
-      // todo: 数据为空的异常处理
-      data.value = res.data.aggregations.jobs_terms.buckets.map((item: any) => {
-        return { submit_id: item.key }
-      })
-    })
-    .catch(err => {
-      ElMessage({
-        message: err.message,
-        type: 'error'
-      })
-    })
-    .finally(() => {
-      submitDataLoading.value = false
-    })
-}
 </script>
 
 <style></style>

@@ -7,10 +7,14 @@
           <el-descriptions-item label="创建人">{{ detailData.subqueue   }}</el-descriptions-item>
           <el-descriptions-item label="所属项目"></el-descriptions-item>
           <el-descriptions-item label="创建时间">
-            {{formatDate(new Date(detailData.submit_time), 'yyyy/MM/dd hh:mm:ss')}}
+            {{ detailData.submit_time ?
+              formatDate(new Date(detailData.submit_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+            }}
           </el-descriptions-item>
           <el-descriptions-item label="完成时间">
-            {{formatDate(new Date(detailData.end_time), 'yyyy/MM/dd hh:mm:ss')}}
+            {{ detailData.end_time ?
+              formatDate(new Date(detailData.end_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+            }}
           </el-descriptions-item>
           <el-descriptions-item label="测试机" :span="2">{{ detailData.testbox }}</el-descriptions-item>
         </el-descriptions>
@@ -25,42 +29,20 @@
         <template #default>
           <div m="4" class="job-table">
             <el-table :data="detailData?.jobList" style="width: 100%">
-              <!--
-              <el-table-column type="expand">
-                <template #default>
-                  <div m="2" class="expand-table">
-                    <el-table :data="[detailData]">
-                      <el-table-column prop="suite" width="430">
-                      </el-table-column>
-                      <el-table-column prop="result" label="job " width="100">
-                        <template #header>
-                          测试结果
-                          <el-tooltip
-                            class="box-item"
-                            effect="dark"
-                            content="Top Center prompts info"
-                            placement="top">
-                            <el-icon><QuestionFilled /></el-icon>
-                          </el-tooltip>
-                        </template>
-                        <template #default="scope">
-                          <div style="color: #43BB57;" v-if="scope.row.result=='suceesful'">
-                             Pass
-                          </div>
-                          <div style="color: #F95858;" v-if="scope.row.result=='failing'">
-                            No Pass
-                          </div>
-                        </template>
-                      </el-table-column>
-                    </el-table>
-                  </div>
-                </template>
-              </el-table-column>
-              -->
               <el-table-column prop="id" label="Job Id" width="160" fixed sortable/>
               <el-table-column prop="job_state" label="Job状态" width="110" sortable sortBy="job_state">
                 <template #default="scope">
                   <span :class="`state-${scope.row.job_state}`">{{ scope.row.job_state }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="job_stage" label="Job Stage" width="120" sortable sortBy="job_stage">
+                <template #default="scope">
+                  <span :class="`state-${scope.row.job_stage}`">{{ scope.row.job_stage }}</span>
+                </template>
+              </el-table-column>
+              <el-table-column prop="job_health" label="Job Health" width="120" sortable sortBy="job_health">
+                <template #default="scope">
+                  <span :class="`state-${scope.row.job_health}`">{{ scope.row.job_health }}</span>
                 </template>
               </el-table-column>
               <el-table-column label="Test Params" min-width="230" sortable>
@@ -68,12 +50,16 @@
               </el-table-column>
               <el-table-column label="开始时间" width="200" sortable sortBy="start_time">
                 <template #default="scope">
-                  {{formatDate(new Date(scope.row.start_time), 'yyyy/MM/dd hh:mm:ss')}}
+                  {{ scope.row.start_time ?
+                    formatDate(new Date(scope.row.start_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+                  }}
                 </template>
               </el-table-column>
               <el-table-column label="结束时间" width="200" sortable sortBy="end_time">
                 <template #default="scope">
-                  {{formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss')}}
+                  {{ scope.row.start_time ? 
+                    formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+                  }}
                 </template>
               </el-table-column>
               <el-table-column width="15" />
@@ -91,7 +77,7 @@
           <span class="state-item" style="background-color: #43BB57;">
             {{ scope?.row?.jobStateData?.finished || '0' }}</span>
           <span class="state-item" style="background-color: #F95858;">
-            {{ scope?.row?.jobStateData?.fail || '0' }}</span>
+            {{ scope?.row?.jobStateData?.failed || '0' }}</span>
           <span class="state-item" style="background-color: #FFA634;">
             {{ scope?.row?.jobStateData?.others || '0' }}</span>
         </template>
@@ -117,7 +103,6 @@ const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
 const testboxStore = useTestboxStore()
 
-const resultName = ref('#29206 w3pGT1xdmCorhS099')
 const detailData = ref<any>({})
 const loading = ref(false)
 
@@ -127,6 +112,9 @@ const getJobData = (submitId:string) => {
     index: 'jobs',
     query: {
       size: 10000,
+      _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time'
+      ],
       query: {
         term: {
           submit_id: submitId
@@ -137,7 +125,6 @@ const getJobData = (submitId:string) => {
     const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
     setDeviceInfoToObj(resultObj)
     setPerformanceData(submitId, resultObj) // save submit data to store
-    // state.detailInfo = resultObj
     detailData.value = resultObj
     console.log(detailData)
   }).catch((err) => {
