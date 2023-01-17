@@ -23,7 +23,6 @@ const submitDataLoading = ref(false)
 
 /* eslint-disable */
 const getAllData = (params: searchParams) => {
-  console.log(params)
   submitDataLoading.value = true
 
   const matchCases = []
@@ -39,6 +38,7 @@ const getAllData = (params: searchParams) => {
   })
 
   matchCases.push({ match: {job_state: 'finished'} })
+  matchCases.push({ range: { time: { gte: 'now-10d/d' } } })
 
   // 获取选择的套件下的submitID list
   getPerformanceData({
@@ -47,17 +47,7 @@ const getAllData = (params: searchParams) => {
       size: 1,
       'query': {
         bool: {
-          // suite': params.suite,
-          // // 其他查询条件应该是放在这里
-          // 'nr_cpu': params.nr_cpu,
-          // 'testbox': params.testbox,
-          // 'memory': params.memory
           must: matchCases,
-          // "must_not":{
-          //   "exists":{
-          //     "field":"errid"
-          //   }
-          // }
         },
       },
       aggs: {
@@ -69,46 +59,6 @@ const getAllData = (params: searchParams) => {
         }
       }
     },
-    /*
-    index: 'jobs',
-    query: {
-      size: 2,
-      _source: ['submit_id', 'suite'],
-      query: {
-        bool: {
-          must: [
-            {
-              match: {
-                suite: params.suite
-              }
-            },
-            {
-              exists: {
-                field: "submit_id"
-              }
-            }
-          ]
-        }
-      },
-      aggs: {
-        uid_aggs: {
-          terms: {
-            field: "submit_id",
-            size: 10000,
-          },
-          aggs: {
-            my_top_hits: {
-              top_hits: {
-                _source: {
-                  includes: ['suite', 'submit_id', 'os', 'os_version', 'nr_cpu', 'testbox', 'kernel_version', 'nr_node', "job_stage", "job_health"]
-                },
-                size: 100 // 最大只能取100个
-              }
-            }
-          }
-        }
-      }
-    } */ 
   }).then((res) => {
     // todo: 数据为空的异常处理
     data.value = res.data.aggregations.jobs_terms.buckets

@@ -20,16 +20,18 @@
 import { ref, reactive } from 'vue'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import ResultTable from './componets/result-table.vue'
-import flattenObj from '@/utils/utils'
+import { flattenObj } from '@/utils/utils'
+
+import { useTestboxStore } from '@/stores/performanceData'
 
 import { getPerformanceData } from '@/api/performance'
 
 import { kpiMaps, kpiMapFuncs, addtionalKpiMaps } from './config.js'
 
+const testboxStore = useTestboxStore()
+
 const dimension = ref('osv')
 
-// testbox字典
-const allHostsMap = reactive({})
 // ejobs
 let ejobs = {}
 let ejobsMap = {}
@@ -105,10 +107,10 @@ const getTotalData = (searchParams) => {
 }
 
 const addHardwareInfoToJob = (job) => {
-  const hardwareInfo = allHostsMap[job.testbox] || {}
-  job['hw.nr_cpu'] = hardwareInfo.cpu && hardwareInfo.cpu.nr_cpu
-  job['hw.nr_node'] = hardwareInfo.cpu && hardwareInfo.cpu.nr_node
-  job['hw.memory'] = hardwareInfo.memory && hardwareInfo.memory.all_memory_size
+  const hardwareInfo = testboxStore.testboxMap[job.testbox] || {}
+  job['hw.nr_cpu'] = hardwareInfo.nr_cpu
+  job['hw.nr_node'] = hardwareInfo.nr_node
+  job['hw.memory'] = hardwareInfo.memory
 }
 
 const constructEjobData = (job, ejobs, ejobsMap) => {

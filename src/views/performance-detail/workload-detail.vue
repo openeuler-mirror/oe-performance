@@ -2,16 +2,7 @@
   <div>
     <el-card class="baseline-detail">
       <div class="main-title">
-        <span>unixbench信息总览 >> UUID: test324802348</span>
         <span class="work-load-title">Workload性能值详情</span>
-        <div class="top-title">
-              <div class="case-info">
-                用例信息 <span class="title-value">多核</span>
-              </div>
-              <div class="performance-value">
-                性能值 <span class="title-value">13491.08</span>
-              </div>
-        </div>
       </div>
       <div class="main-info">
         <div class="use-case-info main-item">

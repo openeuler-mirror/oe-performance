@@ -1,7 +1,7 @@
 <template>
   <div class="performance-baseline-test-table">
     <div class="handle-pannel">
-      <div class="button-group-1">
+      <div class="button-group-left">
         <el-button
           type="primary"
           class="button"
@@ -37,7 +37,7 @@
           <el-button :icon="Search" @click="handleSearchTable" />
         </template>
       </el-input>
-      <div class="button-group-2">
+      <div class="button-group-right">
         <el-button
           :icon="RefreshLeft"
           :loading="reFreshLodaing"
@@ -70,6 +70,7 @@
             </el-checkbox-group>
           </div>
         </el-popover>
+        <!--上传功能尚未接入
         <el-dropdown trigger="click">
           <el-button-group>
             <el-button type="primary" class="more-button">更多</el-button>
@@ -85,6 +86,7 @@
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        -->
       </div>
     </div>
     <div class="tips">
@@ -98,13 +100,15 @@
     <el-table
       :data="tableData"
       v-loading="tableLoading || submitDataLoading"
+      stripe
       :header-cell-style="{ background: 'rgb(243,243,243)' }"
-      @selection-change="handleSelectionChange">
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="30" />
       <el-table-column
         fixed="left"
-        width="150"
-        label="数据来源"
+        width="200"
+        label="提交编号"
         prop="submit_id">
       </el-table-column>
       <template v-for="(item, index) in tableColumn">
@@ -113,7 +117,7 @@
           :prop="item.prop"
           :label="item.label"
           :key="index"
-          width="150">
+          :width="item.width">
         </el-table-column>
       </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">
@@ -151,7 +155,7 @@ import {
 } from '@element-plus/icons-vue'
 import { config, sceneConfig } from '../config-file'
 import { ElMessage } from 'element-plus'
-import { usePerformanceData } from '@/stores/performanceData'
+import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
@@ -179,6 +183,7 @@ const props = defineProps({
 const router = useRouter()
 const route = useRoute()
 const performanceStore = usePerformanceData()
+const testboxStore = useTestboxStore()
 
 const input = ref('')
 const selectedOption = ref('')
@@ -246,34 +251,6 @@ watch(
     initailizeColumn
   }
 )
-// 数据扁平化，便于table展示
-
-// const handleTableData = (page: number) => {
-//   let start = (page - 1) * 5
-//   let end =
-//     props.dataList.length <= start + 5 ? props.dataList.length : start + 5
-//   const temp = []
-//   for (let i = start; i < end; i++) {
-//     temp.push(flattenObj(props.dataList[i]))
-//   }
-//   tableData.value = temp
-//   originData = JSON.parse(JSON.stringify(tableData.value))
-// }
-
-// const flattenObj = (ob: any) => {
-//   let result = <TableItem>{}
-//   for (const i in ob) {
-//     if (typeof ob[i] === 'object' && !Array.isArray(ob[i])) {
-//       const temp = flattenObj(ob[i])
-//       for (const j in temp) {
-//         result[`${i}_${j}`] = temp[j]
-//       }
-//     } else {
-//       result[i] = ob[i]
-//     }
-//   }
-//   return result
-// }
 
 const handlecheckAllColumn = (val: any) => {
   if (val) {
@@ -331,49 +308,50 @@ const handleReFresh = () => {
 }
 
 // 获取并合并jobs的逻辑
-// todo: 这段逻辑可以考虑一直store中
 const getAllJobsData = (idList: any[]) => {
+  tableLoading.value = true
   const tempArr: any[] = reactive(Object.assign([], idList))
-  // todo: 每次遍历请求前，应取消之前所有未完成的请求
-  idList.forEach((idObj: any, idx: number) => {
-    // 如果之前已经获得过数据则不再重复请求
-    if (performanceStore.performanceData[idObj.submit_id]) {
-      tempArr[idx] = performanceStore.performanceData[idObj.submit_id]
-      return
-    }
-    // 根据submitId获取它的jobs
-    requestCount.value += 1
-    tableLoading.value = true
-    performanceStore.changeLoadingStatus(true)
-    getPerformanceData({
-      index: 'jobs',
-      query: {
-        size: 10000, // 取全量
-        query: {
-          term: {
-            submit_id: idObj.submit_id
+  getPerformanceData({
+    'index': 'jobs',
+    'query': {
+      size: 0,
+      'query': {
+        bool: {
+          must: [
+            { terms: { submit_id: idList.map(item => item.submit_id)} },
+          ],
+        },
+      },
+      aggs: {
+        submit_list: { 
+          terms: { field: 'submit_id', size: 10000 },  // 取全量 
+          aggs: { 
+            job_list: { top_hits: { _source: {} } }
           }
-        }
+        },
+      }
+    },
+  }).then(res => {
+    const submitResult = res?.data?.aggregations?.submit_list?.buckets?.map(subItem => {
+      return {
+        submitId: subItem.key,
+        jobList: subItem?.job_list?.hits?.hits
       }
     })
-      .then(res => {
-        const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
-        performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
-        tempArr[idx] = resultObj
-      })
-      .catch(err => {
-        ElMessage({
-          message: err.message,
-          type: 'error'
-        })
-      })
-      .finally(() => {
-        requestCount.value -= 1
-        if (requestCount.value === 0) {
-          tableLoading.value = false
-          performanceStore.changeLoadingStatus(false)
-        }
-      })
+    submitResult.forEach((submitItem, idx) => {
+      if (performanceStore.performanceData[submitItem.submitId]) {
+        tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
+        return
+      }
+      const submitData = combineJobs(submitItem.jobList)
+      setDeviceInfoToObj(submitData)
+      performanceStore.setPerformanceData(submitItem.submitId, submitData)
+      tempArr[idx] = submitData
+    })
+  }).catch(err => {
+    ElMessage({ message: err.message, type: 'error' })
+  }).finally(() => {
+    tableLoading.value = false
   })
   return tempArr
 }
@@ -386,9 +364,6 @@ watchEffect(() => {
   // 数据分页
   idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
   total.value = props.dataList.length
-  // for (let i = 0; total.value > i * 10; i++) {
-  //   pageSizes.value.push((i + 1) * 10)
-  // }
 })
 
 // 当前页数据变化时，获取jobs数据
@@ -397,6 +372,11 @@ watch(idList, () => {
   originData = JSON.parse(JSON.stringify(tableData.value))
   console.log(tableData.value)
 })
+
+const setDeviceInfoToObj = (resultObj) => {
+  const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
+  resultObj.device =  testbox.device || {}
+}
 
 // 对比
 const handleComaration = () => {
@@ -444,7 +424,7 @@ a {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  .button-group-1 {
+  .button-group-left {
     min-width: 200px;
     .button {
       min-width: 90px;
@@ -460,8 +440,7 @@ a {
   .select {
     width: 100px;
   }
-  .button-group-2 {
-    min-width: 290px;
+  .button-group-right {
     .more-button {
       margin-left: 12px;
       min-width: 70px;

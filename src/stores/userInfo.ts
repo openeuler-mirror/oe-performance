@@ -28,7 +28,7 @@ const loadUserInfo = () => {
 const simulateLogin = () => {
   return new Promise((resolve) => {
     const in6hours = 1 / 2
-    cookie.set('token', 'res.data.token', {
+    cookie.set('token', 'simulate_token_0001', {
       expires: in6hours
     })
     cookie.set('user_name', 'admin', {

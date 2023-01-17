@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-aside width="250px">
+    <el-aside width="200px">
       <el-menu :default-active="currentKey" @select="handleMenuClick">
         <el-sub-menu index="baseline-solution">
           <template #title>
@@ -37,7 +37,7 @@
       </el-menu>
     </el-aside>
     <el-main>
-      <div class="breadcrumb-nav" @click="router.go(-1)">&lt;&lt;返回</div>
+      <div class="breadcrumb-nav" @click="router.go(-1)">&lt;返回</div>
       <div class="sub-layout-content">
         <router-view></router-view>
       </div>
@@ -80,5 +80,13 @@ onMounted(() => {
 })
 </script>
 <style scoped lang="scss">
-@import '../style.scss'
+@import '../style.scss';
+
+.breadcrumb-nav {
+  padding: 4px var(--oe-perf-padding) 4px;
+  &:hover {
+    cursor: pointer;
+    color: var(--oe-perf-color-secondary);
+  }
+}
 </style>

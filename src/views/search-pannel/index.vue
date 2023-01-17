@@ -10,7 +10,8 @@
           <el-radio-button
             v-for="(item, index) in suiteList"
             :key="index"
-            :label="item" />
+            :label="item.suiteName"
+            :disabled="item.unavailable"/>
         </el-radio-group>
       </el-col>
     </el-row>
@@ -66,9 +67,12 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { suiteConfig, fieldsConfig } from './config'
 
+import { useTestboxStore } from '@/stores/performanceData'
+
 import { getJobValueList, getTestBoxes } from '@/api/performance'
 
 const props = defineProps({
+  // 是否根据场景区分展示套件。只在性能基线表格页面中使用
   suiteByScene: {
     type: Boolean,
     default: false
@@ -85,6 +89,7 @@ const emit = defineEmits<{
 
 const route = useRoute()
 const router = useRouter()
+const testboxStore = useTestboxStore()
 
 const fieldsListForRender = ref([] as string[])
 const suiteList = ref([] as string[])
@@ -171,10 +176,10 @@ const setSuiteList = () => {
 // 设置默认选中的suite，如果url中有，则使用url的
 const setDefaultSuite = () => {
   const { suite } = route.query
-  if (suite && suiteList.value.indexOf(String(suite)) > -1) {
+  if (suite && suiteList.value.find(suiteItem => suiteItem.suiteName === suite)) {
     searchParams.value['suite'] = String(suite)
   } else {
-    searchParams.value['suite'] = suiteList.value[0]
+    searchParams.value['suite'] = suiteList.value[0] && suiteList.value[0].suiteName
   }
 }
 
@@ -209,6 +214,7 @@ const getHostOptions = () => {
         ...item._source
       }
     })
+    testboxStore.setTestboxData(testboxList.value)
     fieldList.forEach(field => {
       const listValues = []
       const repeatMap = {}
@@ -240,7 +246,11 @@ const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
 }
 
 const handleReset = () => {
-  searchParams.value = {}
+  if (props.suiteByScene) {
+    searchParams.value = { suite: searchParams.value.suite }
+  } else {
+    searchParams.value = {}
+  }
 }
 
 const handleSearch = () => {

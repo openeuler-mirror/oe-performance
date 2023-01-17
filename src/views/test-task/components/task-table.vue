@@ -1,33 +1,37 @@
 <template>
-   <el-row>
-     <el-col :span="15">
-         <el-radio-group
-           v-model="taskStatus"
-           @change ="selectTaskStatus">
-             <el-radio-button label="1">全部任务({{ number }})</el-radio-button>
-             <el-radio-button label="2">Pending({{ number }})</el-radio-button>
-             <el-radio-button label="3">Running({{ number }})</el-radio-button>
-             <el-radio-button label="4">Complete({{ number }})</el-radio-button>
-             <el-radio-button label="5">Fail({{ number }})</el-radio-button>
+   <el-row class="control-row">
+     <el-col :span="24">
+         <el-radio-group class="job-state-list">
+            <el-radio-button label="1">全部Job({{ healthState.allState }})</el-radio-button>
+            <el-radio-button label="4">Finished({{ healthState.finished }})</el-radio-button>
+            <el-radio-button label="5">Fail({{ healthState.failed }})</el-radio-button>
+            <el-radio-button label="3">Running({{ healthState.running }})</el-radio-button>
+            <el-radio-button label="2">Others({{ healthState.others }})</el-radio-button>
          </el-radio-group>
      </el-col>
-     <el-col :span="8">
-         <el-input
-         v-model="searchInput"
-         placeholder="搜索范围"
-         class="input-with-select">
-             <template #prepend>
-               <el-select v-model="select" placeholder="Select" style="width: 115px">
-                 <el-option label="Task ID" value="1" />
-                 <el-option label="Task Name" value="2" />
-                 <el-option label="Creator" value="3" />
-               </el-select>
-             </template>
-             <template #append>
-               <el-button :icon="Search" />
-             </template>
+    </el-row>
+    <el-row class="control-row">
+     <el-col :span="12">
+        <el-input
+          v-model="searchValue"
+          placeholder="搜索范围"
+          class="input-with-select"
+          @keyup.enter="onSearch"
+          :disabled="tableLoading"
+        >
+            <template #prepend>
+              <el-select v-model="searchSelection" style="width: 115px">
+                <el-option label="任务ID" value="taskId" />
+                <el-option label="测试套" value="suite"/>
+                <el-option label="创建者" value="creator" disabled/>
+              </el-select>
+            </template>
+            <template #append>
+              <el-button :icon="Search" :disabled="tableLoading"/>
+            </template>
          </el-input>
      </el-col>
+     <!--
      <el-col :span="1">
        <div class="refresh-icon" style="margin: 5px 0 0 5px;">
         <el-button link="" type="primary">
@@ -35,151 +39,177 @@
         </el-button>
        </div>
      </el-col>
+     -->
    </el-row>
-   <el-row>
-     <el-table
-       ref="multipleTableRef"
-       :data="tableData"
-       v-loading="tableLoading"
-       :default-sort="{ prop: 'date', order: 'descending' }"
-       style="width: 100%; margin-top: 30px;"
-     >
-       <el-table-column width="58">
-         <template #default>
-          <el-icon size="20px" @click="changeStar"><Star /></el-icon>
-          <!-- <el-icon size="20px"><StarFilled /></el-icon> -->
+   <div v-loading="tableLoading || parentLoading">
+      <el-table
+        class="task-table"
+        ref="multipleTableRef"
+        :data="tableData"
+        style="width: 100%"
+        stripe
+      >
+        <!--<el-table-column width="58">
+          <template #default>
+           <el-icon size="20px" @click="changeStar"><Star /></el-icon>
+             <el-icon size="20px"><StarFilled /></el-icon>
+          </template>
+        </el-table-column>-->
+        <el-table-column label="TaskID" prop="submit_id" fixed min-width="200">
+         <template #default="scope">
+           <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
+             {{ scope.row.submit_id }}
+           </router-link>
+         </template>
+        </el-table-column>
+        <el-table-column prop="suite" label="Suite" width="90" show-overflow-tooltip/>
+        <!--以下字段未确认
+        <el-table-column
+              label="审批状态"
+              width="100"
+              :filters="[
+            { text: 'Am', value: 'Am' },
+            { text: 'Tm', value: 'Tm' },
+            { text: '2016-05-03', value: '2016-05-03' },
+            { text: '2016-05-04', value: '2016-05-04' },
+          ]"
+          :filter-method="filterHandler">
+          <template #default="scope">
+           <el-row>
+            <el-col :span="21" :class="scope.row.approval">
+             {{scope.row.approval}}
+            </el-col>
+            <el-col :span="3">
+             <span v-if="scope.row.approval=='Pending'">
+               <el-tooltip
+                 class="box-item"
+                 effect="dark"
+                 content="Top Center prompts info"
+                 placement="top">
+                 <el-icon size="15px"><QuestionFilled /></el-icon>
+               </el-tooltip>
+             </span>
+            </el-col>
+           </el-row>
          </template>
        </el-table-column>
-       <el-table-column fixed label="TaskID" width="110" prop="submit_id">
-         <template #default="scope">
-             <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
-                {{ scope.row.submit_id }}
-            </router-link>
-        </template>
-       </el-table-column>
-       <el-table-column prop="name" label="Task名称" width="90" show-overflow-tooltip/>
        <el-table-column
-             label="审批状态"
-             width="100"
-             :filters="[
-           { text: 'Am', value: 'Am' },
-           { text: 'Tm', value: 'Tm' },
-           { text: '2016-05-03', value: '2016-05-03' },
-           { text: '2016-05-04', value: '2016-05-04' },
-         ]"
-         :filter-method="filterHandler">
-         <template #default="scope">
-          <el-row>
-           <el-col :span="21" :class="scope.row.approval">
-            {{scope.row.approval}}
-           </el-col>
-           <el-col :span="3">
-            <span v-if="scope.row.approval=='Pending'">
-              <el-tooltip
-                class="box-item"
-                effect="dark"
-                content="Top Center prompts info"
-                placement="top">
-                <el-icon size="15px"><QuestionFilled /></el-icon>
-              </el-tooltip>
-            </span>
-           </el-col>
-          </el-row>
-        </template>
-       </el-table-column>
-       <el-table-column
-          prop="date"
-          label="测试类型"
-          width="100"
-          :filters="[
-          { text: 'Am', value: 'Am' },
-          { text: 'Tm', value: 'Tm' },
-          { text: '2016-05-03', value: '2016-05-03' },
-          { text: '2016-05-04', value: '2016-05-04' },
-        ]"
-        :filter-method="filterHandler"/>
-       <el-table-column prop="name" :formatter="formatter" width="140">
+         prop="date"
+         label="测试类型"
+         width="100"
+         :filters="[
+         { text: 'Am', value: 'Am' },
+         { text: 'Tm', value: 'Tm' },
+         { text: '2016-05-03', value: '2016-05-03' },
+         { text: '2016-05-04', value: '2016-05-04' },
+       ]"
+       :filter-method="filterHandler"/>
+       -->
+       <el-table-column width="140">
          <template #header>
            总计/成功/失败
-           <el-tooltip
-             class="box-item"
-             effect="dark"
-             content="Top Center prompts info"
-             placement="top">
-             <el-icon><QuestionFilled /></el-icon>
-           </el-tooltip>
          </template>
-       </el-table-column>
-       <el-table-column prop="address" label="所属项目" width="165" show-overflow-tooltip />
-       <el-table-column prop="date" label="创建人" />
-       <el-table-column prop="date" sortable label="创建时间" width="165"/>
-       <el-table-column prop="date" sortable label="完成时间" width="165">
-        <template #default="scope">
-          <div>
-            {{scope.row.date}}
+         <template #default="scope">
+          <div class="state-counts">
+            <span class="total-state">{{ scope.row?.jobStateData?.all || '-' }}</span>
+            /
+            <span class="finished-state">{{ scope.row?.jobStateData?.finished || '-' }}</span>
+            /
+            <span class="failed-state">{{ scope.row?.jobStateData?.failed || '-' }}</span>
           </div>
          </template>
        </el-table-column>
+       <!--
+       <el-table-column prop="address" label="所属项目" width="165" show-overflow-tooltip />
+       <el-table-column prop="date" label="创建人" />
+       -->
+       <el-table-column label="创建时间" min-width="170">
+         <template #default="scope">
+           {{ scope.row.submit_time && formatDate(new Date(scope.row.submit_time), 'yyyy/MM/dd hh:mm:ss') }}
+         </template>
+       </el-table-column>
+       <el-table-column label="完成时间" min-width="170">
+         <template #default="scope">
+           {{ scope.row.submit_time && formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') }}
+         </template>
+       </el-table-column>
+       <!--
        <el-table-column prop="detail" label="操作" fixed="right" width="120px">
          <template #default>
            <el-button link type="primary">重跑</el-button>
            <el-button link type="primary">删除</el-button>
          </template>
        </el-table-column>
-     </el-table>
-   </el-row>
-   <el-pagination
-      class="pagination"
-      v-model:currentPage="currentPage"
-      v-model:page-size="pageSize"
-      :page-sizes="pageSizes"
-      :small="false"
-      layout="prev, pager, next, sizes, jumper"
-      :total="total"
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-    />
+       -->
+      </el-table>
+      <el-pagination
+        class="pagination"
+        v-model:currentPage="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="pageSizes"
+        :small="false"
+        layout="prev, pager, next, sizes, jumper"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
 </template>
 <script lang="ts" setup>
 // dep
-import { ref, reactive, watch, watchEffect } from 'vue'
+import { ref, reactive, watch, watchEffect, defineEmits } from 'vue'
 import { ElTable, ElMessage } from 'element-plus'
 import { Star, Search } from '@element-plus/icons-vue'
 // store
-import { usePerformanceData } from '@/stores/performanceData'
+import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 // api
 import { getPerformanceData } from '@/api/performance'
 // type
 import type { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults'
 import { User } from '../interface'
 // utils
+import { formatDate } from '@/utils/utils'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
 
 const props = defineProps({
+  parentLoading: {
+    type: Boolean,
+    default: false
+  },
   allData: {
     type: Array,
     default: () => []
+  },
+  healthState: {
+    type: Object,
+    default: () => {}
   }
 })
 
 const performanceStore = usePerformanceData()
+const testboxStore = useTestboxStore()
 
 const idList = ref(<any>[])
 const tableData = ref([])
-const requestCount = ref(0)
 const tableLoading = ref(false)
 
 // 分页参数
 const currentPage = ref(1)
-const pageSize = ref(5)
+const pageSize = ref(10)
 const pageSizes = ref([10, 20, 50])
 const total = ref(0)
 
-const taskStatus = ref('1')
-const select = ref('Task ID')
+const searchSelection = ref('taskId')
+const searchValue = ref('')
 
-const number = ref('423')
-const searchInput = ref('')
+const emit = defineEmits<{
+  (event: 'search', searchKey: string, searchValue: string): void
+}>()
+
+const onSearch = () => {
+  emit('search', searchSelection.value, searchValue.value)
+  currentPage.value = 1
+}
 
 // 根据pagination自动分页
 watchEffect(() => {
@@ -193,67 +223,61 @@ watchEffect(() => {
 // todo: 此处和performancebaseline共用job组合逻辑，可以考虑统一抽出来。
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
-  console.log('taskList data: ', tableData.value)
 })
 
 const getAllJobsData = (idList: any[]) => {
+  tableLoading.value = true
   const tempArr: any[] = reactive(Object.assign([], idList))
-  // todo: 每次遍历请求前，应取消之前所有未完成的请求
-  idList.forEach((idObj: any, idx: number) => {
-    // 如果之前已经获得过数据则不再重复请求
-    if (performanceStore.performanceData[idObj.submit_id]) {
-      tempArr[idx] = performanceStore.performanceData[idObj.submit_id]
-      return
-    }
-    // 根据submitId获取它的jobs
-    requestCount.value += 1
-    tableLoading.value = true
-    performanceStore.changeLoadingStatus(true)
-    getPerformanceData({
-      index: 'jobs',
-      query: {
-        size: 10000, // 取全量
-        // 只取必要的字段
-        // _source: ['suite', 'id', 'submit_id', 'group_id', 'tags',
-        //   'os', 'os_version', 'arch', 'kernel',
-        //   'testbox', 'tbox_group',
-        //   'pp', 'stats',
-        //   'job_state', 'time'
-        // ],
-        query: {
-          term: {
-            submit_id: idObj.submit_id
+  getPerformanceData({
+    'index': 'jobs',
+    'query': {
+      size: 0,
+      'query': {
+        bool: {
+          must: [
+            { terms: { submit_id: idList.map(item => item.submit_id)} },
+          ],
+        },
+      },
+      aggs: {
+        submit_list: { 
+          terms: { field: 'submit_id', size: 10000 },  // 取全量 
+          aggs: { 
+            job_list: { top_hits: { _source: {} } }
           }
-        }
+        },
       }
-    }).then(res => {
-      const resultObj = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
-      performanceStore.setPerformanceData(idObj.submit_id, resultObj) // save submit data to store
-      tempArr[idx] = resultObj
-    }).catch(err => {
-      ElMessage({
-        message: err.message,
-        type: 'error'
-      })
-    }).finally(() => {
-      requestCount.value -= 1
-      if (requestCount.value === 0) {
-        tableLoading.value = false
-        performanceStore.changeLoadingStatus(false)
+    },
+  }).then(res => {
+    const submitResult = res?.data?.aggregations?.submit_list?.buckets?.map(subItem => {
+      return {
+        submitId: subItem.key,
+        jobList: subItem?.job_list?.hits?.hits
       }
     })
+    submitResult.forEach((submitItem, idx) => {
+      if (performanceStore.performanceData[submitItem.submitId]) {
+        tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
+        return
+      }
+      const submitData = combineJobs(submitItem.jobList)
+      setDeviceInfoToObj(submitData)
+      performanceStore.setPerformanceData(submitItem.submitId, submitData)
+      tempArr[idx] = submitData
+    })
+  }).catch(err => {
+    ElMessage({ message: err.message, type: 'error' })
+  }).finally(() => {
+    tableLoading.value = false
   })
   return tempArr
 }
 
+const setDeviceInfoToObj = (resultObj) => {
+  const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
+  resultObj.device =  testbox.device || {}
+}
 
-const selectTaskStatus = (label: any) => {
-  console.log(label, '切换任务类型的处理')
-}
-// , column: TableColumnCtx<User>
-const formatter = (row: User) => {
-  return `${row.name} / ${row.name} / ${row.name}`
-}
 const filterHandler = (
   value: string,
   row: User,
@@ -265,10 +289,6 @@ const filterHandler = (
 }
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 
-const changeStar = () => {
-  console.log('点击收藏处理')
-}
-
 const handleSizeChange = (val: number) => {
   console.log(`${val} items per page`)
 }
@@ -278,6 +298,37 @@ const handleCurrentChange = (val: number) => {
 </script>
 
 <style lang="scss" scoped>
+.control-row {
+  margin-bottom:8px;
+}
+
+.job-state-list {
+  :deep(.el-radio-button__inner) {
+    cursor: default;
+  }
+}
+
+.state-counts {
+  .total-state {
+    color: var(--oe-perf-color-primary)
+  }
+  .finished-state{
+    color: var(--oe-perf-color-success);
+  }
+  .failed-state {
+    color: var(--oe-perf-color-danger);
+  }
+}
+.task-table {
+  :deep(thead th) {
+    background-color: var(--oe-perf-bg-th);
+    color: #333;
+  }
+  :deep(thead th.el-table-fixed-column--left.is-last-column.el-table__cell) {
+    background-color: var(--oe-perf-bg-th);
+    color: #333;
+  }
+}
 .Fail {
   background-color: rgb(250, 88, 88);
   color: rgb(214, 209, 209);

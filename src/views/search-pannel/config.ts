@@ -10,33 +10,27 @@ export const fieldsConfig = Object.assign({}, jobModel.fields) as configObject
 // 只在性能基线页面中使用
 export const suiteConfig: configObject = {
   bigData: {
-    suiteList: ['unixbench', 'lmbench3', 'stream'],
+    suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'lmbench3'}, { suiteName: 'stream'}],
   },
   dataBase: {
-    suiteList: ['???', '??', '?'],
+    suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'lmbench3'}, { suiteName: 'stream'}],
   },
   distributedStorage: {
-    suiteList: ['unixbench', 'lmbench3', 'iperf'],
+    suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'lmbench3'}, { suiteName: 'stream'}],
   },
   cpu: {
-    suiteList: ['???', '??', '?'],
+    suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'speccpu2006'}, { suiteName: 'speccpu2017'}],
   },
   memory: {
-    suiteList: ['unixbench', 'lmbench3', 'iperf'],
+    suiteList: [{ suiteName: 'stream'}, { suiteName: 'lmbench'}],
   },
   storage: {
-    suiteList: ['???', '??', '?'],
+    suiteList: [{ suiteName: 'fio'}, { suiteName: 'iozone', unavailable: true }],
   },
   network: {
-    suiteList: ['unixbench', 'lmbench3', 'iperf'],
+    suiteList: [{ suiteName: 'netperf'}],
   },
   basic: {
-    suiteList: ['???', '??', '?'],
-  },
-  basicPerformance: {
-    suiteList: ['unixbench', 'lmbench3', 'iperf'],
-  },
-  solution: {
-    suiteList: ['???', '??', '?'],
+    suiteList: [{ suiteName: 'libmicro'}, { suiteName: 'specjvm2008', unavailable: true}],
   }
 }
