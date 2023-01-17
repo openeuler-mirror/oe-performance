@@ -103,7 +103,6 @@ const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
 const testboxStore = useTestboxStore()
 
-const resultName = ref('#29206 w3pGT1xdmCorhS099')
 const detailData = ref<any>({})
 const loading = ref(false)
 
