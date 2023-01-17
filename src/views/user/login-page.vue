@@ -1,14 +1,10 @@
 <template>
   <div class="oe-perf-login">
-    <div class="left-content">
-      <h3 class="logo-title">OpenEuler</h3>
+    <img class="logo-image" src="@/assets/logo.png">
+    <img class="theme-image" src="@/assets/theme.png">
+    <div class="login-container">
+      <el-button class="login-btn" type="primary" @click="loginRequest">进入系统</el-button>
     </div>
-    <div class="right-content">
-      <div class="login-container">
-        <h3>openEuler性能看板</h3>
-        <el-button class="login-btn" type="primary" @click="loginRequest">进入系统</el-button>
-      </div>
-    </div> 
   </div>
 </template>
   
@@ -35,31 +31,27 @@ const loginRequest = () => {
     width: 100%;
     height: 100%;
     display: flex;
-    .left-content {
-      width: 50%;
-      height: 100%;
-      background: url('@/assets/login-bg.png') no-repeat;
-      background-size: 100% auto;
-      background-position: center;
-      background-color: #cbd8ed;
-      .logo-title {
-        position: absolute;
-        left: 2%;
-        top: 2%;
-        font-size: 50px;
-        font-weight: 900;
-        color: var(--oe-perf-color-primary);
-      }
+    background: url('@/assets/login-bg.png') no-repeat;
+    background-size: 100% 100%;
+    background-position: center;
+    .logo-image {
+      position: absolute;
+      width: 200px;
+      top:2%;
+      left:2%;
     }
-    .right-content {
-      width: 50%;
-      height: 100%;
-      position: relative;
+    .theme-image {
+      display: block;
+      position: absolute;
+      width: 60%;
+      top: 15%;
+      left: 50%;
+      transform: translate(-50%);
     }
     .login-container {
       position: absolute;
       width: 300px;
-      top: 40vh;
+      top: 75vh;
       left: 50%;
       margin-left: -150px;
       text-align: center;
