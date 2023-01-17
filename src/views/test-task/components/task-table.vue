@@ -224,42 +224,48 @@ watchEffect(() => {
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
 })
-
+/**
+       * 'query': {
+      size: 10000,
+      'query': {
+        constant_score : {
+          filter : {
+            terms : { 
+              submit_id : idList.map(item => item.submit_id)
+            }
+          }
+        }
+      },
+    },
+       */
 const getAllJobsData = (idList: any[]) => {
   tableLoading.value = true
   const tempArr: any[] = reactive(Object.assign([], idList))
   getPerformanceData({
     'index': 'jobs',
     'query': {
-      size: 0,
+      size: 10000,
+      _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'time', 'start_time', 'end_time', 'submit_time'
+      ],
       'query': {
-        bool: {
-          must: [
-            { terms: { submit_id: idList.map(item => item.submit_id)} },
-          ],
-        },
-      },
-      aggs: {
-        submit_list: { 
-          terms: { field: 'submit_id', size: 10000 },  // 取全量 
-          aggs: { 
-            job_list: { top_hits: { _source: {} } }
+        constant_score : {
+          filter : {
+            terms : { 
+              submit_id : idList.map(item => item.submit_id)
+            }
           }
-        },
+        }
       }
     },
   }).then(res => {
-    const submitResult = res?.data?.aggregations?.submit_list?.buckets?.map(subItem => {
-      return {
-        submitId: subItem.key,
-        jobList: subItem?.job_list?.hits?.hits
-      }
-    })
+    const submitResult = constructSubmitDataList(res?.data?.hits?.hits)
     submitResult.forEach((submitItem, idx) => {
       if (performanceStore.performanceData[submitItem.submitId]) {
         tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
         return
       }
+      console.log(submitItem.jobList)
       const submitData = combineJobs(submitItem.jobList)
       setDeviceInfoToObj(submitData)
       performanceStore.setPerformanceData(submitItem.submitId, submitData)
@@ -276,6 +282,24 @@ const getAllJobsData = (idList: any[]) => {
 const setDeviceInfoToObj = (resultObj) => {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
   resultObj.device =  testbox.device || {}
+}
+
+const constructSubmitDataList = (jobList) => {
+  const submitList = <any>[]
+  const submitMap = {}
+  jobList.forEach(job => {
+    const submitId = job?._source?.submit_id
+    if (submitMap[submitId]) {
+      submitMap[submitId].jobList.push(job)
+    } else {
+      submitMap[submitId] = {
+        submitId,
+        jobList: [job]
+      }
+      submitList.push(submitMap[submitId])
+    }
+  })
+  return submitList
 }
 
 const filterHandler = (

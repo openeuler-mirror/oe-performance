@@ -7,10 +7,14 @@
           <el-descriptions-item label="创建人">{{ detailData.subqueue   }}</el-descriptions-item>
           <el-descriptions-item label="所属项目"></el-descriptions-item>
           <el-descriptions-item label="创建时间">
-            {{formatDate(new Date(detailData.submit_time), 'yyyy/MM/dd hh:mm:ss')}}
+            {{ detailData.submit_time ?
+              formatDate(new Date(detailData.submit_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+            }}
           </el-descriptions-item>
           <el-descriptions-item label="完成时间">
-            {{formatDate(new Date(detailData.end_time), 'yyyy/MM/dd hh:mm:ss')}}
+            {{ detailData.end_time ?
+              formatDate(new Date(detailData.end_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+            }}
           </el-descriptions-item>
           <el-descriptions-item label="测试机" :span="2">{{ detailData.testbox }}</el-descriptions-item>
         </el-descriptions>
@@ -25,38 +29,6 @@
         <template #default>
           <div m="4" class="job-table">
             <el-table :data="detailData?.jobList" style="width: 100%">
-              <!--
-              <el-table-column type="expand">
-                <template #default>
-                  <div m="2" class="expand-table">
-                    <el-table :data="[detailData]">
-                      <el-table-column prop="suite" width="430">
-                      </el-table-column>
-                      <el-table-column prop="result" label="job " width="100">
-                        <template #header>
-                          测试结果
-                          <el-tooltip
-                            class="box-item"
-                            effect="dark"
-                            content="Top Center prompts info"
-                            placement="top">
-                            <el-icon><QuestionFilled /></el-icon>
-                          </el-tooltip>
-                        </template>
-                        <template #default="scope">
-                          <div style="color: #43BB57;" v-if="scope.row.result=='suceesful'">
-                             Pass
-                          </div>
-                          <div style="color: #F95858;" v-if="scope.row.result=='failing'">
-                            No Pass
-                          </div>
-                        </template>
-                      </el-table-column>
-                    </el-table>
-                  </div>
-                </template>
-              </el-table-column>
-              -->
               <el-table-column prop="id" label="Job Id" width="160" fixed sortable/>
               <el-table-column prop="job_state" label="Job状态" width="110" sortable sortBy="job_state">
                 <template #default="scope">
@@ -68,12 +40,16 @@
               </el-table-column>
               <el-table-column label="开始时间" width="200" sortable sortBy="start_time">
                 <template #default="scope">
-                  {{formatDate(new Date(scope.row.start_time), 'yyyy/MM/dd hh:mm:ss')}}
+                  {{ scope.row.start_time ?
+                    formatDate(new Date(scope.row.start_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+                  }}
                 </template>
               </el-table-column>
               <el-table-column label="结束时间" width="200" sortable sortBy="end_time">
                 <template #default="scope">
-                  {{formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss')}}
+                  {{ scope.row.start_time ? 
+                    formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+                  }}
                 </template>
               </el-table-column>
               <el-table-column width="15" />
