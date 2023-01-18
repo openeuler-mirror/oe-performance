@@ -12,12 +12,17 @@
   </div>
   <div class="oe-perf-section" v-loading="searchLoading">
     <div v-if="!isSearched" class="banner-text">请搜索数据进行对比</div>
-    <result-table v-else :tjobsAll="inputData" :dimension="dimension"></result-table>
+    <result-table 
+      v-else
+      :tjobsAll="inputData"
+      :dimension="dimension"
+      :suiteControl="searchParams?.suite"
+    ></result-table>
   </div>
 </template>
     
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import ResultTable from './componets/result-table.vue'
 import { flattenObj } from '@/utils/utils'
@@ -39,13 +44,15 @@ let ejobsMap = {}
 let tjobs = {}
 
 let inputData = ref({})
+const searchParams = ref({})
 const searchLoading = ref(false)
 
 const isSearched = ref(false)
 
 // 获取jobs数据
-const onSearch = (searchParams) => {
-  getTotalData(searchParams)
+const onSearch = (params) => {
+  searchParams.value = params
+  getTotalData(params)
 }
 
 const setMustCase = (searchParams) => {

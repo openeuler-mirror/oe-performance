@@ -51,6 +51,10 @@ const props = defineProps({
   dimension: {  // 数据组织维度
     type: String,
     default: 'testbox'
+  },
+  suiteControl: {
+    type: String,
+    default: ''
   }
 })
 
@@ -68,6 +72,7 @@ const tableConfigs:Ref<any> = ref({})
 const tableDatas:Ref<any> = ref({})
 
 const generateTableConfigsAndData = (tjobs, dimension:string) => {
+  setTab()
   tableDatas.value = {}
   tableListOrder.forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
@@ -114,6 +119,14 @@ const generateTableConfigsAndData = (tjobs, dimension:string) => {
       tableDatas.value[suite][tableIndex] = tempTableDataList
     })
   })
+}
+
+const setTab = () => {
+  if (props.suiteControl) {
+    tabName.value = props.suiteControl
+  } else {
+    tabName.value = 'stream'
+  }
 }
 
 const setTableColConfig = (tempConfig, suite, tableIndex) => {
