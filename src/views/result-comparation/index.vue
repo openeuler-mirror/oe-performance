@@ -94,7 +94,7 @@ const getTotalData = (searchParams) => {
     },
   }).then(res => {
     resetData() 
-    res.data.hits.hits.filter(item => {
+    res?.data?.hits?.hits?.filter(item => {
       return item._source.stats && Object.keys(item._source.stats).length > 0
     }).forEach(item => {
       const tempFlattenItem = flattenObj(item._source)       // jobs转换成ejobs
