@@ -159,7 +159,7 @@
 // dep
 import { ref, reactive, watch, watchEffect, defineEmits } from 'vue'
 import { ElTable, ElMessage } from 'element-plus'
-import { Star, Search } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 // store
 import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 // api
@@ -301,7 +301,7 @@ const constructSubmitDataList = (jobList) => {
   })
   return submitList
 }
-
+/*
 const filterHandler = (
   value: string,
   row: User,
@@ -311,6 +311,7 @@ const filterHandler = (
   
   return row[propertyKey] === value
 }
+*/
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 
 const handleSizeChange = (val: number) => {

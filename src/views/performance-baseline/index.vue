@@ -5,7 +5,9 @@
   <div class="oe-perf-section">
     <testment-table
       :dataList="data"
-      :submitDataLoading="submitDataLoading"></testment-table>
+      :submitDataLoading="submitDataLoading"
+      @refreash="refreashData"
+    ></testment-table>
   </div>
 </template>
 
@@ -19,10 +21,16 @@ import SearchPannel from '@/views/search-pannel/index.vue'
 import { getPerformanceData } from '@/api/performance'
 
 const data = ref<any[]>([])
+const searchParams = ref({})
 const submitDataLoading = ref(false)
+
+const refreashData = () => {
+  getAllData(searchParams.value)
+}
 
 /* eslint-disable */
 const getAllData = (params: searchParams) => {
+  searchParams.value = params
   submitDataLoading.value = true
 
   const matchCases = []

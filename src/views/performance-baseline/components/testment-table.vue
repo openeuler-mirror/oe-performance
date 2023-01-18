@@ -150,7 +150,6 @@ import {
   Search,
   Setting,
   RefreshLeft,
-  MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
 import { config, sceneConfig } from '../config-file'
@@ -179,6 +178,10 @@ const props = defineProps({
     default: false
   }
 })
+
+const emit = defineEmits<{
+  (event: 'refreash'): void
+}>()
 
 const router = useRouter()
 const route = useRoute()
@@ -214,6 +217,7 @@ const checkAllColumn = ref(true)
 
 const selectedTableRows = ref(<{}[]>[])
 
+const idList = ref(<any>[])
 const currentPage = ref(1)
 const pageSize = ref(5)
 const pageSizes = ref([10, 20, 50])
@@ -222,13 +226,8 @@ const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
 
-const requestCount = ref(0) // 记录请求总是
 const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
-
-onMounted(() => {
-  initailizeColumn()
-})
 
 const initailizeColumn = () => {
   const scene = route.query.scene ? route.query.scene : 'bigData'
@@ -244,13 +243,6 @@ const initailizeColumn = () => {
     }
   }
 }
-
-watch(
-  () => route.query.scene,
-  () => {
-    initailizeColumn
-  }
-)
 
 const handlecheckAllColumn = (val: any) => {
   if (val) {
@@ -297,15 +289,6 @@ const handleSearchTable = () => {
     )
   }
 }
-watchEffect(() => {
-  if (input.value === '') {
-    tableData.value = originData
-  }
-})
-
-const handleReFresh = () => {
-  reFreshLodaing.value = !reFreshLodaing.value
-}
 
 // 获取并合并jobs的逻辑
 const getAllJobsData = (idList: any[]) => {
@@ -348,8 +331,6 @@ const getAllJobsData = (idList: any[]) => {
   return tempArr
 }
 
-const idList = ref(<any>[])
-
 const constructSubmitDataList = (jobList) => {
   const submitList = <any>[]
   const submitMap = {}
@@ -367,21 +348,6 @@ const constructSubmitDataList = (jobList) => {
   })
   return submitList
 }
-
-// 自动分页
-watchEffect(() => {
-  const startIndex = (currentPage.value - 1) * pageSize.value
-  // 数据分页
-  idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
-  total.value = props.dataList.length
-})
-
-// 当前页数据变化时，获取jobs数据
-watch(idList, () => {
-  tableData.value = getAllJobsData(idList.value)
-  originData = JSON.parse(JSON.stringify(tableData.value))
-  console.log(tableData.value)
-})
 
 const setDeviceInfoToObj = (resultObj) => {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
@@ -423,6 +389,41 @@ const handleExportCsv = () => {
     downloadBlobFile(blob, '导出.csv')
   }
 }
+
+const handleReFresh = () => {
+  emit('refreash')
+}
+
+watch(
+  () => route.query.scene,
+  () => {
+    initailizeColumn
+  }
+)
+
+watchEffect(() => {
+  if (input.value === '') {
+    tableData.value = originData
+  }
+})
+
+// 自动分页
+watchEffect(() => {
+  const startIndex = (currentPage.value - 1) * pageSize.value
+  // 数据分页
+  idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
+  total.value = props.dataList.length
+})
+
+// 当前页数据变化时，获取jobs数据
+watch(idList, () => {
+  tableData.value = getAllJobsData(idList.value)
+  originData = JSON.parse(JSON.stringify(tableData.value))
+})
+
+onMounted(() => {
+  initailizeColumn()
+})
 </script>
 
 <style scoped lang="scss">
