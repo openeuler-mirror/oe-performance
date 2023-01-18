@@ -36,6 +36,7 @@
             <el-select
               class="field-selection"
               v-model="searchParams[paramKey]"
+              filterable
               clearable
               size="small">
               <el-option
@@ -243,6 +244,7 @@ const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
       sourceArr.push(inputItem)
     }
   })
+  sourceArr.sort((prev, curv) => prev.value - curv.value)
 }
 
 const handleReset = () => {
