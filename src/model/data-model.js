@@ -30,7 +30,7 @@ export const jobModel = {
                         },
                 },
                 submit_id: {
-                        label: '提交id',
+                        label: 'Submit Id',
                         type: 'select',
                         origin: 'jobs',
                         valueSources: ['value'],

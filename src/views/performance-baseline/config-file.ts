@@ -8,12 +8,14 @@ export const columnConfig = [
   {
     label: 'CPU频率',
     prop: 'device.cpu.cpu_max_mhz',
-    show: true
+    show: true,
+    width: 100
   },
   {
     label: 'CPU总核数',
     prop: 'nr_cpu',
-    show: true
+    show: true,
+    width: 120
   },
   {
     label: 'CPU型号',
