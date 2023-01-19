@@ -31,11 +31,25 @@
             :lg="6"
             class="field-item"
             v-for="(paramKey, index) in Object.keys(subField)"
-            :key="index">
+            :key="index"
+          >
             <span>{{ `${subField[paramKey].label}:` }}</span>
+            <!--for osv group-->
+            <el-cascader
+              class="field-selection"
+              v-if="paramKey==='osv'"
+              v-model="searchParams[paramKey]"
+              :options="osvOptions"
+              size="small"
+              filterable
+              clearable
+            />
+            <!--end-->
             <el-select
+              v-else
               class="field-selection"
               v-model="searchParams[paramKey]"
+              filterable
               clearable
               size="small">
               <el-option
@@ -65,7 +79,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { suiteConfig, fieldsConfig } from './config'
+import { suiteConfig, fieldsConfiguration } from './config'
 
 import { useTestboxStore } from '@/stores/performanceData'
 
@@ -87,6 +101,8 @@ const emit = defineEmits<{
   (event: 'search', params: searchParams): void
 }>()
 
+let fieldsConfig = JSON.parse(JSON.stringify(fieldsConfiguration))
+
 const route = useRoute()
 const router = useRouter()
 const testboxStore = useTestboxStore()
@@ -102,6 +118,7 @@ const hostFieldList = [] as any // 中间数据，用来循环host类型的field
 const jobFieldList = [] as any // 中间数据，用来循环job类型的field字段
 
 const searchParams = ref({} as objectItem)
+const osvOptions =ref([])
 
 interface objectItem {
   [key: string]: string
@@ -159,7 +176,11 @@ const setFieldSelection = () => {
   Object.keys(fields).forEach(fieldKey => {
     if (fieldKeys.indexOf(fieldKey) > -1) {
       // 只添加当前选择框中存在的field选择
-      searchParams.value[fieldKey] = fields[fieldKey] as string
+      if (fieldKey === 'osv') {
+        searchParams.value[fieldKey] = fields[fieldKey].split('@')
+      } else {
+        searchParams.value[fieldKey] = fields[fieldKey] as string
+      }
     }
   })
 }
@@ -183,10 +204,26 @@ const setDefaultSuite = () => {
   }
 }
 
+// 切换suite时，重新获取fields的可选值
+watch(
+  () => searchParams.value.suite,
+  () => {
+    if (props.suiteByScene) {
+      fieldsConfig = JSON.parse(JSON.stringify(fieldsConfiguration))
+      fieldsListForRender.value = initailizefieldsList()
+      getFieldsOptions()
+      getHostOptions()
+    }
+  }
+)
+
 // 获取搜索条件
 const getFieldsOptions = () => {
   fieldLoadingCount.value ++
-  getJobValueList({ jobFieldList }).then(res => {
+  getJobValueList({
+    jobFieldList,
+    byScene: props.suiteByScene && searchParams.value.suite
+  }).then(res => {
     const aggs = res.data.aggregations || {}
     Object.keys(aggs).forEach(field => {
       // 通过请求获取的可选项
@@ -196,12 +233,54 @@ const getFieldsOptions = () => {
         }
       })
       // default可选项
+      console.log(11,fieldsConfig)
       const staticValues = fieldsConfig[field].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
+      if (field === 'osv') {
+        constrcutOsvOptions(staticValues)
+      }
     })
   }).finally(() => {
     fieldLoadingCount.value --
   })
+}
+
+// 设置osv 分组选项
+const constrcutOsvOptions = (osvList) => {
+  if (!osvList || osvList.length < 1) return
+  const osMap = {}
+  const osvListNew = []
+  osvList.forEach((osv:string) => {
+    const osParams = osv?.value.split('@')
+    const os = osParams[0]
+    let osLabel = os
+    const version = osParams[1]
+    let versionLabel = version
+    // 如果有自定义的系统名
+    if (osv.label) {
+      if (version) {
+        const tempLabel = osv.label.split(' ')
+        osLabel = tempLabel.slice(0, tempLabel.length -1).join(' ')
+        versionLabel = tempLabel[tempLabel.length -1]
+      } else {
+        osLabel = osv.label
+      }
+    }
+    if (osMap[os]) {
+      const oldChildren = osMap[os].children
+      if (!oldChildren) return
+      if (!oldChildren.find(item => item.value === version)) {
+        oldChildren.push({ value: version, label: versionLabel })
+      }
+    } else {
+      osMap[os] = { value: os, label: osLabel }
+      if (version) {
+        osMap[os].children = [{ value: version, label: versionLabel }]
+      }
+    }
+  })
+  Object.keys(osMap).forEach(os => { osvListNew.push(osMap[os]) })
+  osvOptions.value = osvListNew
 }
 // 获取主机相关搜索条件。
 const getHostOptions = () => {
@@ -243,6 +322,7 @@ const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
       sourceArr.push(inputItem)
     }
   })
+  sourceArr.sort((prev, curv) => prev.value - curv.value)
 }
 
 const handleReset = () => {
@@ -257,20 +337,25 @@ const handleSearch = () => {
   // 记录查询条件到url上
   setQueryToUrl()
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
+  // osv特殊处理
+  if (jobParams.osv) {
+    jobParams.osv = jobParams.osv.join('@')
+  }
+
   if (Object.keys(hostParams).length > 0) {
     const testboxSearchList = []
     Object.keys(hostParams).forEach(hostFieldKey => {
       const tempKey = hostFieldKey.replace('hw.', '')
       const tempIdList = testboxList.value.filter(testbox => {
-        return testbox[tempKey] && testbox[tempKey] === hostParams[hostFieldKey]})
+        return testbox[tempKey] && String(testbox[tempKey]) === String(hostParams[hostFieldKey])})
         .map(testbox => testbox.testboxId)
       testboxSearchList.push(...tempIdList)
     })
-    const searchParams = { ...jobParams }
-    if (testboxSearchList.length > 0) {
-      searchParams.testboxByParams = testboxSearchList
+    const searchParamData = { ...jobParams }
+    if (testboxSearchList.length > 0 && !searchParamData.testbox) { // 当testbox存在时，说明用户指定了testboxId，此时使用硬件的筛选没有意义了
+      searchParamData.testbox = testboxSearchList
     }
-    emit('search', searchParams)
+    emit('search', searchParamData)
   } else {
     emit('search', jobParams)
   }
@@ -281,6 +366,10 @@ const setQueryToUrl = () => {
   const newQuery = {} as objectItem
   Object.keys(searchParams.value).forEach(field => {
     searchParams.value[field] && (newQuery[field] = searchParams.value[field])
+    // osv值拼接
+    if (field === 'osv' && searchParams.value[field]) {
+      newQuery[field] = searchParams.value[field].join('@')
+    }
   })
   newQuery['scene'] = route.query.scene as string
   router.push({
@@ -349,6 +438,12 @@ onMounted(() => {
     }
     .field-selection {
       position: absolute;
+      right: 20px;
+      width: 60%;
+    }
+    :deep(.el-cascader) {
+      position: absolute;
+      display: inline-flex;
       right: 20px;
       width: 60%;
     }

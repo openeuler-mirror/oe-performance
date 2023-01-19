@@ -12,12 +12,17 @@
   </div>
   <div class="oe-perf-section" v-loading="searchLoading">
     <div v-if="!isSearched" class="banner-text">请搜索数据进行对比</div>
-    <result-table v-else :tjobsAll="inputData" :dimension="dimension"></result-table>
+    <result-table 
+      v-else
+      :tjobsAll="inputData"
+      :dimension="dimension"
+      :suiteControl="searchParams?.suite"
+    ></result-table>
   </div>
 </template>
     
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import ResultTable from './componets/result-table.vue'
 import { flattenObj } from '@/utils/utils'
@@ -39,21 +44,29 @@ let ejobsMap = {}
 let tjobs = {}
 
 let inputData = ref({})
+const searchParams = ref({})
 const searchLoading = ref(false)
 
 const isSearched = ref(false)
 
 // 获取jobs数据
-const onSearch = (searchParams) => {
-  getTotalData(searchParams)
+const onSearch = (params) => {
+  searchParams.value = params
+  getTotalData(params)
 }
 
 const setMustCase = (searchParams) => {
   const tempArr = []
   Object.keys(searchParams).forEach(paramKey => {
     if (searchParams[paramKey]) {
-      if (paramKey === 'testboxByParams') {
-        tempArr.push( { terms: { testbox: searchParams[paramKey] } } )
+      if (paramKey === 'testbox') {
+        if (typeof searchParams[paramKey] === 'string') {
+          // 用户指定testbox
+          tempArr.push( { match: { testbox: searchParams[paramKey] } } )
+        } else {
+          // 用户通过硬件配置过滤
+          tempArr.push( { terms: { testbox: searchParams[paramKey] } } )
+        }
       } else {
         const matchObj = {}
         matchObj[paramKey] = searchParams[paramKey]
@@ -87,7 +100,7 @@ const getTotalData = (searchParams) => {
     },
   }).then(res => {
     resetData() 
-    res.data.hits.hits.filter(item => {
+    res?.data?.hits?.hits?.filter(item => {
       return item._source.stats && Object.keys(item._source.stats).length > 0
     }).forEach(item => {
       const tempFlattenItem = flattenObj(item._source)       // jobs转换成ejobs

@@ -1,12 +1,16 @@
 <template>
    <el-row class="control-row">
      <el-col :span="24">
-         <el-radio-group class="job-state-list">
-            <el-radio-button label="1">全部Job({{ healthState.allState }})</el-radio-button>
-            <el-radio-button label="4">Finished({{ healthState.finished }})</el-radio-button>
-            <el-radio-button label="5">Fail({{ healthState.failed }})</el-radio-button>
-            <el-radio-button label="3">Running({{ healthState.running }})</el-radio-button>
-            <el-radio-button label="2">Others({{ healthState.others }})</el-radio-button>
+         <el-radio-group
+          class="job-state-list"
+          v-model="stateFilter"
+          @change="handleStateFiltering"
+        >
+            <el-radio-button label="">全部Job({{ healthState.allState }})</el-radio-button>
+            <el-radio-button label="finished">Finished({{ healthState.finished }})</el-radio-button>
+            <el-radio-button label="failed">Failed({{ healthState.failed }})</el-radio-button>
+            <el-radio-button label="running">Running({{ healthState.running }})</el-radio-button>
+            <el-radio-button label="others">Others({{ healthState.others }})</el-radio-button>
          </el-radio-group>
      </el-col>
     </el-row>
@@ -15,7 +19,7 @@
         <el-input
           v-model="searchValue"
           placeholder="搜索范围"
-          class="input-with-select"
+          class="oe-input-with-select"
           @keyup.enter="onSearch"
           :disabled="tableLoading"
         >
@@ -130,7 +134,7 @@
        </el-table-column>
        <el-table-column label="完成时间" min-width="170">
          <template #default="scope">
-           {{ scope.row.submit_time && formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') }}
+           {{ scope.row.end_time && formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') }}
          </template>
        </el-table-column>
        <!--
@@ -159,7 +163,7 @@
 // dep
 import { ref, reactive, watch, watchEffect, defineEmits } from 'vue'
 import { ElTable, ElMessage } from 'element-plus'
-import { Star, Search } from '@element-plus/icons-vue'
+import { Search } from '@element-plus/icons-vue'
 // store
 import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 // api
@@ -186,12 +190,19 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits<{
+  (event: 'search', searchKey: string, searchValue: string): void
+  (event: 'stateFilterChange', stateFilterValue: string): void
+}>()
+
 const performanceStore = usePerformanceData()
 const testboxStore = useTestboxStore()
 
 const idList = ref(<any>[])
 const tableData = ref([])
 const tableLoading = ref(false)
+
+const stateFilter = ref('')
 
 // 分页参数
 const currentPage = ref(1)
@@ -202,13 +213,13 @@ const total = ref(0)
 const searchSelection = ref('taskId')
 const searchValue = ref('')
 
-const emit = defineEmits<{
-  (event: 'search', searchKey: string, searchValue: string): void
-}>()
-
 const onSearch = () => {
   emit('search', searchSelection.value, searchValue.value)
   currentPage.value = 1
+}
+
+const handleStateFiltering = () => {
+  emit('stateFilterChange', stateFilter.value)
 }
 
 // 根据pagination自动分页
@@ -224,20 +235,7 @@ watchEffect(() => {
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
 })
-/**
-       * 'query': {
-      size: 10000,
-      'query': {
-        constant_score : {
-          filter : {
-            terms : { 
-              submit_id : idList.map(item => item.submit_id)
-            }
-          }
-        }
-      },
-    },
-       */
+
 const getAllJobsData = (idList: any[]) => {
   tableLoading.value = true
   const tempArr: any[] = reactive(Object.assign([], idList))
@@ -246,7 +244,8 @@ const getAllJobsData = (idList: any[]) => {
     'query': {
       size: 10000,
       _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
-        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time'
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time',
+        'my_account', 'group_id'
       ],
       'query': {
         constant_score : {
@@ -301,7 +300,7 @@ const constructSubmitDataList = (jobList) => {
   })
   return submitList
 }
-
+/*
 const filterHandler = (
   value: string,
   row: User,
@@ -311,6 +310,7 @@ const filterHandler = (
   
   return row[propertyKey] === value
 }
+*/
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 
 const handleSizeChange = (val: number) => {
@@ -324,12 +324,6 @@ const handleCurrentChange = (val: number) => {
 <style lang="scss" scoped>
 .control-row {
   margin-bottom:8px;
-}
-
-.job-state-list {
-  :deep(.el-radio-button__inner) {
-    cursor: default;
-  }
 }
 
 .state-counts {

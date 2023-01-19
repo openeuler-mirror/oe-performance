@@ -24,7 +24,7 @@ const option = function(title:string, data:any[], cases:string[]){
     tooltip: {
       trigger: 'axis'
     },
-    color: ['#00c853','#2979ff','#1e88e5','#29b6f6','#90caf9'],
+    // color: ['#00c853','#2979ff','#1e88e5','#29b6f6','#90caf9'],
     legend: {
       x:'center',
       y: 'bottom',

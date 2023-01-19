@@ -29,6 +29,7 @@ export const jobModel = {
                                 ]
                         },
                 },
+                /*
                 submit_id: {
                         label: '提交id',
                         type: 'select',
@@ -38,6 +39,7 @@ export const jobModel = {
                                 listValues: [], // 查询jobs后动态赋值
                         },
                 },
+                */
                 group_id: {
                         label: '批次id',
                         type: 'select',

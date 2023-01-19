@@ -8,7 +8,7 @@ const option = function(title:string, data:any[], cases:string[]){
       {
         name: item['dimensionId'],
         type: 'bar',
-        stack: 'total',
+        // stack: 'total',
         label: {
           show: true
         },
@@ -34,7 +34,7 @@ const option = function(title:string, data:any[], cases:string[]){
         type: 'shadow'
       }
     },
-    color: ['#00c853','#2979ff','#1e88e5','#29b6f6','#90caf9'],  
+    // color: ['#00c853','#2979ff','#1e88e5','#29b6f6','#90caf9'],  
     legend: {
       x:'center',
       y: 'bottom',

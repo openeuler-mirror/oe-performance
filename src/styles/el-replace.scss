@@ -13,14 +13,6 @@
     --el-button-active-bg-color: var(--oe-perf-color-third);
     --el-button-active-border-color: var(--oe-perf-color-third);
   }
-  &:focus {
-    background: var(--oe-perf-color-primary);
-    border-color: var(--oe-perf-color-primary);
-  }
-  &:active {
-    background: var(--oe-perf-color-third);
-    border-color: var(--oe-perf-color-third);
-  }
 }
 
 //tab
@@ -34,7 +26,7 @@
 }
 
 //input
-.input-with-select {
+.oe-input-with-select {
   .el-input-group__append {
     background-color: var(--el-fill-color-blank);
   }

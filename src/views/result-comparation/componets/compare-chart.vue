@@ -38,7 +38,7 @@ watch(() => props.chartData, (newVal) => {
       {
         name: item['dimensionId'],
         type: 'bar',
-        stack: 'total',
+        // stack: 'total',
         label: {
           show: true
         },

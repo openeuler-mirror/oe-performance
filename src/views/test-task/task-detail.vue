@@ -88,7 +88,6 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Result } from './interface'
 import TaskDoughnut from './components/task-doughnut.vue';
 
 import { getPerformanceData, getTestBoxes } from '@/api/performance'

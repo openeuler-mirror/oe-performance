@@ -4,7 +4,7 @@ export interface configObject {
   [key: string]: any
 }
 
-export const fieldsConfig = Object.assign({}, jobModel.fields) as configObject
+export const fieldsConfiguration = Object.assign({}, jobModel.fields) as configObject
 
 // 根据场景，可选择不同的套件进行查询
 // 只在性能基线页面中使用

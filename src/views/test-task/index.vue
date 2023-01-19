@@ -14,6 +14,7 @@
       :healthState="healthState"
       :parentLoading="dataLoading"
       @search="handleSearch"
+      @state-filter-change="handleStateFiltering"
     ></TaskTable>
   </div>
  </el-card>
@@ -34,6 +35,8 @@ const activeName = ref('allTask')
 const dataList = ref([])
 const dataLoading = ref(false)
 const healthState = ref({})
+
+const jobStateFilter = ref('')
 
 const searchKey = ref('submit_id')
 const searchValue = ref('')
@@ -63,9 +66,15 @@ const handleSearch = (searchK:string, searchV:string) => {
   getDataList(activeName.value)
 }
 
+const handleStateFiltering = (jobState: string) => {
+  jobStateFilter.value = jobState
+  getDataList(activeName.value)
+}
+
 const getDataList = (type: string) => {
   dataLoading.value = true
   // 组织搜索条件
+  const boolObj = {}
   const mustList = []
   mustList.push({ 'range': {'time': {'gte': 'now-10d/d'} } })
   if (searchValue.value) {
@@ -73,15 +82,21 @@ const getDataList = (type: string) => {
     searchObj[searchKey.value] = searchValue.value
     mustList.push({ fuzzy: searchObj })
   }
+  if (jobStateFilter.value) {
+    if (jobStateFilter.value === 'others') {
+      boolObj.must_not = [ { terms: { job_state: ['finished', 'failed', 'running'] } } ]
+    } else {
+      mustList.push({ match: { job_state: jobStateFilter.value } })
+    }
+  }
+  boolObj.must = mustList
   // 获取选择的套件下的submitID list
   getPerformanceData({
     'index': 'jobs',
     'query': {
       size: 1,
       'query': {
-        bool: {
-          must: mustList,
-        },
+        bool: boolObj,
       },
       aggs: {
         jobs_terms: {

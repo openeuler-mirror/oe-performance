@@ -72,8 +72,13 @@ interface Aggs {
   [propName: string]: any
 }
 export function getJobValueList(params:any) {
-  const { jobFieldList } = params
+  const { jobFieldList, byScene } = params
   const aggs: Aggs = {}
+  const mustArr = []
+  mustArr.push({ range: { time: { gte: 'now-10d/d' } } })
+  if (byScene) {
+    mustArr.push({ match: { suite: byScene } })
+  }
   jobFieldList.forEach((field:string) => {
     if (field === 'tags') return // 只要包含tag就会全部返回空
     aggs[field] = {
@@ -87,11 +92,9 @@ export function getJobValueList(params:any) {
   const query = {
     size: 10,
     query: {
-      range: {
-        time: {
-          gte: 'now-10d/d'
-        }
-      }
+      bool: {
+        must: mustArr
+      } 
     },
     aggs
   }

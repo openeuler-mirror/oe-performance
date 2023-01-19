@@ -16,21 +16,24 @@
         >
       </div>
       <el-input
-        v-model="input"
+        class="oe-input-with-select table-searcher"
+        v-model="searcherValue"
         placeholder="请输入搜索内容"
-        clearable
-        class="input-with-select">
+        clearable>
         <template #prepend>
           <el-select
-            clearable
-            v-model="selectedOption"
+            class="searcher-selector"
+            v-model="searcherKey"
             placeholder="搜索条件"
-            class="select">
+            clearable
+          >
             <el-option
-              v-for="item in selectOptions"
+              v-for="item in searcherOptions"
               :key="item.value"
               :label="item.label"
-              :value="item.value" />
+              :value="item.value"
+              :disabled="item.disabled"
+              />
           </el-select>
         </template>
         <template #append>
@@ -150,7 +153,6 @@ import {
   Search,
   Setting,
   RefreshLeft,
-  MoreFilled,
   WarningFilled
 } from '@element-plus/icons-vue'
 import { config, sceneConfig } from '../config-file'
@@ -180,25 +182,32 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits<{
+  (event: 'refreash'): void
+  (event: 'tableSearch', searchKey: string, searchValue: string): void
+}>()
+
 const router = useRouter()
 const route = useRoute()
 const performanceStore = usePerformanceData()
 const testboxStore = useTestboxStore()
 
-const input = ref('')
-const selectedOption = ref('')
-const selectOptions = [
-  {
-    label: '测试用例',
-    value: 'submit_id'
-  },
-  {
-    label: '任务名称',
-    value: 'missionName'
-  },
+const searcherValue = ref('')
+const searcherKey = ref('my_account')
+const searcherOptions = [
   {
     label: '测试人',
     value: 'my_account'
+  },
+  {
+    label: '测试用例',
+    value: 'submit_id',
+    disabled: true // 该属性未录入数据库
+  },
+  {
+    label: '任务名称',
+    value: 'missionName',
+    disabled: true // 该属性未录入数据库
   }
 ]
 
@@ -214,6 +223,7 @@ const checkAllColumn = ref(true)
 
 const selectedTableRows = ref(<{}[]>[])
 
+const idList = ref(<any>[])
 const currentPage = ref(1)
 const pageSize = ref(5)
 const pageSizes = ref([10, 20, 50])
@@ -222,13 +232,8 @@ const small = ref(false)
 const background = ref(false)
 const disabled = ref(false)
 
-const requestCount = ref(0) // 记录请求总是
 const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
-
-onMounted(() => {
-  initailizeColumn()
-})
 
 const initailizeColumn = () => {
   const scene = route.query.scene ? route.query.scene : 'bigData'
@@ -244,13 +249,6 @@ const initailizeColumn = () => {
     }
   }
 }
-
-watch(
-  () => route.query.scene,
-  () => {
-    initailizeColumn
-  }
-)
 
 const handlecheckAllColumn = (val: any) => {
   if (val) {
@@ -278,33 +276,25 @@ const handleCheckedTableCloumn = (value: any[]) => {
 
 const handleSelectionChange = (selectedRow: any) => {
   selectedTableRows.value = selectedRow
-  console.log(selectedTableRows.value)
 }
 
 const handleSearchTable = () => {
-  console.log(originData)
-  if (selectedOption.value === '') {
+  if (searcherKey.value === '') {
     ElMessage('请选择搜索条件！')
-  } else if (input.value === '') {
-    ElMessage('请输入搜索内容！')
-  } else {
-    tableData.value = originData.filter(
-      data =>
-        !input.value ||
-        data[selectedOption.value]
-          .toLowerCase()
-          .includes(input.value.toLowerCase())
-    )
-  }
-}
-watchEffect(() => {
-  if (input.value === '') {
-    tableData.value = originData
-  }
-})
-
-const handleReFresh = () => {
-  reFreshLodaing.value = !reFreshLodaing.value
+    return
+  } 
+  emit('tableSearch', searcherKey.value, searcherValue.value)
+  // else if (searcherValue.value === '') {
+  //   ElMessage('请输入搜索内容！')
+  // } else {
+  //   tableData.value = originData.filter(
+  //     data =>
+  //       !searcherValue.value ||
+  //       data[searcherKey.value]
+  //         .toLowerCase()
+  //         .includes(searcherValue.value.toLowerCase())
+  //   )
+  // }
 }
 
 // 获取并合并jobs的逻辑
@@ -316,7 +306,8 @@ const getAllJobsData = (idList: any[]) => {
     'query': {
       size: 10000,
       _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
-        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time'
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time',
+        'my_account', 'group_id'
       ],
       'query': {
         constant_score : {
@@ -348,8 +339,6 @@ const getAllJobsData = (idList: any[]) => {
   return tempArr
 }
 
-const idList = ref(<any>[])
-
 const constructSubmitDataList = (jobList) => {
   const submitList = <any>[]
   const submitMap = {}
@@ -367,21 +356,6 @@ const constructSubmitDataList = (jobList) => {
   })
   return submitList
 }
-
-// 自动分页
-watchEffect(() => {
-  const startIndex = (currentPage.value - 1) * pageSize.value
-  // 数据分页
-  idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
-  total.value = props.dataList.length
-})
-
-// 当前页数据变化时，获取jobs数据
-watch(idList, () => {
-  tableData.value = getAllJobsData(idList.value)
-  originData = JSON.parse(JSON.stringify(tableData.value))
-  console.log(tableData.value)
-})
 
 const setDeviceInfoToObj = (resultObj) => {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
@@ -423,6 +397,41 @@ const handleExportCsv = () => {
     downloadBlobFile(blob, '导出.csv')
   }
 }
+
+const handleReFresh = () => {
+  emit('refreash')
+}
+
+watch(
+  () => route.query.scene,
+  () => {
+    initailizeColumn
+  }
+)
+
+// watchEffect(() => {
+//   if (searcherValue.value === '') {
+//     tableData.value = originData
+//   }
+// })
+
+// 自动分页
+watchEffect(() => {
+  const startIndex = (currentPage.value - 1) * pageSize.value
+  // 数据分页
+  idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
+  total.value = props.dataList.length
+})
+
+// 当前页数据变化时，获取jobs数据
+watch(idList, () => {
+  tableData.value = getAllJobsData(idList.value)
+  originData = JSON.parse(JSON.stringify(tableData.value))
+})
+
+onMounted(() => {
+  initailizeColumn()
+})
 </script>
 
 <style scoped lang="scss">
@@ -441,14 +450,14 @@ a {
     }
   }
 
-  .input-with-select {
+  .table-searcher {
     margin: 10px 0 10px 0;
     min-width: 250px;
     width: 35%;
     max-height: 32px;
-  }
-  .select {
-    width: 100px;
+    .searcher-selector {
+      width: 100px;
+    }
   }
   .button-group-right {
     .more-button {
