@@ -15,7 +15,7 @@
         <el-input
           v-model="searchValue"
           placeholder="搜索范围"
-          class="input-with-select"
+          class="oe-input-with-select"
           @keyup.enter="onSearch"
           :disabled="tableLoading"
         >

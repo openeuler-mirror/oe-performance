@@ -16,21 +16,24 @@
         >
       </div>
       <el-input
-        v-model="input"
+        class="oe-input-with-select table-searcher"
+        v-model="searcherValue"
         placeholder="请输入搜索内容"
-        clearable
-        class="input-with-select">
+        clearable>
         <template #prepend>
           <el-select
-            clearable
-            v-model="selectedOption"
+            class="searcher-selector"
+            v-model="searcherKey"
             placeholder="搜索条件"
-            class="select">
+            clearable
+          >
             <el-option
-              v-for="item in selectOptions"
+              v-for="item in searcherOptions"
               :key="item.value"
               :label="item.label"
-              :value="item.value" />
+              :value="item.value"
+              :disabled="item.disabled"
+              />
           </el-select>
         </template>
         <template #append>
@@ -181,6 +184,7 @@ const props = defineProps({
 
 const emit = defineEmits<{
   (event: 'refreash'): void
+  (event: 'tableSearch', searchKey: string, searchValue: string): void
 }>()
 
 const router = useRouter()
@@ -188,20 +192,22 @@ const route = useRoute()
 const performanceStore = usePerformanceData()
 const testboxStore = useTestboxStore()
 
-const input = ref('')
-const selectedOption = ref('')
-const selectOptions = [
-  {
-    label: '测试用例',
-    value: 'submit_id'
-  },
-  {
-    label: '任务名称',
-    value: 'missionName'
-  },
+const searcherValue = ref('')
+const searcherKey = ref('my_account')
+const searcherOptions = [
   {
     label: '测试人',
     value: 'my_account'
+  },
+  {
+    label: '测试用例',
+    value: 'submit_id',
+    disabled: true // 该属性未录入数据库
+  },
+  {
+    label: '任务名称',
+    value: 'missionName',
+    disabled: true // 该属性未录入数据库
   }
 ]
 
@@ -270,24 +276,25 @@ const handleCheckedTableCloumn = (value: any[]) => {
 
 const handleSelectionChange = (selectedRow: any) => {
   selectedTableRows.value = selectedRow
-  console.log(selectedTableRows.value)
 }
 
 const handleSearchTable = () => {
-  console.log(originData)
-  if (selectedOption.value === '') {
+  if (searcherKey.value === '') {
     ElMessage('请选择搜索条件！')
-  } else if (input.value === '') {
-    ElMessage('请输入搜索内容！')
-  } else {
-    tableData.value = originData.filter(
-      data =>
-        !input.value ||
-        data[selectedOption.value]
-          .toLowerCase()
-          .includes(input.value.toLowerCase())
-    )
-  }
+    return
+  } 
+  emit('tableSearch', searcherKey.value, searcherValue.value)
+  // else if (searcherValue.value === '') {
+  //   ElMessage('请输入搜索内容！')
+  // } else {
+  //   tableData.value = originData.filter(
+  //     data =>
+  //       !searcherValue.value ||
+  //       data[searcherKey.value]
+  //         .toLowerCase()
+  //         .includes(searcherValue.value.toLowerCase())
+  //   )
+  // }
 }
 
 // 获取并合并jobs的逻辑
@@ -402,11 +409,11 @@ watch(
   }
 )
 
-watchEffect(() => {
-  if (input.value === '') {
-    tableData.value = originData
-  }
-})
+// watchEffect(() => {
+//   if (searcherValue.value === '') {
+//     tableData.value = originData
+//   }
+// })
 
 // 自动分页
 watchEffect(() => {
@@ -443,14 +450,14 @@ a {
     }
   }
 
-  .input-with-select {
+  .table-searcher {
     margin: 10px 0 10px 0;
     min-width: 250px;
     width: 35%;
     max-height: 32px;
-  }
-  .select {
-    width: 100px;
+    .searcher-selector {
+      width: 100px;
+    }
   }
   .button-group-right {
     .more-button {

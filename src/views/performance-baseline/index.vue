@@ -6,6 +6,7 @@
     <testment-table
       :dataList="data"
       :submitDataLoading="submitDataLoading"
+      @tableSearch="handleTableSearch"
       @refreash="refreashData"
     ></testment-table>
   </div>
@@ -22,9 +23,18 @@ import { getPerformanceData } from '@/api/performance'
 
 const data = ref<any[]>([])
 const searchParams = ref({})
+const tableSearchParams = ref({})
 const submitDataLoading = ref(false)
 
 const refreashData = () => {
+  getAllData(searchParams.value)
+}
+
+const handleTableSearch = (searchKey, searchValue) => {
+  tableSearchParams.value = {
+    searchKey,
+    searchValue
+  }
   getAllData(searchParams.value)
 }
 
@@ -39,11 +49,14 @@ const getAllData = (params: searchParams) => {
     if (params[paramKey]) {
       const matchObj = {}
       matchObj[paramKey] = params[paramKey]
-      matchCases.push({
-        match: matchObj
-      })
+      matchCases.push({ match: matchObj })
     }
   })
+  if (tableSearchParams.value.searchValue) {
+    const matchObj = {}
+    matchObj[tableSearchParams.value.searchKey] = tableSearchParams.value.searchValue
+    matchCases.push({ match: matchObj })
+  }
 
   matchCases.push({ match: {job_state: 'finished'} })
   matchCases.push({ range: { time: { gte: 'now-10d/d' } } })
