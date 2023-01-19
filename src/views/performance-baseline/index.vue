@@ -38,20 +38,33 @@ const handleTableSearch = (searchKey, searchValue) => {
   getAllData(searchParams.value)
 }
 
-/* eslint-disable */
+const setMustCase = (searchParams) => {
+  const tempArr = []
+  Object.keys(searchParams).forEach(paramKey => {
+    if (searchParams[paramKey]) {
+      if (paramKey === 'testbox') {
+        if (typeof searchParams[paramKey] === 'string') {
+          // 用户指定testbox
+          tempArr.push( { match: { testbox: searchParams[paramKey] } } )
+        } else {
+          // 用户通过硬件配置过滤
+          tempArr.push( { terms: { testbox: searchParams[paramKey] } } )
+        }
+      } else {
+        const matchObj = {}
+        matchObj[paramKey] = searchParams[paramKey]
+        tempArr.push({ match: matchObj })
+      }
+    }
+  })
+  return tempArr
+}
+
 const getAllData = (params: searchParams) => {
   searchParams.value = params
   submitDataLoading.value = true
 
-  const matchCases = []
-  // 组织选择参数为es QUERY的请求格式
-  Object.keys(params).forEach(paramKey => {
-    if (params[paramKey]) {
-      const matchObj = {}
-      matchObj[paramKey] = params[paramKey]
-      matchCases.push({ match: matchObj })
-    }
-  })
+  const matchCases = setMustCase(params)
   if (tableSearchParams.value.searchValue) {
     const matchObj = {}
     matchObj[tableSearchParams.value.searchKey] = tableSearchParams.value.searchValue

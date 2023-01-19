@@ -59,8 +59,14 @@ const setMustCase = (searchParams) => {
   const tempArr = []
   Object.keys(searchParams).forEach(paramKey => {
     if (searchParams[paramKey]) {
-      if (paramKey === 'testboxByParams') {
-        tempArr.push( { terms: { testbox: searchParams[paramKey] } } )
+      if (paramKey === 'testbox') {
+        if (typeof searchParams[paramKey] === 'string') {
+          // 用户指定testbox
+          tempArr.push( { match: { testbox: searchParams[paramKey] } } )
+        } else {
+          // 用户通过硬件配置过滤
+          tempArr.push( { terms: { testbox: searchParams[paramKey] } } )
+        }
       } else {
         const matchObj = {}
         matchObj[paramKey] = searchParams[paramKey]

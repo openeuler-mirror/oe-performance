@@ -226,6 +226,7 @@ const getFieldsOptions = () => {
   })
 }
 
+// 设置osv 分组选项
 const constrcutOsvOptions = (osvList) => {
   if (!osvList || osvList.length < 1) return
   const osMap = {}
@@ -327,15 +328,15 @@ const handleSearch = () => {
     Object.keys(hostParams).forEach(hostFieldKey => {
       const tempKey = hostFieldKey.replace('hw.', '')
       const tempIdList = testboxList.value.filter(testbox => {
-        return testbox[tempKey] && testbox[tempKey] === hostParams[hostFieldKey]})
+        return testbox[tempKey] && String(testbox[tempKey]) === String(hostParams[hostFieldKey])})
         .map(testbox => testbox.testboxId)
       testboxSearchList.push(...tempIdList)
     })
-    const searchParams = { ...jobParams }
-    if (testboxSearchList.length > 0) {
-      searchParams.testboxByParams = testboxSearchList
+    const searchParamData = { ...jobParams }
+    if (testboxSearchList.length > 0 && !searchParamData.testbox) { // 当testbox存在时，说明用户指定了testboxId，此时使用硬件的筛选没有意义了
+      searchParamData.testbox = testboxSearchList
     }
-    emit('search', searchParams)
+    emit('search', searchParamData)
   } else {
     emit('search', jobParams)
   }
