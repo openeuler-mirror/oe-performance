@@ -1,12 +1,16 @@
 <template>
    <el-row class="control-row">
      <el-col :span="24">
-         <el-radio-group class="job-state-list">
-            <el-radio-button label="1">全部Job({{ healthState.allState }})</el-radio-button>
-            <el-radio-button label="4">Finished({{ healthState.finished }})</el-radio-button>
-            <el-radio-button label="5">Fail({{ healthState.failed }})</el-radio-button>
-            <el-radio-button label="3">Running({{ healthState.running }})</el-radio-button>
-            <el-radio-button label="2">Others({{ healthState.others }})</el-radio-button>
+         <el-radio-group
+          class="job-state-list"
+          v-model="stateFilter"
+          @change="handleStateFiltering"
+        >
+            <el-radio-button label="">全部Job({{ healthState.allState }})</el-radio-button>
+            <el-radio-button label="finished">Finished({{ healthState.finished }})</el-radio-button>
+            <el-radio-button label="failed">Failed({{ healthState.failed }})</el-radio-button>
+            <el-radio-button label="running">Running({{ healthState.running }})</el-radio-button>
+            <el-radio-button label="others">Others({{ healthState.others }})</el-radio-button>
          </el-radio-group>
      </el-col>
     </el-row>
@@ -186,12 +190,19 @@ const props = defineProps({
   }
 })
 
+const emit = defineEmits<{
+  (event: 'search', searchKey: string, searchValue: string): void
+  (event: 'stateFilterChange', stateFilterValue: string): void
+}>()
+
 const performanceStore = usePerformanceData()
 const testboxStore = useTestboxStore()
 
 const idList = ref(<any>[])
 const tableData = ref([])
 const tableLoading = ref(false)
+
+const stateFilter = ref('')
 
 // 分页参数
 const currentPage = ref(1)
@@ -202,13 +213,13 @@ const total = ref(0)
 const searchSelection = ref('taskId')
 const searchValue = ref('')
 
-const emit = defineEmits<{
-  (event: 'search', searchKey: string, searchValue: string): void
-}>()
-
 const onSearch = () => {
   emit('search', searchSelection.value, searchValue.value)
   currentPage.value = 1
+}
+
+const handleStateFiltering = () => {
+  emit('stateFilterChange', stateFilter.value)
 }
 
 // 根据pagination自动分页
@@ -224,20 +235,7 @@ watchEffect(() => {
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
 })
-/**
-       * 'query': {
-      size: 10000,
-      'query': {
-        constant_score : {
-          filter : {
-            terms : { 
-              submit_id : idList.map(item => item.submit_id)
-            }
-          }
-        }
-      },
-    },
-       */
+
 const getAllJobsData = (idList: any[]) => {
   tableLoading.value = true
   const tempArr: any[] = reactive(Object.assign([], idList))
@@ -325,12 +323,6 @@ const handleCurrentChange = (val: number) => {
 <style lang="scss" scoped>
 .control-row {
   margin-bottom:8px;
-}
-
-.job-state-list {
-  :deep(.el-radio-button__inner) {
-    cursor: default;
-  }
 }
 
 .state-counts {
