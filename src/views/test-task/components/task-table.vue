@@ -134,7 +134,7 @@
        </el-table-column>
        <el-table-column label="完成时间" min-width="170">
          <template #default="scope">
-           {{ scope.row.submit_time && formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') }}
+           {{ scope.row.end_time && formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') }}
          </template>
        </el-table-column>
        <!--
@@ -244,7 +244,8 @@ const getAllJobsData = (idList: any[]) => {
     'query': {
       size: 10000,
       _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
-        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time'
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time',
+        'my_account', 'group_id'
       ],
       'query': {
         constant_score : {

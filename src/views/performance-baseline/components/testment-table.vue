@@ -307,7 +307,7 @@ const getAllJobsData = (idList: any[]) => {
       size: 10000,
       _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
         'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time',
-        'my_account'
+        'my_account', 'group_id'
       ],
       'query': {
         constant_score : {

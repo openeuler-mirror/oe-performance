@@ -79,7 +79,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { suiteConfig, fieldsConfig } from './config'
+import { suiteConfig, fieldsConfiguration } from './config'
 
 import { useTestboxStore } from '@/stores/performanceData'
 
@@ -100,6 +100,8 @@ const props = defineProps({
 const emit = defineEmits<{
   (event: 'search', params: searchParams): void
 }>()
+
+let fieldsConfig = JSON.parse(JSON.stringify(fieldsConfiguration))
 
 const route = useRoute()
 const router = useRouter()
@@ -202,10 +204,26 @@ const setDefaultSuite = () => {
   }
 }
 
+// 切换suite时，重新获取fields的可选值
+watch(
+  () => searchParams.value.suite,
+  () => {
+    if (props.suiteByScene) {
+      fieldsConfig = JSON.parse(JSON.stringify(fieldsConfiguration))
+      fieldsListForRender.value = initailizefieldsList()
+      getFieldsOptions()
+      getHostOptions()
+    }
+  }
+)
+
 // 获取搜索条件
 const getFieldsOptions = () => {
   fieldLoadingCount.value ++
-  getJobValueList({ jobFieldList }).then(res => {
+  getJobValueList({
+    jobFieldList,
+    byScene: props.suiteByScene && searchParams.value.suite
+  }).then(res => {
     const aggs = res.data.aggregations || {}
     Object.keys(aggs).forEach(field => {
       // 通过请求获取的可选项
@@ -215,6 +233,7 @@ const getFieldsOptions = () => {
         }
       })
       // default可选项
+      console.log(11,fieldsConfig)
       const staticValues = fieldsConfig[field].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
       if (field === 'osv') {
