@@ -185,7 +185,11 @@ const setFieldSelection = () => {
       if (fieldKey === 'osv') {
         searchParams.value[fieldKey] = fields[fieldKey].split('@')
       } else {
-        searchParams.value[fieldKey] = fields[fieldKey] as string
+        if (Array.isArray(fields[fieldKey])) {
+          searchParams.value[fieldKey] = fields[fieldKey]
+        } else {
+          searchParams.value[fieldKey] = [fields[fieldKey]]
+        }
       }
     }
   })
