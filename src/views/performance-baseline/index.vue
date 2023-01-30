@@ -45,23 +45,10 @@ const setMustCase = (searchParams) => {
       const matchObj = {}
       matchObj[paramKey] = searchParams[paramKey]
       if (Array.isArray(searchParams[paramKey])) {
-        tempArr.push({ terms: matchObj })
+        searchParams[paramKey].length > 0 && tempArr.push({ terms: matchObj })
       } else {
         tempArr.push({ match: matchObj })
       }
-      // if (paramKey === 'testbox') {
-      //   if (typeof searchParams[paramKey] === 'string') {
-      //     // 用户指定testbox
-      //     tempArr.push( { match: { testbox: searchParams[paramKey] } } )
-      //   } else {
-      //     // 用户通过硬件配置过滤
-      //     tempArr.push( { terms: { testbox: searchParams[paramKey] } } )
-      //   }
-      // } else {
-      //   const matchObj = {}
-      //   matchObj[paramKey] = searchParams[paramKey]
-      //   tempArr.push({ match: matchObj })
-      // }
     }
   })
   return tempArr

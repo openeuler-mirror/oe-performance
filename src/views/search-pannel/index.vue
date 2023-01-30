@@ -39,6 +39,7 @@
               class="field-selection"
               v-if="paramKey==='osv'"
               v-model="searchParams[paramKey]"
+              :loading="subField[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
               :options="osvOptions"
               size="small"
               filterable
@@ -49,6 +50,7 @@
               v-else
               class="field-selection"
               v-model="searchParams[paramKey]"
+              :loading="subField[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
               filterable
               multiple
               collapse-tags
@@ -71,7 +73,7 @@
       <el-button
         type="primary"
         @click="handleSearch"
-        :loading="searchLoading || fieldLoadingCount !== 0"
+        :loading="searchLoading"
         >
         搜索
       </el-button>
@@ -114,7 +116,8 @@ const fieldsListForRender = ref([] as string[])
 const suiteList = ref([])
 // uite = ref('unixbench')
 const testboxList = ref([])
-const fieldLoadingCount = ref(0)
+const jobFieldsLoading = ref(false)
+const hostFieldsLoading = ref(false)
 
 const fieldOrigin = {} as objectItem // 字典，用来判断某个field字段的origin
 const hostFieldList = [] as any // 中间数据，用来循环host类型的field字段
@@ -236,7 +239,7 @@ watch(
 
 // 获取搜索条件
 const getFieldsOptions = () => {
-  fieldLoadingCount.value ++
+  jobFieldsLoading.value  = true
   getJobValueList({
     jobFieldList,
     byScene: props.suiteByScene && searchParams.value.suite
@@ -250,7 +253,6 @@ const getFieldsOptions = () => {
         }
       })
       // default可选项
-      console.log(11,fieldsConfig)
       const staticValues = fieldsConfig[field].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
       if (field === 'osv') {
@@ -258,7 +260,7 @@ const getFieldsOptions = () => {
       }
     })
   }).finally(() => {
-    fieldLoadingCount.value --
+    jobFieldsLoading.value = false
   })
 }
 
@@ -301,7 +303,7 @@ const constrcutOsvOptions = (osvList) => {
 }
 // 获取主机相关搜索条件。
 const getHostOptions = () => {
-  fieldLoadingCount.value ++
+  hostFieldsLoading.value = true
   const fieldList = hostFieldList.map((field:string) => field.replace('hw.', ''))
   getTestBoxes().then((testboxRes => {
     testboxList.value = testboxRes.data.hits.hits.map(item => {
@@ -326,7 +328,7 @@ const getHostOptions = () => {
       addNewOptionValues(staticValues, listValues)
     })
   })).finally(() => {
-    fieldLoadingCount.value --
+    hostFieldsLoading.value = false
   })
 }
 // 将inputArr中与sourceArr不同的选项追加到sourceArr中

@@ -1,18 +1,8 @@
 // vim: set et:
 
 /* eslint-disable */
+// 数据和/data-model.js保持一致，并根据页面需求增加了一些配置或者调整了顺序
 export const jobModel = {
-        // 以下fields字段的格式参见
-        // https://www.npmjs.com/package/react-awesome-query-builder
-        // https://github.com/ukrbublik/react-awesome-query-builder/blob/HEAD/CONFIG.adoc
-        //
-        // In addition, we add this to track where the data come from
-        // origin: hosts|jobs|ejobs
-        //
-        // fields 下的各字段来源于
-        // - origin=hosts: 可ES搜索的hosts字段列表，参考 https://gitee.com/compass-ci/lab-z9/blob/master/devices/taishan200-2280-2s48p-256g--a11
-        // - origin=jobs: 可ES搜索的jobs字段列表，参考 https://gitee.com/openeuler/compass-ci/blob/master/sbin/es-jobs-mapping.sh
-        // - origin=ejobs: jobs取到本地后，在JS代码里加的新增字段
         fields: {
                 suite: {
                         label: '测试套',
@@ -29,7 +19,6 @@ export const jobModel = {
                                 ]
                         },
                 },
-                /*
                 submit_id: {
                         label: '提交id',
                         type: 'select',
@@ -39,7 +28,28 @@ export const jobModel = {
                                 listValues: [], // 查询jobs后动态赋值
                         },
                 },
-                */
+                os_arch: {
+                        label: '架构',
+                        type: 'select',
+                        origin: 'jobs',
+                        valueSources: ['value'],
+                        fieldSettings: {
+                                listValues: [
+                                        { value: 'x86_64' },
+                                        { value: 'aarch64' },
+                                        { value: 'riscv' },
+                                ],
+                        },
+                },
+                'hw.memory': {
+                        label: '内存大小',
+                        type: 'select',
+                        origin: 'hosts',
+                        valueSources: ['value'],
+                        fieldSettings: {
+                                listValues: [], // 查询hosts后动态赋值
+                        },
+                },
                 group_id: {
                         label: '批次id',
                         type: 'select',
@@ -49,6 +59,15 @@ export const jobModel = {
                                 listValues: [], // 查询jobs后动态赋值
                         },
                 },
+                testbox: {
+                        label: '测试机',
+                        type: 'select',
+                        origin: 'jobs',
+                        valueSources: ['value'],
+                        fieldSettings: {
+                                listValues: [], // 查询hosts后动态赋值
+                        },
+                },
                 tags: {
                         label: '标记',
                         type: 'select',
@@ -56,6 +75,15 @@ export const jobModel = {
                         valueSources: ['value'],
                         fieldSettings: {
                                 listValues: [], // 查询jobs后动态赋值
+                        },
+                },
+                'hw.nr_cpu': {
+                        label: '逻辑CPU数',
+                        type: 'select',
+                        origin: 'hosts',
+                        valueSources: ['value'],
+                        fieldSettings: {
+                                listValues: [], // 查询hosts后动态赋值
                         },
                 },
                 osv: {
@@ -96,48 +124,8 @@ export const jobModel = {
                                 ],
                         },
                 },
-                os_arch: {
-                        label: '架构',
-                        type: 'select',
-                        origin: 'jobs',
-                        valueSources: ['value'],
-                        fieldSettings: {
-                                listValues: [
-                                        { value: 'x86_64' },
-                                        { value: 'aarch64' },
-                                        { value: 'riscv' },
-                                ],
-                        },
-                },
-                testbox: {
-                        label: '测试机',
-                        type: 'select',
-                        origin: 'jobs',
-                        valueSources: ['value'],
-                        fieldSettings: {
-                                listValues: [], // 查询hosts后动态赋值
-                        },
-                },
-                'hw.nr_cpu': {
-                        label: '逻辑CPU数',
-                        type: 'select',
-                        origin: 'hosts',
-                        valueSources: ['value'],
-                        fieldSettings: {
-                                listValues: [], // 查询hosts后动态赋值
-                        },
-                },
                 'hw.nr_node': {
                         label: '物理CPU数',
-                        type: 'select',
-                        origin: 'hosts',
-                        valueSources: ['value'],
-                        fieldSettings: {
-                                listValues: [], // 查询hosts后动态赋值
-                        },
-                },
-                'hw.memory': {
-                        label: '内存大小',
                         type: 'select',
                         origin: 'hosts',
                         valueSources: ['value'],
