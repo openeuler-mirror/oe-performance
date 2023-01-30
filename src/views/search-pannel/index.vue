@@ -6,13 +6,13 @@
         <span>测试组件:</span>
       </el-col>
       <el-col :span="22">
-        <el-radio-group v-model="searchParams['suite']">
-          <el-radio-button
+        <el-checkbox-group v-model="searchParams['suite']">
+          <el-checkbox-button
             v-for="(item, index) in suiteList"
             :key="index"
             :label="item.suiteName"
             :disabled="item.unavailable"/>
-        </el-radio-group>
+        </el-checkbox-group>
       </el-col>
     </el-row>
     <!--测试组件 end-->
@@ -50,6 +50,9 @@
               class="field-selection"
               v-model="searchParams[paramKey]"
               filterable
+              multiple
+              collapse-tags
+              collapse-tags-tooltip
               clearable
               size="small">
               <el-option
@@ -108,7 +111,7 @@ const router = useRouter()
 const testboxStore = useTestboxStore()
 
 const fieldsListForRender = ref([] as string[])
-const suiteList = ref([] as string[])
+const suiteList = ref([])
 // uite = ref('unixbench')
 const testboxList = ref([])
 const fieldLoadingCount = ref(0)
@@ -121,7 +124,7 @@ const searchParams = ref({} as objectItem)
 const osvOptions =ref([])
 
 interface objectItem {
-  [key: string]: string
+  [key: string]: string | string[]
 }
 
 // 修改fieldConfig的格式，方便展示
@@ -196,15 +199,29 @@ const setSuiteList = () => {
 // 性能基线页面中:
 // 设置默认选中的suite，如果url中有，则使用url的
 const setDefaultSuite = () => {
-  const { suite } = route.query
-  if (suite && suiteList.value.find(suiteItem => suiteItem.suiteName === suite)) {
-    searchParams.value['suite'] = String(suite)
-  } else {
-    searchParams.value['suite'] = suiteList.value[0] && suiteList.value[0].suiteName
+  let suite = []
+  const queryObj = route.query
+  if (queryObj.suite) {
+    if (Array.isArray(queryObj.suite)) {
+      suite.push(...queryObj.suite)
+    } else {
+      suite.push(queryObj.suite)
+    }
   }
+  searchParams.value['suite'] = []
+  if (suite.length < 1) {
+    searchParams.value['suite'] = suiteList.value[0] && [suiteList.value[0].suiteName]
+    return
+  }
+  suite.forEach(suiteItem => {
+    if (suiteList.value.find(s => s.suiteName === suiteItem)) {
+      searchParams.value['suite'].push(String(suiteItem))
+    }
+  })
 }
 
 // 切换suite时，重新获取fields的可选值
+// 需要调整
 watch(
   () => searchParams.value.suite,
   () => {
@@ -337,6 +354,7 @@ const handleSearch = () => {
   // 记录查询条件到url上
   setQueryToUrl()
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
+  console.log(jobParams)
   // osv特殊处理
   if (jobParams.osv) {
     jobParams.osv = jobParams.osv.join('@')
@@ -355,6 +373,7 @@ const handleSearch = () => {
     if (testboxSearchList.length > 0 && !searchParamData.testbox) { // 当testbox存在时，说明用户指定了testboxId，此时使用硬件的筛选没有意义了
       searchParamData.testbox = testboxSearchList
     }
+
     emit('search', searchParamData)
   } else {
     emit('search', jobParams)
