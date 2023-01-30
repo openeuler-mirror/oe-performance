@@ -229,8 +229,6 @@ watch(
   () => searchParams.value.suite,
   () => {
     if (props.suiteByScene) {
-      fieldsConfig = JSON.parse(JSON.stringify(fieldsConfiguration))
-      fieldsListForRender.value = initailizefieldsList()
       getFieldsOptions()
       getHostOptions()
     }
@@ -252,7 +250,10 @@ const getFieldsOptions = () => {
           value: item.key
         }
       })
-      // default可选项
+      // 重置listValues
+      const originData = JSON.parse(JSON.stringify(fieldsConfiguration[field].fieldSettings.listValues))
+      fieldsConfig[field].fieldSettings.listValues = originData
+      // 获取对应field的listValues引用
       const staticValues = fieldsConfig[field].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
       if (field === 'osv') {
@@ -324,6 +325,8 @@ const getHostOptions = () => {
           repeatMap[testbox[field]] = 1
         }
       })
+      const originData = JSON.parse(JSON.stringify(fieldsConfiguration[`hw.${field}`].fieldSettings.listValues))
+      fieldsConfig[`hw.${field}`].fieldSettings.listValues = originData
       const staticValues = fieldsConfig[`hw.${field}`].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
     })
@@ -356,7 +359,6 @@ const handleSearch = () => {
   // 记录查询条件到url上
   setQueryToUrl()
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
-  console.log(jobParams)
   // osv特殊处理
   if (jobParams.osv) {
     jobParams.osv = jobParams.osv.join('@')
@@ -365,14 +367,22 @@ const handleSearch = () => {
   if (Object.keys(hostParams).length > 0) {
     const testboxSearchList = []
     Object.keys(hostParams).forEach(hostFieldKey => {
-      const tempKey = hostFieldKey.replace('hw.', '')
-      const tempIdList = testboxList.value.filter(testbox => {
-        return testbox[tempKey] && String(testbox[tempKey]) === String(hostParams[hostFieldKey])})
-        .map(testbox => testbox.testboxId)
+      const fieldKeyInTestbox = hostFieldKey.replace('hw.', '')
+      let tempIdList = []
+      if (Array.isArray(hostParams[hostFieldKey])) {
+        tempIdList = testboxList.value.filter(testbox => {
+          return testbox[fieldKeyInTestbox] && hostParams[hostFieldKey].indexOf(testbox[fieldKeyInTestbox]) > -1
+        }).map(testbox => testbox.testboxId)
+      } else {
+        tempIdList = testboxList.value.filter(testbox => {
+          return testbox[fieldKeyInTestbox] && String(testbox[fieldKeyInTestbox]) === String(hostParams[hostFieldKey])
+        }).map(testbox => testbox.testboxId)
+      }
       testboxSearchList.push(...tempIdList)
     })
     const searchParamData = { ...jobParams }
-    if (testboxSearchList.length > 0 && !searchParamData.testbox) { // 当testbox存在时，说明用户指定了testboxId，此时使用硬件的筛选没有意义了
+    // 当testbox存在时，说明用户指定了testboxId，此时使用硬件的筛选没有意义了
+    if (testboxSearchList.length > 0 && searchParamData.testbox.length < 1) { 
       searchParamData.testbox = testboxSearchList
     }
 
