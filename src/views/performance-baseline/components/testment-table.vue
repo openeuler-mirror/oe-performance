@@ -377,15 +377,15 @@ const handleExportCsv = () => {
   } else {
     const data = []
     // 这里要深拷贝,不然影响列的字段
-    const titleData: any[] = JSON.parse(JSON.stringify(allColumn))
-    titleData.splice(0, 0, { label: '数据来源', prop: 'submit_id' })
+    const titleData: any[] = JSON.parse(JSON.stringify(allColumn.value))
+    titleData.splice(0, 0, { label: '提交编号', prop: 'submit_id' })
     const title = titleData.map<string>((item: any) => item.label).join(',')
     const keys = titleData.map<string>((item: any) => item.prop)
     data.push(`${title}\r\n`)
     selectedTableRows.value.forEach((item: any) => {
       const temp: string[] = []
       keys.forEach((key: string) => {
-        temp.push(item[key])
+        temp.push(getProperty(item,key))
       })
       const tmpStr = temp.join(',')
       data.push(`${tmpStr}\r\n`)
@@ -401,7 +401,13 @@ const handleExportCsv = () => {
 const handleReFresh = () => {
   emit('refreash')
 }
-
+const getProperty = (item:any, key:string) => {
+  const index = key.split('.')
+  index.forEach(e => {
+    item = item[e] || ''
+  })
+  return item
+}
 watch(
   () => route.query.scene,
   () => {
