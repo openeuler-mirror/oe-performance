@@ -2,12 +2,12 @@
   <div class="baseline-detail-workload-tables" v-loading="loading">
     <!-- <el-card class=""> -->
       <div class="table-wrap" v-for="tableInfo in tableColumnMap[detailData.suite]||[]" :key="tableInfo.tableName">
-          <div class="tableName">{{ tableInfo.tableName }}</div>
+          <div class="tableName">{{ `测试用例： ${tableInfo.tableName}` }}</div>
           <el-table
             :data="tableDatas[tableInfo.tableName]"
             border
           >
-            <el-table-column label="测试用例" prop="li-testcase"></el-table-column>
+            <el-table-column label="测试参数" prop="li-testcase"></el-table-column>
             <el-table-column
               v-for="column in tableInfo.column"
               :key="column.prop"
