@@ -111,7 +111,7 @@
       <el-table-column
         fixed="left"
         width="200"
-        label="提交编号"
+        label="Submit Id"
         prop="submit_id">
       </el-table-column>
       <template v-for="(item, index) in tableColumn">

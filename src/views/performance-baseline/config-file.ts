@@ -1,5 +1,11 @@
 export const columnConfig = [
   {
+    label: '性能数据',
+    prop: 'performance_data',
+    show: true,
+    width: 130
+  },
+  {
     label: '服务器型号',
     prop: 'testbox',
     show: true,
@@ -39,17 +45,18 @@ export const columnConfig = [
     label: '测试人',
     prop: 'my_account',
     show: true,
-    width: 300
-  },
-  {
-    label: '性能数据',
-    prop: 'performance_data',
-    show: true
+    width: 150
   }
 ]
 
 export const columnConfig2 = [
   {
+    label: '性能数据',
+    prop: 'performance_data',
+    show: true,
+    width: 130
+  },
+  {
     label: '服务器型号',
     prop: 'testbox',
     show: true,
@@ -90,11 +97,6 @@ export const columnConfig2 = [
     prop: 'my_account',
     show: true,
     width: 300
-  },
-  {
-    label: '性能数据',
-    prop: 'performance_data',
-    show: true
   }
 ]
 

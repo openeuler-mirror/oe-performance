@@ -41,6 +41,9 @@
               v-model="searchParams[paramKey]"
               :loading="subField[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
               :options="osvOptions"
+              :props="cascaderProps"
+              collapse-tags
+              collapse-tags-tooltip
               size="small"
               filterable
               clearable
@@ -87,6 +90,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { suiteConfig, fieldsConfiguration } from './config'
 
 import { useTestboxStore } from '@/stores/performanceData'
+import { parseQueryStringTo2dArray } from './utils'
 
 import { getJobValueList, getTestBoxes } from '@/api/performance'
 
@@ -125,9 +129,10 @@ const jobFieldList = [] as any // 中间数据，用来循环job类型的field�
 
 const searchParams = ref({} as objectItem)
 const osvOptions =ref([])
+const cascaderProps = { multiple: true }
 
 interface objectItem {
-  [key: string]: string | string[]
+  [key: string]: string | string[] | string[][]
 }
 
 // 修改fieldConfig的格式，方便展示
@@ -183,7 +188,7 @@ const setFieldSelection = () => {
     if (fieldKeys.indexOf(fieldKey) > -1) {
       // 只添加当前选择框中存在的field选择
       if (fieldKey === 'osv') {
-        searchParams.value[fieldKey] = fields[fieldKey].split('@')
+        searchParams.value[fieldKey] = parseQueryStringTo2dArray(fields[fieldKey])
       } else {
         if (Array.isArray(fields[fieldKey])) {
           searchParams.value[fieldKey] = fields[fieldKey]
@@ -364,8 +369,8 @@ const handleSearch = () => {
   setQueryToUrl()
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
   // osv特殊处理
-  if (jobParams.osv) {
-    jobParams.osv = jobParams.osv.join('@')
+  if (jobParams.osv && Array.isArray(jobParams.osv)) {
+    jobParams.osv = jobParams.osv.map((arr:string[]) => arr.join('@'))
   }
 
   if (Object.keys(hostParams).length > 0) {

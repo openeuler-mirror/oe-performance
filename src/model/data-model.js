@@ -20,7 +20,7 @@ export const jobModel = {
                         },
                 },
                 submit_id: {
-                        label: '提交id',
+                        label: 'Submit Id',
                         type: 'select',
                         origin: 'jobs',
                         valueSources: ['value'],
@@ -51,7 +51,7 @@ export const jobModel = {
                         },
                 },
                 group_id: {
-                        label: '批次id',
+                        label: 'Group Id',
                         type: 'select',
                         origin: 'jobs',
                         valueSources: ['value'],
