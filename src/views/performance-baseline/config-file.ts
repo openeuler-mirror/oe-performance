@@ -6,6 +6,12 @@ export const columnConfig = [
     width: 130
   },
   {
+    label: '测试套',
+    prop: 'suite',
+    show: true,
+    width: 100,
+  },
+  {
     label: '服务器型号',
     prop: 'testbox',
     show: true,
@@ -55,6 +61,12 @@ export const columnConfig2 = [
     prop: 'performance_data',
     show: true,
     width: 130
+  },
+  {
+    label: '测试套',
+    prop: 'suite',
+    show: true,
+    width: 100,
   },
   {
     label: '服务器型号',

@@ -12,7 +12,10 @@
               v-for="column in tableInfo.column"
               :key="column.prop"
               :label="column.label"
-              :prop="column.prop">
+              :prop="column.prop"
+              :formatter="tableCellFormatter"
+              min-width="100"
+            >
             </el-table-column>
           </el-table>
         </div>
@@ -42,7 +45,6 @@ onMounted(() => {
   const submitId = router.currentRoute.value.params.submit_id
   if (performanceData[submitId]) {
     detailData.value = performanceData[submitId]
-    console.log(performanceData[submitId])
     tableDatas.value = detailData.value.tableDatas
   } else {
     loading.value = true
@@ -74,6 +76,17 @@ onMounted(() => {
     })
   }
 })
+
+const tableCellFormatter = (row, column, cellValue) => {
+  if (cellValue === undefined) {
+    return '暂无数据'
+  }
+  if (cellValue === -1) {
+    return '数据错误'
+  }
+  return cellValue
+}
+
 </script>
   
 <style lang="scss" scoped>
