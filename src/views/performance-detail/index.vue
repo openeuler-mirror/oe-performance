@@ -609,7 +609,7 @@
                   ></el-tooltip>
                 </span>
               </template>
-              <span>{{ detailData.performanceVal }}</span>
+              <span class="important-value">{{ performanceValFormatter({},{},detailData.performanceVal) }}</span>
             </el-descriptions-item>
             <!--
             <el-descriptions-item label="单位(描述)">
@@ -744,6 +744,7 @@ const getJobData = (submitId) => {
       message: err.message,
       type: 'error'
     })
+    console.warn(err)
   }).finally(() => {
     loading.value = false
   })
@@ -755,6 +756,7 @@ onMounted(() => {
   if (performanceData[submitId]) {
     detailData.value = performanceData[submitId]
   } else {
+    loading.value = true
     getTestBoxes().then(testboxRes => {
       let testboxList = []
       testboxList = testboxRes.data.hits.hits.map(item => {
@@ -767,13 +769,20 @@ onMounted(() => {
       getJobData(submitId)
     })
   }
-  console.log('datailData', detailData.value)
 })
 
 const setDeviceInfoToObj = (resultObj) => {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
   resultObj.device =  testbox.device || {}
 }
+
+const performanceValFormatter = (row, column, cellValue) => {
+  if (cellValue === undefined || cellValue === -1) {
+    return '暂无数据'
+  }
+  return cellValue
+}
+
 </script>
 
 <style lang="scss" scoped>
@@ -845,6 +854,9 @@ const setDeviceInfoToObj = (resultObj) => {
         color: var(--oe-perf-color-primary);
       }
     }
+  }
+  .important-value {
+    color: var(--oe-perf-color-primary);
   }
 }
 </style>

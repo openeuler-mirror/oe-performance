@@ -20,7 +20,6 @@ export const combineJobs = (jobList) => {
   tempSubmit['groupData'] = ppGroup
   // 计算性能数据
   tempSubmit['tableDatas'] = mapGroupDataToTableData(ppGroup, tempSubmit.suite)
-  console.log(22)
   tempSubmit['performanceVal'] = computeTotalPerformanceValue(tempSubmit['tableDatas'])
   return tempSubmit
 }
@@ -71,12 +70,13 @@ const groupDataByTestparam = (dataList) => {
     const testParamName = job['li-testcase']
     if (resultObj[testParamName]) {
       kpiListMap[job.suite].forEach(kpi => {
-        job[`stats.${kpi}`] && resultObj[testParamName][kpi].push(job[`stats.${kpi}`])
+        resultObj[testParamName][kpi].push(job[`stats.${kpi}`])
       })
     } else {
       resultObj[testParamName] = {}
       kpiListMap[job.suite].forEach(kpi => {
-        job[`stats.${kpi}`] && (resultObj[testParamName][kpi] = [job[`stats.${kpi}`]])
+        // 没有stats值的话会存一个空数组
+        resultObj[testParamName][kpi] = [job[`stats.${kpi}`]]
       })
     }
   })
@@ -111,7 +111,6 @@ const mapGroupDataToTableData = (ppGroup, suite) => {
   if (!tableColumnMap[suite]) {
     return {}
   }
-  
   switch (tableMode[suite]) {
   case 'unixbench':  // 表格分成两组数据，一组展示单核，一组展示多核
     gruopDataForUnixbench(ppGroup, tableDatas, suite)
@@ -121,7 +120,6 @@ const mapGroupDataToTableData = (ppGroup, suite) => {
     groupDataForDefault(ppGroup, tableDatas, suite)
     break;
   }
-  
   return tableDatas
 }
 
@@ -182,15 +180,16 @@ const computePerformanceValue = (ppData, tableInfo) => {
 
 // 计算总的性能值
 const computeTotalPerformanceValue = (tableDatas) => {
-  console.log(111, tableDatas)
   const performanceValList = []
   Object.keys(tableDatas).forEach(tableName => {
     const tablePerformanceValList = []
+    // 计算每张表的总性能值（合并表中不同pp的性能值）
     tableDatas[tableName].forEach(rowData => {
       tablePerformanceValList.push(rowData[`performanceVal_${tableName}`])
     })
     performanceValList.push(computeGeoMean(tablePerformanceValList))
   })
+  // 返回所有表性能值的几何平均值
   return computeGeoMean(performanceValList)
 }
 
@@ -207,9 +206,9 @@ const computeMean = (inputArr) => {
     sum += Number(val)
     count += 1
   })
-  // 当数据都是
+  // 无数据情况
   if (count === 0) {
-    return -1 // 标识特殊情况，输入数据为空或者数据都是NaN
+    return -1 // 特殊标识
   }
   return (sum / count).toFixed(2)
 }
@@ -217,9 +216,9 @@ const computeMean = (inputArr) => {
 const computeGeoMean = (inputArr) =>{
   let testmentVal = 1
   let count = 0
-  const tempArr = inputArr.filter(val => val > 0)
+  const tempArr = inputArr.filter(val => val >= 0)
   if (tempArr.length < 1) {
-    return -1
+    return -1 // 无数据情况
   }
   tempArr.forEach(val => {
     testmentVal *= val

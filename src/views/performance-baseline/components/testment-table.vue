@@ -122,6 +122,7 @@
           :key="index"
           :width="item.width"
           :formatter="item.formatter"
+          :className="item.className"
         >
         </el-table-column>
       </template>
@@ -169,7 +170,8 @@ export interface Column {
   prop: string
   show: boolean
   width: string
-  formatter?: Function
+  formatter?: Function,
+  className?: string
 }
 export interface TableItem {
   [key: string]: any
@@ -498,4 +500,8 @@ a {
 .pagination {
   margin-top: 30px;
 }
+
+:deep(td.important-value) {
+    color: var(--oe-perf-color-primary);
+  }
 </style>

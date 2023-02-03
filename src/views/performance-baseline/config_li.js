@@ -96,7 +96,8 @@ export const tableMode = {
 export const tableColumnMap = {
   stream: [
     {
-      tableName: 'Function',
+      tableName: 'Bandwidth_MBps',
+      tableLabel: '内存带宽测试(单位：MB/s 越大越好)',
       column: [
         {
           label: 'copy',

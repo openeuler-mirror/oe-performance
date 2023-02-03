@@ -5,14 +5,12 @@ export const columnConfig = [
     show: true,
     width: 130,
     formatter: (row: {}, column: {}, cellValue: number) => {
-      if (cellValue === undefined) {
+      if (cellValue === undefined || cellValue === -1) {
         return '暂无数据'
       }
-      if (cellValue === -1) {
-        return '数据错误'
-      }
       return cellValue
-    }
+    },
+    'className': 'important-value'
   },
   {
     label: '测试套',
