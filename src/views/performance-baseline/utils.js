@@ -111,7 +111,7 @@ const mapGroupDataToTableData = (ppGroup, suite) => {
   
   switch (tableMode[suite]) {
   case 'unixbench':  // 表格分成两组数据，一组展示单核，一组展示多核
-    gruopDataForUnixbench(ppGroup, tableDatas)
+    gruopDataForUnixbench(ppGroup, tableDatas, suite)
     break;
   default:
     // stream、lmbench
@@ -122,20 +122,23 @@ const mapGroupDataToTableData = (ppGroup, suite) => {
   return tableDatas
 }
 
-const gruopDataForUnixbench = (ppGroup, tableDatas) => {
+const gruopDataForUnixbench = (ppGroup, tableDatas, suite) => {
   Object.keys(ppGroup).forEach(ppKey => {
     const ppObj = {}
     Object.keys(ppGroup[ppKey]).forEach(kpi => {
       ppObj[kpi] = computeMean(ppGroup[ppKey][kpi])
     })
     ppObj['li-testcase'] = ppKey
+    // todo: 需要适配下多pp参数的情况
     if (ppKey.split('=')[1] === '1') {
-      tableDatas['单核'] = [ppObj]
+      computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'single'))
+      tableDatas['single'] = [ppObj]
     } else {
-      if (tableDatas['多核']) {
-        tableDatas['多核'].push(ppobj)
+      computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'multiple'))
+      if (tableDatas['multiple']) {
+        tableDatas['multiple'].push(ppobj)
       } else {
-        tableDatas['多核'] = [ppObj]
+        tableDatas['multiple'] = [ppObj]
       }
     }
   })
@@ -154,8 +157,22 @@ const groupDataForDefault = (ppGroup, tableDatas, suite) => {
     resultArr.push(ppObj)
   })
   tableColumnMap[suite].forEach(tableInfo => {
+    // 为每条数据计算对应表格下的几何平均值
+    resultArr.forEach(ppData => {
+      computePerformanceValue(ppData, tableInfo)
+    })
     tableDatas[tableInfo.tableName] = resultArr
   })
+  console.log(resultArr)
+}
+
+const computePerformanceValue = (ppData, tableInfo) => {
+  const computeArr = []
+  // 只取对应表格下的字段进行计算
+  tableInfo.column.forEach(col => {
+    computeArr.push(ppData[col.prop])
+  })
+  ppData[`performanceVal_${tableInfo.tableName}`] = computeGeoMean(computeArr)
 }
 
 const computeMean = (inputArr) => {
@@ -179,5 +196,15 @@ const computeMean = (inputArr) => {
 }
 
 const computeGeoMean = (inputArr) =>{
-  const tempArr = inputArr.filter(val => val >= 0) 
+  let testmentVal = 1
+  let count = 0
+  const tempArr = inputArr.filter(val => val > 0)
+  if (tempArr.length < 1) {
+    return -1
+  }
+  tempArr.forEach(val => {
+    testmentVal *= val
+    count += 1
+  })
+  return Math.pow(testmentVal, 1/count).toFixed(3)
 }

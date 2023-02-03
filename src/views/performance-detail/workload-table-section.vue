@@ -2,7 +2,7 @@
   <div class="baseline-detail-workload-tables" v-loading="loading">
     <!-- <el-card class=""> -->
       <div class="table-wrap" v-for="tableInfo in tableColumnMap[detailData.suite]||[]" :key="tableInfo.tableName">
-          <div class="tableName">{{ `测试用例： ${tableInfo.tableName}` }}</div>
+          <div class="tableName">{{ `测试用例： ${tableInfo.tableLabel || tableInfo.tableName}` }}</div>
           <el-table
             :data="tableDatas[tableInfo.tableName]"
             border
@@ -17,6 +17,7 @@
               min-width="100"
             >
             </el-table-column>
+            <el-table-column label="性能值" :prop="`performanceVal_${tableInfo.tableName}`"></el-table-column>
           </el-table>
         </div>
     <!-- </el-card> -->

@@ -10,7 +10,7 @@ export const fieldsConfiguration = Object.assign({}, jobModel.fields) as configO
 // 只在性能基线页面中使用
 export const suiteConfig: configObject = {
   bigData: {
-    suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'lmbench3'}, { suiteName: 'stream'}],
+    suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'lmbench'}, { suiteName: 'stream'}, { suiteName: 'lmbench3'},],
   },
   dataBase: {
     suiteList: [{ suiteName: 'MySQL-OLTP'}],

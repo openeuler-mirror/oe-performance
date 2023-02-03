@@ -119,7 +119,8 @@ export const tableColumnMap = {
   ],
   unixbench: [
     {
-      tableName: '单核',
+      tableName: 'single',
+      tableLabel: '单核',
       column: [
         {
           label: 'Dhrystone_2_using_register_variables',
@@ -176,7 +177,8 @@ export const tableColumnMap = {
       ]
     },
     {
-      tableName: '多核',
+      tableName: 'multiple',
+      tableLabel: '多核',
       column: [
         {
           label: 'Dhrystone_2_using_register_variables',
