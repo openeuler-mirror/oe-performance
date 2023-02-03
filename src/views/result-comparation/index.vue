@@ -1,13 +1,16 @@
 <template>
   <div class="oe-perf-section">
     <search-pannel @search="onSearch" :searchLoading="searchLoading"/>
-    <div>
-      对比维度
-      <el-radio-group v-model="dimension">
-        <el-radio-button label="osv" />
-        <el-radio-button label="testbox" />
-        <el-radio-button label="tags" />
-      </el-radio-group>
+    <div class="dimension-controller">
+      <div class="label">对比维度</div>
+      <div class="dimension-controller-inner">
+        <el-radio-group v-model="dimension">
+          <el-radio-button label="osv" />
+          <el-radio-button label="testbox" />
+          <el-radio-button label="tags" />
+        </el-radio-group>
+        <el-input></el-input>
+      </div>
     </div>
   </div>
   <div class="oe-perf-section" v-loading="searchLoading">
@@ -191,5 +194,13 @@ const resetData = () => {
 <style lang="scss" scoped>
 .banner-text {
   text-align: center;
+}
+.dimension-controller {
+  margin-top: 24px;
+  display: flex;
+  .label {
+    line-height: 32px;
+    margin-right: 10px;
+  }
 }
 </style>

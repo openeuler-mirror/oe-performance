@@ -82,6 +82,7 @@ export const kpiListMap = {
     'lmbench.Rand_mem'
   ],
   netperf: [
+    'netperf.Throughput_Mbps',
     'netperf.Throughput_tps'
   ]
 }
@@ -444,8 +445,6 @@ export const tableColumnMap = {
     },
     {
       tableName: 'UDP_STREAM',
-      mode: 'mixPP',
-      mixPP: ['pp.netperf.test=TCP_STREAM'],
       column: [
         {label: '1', prop: 'pp.netperf.send_size=1'},
         {label: '64', prop: 'pp.netperf.send_size=64'},

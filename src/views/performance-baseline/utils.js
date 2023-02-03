@@ -112,11 +112,17 @@ const mapGroupDataToTableData = (ppGroup, suite) => {
     return {}
   }
   switch (tableMode[suite]) {
-  case 'unixbench':  // 表格分成两组数据，一组展示单核，一组展示多核
+  case 'unixbench':
+    // 表格分成两组数据，一组展示pp参数=单核，一组展示pp参数=多核
     gruopDataForUnixbench(ppGroup, tableDatas, suite)
+    break;
+  case 'netperf':
+    // netperf不适用kpi做列，而是使用pp参数send_size或者test作为列名。需要转换数据维度
+    groupDataForNetperf(ppGroup, tableDatas, suite)
     break;
   default:
     // stream、lmbench
+    // 这个类型下kpi分布部在不同的表上，不需要对pp数据作区分
     groupDataForDefault(ppGroup, tableDatas, suite)
     break;
   }
@@ -145,6 +151,41 @@ const gruopDataForUnixbench = (ppGroup, tableDatas, suite) => {
   })
 }
 
+const groupDataForNetperf = (ppGroup, tableDatas, suite) => {
+  const ppObjTCPStream = { 'li-testcase': 'Throughput_Mbps' }
+  const ppObjDUPStream = { 'li-testcase': 'Throughput_Mbps' }
+  const ppObjProtoclKind = { 'li-testcase': 'Throughput_tps' }
+  Object.keys(ppGroup).forEach(ppKey => {
+    const ppObj = {}
+    Object.keys(ppGroup[ppKey]).forEach(kpi => {
+      ppObj[kpi] = computeMean(ppGroup[ppKey][kpi])
+    })
+    const testKey = getPpParamAndValue(ppKey, 'pp.netperf.test')
+    if (!testKey) return
+    switch (testKey.split('=')[1]) {
+    case 'TCP_STREAM':
+      const propKeyTCP = getPpParamAndValue(ppKey, 'pp.netperf.send_size')
+      ppObjTCPStream[propKeyTCP] = ppObj['netperf.Throughput_Mbps']
+      break
+    case 'UDP_STREAM':
+      const propKeyUDP = getPpParamAndValue(ppKey, 'pp.netperf.send_size')
+      ppObjDUPStream[propKeyUDP] = ppObj['netperf.Throughput_Mbps']
+      break
+    case 'TCP_RR':
+    case 'UDP_RR':
+    case 'TCP_CRR':
+      ppObjProtoclKind[testKey] = ppObj['netperf.Throughput_tps']
+      break
+    }
+  })
+  computePerformanceValue(ppObjTCPStream, tableColumnMap[suite].find(table => table.tableName === 'TCP_STREAM'))
+  computePerformanceValue(ppObjDUPStream, tableColumnMap[suite].find(table => table.tableName === 'UDP_STREAM'))
+  computePerformanceValue(ppObjProtoclKind, tableColumnMap[suite].find(table => table.tableName === 'Protocol_kind'))
+  addElementArrayToObj(tableDatas, 'TCP_STREAM', ppObjTCPStream)
+  addElementArrayToObj(tableDatas, 'UDP_STREAM', ppObjDUPStream)
+  addElementArrayToObj(tableDatas, 'Protocol_kind', ppObjProtoclKind)
+}
+
 const groupDataForDefault = (ppGroup, tableDatas, suite) => {
   const resultArr = []
   // 基于ppKey区分每条数据。每个kpi作为每条数据的属性。
@@ -164,6 +205,14 @@ const groupDataForDefault = (ppGroup, tableDatas, suite) => {
     })
     tableDatas[tableInfo.tableName] = resultArr
   })
+}
+
+// 根据指定的pp字段，返回pp字段+字段值
+// example: ppName = pp.netperf.test=TCP_STREAM,pp.netperf.send_size=1; 
+//          getPpParamAndValue(ppName, 'pp.netperf.send_size') => 'pp.netperf.send_size=1'
+const getPpParamAndValue = (ppName, ppKey) => {
+  const ppArr = ppName.split(',')
+  return ppArr.find(ppString => ppString.indexOf(ppKey) > -1)
 }
 
 // 计算单条pp数据的性能值
@@ -225,4 +274,15 @@ const computeGeoMean = (inputArr) =>{
     count += 1
   })
   return Math.pow(testmentVal, 1/count).toFixed(3)
+}
+
+const addElementArrayToObj = (obj, arrKey, element) => {
+  if (!element) {
+    obj[arrKey] = []
+  }
+  if (!obj[arrKey] || !Array.isArray(obj[arrKey])) {
+    obj[arrKey] = [element]
+  } else {
+    obj[arrKey].push(element)
+  }
 }
