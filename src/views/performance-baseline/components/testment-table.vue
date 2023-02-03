@@ -120,7 +120,9 @@
           :prop="item.prop"
           :label="item.label"
           :key="index"
-          :width="item.width">
+          :width="item.width"
+          :formatter="item.formatter"
+        >
         </el-table-column>
       </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">
@@ -166,6 +168,8 @@ export interface Column {
   label: string
   prop: string
   show: boolean
+  width: string
+  formatter?: Function
 }
 export interface TableItem {
   [key: string]: any

@@ -609,7 +609,7 @@
                   ></el-tooltip>
                 </span>
               </template>
-              <!-- <span>{{ state.detailInfo.case_result.performance_data }}</span> -->
+              <span>{{ detailData.performanceVal }}</span>
             </el-descriptions-item>
             <!--
             <el-descriptions-item label="单位(描述)">

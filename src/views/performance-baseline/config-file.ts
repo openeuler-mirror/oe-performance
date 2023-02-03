@@ -1,9 +1,18 @@
 export const columnConfig = [
   {
     label: '性能数据',
-    prop: 'performance_data',
+    prop: 'performanceVal',
     show: true,
-    width: 130
+    width: 130,
+    formatter: (row: {}, column: {}, cellValue: number) => {
+      if (cellValue === undefined) {
+        return '暂无数据'
+      }
+      if (cellValue === -1) {
+        return '数据错误'
+      }
+      return cellValue
+    }
   },
   {
     label: '测试套',

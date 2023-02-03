@@ -20,8 +20,11 @@ export const combineJobs = (jobList) => {
   tempSubmit['groupData'] = ppGroup
   // 计算性能数据
   tempSubmit['tableDatas'] = mapGroupDataToTableData(ppGroup, tempSubmit.suite)
+  console.log(22)
+  tempSubmit['performanceVal'] = computeTotalPerformanceValue(tempSubmit['tableDatas'])
   return tempSubmit
 }
+
 // 每个job数据扁平、预处理
 const prePrecessJob = (job) => {
   const tempObj = reactive(flattenObj(job))
@@ -163,16 +166,32 @@ const groupDataForDefault = (ppGroup, tableDatas, suite) => {
     })
     tableDatas[tableInfo.tableName] = resultArr
   })
-  console.log(resultArr)
 }
 
+// 计算单条pp数据的性能值
 const computePerformanceValue = (ppData, tableInfo) => {
   const computeArr = []
   // 只取对应表格下的字段进行计算
   tableInfo.column.forEach(col => {
     computeArr.push(ppData[col.prop])
   })
-  ppData[`performanceVal_${tableInfo.tableName}`] = computeGeoMean(computeArr)
+  const geoMean = computeGeoMean(computeArr)
+  ppData[`performanceVal_${tableInfo.tableName}`] = geoMean
+  return geoMean
+}
+
+// 计算总的性能值
+const computeTotalPerformanceValue = (tableDatas) => {
+  console.log(111, tableDatas)
+  const performanceValList = []
+  Object.keys(tableDatas).forEach(tableName => {
+    const tablePerformanceValList = []
+    tableDatas[tableName].forEach(rowData => {
+      tablePerformanceValList.push(rowData[`performanceVal_${tableName}`])
+    })
+    performanceValList.push(computeGeoMean(tablePerformanceValList))
+  })
+  return computeGeoMean(performanceValList)
 }
 
 const computeMean = (inputArr) => {
