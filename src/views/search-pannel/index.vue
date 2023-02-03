@@ -154,14 +154,14 @@ const initailizefieldsList = () => {
 }
 
 // 页面初始化方法
-const initailizing = () => {
+const initailizing = (forcedUpdate = false) => {
   fieldsListForRender.value = initailizefieldsList()
   setFeildsData()
   setFieldSelection()
 
   if (props.suiteByScene) {
     setSuiteList()
-    setDefaultSuite()
+    setDefaultSuite(forcedUpdate)
   }
 }
 
@@ -210,7 +210,7 @@ const setSuiteList = () => {
 }
 // 性能基线页面中:
 // 设置默认选中的suite，如果url中有，则使用url的
-const setDefaultSuite = () => {
+const setDefaultSuite = (forced=false) => {
   let suite = []
   const queryObj = route.query
   if (queryObj.suite) {
@@ -221,7 +221,7 @@ const setDefaultSuite = () => {
     }
   }
   searchParams.value['suite'] = []
-  if (suite.length < 1) {
+  if (suite.length < 1 || forced) {
     searchParams.value['suite'] = suiteList.value[0] && [suiteList.value[0].suiteName]
     return
   }
@@ -435,7 +435,7 @@ const splitParamsByOrigin = (paramObj: objectItem) => {
 watch(
   () => route.query.scene,
   () => {
-    initailizing()
+    initailizing(true)
   }
 )
 

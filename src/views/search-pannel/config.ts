@@ -13,10 +13,10 @@ export const suiteConfig: configObject = {
     suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'lmbench3'}, { suiteName: 'stream'}],
   },
   dataBase: {
-    suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'lmbench3'}, { suiteName: 'stream'}],
+    suiteList: [{ suiteName: 'MySQL-OLTP'}],
   },
   distributedStorage: {
-    suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'lmbench3'}, { suiteName: 'stream'}],
+    suiteList: [{ suiteName: 'block'}],
   },
   cpu: {
     suiteList: [{ suiteName: 'unixbench'}, { suiteName: 'speccpu2006'}, { suiteName: 'speccpu2017'}],

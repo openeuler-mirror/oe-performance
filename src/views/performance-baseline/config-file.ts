@@ -55,63 +55,6 @@ export const columnConfig = [
   }
 ]
 
-export const columnConfig2 = [
-  {
-    label: '性能数据',
-    prop: 'performance_data',
-    show: true,
-    width: 130
-  },
-  {
-    label: '测试套',
-    prop: 'suite',
-    show: true,
-    width: 100,
-  },
-  {
-    label: '服务器型号',
-    prop: 'testbox',
-    show: true,
-    width: 260,
-  },
-  {
-    label: 'CPU频率',
-    prop: 'device.cpu.cpu_max_mhz',
-    show: true,
-    width: 100
-  },
-  {
-    label: 'CPU总核数',
-    prop: 'nr_cpu',
-    show: true,
-    width: 120
-  },
-  {
-    label: 'CPU型号',
-    prop: 'model_name',
-    show: true,
-    width: 300
-  },
-  {
-    label: '操作系统',
-    prop: 'osv',  // 需要拼接
-    show: true,
-    width: 260
-  },
-  {
-    label: '系统内核',
-    prop: 'kernel_version',
-    show: true,
-    width: 300
-  },
-  {
-    label: '测试人',
-    prop: 'my_account',
-    show: true,
-    width: 300
-  }
-]
-
 export const sceneConfig = {
   solution: [
     {
@@ -155,6 +98,7 @@ export interface configObject {
   [key: string]: any
 }
 
+// 可配置不同场景下使用不同的表格配置
 export const config: configObject = {
   bigData: {
     column: columnConfig
