@@ -89,7 +89,7 @@ const generateTableConfigsAndData = (tjobs, dimension:string) => {
       const tableName = `${filterName || ''}${labelName}${directionName > 0 ? '（越大越好）':'（越小越好）'}`
       tempConfig['tableName'] = tableName
 
-      const tempColumn = [{ label: tableConfig.kpi, prop: 'dimensionId' }]
+      const tempColumn = [{ label: tableConfig.x_param, prop: 'dimensionId' }]
       const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
       tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
         // 1、拿到当前tjob的维度值
