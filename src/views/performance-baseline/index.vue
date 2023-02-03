@@ -66,7 +66,7 @@ const getAllData = (params: searchParams) => {
   }
 
   matchCases.push({ match: {job_state: 'finished'} })
-  matchCases.push({ range: { time: { gte: 'now-30d/d' } } })
+  matchCases.push({ range: { time: { gte: 'now-1s0d/d' } } })
 
   // 获取选择的套件下的submitID list
   getPerformanceData({

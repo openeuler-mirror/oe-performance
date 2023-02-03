@@ -16,7 +16,7 @@ export const columnConfig = [
     label: '测试套',
     prop: 'suite',
     show: true,
-    width: 100,
+    width: 120,
   },
   {
     label: '服务器型号',

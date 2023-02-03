@@ -82,6 +82,7 @@ onMounted(() => {
         message: err.message,
         type: 'error'
       })
+      console.error(err)
     }).finally(() => {
       loading.value = false
     })

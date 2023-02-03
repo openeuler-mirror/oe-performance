@@ -115,16 +115,23 @@ const mapGroupDataToTableData = (ppGroup, suite) => {
   case 'unixbench':
     // 表格分成两组数据，一组展示pp参数=单核，一组展示pp参数=多核
     gruopDataForUnixbench(ppGroup, tableDatas, suite)
-    break;
+    break
   case 'netperf':
     // netperf不适用kpi做列，而是使用pp参数send_size或者test作为列名。需要转换数据维度
     groupDataForNetperf(ppGroup, tableDatas, suite)
-    break;
+    break
+  case 'speccpu2006':
+    groupDataForSpeccpu2006(ppGroup, tableDatas, suite)
+    break
+  case 'speccpu2017':
+    // 2017和2006几乎一样，就是数据归类到对应表格的逻辑有点小区别
+    groupDataForSpeccpu2017(ppGroup, tableDatas, suite)
+    break
   default:
     // stream、lmbench
     // 这个类型下kpi分布部在不同的表上，不需要对pp数据作区分
     groupDataForDefault(ppGroup, tableDatas, suite)
-    break;
+    break
   }
   return tableDatas
 }
@@ -152,6 +159,7 @@ const gruopDataForUnixbench = (ppGroup, tableDatas, suite) => {
 }
 
 const groupDataForNetperf = (ppGroup, tableDatas, suite) => {
+  // pp参数需要合并，因此每个表就一个pp对象
   const ppObjTCPStream = { 'li-testcase': 'Throughput_Mbps' }
   const ppObjDUPStream = { 'li-testcase': 'Throughput_Mbps' }
   const ppObjProtoclKind = { 'li-testcase': 'Throughput_tps' }
@@ -184,6 +192,75 @@ const groupDataForNetperf = (ppGroup, tableDatas, suite) => {
   addElementArrayToObj(tableDatas, 'TCP_STREAM', ppObjTCPStream)
   addElementArrayToObj(tableDatas, 'UDP_STREAM', ppObjDUPStream)
   addElementArrayToObj(tableDatas, 'Protocol_kind', ppObjProtoclKind)
+}
+
+const groupDataForSpeccpu2006 = (ppGroup, tableDatas, suite) => {
+  Object.keys(ppGroup).forEach(ppKey => {
+    const ppObj = {}
+    // 计算每一个kpi的值。
+    Object.keys(ppGroup[ppKey]).forEach(kpi => {
+      ppObj[kpi] = computeMean(ppGroup[ppKey][kpi])
+    })
+    ppObj['li-testcase'] = ppKey
+    const testItemVal = getPpParamAndValue(ppKey, 'pp.speccpu2006.test_item')?.split('=')[1]
+    const numTypeVal = getPpParamAndValue(ppKey, 'pp.speccpu2006.num_type')?.split('=')[1]
+    switch (testItemVal) {
+    case 'rate':
+      switch (numTypeVal) {
+      case 'int':
+        computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'intrate'))
+        addElementArrayToObj(tableDatas, 'intrate', ppObj)
+        break
+      case 'fp':
+        computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'fprate'))
+        addElementArrayToObj(tableDatas, 'fprate', ppObj)
+        break
+      }
+      break
+    case 'speed':
+      switch (numTypeVal) {
+      case 'int':
+        computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'intspeed'))
+        addElementArrayToObj(tableDatas, 'intspeed', ppObj)
+        break
+      case 'fp':
+        computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'fpspeed'))
+        addElementArrayToObj(tableDatas, 'fpspeed', ppObj)
+        break
+      }
+      break
+    }
+  })
+}
+
+const groupDataForSpeccpu2017 = (ppGroup, tableDatas, suite) => {
+  Object.keys(ppGroup).forEach(ppKey => {
+    const ppObj = {}
+    // 计算每一个kpi的值。
+    Object.keys(ppGroup[ppKey]).forEach(kpi => {
+      ppObj[kpi] = computeMean(ppGroup[ppKey][kpi])
+    })
+    ppObj['li-testcase'] = ppKey
+    const itemVal = getPpParamAndValue(ppKey, 'pp.speccpu2017.item')?.split('=')[1]
+    switch (itemVal) {
+    case 'intrate':
+      computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'intrate'))
+      addElementArrayToObj(tableDatas, 'intrate', ppObj)
+      break
+    case 'intspeed':
+      computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'intspeed'))
+      addElementArrayToObj(tableDatas, 'intspeed', ppObj)
+      break
+    case 'fpspeed':
+      computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'fpspeed'))
+      addElementArrayToObj(tableDatas, 'fpspeed', ppObj)
+      break  
+    case 'fprate':
+      computePerformanceValue(ppObj, tableColumnMap[suite].find(table => table.tableName === 'fprate'))
+      addElementArrayToObj(tableDatas, 'fprate', ppObj)
+      break
+    }
+  })
 }
 
 const groupDataForDefault = (ppGroup, tableDatas, suite) => {
