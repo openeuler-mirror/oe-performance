@@ -16,7 +16,7 @@
       v-else
       :tjobsAll="inputData"
       :dimension="dimension"
-      :suiteControl="searchParams?.suite"
+      :suiteControl="searchParams?.suite[0]"
     ></result-table>
   </div>
 </template>

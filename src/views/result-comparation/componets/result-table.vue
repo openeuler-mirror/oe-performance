@@ -8,30 +8,39 @@
         :key="suite"
         lazy
       >
-        {{ suite }}
-        <div v-for="(config, tableIdx) in tableConfigs[suite]" :key="config.tableName">
-          {{ config.tableName }}
-          <el-table border :data="tableDatas[suite][tableIdx]">
-            <el-table-column
-              :prop="config.column[0].prop"
-              :label="config.column[0].label"
-              :key="config.column[0].prop"
-              width="200"
-              fixed
-            >
-            </el-table-column>
-            <el-table-column
-              v-for="item in config.column.slice(1)"
-              :prop="item.prop"
-              :label="item.label"
-              :key="item.prop">
-            </el-table-column>
-          </el-table>
-          <el-card v-if="tableDatas[suite][tableIdx].length !== 0" shadow="hover" style="margin-bottom:20px">
-            <compare-chart
-            :chartConfigs="tableConfigs[suite][tableIdx]"
-            :chartData="tableDatas[suite][tableIdx]"/>
-          </el-card>
+        <div v-if="isSuiteDataEmpty(tableDatas[suite])" class="empty-content">
+          <img src="@/assets/empty.png" />
+          <h5>暂无数据</h5>
+        </div>
+        <div
+          v-else
+          v-for="(config, tableIdx) in tableConfigs[suite]"
+          :key="config.tableName"
+        >
+          <template v-if="tableDatas[suite][tableIdx].length > 0">
+            {{ config.tableName }}
+            <el-table border :data="tableDatas[suite][tableIdx]">
+              <el-table-column
+                :prop="config.column[0].prop"
+                :label="config.column[0].label"
+                :key="config.column[0].prop"
+                min-width="200"
+                fixed
+              >
+              </el-table-column>
+              <el-table-column
+                v-for="item in config.column.slice(1)"
+                :prop="item.prop"
+                :label="item.label"
+                :key="item.prop">
+              </el-table-column>
+            </el-table>
+            <el-card v-if="tableDatas[suite][tableIdx].length !== 0" shadow="hover" style="margin-bottom:20px">
+              <compare-chart
+              :chartConfigs="tableConfigs[suite][tableIdx]"
+              :chartData="tableDatas[suite][tableIdx]"/>
+            </el-card>
+          </template>
         </div>
       </el-tab-pane>
     </el-tabs>
@@ -213,6 +222,17 @@ const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
   return true
 }
 
+const isSuiteDataEmpty = (tableDatasUnderSuite) => {
+  let emptyFlag = true
+  if (tableDatasUnderSuite.length < 1) return true
+  tableDatasUnderSuite.forEach(tableDataByIdx => {
+    if (tableDataByIdx.length > 0) {
+      emptyFlag = false
+    }
+  })
+  return emptyFlag
+}
+
 const handleTabChange = () => {
   nextTick(() => {
     const event = new Event('resize')
@@ -232,5 +252,9 @@ watchEffect(() => {
 }
 .el-table {
   margin-bottom: 20px;
+}
+.empty-content {
+  padding: 80px 0;
+  text-align: center;
 }
 </style>
