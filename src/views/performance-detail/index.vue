@@ -609,7 +609,26 @@
                   ></el-tooltip>
                 </span>
               </template>
-              <span class="important-value">{{ performanceValFormatter({},{},detailData.performanceVal) }}</span>
+              <span
+                v-if="detailData.suite!=='lmbench'"
+                class="important-value"
+              >
+                {{ performanceValFormatter({},{},detailData.performanceVal) }}
+              </span>
+              <template v-else>
+                <p>
+                  <span>Bandwidth性能值：</span>
+                  <span class="important-value">
+                    {{ performanceValFormatter({},{},detailData.performanceVal_local_bandwidths) }}
+                  </span>
+                </p>
+                <p>
+                  <span>Latency性能值：</span>
+                  <span class="important-value">
+                    {{ performanceValFormatter({},{},detailData.performanceVal) }}
+                  </span>
+                </p>
+              </template>
             </el-descriptions-item>
             <!--
             <el-descriptions-item label="单位(描述)">

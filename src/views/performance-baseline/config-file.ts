@@ -3,14 +3,7 @@ export const columnConfig = [
     label: '性能数据',
     prop: 'performanceVal',
     show: true,
-    width: 130,
-    formatter: (row: {}, column: {}, cellValue: number) => {
-      if (cellValue === undefined || cellValue === -1) {
-        return '暂无数据'
-      }
-      return cellValue
-    },
-    'className': 'important-value'
+    width: 180,
   },
   {
     label: '测试套',

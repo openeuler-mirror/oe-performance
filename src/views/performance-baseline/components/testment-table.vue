@@ -121,9 +121,29 @@
           :label="item.label"
           :key="index"
           :width="item.width"
-          :formatter="item.formatter"
-          :className="item.className"
+          :min-width="item.minWidth"
+          :class-name="item.className"
         >
+          <template #default="scope" v-if="item.prop==='performanceVal'">
+            <div
+              v-if="scope.row.suite!=='lmbench'"
+              class="important-value"
+            >{{ perfValformatter(scope.row.performanceVal) }}</div>
+            <div v-else>
+              <p>
+                <span>Bandwidth：</span>
+                <span class="important-value">
+                  {{ perfValformatter(scope.row.performanceVal_local_bandwidths) }}
+                </span>
+              </p>
+              <p>
+                <span>Latency：</span>
+                <span class="important-value">
+                  {{ perfValformatter(scope.row.performanceVal) }}
+                </span>
+              </p>
+            </div>
+          </template>
         </el-table-column>
       </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">
@@ -218,7 +238,7 @@ const searcherOptions = [
 ]
 
 const tableData = ref<TableItem[]>([])
-let originData: TableItem[] = []
+// let originData: TableItem[] = []
 
 const allColumn = ref([] as Column[])
 const tableColumn = ref([] as Column[])
@@ -404,9 +424,17 @@ const handleExportCsv = () => {
   }
 }
 
+const perfValformatter = (cellValue: number) => {
+  if (cellValue === undefined || cellValue === -1) {
+    return '暂无数据'
+  }
+  return cellValue
+}
+
 const handleReFresh = () => {
   emit('refreash')
 }
+
 const getProperty = (item:any, key:string) => {
   const index = key.split('.')
   index.forEach(e => {
@@ -421,12 +449,6 @@ watch(
   }
 )
 
-// watchEffect(() => {
-//   if (searcherValue.value === '') {
-//     tableData.value = originData
-//   }
-// })
-
 // 自动分页
 watchEffect(() => {
   const startIndex = (currentPage.value - 1) * pageSize.value
@@ -438,7 +460,7 @@ watchEffect(() => {
 // 当前页数据变化时，获取jobs数据
 watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
-  originData = JSON.parse(JSON.stringify(tableData.value))
+  // originData = JSON.parse(JSON.stringify(tableData.value))
 })
 
 onMounted(() => {
@@ -501,7 +523,7 @@ a {
   margin-top: 30px;
 }
 
-:deep(td.important-value) {
-    color: var(--oe-perf-color-primary);
-  }
+.important-value {
+  color: var(--oe-perf-color-primary);
+}
 </style>

@@ -20,7 +20,10 @@ export const combineJobs = (jobList) => {
   tempSubmit['groupData'] = ppGroup
   // 计算性能数据
   tempSubmit['tableDatas'] = mapGroupDataToTableData(ppGroup, tempSubmit.suite)
-  tempSubmit['performanceVal'] = computeTotalPerformanceValue(tempSubmit['tableDatas'])
+  const perfValData = computeTotalPerformanceValue(tempSubmit['tableDatas'], tempSubmit.suite)
+  Object.keys(perfValData).forEach(perfValKey => {
+    tempSubmit[perfValKey] = perfValData[perfValKey]
+  })
   return tempSubmit
 }
 
@@ -107,7 +110,6 @@ const getjobStateData = (jobList) => {
 }
 
 const mapGroupDataToTableData = (ppGroup, suite) => {
-  console.log(ppGroup)
   const tableDatas = {}
   if (!tableColumnMap[suite]) {
     return {}
@@ -306,18 +308,25 @@ const computePerformanceValue = (ppData, tableInfo) => {
 }
 
 // 计算总的性能值
-const computeTotalPerformanceValue = (tableDatas) => {
+const computeTotalPerformanceValue = (tableDatas, suite) => {
   const performanceValList = []
+  const resultObj = {}
   Object.keys(tableDatas).forEach(tableName => {
     const tablePerformanceValList = []
     // 计算每张表的总性能值（合并表中不同pp的性能值）
     tableDatas[tableName].forEach(rowData => {
       tablePerformanceValList.push(rowData[`performanceVal_${tableName}`])
     })
+    // lmbench特殊处理，得到两个性能值：perfVallocal_bandwidths和perfVal。分别对应bandwidth和latency
+    if (suite === 'lmbench' && tableName === 'local_bandwidths') {
+      resultObj['performanceVal_local_bandwidths'] = computeGeoMean(tablePerformanceValList)
+      return
+    }
     performanceValList.push(computeGeoMean(tablePerformanceValList))
   })
+  resultObj['performanceVal'] = computeGeoMean(performanceValList)
   // 返回所有表性能值的几何平均值
-  return computeGeoMean(performanceValList)
+  return resultObj
 }
 
 const computeMean = (inputArr) => {
