@@ -5,44 +5,43 @@
       :searchLoading="searchLoading"
       :fieldsBySecne="availableSuites"
     />
-    <div class="dimension-controller">
-      <div class="label">对比维度</div>
-      <div class="dimension-controller-inner">
-        <el-radio-group v-model="dimension">
-          <el-radio-button label="osv" />
-          <el-radio-button label="testbox" />
-          <el-radio-button label="tags" />
-        </el-radio-group>
-        <el-input></el-input>
-      </div>
-    </div>
   </div>
   <div class="oe-perf-section" v-loading="searchLoading">
     <div v-if="!isSearched" class="banner-text">请搜索数据进行对比</div>
-    <result-table 
-      v-else
-      :tjobsAll="inputData"
-      :dimension="dimension"
-      :suiteControl="searchParams?.suite[0]"
-    ></result-table>
+    <template v-else>
+      <dimension-controller 
+        :osv-options="osvOptions"
+        :testbox-options="testboxOptions"
+        :tags-options="tagsOptions"
+        @filtering="handleDimensionFiltering"
+      />
+      <result-table 
+        :tjobsAll="inputData"
+        :dimension="filterDimension"
+        :filterListUnderDimension="filterList"
+        :suiteControl="searchParams?.suite[0]"
+      ></result-table>
+    </template>
+
   </div>
 </template>
     
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, Ref } from 'vue'
 import SearchPannel from '@/views/search-pannel/index.vue'
+import dimensionController from './componets/dimension-controller.vue'
 import ResultTable from './componets/result-table.vue'
+// util tool
 import { flattenObj } from '@/utils/utils'
-
+// store
 import { useTestboxStore } from '@/stores/performanceData'
-
+// api
 import { getPerformanceData } from '@/api/performance'
-
+// configs
 import { kpiMaps, kpiMapFuncs, addtionalKpiMaps } from './config.js'
 
 const testboxStore = useTestboxStore()
 
-const dimension = ref('osv')
 const availableSuites = ['stream', 'netperf', 'lmbench', 'unixbench', 'libmicro']
 
 // ejobs
@@ -56,6 +55,13 @@ const searchParams = ref({})
 const searchLoading = ref(false)
 
 const isSearched = ref(false)
+
+const osvOptions = ref(new Set())
+const testboxOptions = ref(new Set())
+const tagsOptions = ref(new Set())
+
+const filterDimension = ref('osv')
+const filterList:Ref<string[]> = ref([])
 
 // 获取jobs数据
 const onSearch = (params) => {
@@ -105,14 +111,20 @@ const getTotalData = (searchParams) => {
     res?.data?.hits?.hits?.filter(item => {
       return item._source.stats && Object.keys(item._source.stats).length > 0
     }).forEach(item => {
-      const tempFlattenItem = flattenObj(item._source)       // jobs转换成ejobs
+      const tempFlattenItem = flattenObj(item._source)  
+      // jobs转换成ejobs
       tempFlattenItem['osv'] = `${tempFlattenItem.os}@${tempFlattenItem.os_version}` // 增加需组装的参数
       // 保存硬件信息
       addHardwareInfoToJob(tempFlattenItem)
       // 生成ejobs
       constructEjobData(tempFlattenItem, ejobs, ejobsMap)
+      // 记录可选择项
+      tempFlattenItem['osv'] && osvOptions.value.add(tempFlattenItem['osv'])
+      tempFlattenItem['testbox'] && testboxOptions.value.add(tempFlattenItem['testbox'])
+      tempFlattenItem['tags'] && tagsOptions.value.add(tempFlattenItem['tags'])
     })
     console.log('ejobs: ', ejobs, ejobsMap)
+    console.log(osvOptions, testboxOptions, tagsOptions)
     e2tConverter(ejobs, tjobs)
     inputData.value = tjobs
   }).finally(() => {
@@ -192,6 +204,11 @@ const resetData = () => {
   ejobs = {}
   ejobsMap = {}
   tjobs = {}
+}
+
+const handleDimensionFiltering = (dimension: string, List: Array<string>) => {
+  filterDimension.value = dimension
+  filterList.value = List
 }
 
 </script>
