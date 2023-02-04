@@ -40,7 +40,7 @@
               v-if="paramKey==='osv'"
               v-model="searchParams[paramKey]"
               :loading="subField[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
-              :options="osvOptions"
+              :options="subField[paramKey].fieldSettings.listValues"
               :props="cascaderProps"
               collapse-tags
               collapse-tags-tooltip
@@ -269,9 +269,12 @@ const getFieldsOptions = () => {
       fieldsConfig[field].fieldSettings.listValues = originData
       // 获取对应field的listValues引用
       const staticValues = fieldsConfig[field].fieldSettings.listValues || []
-      addNewOptionValues(staticValues, listValues)
       if (field === 'osv') {
-        constrcutOsvOptions(staticValues)
+        const osvOptions = constrcutOsvOptions(listValues)
+        console.log(osvOptions)
+        addNewOptionValues(staticValues, osvOptions)
+      } else {
+        addNewOptionValues(staticValues, listValues)
       }
     })
   }).finally(() => {
@@ -281,7 +284,7 @@ const getFieldsOptions = () => {
 
 // 设置osv 分组选项
 const constrcutOsvOptions = (osvList) => {
-  if (!osvList || osvList.length < 1) return
+  if (!osvList || osvList.length < 1) return []
   const osMap = {}
   const osvListNew = []
   osvList.forEach((osv:string) => {
@@ -314,7 +317,8 @@ const constrcutOsvOptions = (osvList) => {
     }
   })
   Object.keys(osMap).forEach(os => { osvListNew.push(osMap[os]) })
-  osvOptions.value = osvListNew
+  return osvListNew
+  // sourceArr.push(...osvListNew)
 }
 // 获取主机相关搜索条件。
 const getHostOptions = () => {
@@ -370,7 +374,6 @@ const handleReset = () => {
 }
 
 const handleSearch = () => {
-  console.log(searchParams.value)
   // 记录查询条件到url上
   setQueryToUrl()
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
