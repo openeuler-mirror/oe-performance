@@ -147,7 +147,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  (event: 'search', params: searchParams, searchTime: number): void
+  (event: 'search', params: searchParams, searchTime: number): void,
+  // 当搜索条件重置是
+  (event: 'resetSearchValue'): void
 }>()
 
 let fieldsConfig = JSON.parse(JSON.stringify(fieldsConfiguration))
@@ -194,14 +196,14 @@ const initailizefieldsList = () => {
 }
 
 // 页面初始化方法
-const initailizing = (forcedUpdate = false) => {
+const initailizing = () => {
   fieldsListForRender.value = initailizefieldsList()
   setFeildsData()
   setFieldSelection()
 
   if (props.suiteByScene) {
     setSuiteList()
-    setDefaultSuite(forcedUpdate)
+    setDefaultSuite()
   }
 }
 
@@ -251,7 +253,7 @@ const setSuiteList = () => {
 }
 // 性能基线页面中:
 // 设置默认选中的suite，如果url中有，则使用url的
-const setDefaultSuite = (forced=false) => {
+const setDefaultSuite = (forcedUpdateSuite=false) => {
   let suite = []
   const queryObj = route.query
   if (queryObj.suite) {
@@ -262,7 +264,7 @@ const setDefaultSuite = (forced=false) => {
     }
   }
   searchParams.value['suite'] = []
-  if (suite.length < 1 || forced) {
+  if (suite.length < 1 || forcedUpdateSuite) {
     searchParams.value['suite'] = suiteList.value[0] && [suiteList.value[0].suiteName]
     return
   }
@@ -478,7 +480,9 @@ const handleUpdateFields = () => {
 watch(
   () => route.query.scene,
   () => {
-    initailizing(true)
+    emit('resetSearchValue')
+    setSuiteList()
+    setDefaultSuite(true) // 这里个会更新suite，触发下一个的watch，加载新的查询条件并重置searchParams
   }
 )
 
@@ -486,13 +490,12 @@ watch(
 // 需要调整
 watch(
   () => searchParams.value.suite,
-  (prev) => {
+  (curv) => {
     if (props.suiteByScene) {
       getFieldsOptions()
       getHostOptions()
       // 当suite不一致时，候选项可能会不能匹配原suite数据，因此需要重置搜索内容
-      searchParams.value = {}
-      searchParams.value.suite = prev
+      searchParams.value = { suite: curv }
     }
   }
 )

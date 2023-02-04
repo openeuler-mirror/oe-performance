@@ -1,6 +1,9 @@
 <template>
   <div class="oe-perf-section">
-    <search-pannel @search="getAllData" suiteByScene></search-pannel>
+    <search-pannel
+      @search="getAllData"
+      @reset-search-value="clearTableData"
+      suiteByScene></search-pannel>
   </div>
   <div class="oe-perf-section">
     <testment-table
@@ -99,6 +102,10 @@ const getAllData = (params: searchParams, searchTime: number) => {
   }).finally(() => {
     submitDataLoading.value = false
   })
+}
+
+const clearTableData = () => {
+  data.value =[]
 }
 </script>
 
