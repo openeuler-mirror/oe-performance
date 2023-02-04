@@ -72,10 +72,10 @@ interface Aggs {
   [propName: string]: any
 }
 export function getJobValueList(params:any) {
-  const { jobFieldList, byScene } = params
+  const { jobFieldList, searchTime = 10, byScene } = params
   const aggs: Aggs = {}
   const mustArr = []
-  mustArr.push({ range: { time: { gte: 'now-10d/d' } } })
+  mustArr.push({ range: { time: { gte: `now-${searchTime}d/d` } } })
   if (byScene && byScene?.length > 0) {
     mustArr.push({ terms: { suite: byScene } })
   }

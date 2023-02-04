@@ -1,8 +1,8 @@
 <template>
   <div class="performance-baseline-search-pannel">
     <!--测试组件只在性能基线页面中使用-->
-    <el-row class="suite-selection" v-if="suiteByScene">
-      <el-col :span="2">
+    <el-row class="suite-selection" v-if="suiteByScene" :gutter="4">
+      <el-col class="suite-selection-label" :span="2">
         <span>测试组件:</span>
       </el-col>
       <el-col :span="22">
@@ -16,7 +16,7 @@
       </el-col>
     </el-row>
     <!--测试组件 end-->
-    <el-row class="search-field-section">
+    <el-row class="search-field-section" :gutter="4">
       <el-col :span="2">
         <span>筛选内容:</span>
       </el-col>
@@ -71,6 +71,41 @@
         </el-row>
       </el-col>
     </el-row>
+    <el-row class="search-field-section" :gutter="4">
+      <el-col :span="2">
+        <span class="search-field-section-label">数据时间:</span>
+      </el-col>
+      <el-col :span="22">
+        <div class="time-controller">
+          获取距当前
+          <el-input-number
+            v-model="searchTime"
+            controls-position="right"
+            size="small"
+            :min="1"
+            :max="365"
+            :precision="0"
+          />
+          天的数据
+          <el-button
+            class="update-button"
+            link
+            type="primary"
+            :disabled="jobFieldsLoading || hostFieldsLoading"
+            @click="handleUpdateFields"
+          >更新筛选项</el-button>
+          <div class="loading-icon" v-if="jobFieldsLoading || hostFieldsLoading" v-loading="1"></div>
+          <el-tooltip placement="top" effect="light">
+            <template #content>
+              <p>提示1：系统默认搜索 距当前时间10天 内的数据。用户可根据需要修改.</p>
+              <p>如果使用较长跨度的搜索时间，可能会导致查询时间较长。</p>
+              <p>提示2：修改搜索时间后，请手动更新筛选项，获取目标时间跨度内的数据可筛选项。</p>
+            </template>
+            <el-icon class="update-tooltip"><QuestionFilled /></el-icon>
+          </el-tooltip>
+        </div>
+      </el-col>
+    </el-row>
     <el-row justify="center">
       <el-button @click="handleReset">重置</el-button>
       <el-button
@@ -91,7 +126,7 @@ import { suiteConfig, fieldsConfiguration } from './config'
 
 import { useTestboxStore } from '@/stores/performanceData'
 import { parseQueryStringTo2dArray } from './utils'
-
+// api
 import { getJobValueList, getTestBoxes } from '@/api/performance'
 
 const props = defineProps({
@@ -112,7 +147,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  (event: 'search', params: searchParams): void
+  (event: 'search', params: searchParams, searchTime: number): void
 }>()
 
 let fieldsConfig = JSON.parse(JSON.stringify(fieldsConfiguration))
@@ -132,6 +167,7 @@ const fieldOrigin = {} as objectItem // 字典，用来判断某个field字段�
 const hostFieldList = [] as any // 中间数据，用来循环host类型的field字段
 const jobFieldList = [] as any // 中间数据，用来循环job类型的field字段
 
+const searchTime = ref(10)
 const searchParams = ref({} as objectItem)
 const cascaderProps = { multiple: true }
 
@@ -236,26 +272,12 @@ const setDefaultSuite = (forced=false) => {
   })
 }
 
-// 切换suite时，重新获取fields的可选值
-// 需要调整
-watch(
-  () => searchParams.value.suite,
-  (prev) => {
-    if (props.suiteByScene) {
-      getFieldsOptions()
-      getHostOptions()
-      // 当suite不一致时，候选项可能会不能匹配原suite数据，因此需要重置搜索内容
-      searchParams.value = {}
-      searchParams.value.suite = prev
-    }
-  }
-)
-
 // 获取搜索条件
 const getFieldsOptions = () => {
   jobFieldsLoading.value  = true
   getJobValueList({
     jobFieldList,
+    searchTime: searchTime.value,
     byScene: (props.suiteByScene && searchParams.value.suite) || (props.fieldsBySecne.length > 0 && props.fieldsBySecne)
   }).then(res => {
     const aggs = res.data.aggregations || {}
@@ -405,9 +427,9 @@ const handleSearch = () => {
       searchParamData.testbox = testboxSearchList
     }
 
-    emit('search', searchParamData)
+    emit('search', searchParamData, searchTime.value)
   } else {
-    emit('search', jobParams)
+    emit('search', jobParams, searchTime.value)
   }
 }
 
@@ -441,11 +463,35 @@ const splitParamsByOrigin = (paramObj: objectItem) => {
   return { hostParams, jobParams }
 }
 
+const handleUpdateFields = () => {
+  getFieldsOptions()
+  if (props.suiteByScene) {
+    const oldSuite = searchParams.value.suite
+    searchParams.value = {}
+    searchParams.value.suite = oldSuite
+  }
+}
+
 // 当场景切换时，初始化页面
 watch(
   () => route.query.scene,
   () => {
     initailizing(true)
+  }
+)
+
+// 切换suite时，重新获取fields的可选值
+// 需要调整
+watch(
+  () => searchParams.value.suite,
+  (prev) => {
+    if (props.suiteByScene) {
+      getFieldsOptions()
+      getHostOptions()
+      // 当suite不一致时，候选项可能会不能匹配原suite数据，因此需要重置搜索内容
+      searchParams.value = {}
+      searchParams.value.suite = prev
+    }
   }
 )
 
@@ -482,7 +528,15 @@ onMounted(() => {
   border-bottom-right-radius: 5px;
 }
 
+.suite-selection-label  {
+  line-height: 32px;
+}
+
+
 .search-field-section {
+  &-label {
+    line-height: 32px;
+  }
   .react-row {
     .field-item {
       position: relative;
@@ -503,5 +557,26 @@ onMounted(() => {
 span {
   font-size: 14px;
   min-width: 60px;
+}
+.time-controller {
+  display: inline-flex;
+  align-items: center;
+  font-size: 14px;
+  :deep(.el-input-number) {
+    margin: 0 8px;
+  }
+  .update-button {
+    margin-left:12px;
+  }
+  :deep(.loading-icon) {
+    width: 12px;
+    .circular {
+      width: 12px;
+    }
+  }
+  :deep(.update-tooltip) {
+    margin-left:8px;
+    cursor: pointer;
+  }
 }
 </style>

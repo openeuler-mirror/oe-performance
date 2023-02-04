@@ -54,7 +54,7 @@ const setMustCase = (searchParams) => {
   return tempArr
 }
 
-const getAllData = (params: searchParams) => {
+const getAllData = (params: searchParams, searchTime: number) => {
   searchParams.value = params
   submitDataLoading.value = true
 
@@ -66,7 +66,7 @@ const getAllData = (params: searchParams) => {
   }
 
   matchCases.push({ match: {job_state: 'finished'} })
-  matchCases.push({ range: { time: { gte: 'now-10d/d' } } })
+  matchCases.push({ range: { time: { gte: `now-${searchTime}d/d` } } })
 
   // 获取选择的套件下的submitID list
   getPerformanceData({

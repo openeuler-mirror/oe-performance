@@ -64,9 +64,9 @@ const filterDimension = ref('osv')
 const filterList:Ref<string[]> = ref([])
 
 // 获取jobs数据
-const onSearch = (params) => {
+const onSearch = (params, searchTime:number) => {
   searchParams.value = params
-  getTotalData(params)
+  getTotalData(params, searchTime)
 }
 
 const setMustCase = (searchParams) => {
@@ -85,7 +85,7 @@ const setMustCase = (searchParams) => {
   return tempArr
 }
 
-const getTotalData = (searchParams) => {
+const getTotalData = (searchParams, searchTime: number) => {
   searchLoading.value = true
   const mustCases = setMustCase(searchParams)
 
@@ -101,7 +101,7 @@ const getTotalData = (searchParams) => {
           must: [
             { terms: { suite: availableSuites} }, // 对应配置文件，目前只能查到这几个数据
             ...mustCases,
-            { 'range': {'time': {'gte': 'now-10d/d'} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试
+            { 'range': {'time': {'gte': `now-${searchTime}d/d`} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试
           ],
         },
       }
