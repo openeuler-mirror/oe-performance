@@ -133,7 +133,6 @@ const hostFieldList = [] as any // 中间数据，用来循环host类型的field
 const jobFieldList = [] as any // 中间数据，用来循环job类型的field字段
 
 const searchParams = ref({} as objectItem)
-const osvOptions =ref([])
 const cascaderProps = { multiple: true }
 
 interface objectItem {
@@ -241,10 +240,13 @@ const setDefaultSuite = (forced=false) => {
 // 需要调整
 watch(
   () => searchParams.value.suite,
-  () => {
+  (prev) => {
     if (props.suiteByScene) {
       getFieldsOptions()
       getHostOptions()
+      // 当suite不一致时，候选项可能会不能匹配原suite数据，因此需要重置搜索内容
+      searchParams.value = {}
+      searchParams.value.suite = prev
     }
   }
 )
@@ -271,7 +273,6 @@ const getFieldsOptions = () => {
       const staticValues = fieldsConfig[field].fieldSettings.listValues || []
       if (field === 'osv') {
         const osvOptions = constrcutOsvOptions(listValues)
-        console.log(osvOptions)
         addNewOptionValues(staticValues, osvOptions)
       } else {
         addNewOptionValues(staticValues, listValues)
