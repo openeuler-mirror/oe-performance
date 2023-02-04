@@ -76,7 +76,7 @@ export function getJobValueList(params:any) {
   const aggs: Aggs = {}
   const mustArr = []
   mustArr.push({ range: { time: { gte: 'now-10d/d' } } })
-  if (byScene) {
+  if (byScene && byScene?.length > 0) {
     mustArr.push({ terms: { suite: byScene } })
   }
   jobFieldList.forEach((field:string) => {

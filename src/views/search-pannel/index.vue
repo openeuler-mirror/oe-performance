@@ -95,10 +95,15 @@ import { parseQueryStringTo2dArray } from './utils'
 import { getJobValueList, getTestBoxes } from '@/api/performance'
 
 const props = defineProps({
-  // 是否根据场景区分展示套件。只在性能基线表格页面中使用
+  // 是否根据场景区分展示套件, 并将套件的展示通过独立组建展示出来。只在性能基线表格页面中使用
   suiteByScene: {
     type: Boolean,
     default: false
+  },
+  // 外部指定一个数组，元素为套件名称。通过这个套件数组来控制获取选择菜单项
+  fieldsBySecne: {
+    type: Array,
+    default: () => []
   },
   searchLoading: {
     type: Boolean,
@@ -249,7 +254,7 @@ const getFieldsOptions = () => {
   jobFieldsLoading.value  = true
   getJobValueList({
     jobFieldList,
-    byScene: props.suiteByScene && searchParams.value.suite
+    byScene: (props.suiteByScene && searchParams.value.suite) || (props.fieldsBySecne.length > 0 && props.fieldsBySecne)
   }).then(res => {
     const aggs = res.data.aggregations || {}
     Object.keys(aggs).forEach(field => {
@@ -365,6 +370,7 @@ const handleReset = () => {
 }
 
 const handleSearch = () => {
+  console.log(searchParams.value)
   // 记录查询条件到url上
   setQueryToUrl()
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)

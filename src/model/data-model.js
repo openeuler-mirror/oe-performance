@@ -95,6 +95,7 @@ export const jobModel = {
                                 // 查询jobs后，进一步追加可能的值
                                 // 可按特定规则动态生成 lable: 字段
                                 listValues: [
+                                        /* 给出的这些系统在目前的数据库中和数据不匹配。因此直接使用获取到的osv
                                         { value: 'openeuler@20.03' },
                                         { value: 'openeuler@22.03' },
                                         { value: 'openeuler@22.09' },
@@ -121,6 +122,7 @@ export const jobModel = {
                                         { value: 'ubuntu@22.04' },
                                         { value: 'uos-deb@20',          label: 'UOS桌面版 V20' },
                                         { value: 'uos-rpm-e@20',        label: 'UOS服务器版 V20' },
+                                        */
                                 ],
                         },
                 },

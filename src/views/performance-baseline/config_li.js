@@ -1070,5 +1070,179 @@ export const tableColumnMap = {
         }
       ]
     }
+  ],
+  // mock大数据表格
+  'Spark': [
+    {
+      tableName: 'spark hibench',
+      column: [
+        {
+          label: 'Wrodcount',
+          prop: 'Wrodcount'
+        },
+        {
+          label: 'Terasort',
+          prop: 'Terasort'
+        },
+        {
+          label: 'Kmeans',
+          prop: 'Kmeans'
+        }
+      ]
+    },
+    {
+      tableName: 'spark sql',
+      column: [
+        {
+          label: 'sql1',
+          prop: 'sql1'
+        },
+        {
+          label: 'sql2',
+          prop: 'sql2'
+        },
+        {
+          label: 'sql3',
+          prop: 'sql3'
+        },
+        {
+          label: 'sql4',
+          prop: 'sql4'
+        },
+        {
+          label: 'sql5',
+          prop: 'sql5'
+        },
+        {
+          label: 'sql6',
+          prop: 'sql6'
+        },
+        {
+          label: 'sql7',
+          prop: 'sql7'
+        },
+        {
+          label: 'sql8',
+          prop: 'sql8'
+        },
+        {
+          label: 'sql9',
+          prop: 'sql9'
+        },
+        {
+          label: 'sql10',
+          prop: 'sql10'
+        },
+      ]
+    }
+  ],
+  'Hive': [
+    {
+      tableName: 'hive sql',
+      column: [
+        {
+          label: 'sql1',
+          prop: 'sql1'
+        },
+        {
+          label: 'sql2',
+          prop: 'sql2'
+        },
+        {
+          label: 'sql3',
+          prop: 'sql3'
+        },
+        {
+          label: 'sql4',
+          prop: 'sql4'
+        },
+        {
+          label: 'sql5',
+          prop: 'sql5'
+        },
+        {
+          label: 'sql6',
+          prop: 'sql6'
+        },
+        {
+          label: 'sql7',
+          prop: 'sql7'
+        },
+        {
+          label: 'sql8',
+          prop: 'sql8'
+        },
+        {
+          label: 'sql9',
+          prop: 'sql9'
+        },
+        {
+          label: 'sql10',
+          prop: 'sql10'
+        },
+      ]
+    }
+  ],
+  'Hbase': [
+    {
+      tableName: 'hbase',
+      column: [
+        {
+          label: '1T-randwrite',
+          prop: '1T-randwrite'
+        },
+        {
+          label: 'Terasort',
+          prop: '100G-randread'
+        },
+        {
+          label: '1TBulkload',
+          prop: '1TBulkload'
+        }
+      ]
+    }
+  ],
+  'MySQL-OLTP': [
+    {
+      tableName: 'benchmarksql',
+      column: []
+    }
+  ],
+  'block': [
+    {
+      tableName: '容量型',
+      column: [
+        {
+          label: '1M-randrw',
+          prop: '1M-randrw'
+        },
+        {
+          label: '4K-randwrite',
+          prop: '4K-randwrite'
+        },
+        {
+          label: '4k-randrw',
+          prop: '4K-randrw'
+        }
+      ]
+    },
+    {
+      tableName: '缓存型',
+      column: [
+        {
+          label: '1M-randrw',
+          prop: '1M-randrw'
+        },
+        {
+          label: '4K-randwrite',
+          prop: '4K-randwrite'
+        },
+        {
+          label: '4k-randrw',
+          prop: '4K-randrw'
+        }
+      ]
+    }
   ]
+  // mock-end
 }

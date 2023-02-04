@@ -1,6 +1,10 @@
 <template>
   <div class="oe-perf-section">
-    <search-pannel @search="onSearch" :searchLoading="searchLoading"/>
+    <search-pannel
+      @search="onSearch"
+      :searchLoading="searchLoading"
+      :fieldsBySecne="availableSuites"
+    />
     <div class="dimension-controller">
       <div class="label">对比维度</div>
       <div class="dimension-controller-inner">
@@ -39,6 +43,7 @@ import { kpiMaps, kpiMapFuncs, addtionalKpiMaps } from './config.js'
 const testboxStore = useTestboxStore()
 
 const dimension = ref('osv')
+const availableSuites = ['stream', 'netperf', 'lmbench', 'unixbench', 'libmicro']
 
 // ejobs
 let ejobs = {}
@@ -88,7 +93,7 @@ const getTotalData = (searchParams) => {
       'query': {
         bool: {
           must: [
-            { terms: { suite: ['stream', 'netperf', 'lmbench', 'unixbench', 'libmicro']} }, // 对应配置文件，目前只能查到这几个数据
+            { terms: { suite: availableSuites} }, // 对应配置文件，目前只能查到这几个数据
             ...mustCases,
             { 'range': {'time': {'gte': 'now-10d/d'} } } // 需要限制数据时间和主机，不然加载时间太长，不便于测试
           ],
