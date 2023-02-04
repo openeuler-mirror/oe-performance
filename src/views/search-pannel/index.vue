@@ -16,7 +16,7 @@
       </el-col>
     </el-row>
     <!--测试组件 end-->
-    <el-row class="search-field-section high-level" :gutter="4">
+    <el-row class="search-field-section" :gutter="4">
       <el-col :span="2">
         <span>筛选内容:</span>
       </el-col>
@@ -33,7 +33,7 @@
             v-for="(paramKey, index) in Object.keys(subField)"
             :key="index"
           >
-            <span>{{ `${subField[paramKey].label}:` }}</span>
+            <span class="fields-label">{{ `${subField[paramKey].label}:` }}</span>
             <!--for osv group-->
             <el-cascader
               class="field-selection"
@@ -71,7 +71,7 @@
         </el-row>
       </el-col>
     </el-row>
-    <el-row class="search-field-section" :gutter="4">
+    <el-row :gutter="4">
       <el-col :span="2">
         <span class="search-field-section-label">数据时间:</span>
       </el-col>
@@ -536,15 +536,19 @@ onMounted(() => {
 
 
 .search-field-section {
+  z-index:5;
+  margin-bottom: 30px;
   &-label {
     line-height: 32px;
-  }
-  &.high-level {
-    z-index:5;
   }
   .react-row {
     .field-item {
       position: relative;
+    }
+    .fields-label {
+      display: inline-block;
+      line-height: 24px;
+      height: 24px;
     }
     .field-selection {
       position: absolute;
@@ -556,6 +560,7 @@ onMounted(() => {
       display: inline-flex;
       right: 20px;
       width: 60%;
+      z-index: 1;
     }
   }
 }
