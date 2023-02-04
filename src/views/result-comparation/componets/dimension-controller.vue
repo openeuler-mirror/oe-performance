@@ -2,12 +2,13 @@
   <div class="dimension-controller">
     <div class="label">对比维度</div>
     <div class="dimension-controller-inner">
-      <el-radio-group v-model="dimension">
+      <el-radio-group class="controller-item" v-model="dimension">
         <el-radio-button label="osv" />
         <el-radio-button label="testbox" />
         <el-radio-button label="tags" />
       </el-radio-group>
       <el-select
+        class="controller-item"
         v-model="filterList"
         placeholder="请先搜索数据"
         multiple
@@ -16,6 +17,7 @@
         clearable
       >
         <el-option
+          class="controller-item"
           v-for="item in filterOptions[dimension]"
           :key="item"
           :label="item"
@@ -60,3 +62,19 @@ const handleFiltering = () => {
   emit('filtering', dimension.value, filterList.value)
 }
 </script>
+<style scoped lang="scss">
+.dimension-controller {
+  display: flex;
+  margin: 12px 0 24px 0;
+  .label {
+    line-height: 32px;
+    margin-right: 10px;
+  }
+  &-inner {
+    display: inline-flex;
+    .controller-item:not(:last-child) {
+      margin-right: 8px;
+    }
+  }
+}
+</style>

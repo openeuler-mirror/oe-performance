@@ -19,7 +19,7 @@
         :tjobsAll="inputData"
         :dimension="filterDimension"
         :filterListUnderDimension="filterList"
-        :suiteControl="searchParams?.suite[0]"
+        :suiteControl="searchParams.suite && searchParams.suite[0]"
       ></result-table>
     </template>
 
@@ -124,7 +124,6 @@ const getTotalData = (searchParams) => {
       tempFlattenItem['tags'] && tagsOptions.value.add(tempFlattenItem['tags'])
     })
     console.log('ejobs: ', ejobs, ejobsMap)
-    console.log(osvOptions, testboxOptions, tagsOptions)
     e2tConverter(ejobs, tjobs)
     inputData.value = tjobs
   }).finally(() => {
@@ -216,13 +215,5 @@ const handleDimensionFiltering = (dimension: string, List: Array<string>) => {
 <style lang="scss" scoped>
 .banner-text {
   text-align: center;
-}
-.dimension-controller {
-  margin-top: 24px;
-  display: flex;
-  .label {
-    line-height: 32px;
-    margin-right: 10px;
-  }
 }
 </style>
