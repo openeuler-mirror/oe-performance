@@ -16,7 +16,7 @@
       </el-col>
     </el-row>
     <!--测试组件 end-->
-    <el-row class="search-field-section" :gutter="4">
+    <el-row class="search-field-section high-level" :gutter="4">
       <el-col :span="2">
         <span>筛选内容:</span>
       </el-col>
@@ -538,6 +538,9 @@ onMounted(() => {
 .search-field-section {
   &-label {
     line-height: 32px;
+  }
+  &.high-level {
+    z-index:5;
   }
   .react-row {
     .field-item {

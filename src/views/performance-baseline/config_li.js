@@ -22,6 +22,9 @@ export const testParamsMap = {
   ],
   speccpu2006: [
     'pp.speccpu2017.item',
+  ],
+  libmicro: [
+    'pp.libmicro'
   ]
 }
 
@@ -204,6 +207,263 @@ export const kpiListMap = {
     'speccpu2017.549.fotonik3d_r',
     'speccpu2017.554.roms_r',
     'speccpu2017.Est.SPECrate2017_fp_base',
+  ],
+  libmicro: [
+    'libmicro.getpid',
+    'libmicro.getenv',
+    'libmicro.getenvT2',
+    'libmicro.gettimeofday',
+    'libmicro.log',
+    'libmicro.exp',
+    'libmicro.lrand48',
+    'libmicro.memset_10',
+    'libmicro.memset_256',
+    'libmicro.memset_256_u',
+    'libmicro.memset_1k',
+    'libmicro.memset_4k',
+    'libmicro.memset_4k_uc',
+    'libmicro.memset_10k',
+    'libmicro.memset_1m',
+    'libmicro.memset_10m',
+    'libmicro.memsetP2_10m',
+    'libmicro.memrand',
+    'libmicro.isatty_yes',
+    'libmicro.isatty_no',
+    'libmicro.malloc_10',
+    'libmicro.malloc_100',
+    'libmicro.malloc_1k',
+    'libmicro.malloc_10k',
+    'libmicro.malloc_100k',
+    'libmicro.mallocT2_10',
+    'libmicro.mallocT2_100',
+    'libmicro.mallocT2_1k',
+    'libmicro.mallocT2_10k',
+    'libmicro.mallocT2_100k',
+    'libmicro.close_bad',
+    'libmicro.close_tmp',
+    'libmicro.close_usr',
+    'libmicro.close_zero',
+    'libmicro.memcpy_10',
+    'libmicro.memcpy_1k',
+    'libmicro.memcpy_10k',
+    'libmicro.memcpy_1m',
+    'libmicro.memcpy_10m',
+    'libmicro.strcpy_10',
+    'libmicro.strchr_1k',
+    'libmicro.strcmp_10',
+    'libmicro.strcmp_1k',
+    'libmicro.scasecmp_10',
+    'libmicro.scasecmp_1k',
+    'libmicro.strtol',
+    'libmicro.getcontext',
+    'libmicro.setcontext',
+    'libmicro.mutex_st',
+    'libmicro.mutex_mt',
+    'libmicro.mutex_T2',
+    'libmicro.longjmp',
+    'libmicro.siglongjmp',
+    'libmicro.getrusage',
+    'libmicro.times',
+    'libmicro.time',
+    'libmicro.localtime_r',
+    'libmicro.strftime',
+    'libmicro.mktime',
+    'libmicro.mktimeT2',
+    'libmicro.c_mutex_1',
+    'libmicro.c_mutex_10',
+    'libmicro.c_mutex_200',
+    'libmicro.c_cond_1',
+    'libmicro.c_cond_10',
+    'libmicro.c_cond_200',
+    'libmicro.c_lockf_1',
+    'libmicro.c_lockf_10',
+    'libmicro.c_lockf_200',
+    'libmicro.c_flock',
+    'libmicro.c_flock_10',
+    'libmicro.c_flock_200',
+    'libmicro.c_fcntl_1',
+    'libmicro.c_fcntl_10',
+    'libmicro.c_fcntl_200',
+    'libmicro.file_lock',
+    'libmicro.getsockname',
+    'libmicro.getpeername',
+    'libmicro.chdir_tmp',
+    'libmicro.chdir_usr',
+    'libmicro.chgetwd_tmp',
+    'libmicro.chgetwd_usr',
+    'libmicro.realpath_tmp',
+    'libmicro.realpath_usr',
+    'libmicro.stat_tmp',
+    'libmicro.stat_usr',
+    'libmicro.fcntl_tmp',
+    'libmicro.fcntl_usr',
+    'libmicro.fcntl_ndelay',
+    'libmicro.lseek_t8k',
+    'libmicro.lseek_u8k',
+    'libmicro.open_tmp',
+    'libmicro.open_usr',
+    'libmicro.open_zero',
+    'libmicro.dup',
+    'libmicro.socket_u',
+    'libmicro.socket_i',
+    'libmicro.socketpair',
+    'libmicro.setsockopt',
+    'libmicro.bind',
+    'libmicro.listen',
+    'libmicro.connection',
+    'libmicro.poll_10',
+    'libmicro.poll_100',
+    'libmicro.poll_1000',
+    'libmicro.poll_w10',
+    'libmicro.poll_w100',
+    'libmicro.poll_w1000',
+    'libmicro.select_10',
+    'libmicro.select_100',
+    'libmicro.select_1000',
+    'libmicro.select_w10',
+    'libmicro.select_w100',
+    'libmicro.select_w1000',
+    'libmicro.semop',
+    'libmicro.sigaction',
+    'libmicro.signal',
+    'libmicro.sigprocmask',
+    'libmicro.pthread_8',
+    'libmicro.pthread_32',
+    'libmicro.pthread_128',
+    'libmicro.pthread_512',
+    'libmicro.fork_10',
+    'libmicro.fork_100',
+    'libmicro.fork_1000',
+    'libmicro.exit_10',
+    'libmicro.exit_100',
+    'libmicro.exit_1000',
+    'libmicro.exit_10_nolibc',
+    'libmicro.exec',
+    'libmicro.system',
+    'libmicro.recurse',
+    'libmicro.read_t1k',
+    'libmicro.read_t10k',
+    'libmicro.read_t100k',
+    'libmicro.read_u1k',
+    'libmicro.read_u10k',
+    'libmicro.read_u100k',
+    'libmicro.read_z1k',
+    'libmicro.read_z10k',
+    'libmicro.read_z100k',
+    'libmicro.read_zw100k',
+    'libmicro.write_t1k',
+    'libmicro.write_t10k',
+    'libmicro.write_t100k',
+    'libmicro.write_u1k',
+    'libmicro.write_u10k',
+    'libmicro.write_u100k',
+    'libmicro.write_n1k',
+    'libmicro.write_n10k',
+    'libmicro.write_n100k',
+    'libmicro.writev_t1k',
+    'libmicro.writev_t10k',
+    'libmicro.writev_t100k',
+    'libmicro.writev_u1k',
+    'libmicro.writev_u10k',
+    'libmicro.writev_u100k',
+    'libmicro.writev_n1k',
+    'libmicro.writev_n10k',
+    'libmicro.writev_n100k',
+    'libmicro.pread_t1k',
+    'libmicro.pread_t10k',
+    'libmicro.pread_t100k',
+    'libmicro.pread_u1k',
+    'libmicro.pread_u10k',
+    'libmicro.pread_u100k',
+    'libmicro.pread_z1k',
+    'libmicro.pread_z10k',
+    'libmicro.pread_z100k',
+    'libmicro.pread_zw100k',
+    'libmicro.pwrite_t1k',
+    'libmicro.pwrite_t10k',
+    'libmicro.pwrite_t100k',
+    'libmicro.pwrite_u1k',
+    'libmicro.pwrite_u10k',
+    'libmicro.pwrite_u100k',
+    'libmicro.pwrite_n1k',
+    'libmicro.pwrite_n10k',
+    'libmicro.pwrite_n100k',
+    'libmicro.mmap_z8k',
+    'libmicro.mmap_z128k',
+    'libmicro.mmap_t8k',
+    'libmicro.mmap_t128k',
+    'libmicro.mmap_u8k',
+    'libmicro.mmap_u128k',
+    'libmicro.mmap_a8k',
+    'libmicro.mmap_a128k',
+    'libmicro.mmap_rz8k',
+    'libmicro.mmap_rz128k',
+    'libmicro.mmap_rt8k',
+    'libmicro.mmap_rt128k',
+    'libmicro.mmap_ru8k',
+    'libmicro.mmap_ru128k',
+    'libmicro.mmap_ra8k',
+    'libmicro.mmap_ra128k',
+    'libmicro.mmap_wz8k',
+    'libmicro.mmap_wz128k',
+    'libmicro.mmap_wt8k',
+    'libmicro.mmap_wt128k',
+    'libmicro.mmap_wu8k',
+    'libmicro.mmap_wu128k',
+    'libmicro.mmap_wa8k',
+    'libmicro.mmap_wa128k',
+    'libmicro.unmap_z8k',
+    'libmicro.unmap_z128k',
+    'libmicro.unmap_t8k',
+    'libmicro.unmap_t128k',
+    'libmicro.unmap_u8k',
+    'libmicro.unmap_u128k',
+    'libmicro.unmap_a8k',
+    'libmicro.unmap_a128k',
+    'libmicro.unmap_rz8k',
+    'libmicro.unmap_rz128k',
+    'libmicro.unmap_rt8k',
+    'libmicro.unmap_rt128k',
+    'libmicro.unmap_ru8k',
+    'libmicro.unmap_ru128k',
+    'libmicro.unmap_ra8k',
+    'libmicro.unmap_ra128k',
+    'libmicro.conn_connect',
+    'libmicro.unmap_wz8k',
+    'libmicro.unmap_wz128k',
+    'libmicro.unmap_wt8k',
+    'libmicro.unmap_wt128k',
+    'libmicro.unmap_wu8k',
+    'libmicro.unmap_wu128k',
+    'libmicro.unmap_wa8k',
+    'libmicro.unmap_wa128k',
+    'libmicro.mprot_z8k',
+    'libmicro.mprot_z128k',
+    'libmicro.mprot_wz8k',
+    'libmicro.mprot_wz128k',
+    'libmicro.mprot_twz8k',
+    'libmicro.mprot_tw128k',
+    'libmicro.mprot_tw4m',
+    'libmicro.pipe_pst1',
+    'libmicro.pipe_pmt1',
+    'libmicro.pipe_pmp1',
+    'libmicro.pipe_pst4k',
+    'libmicro.pipe_pmt4k',
+    'libmicro.pipe_pmp4k',
+    'libmicro.pipe_sst1',
+    'libmicro.pipe_smt1',
+    'libmicro.pipe_smp1',
+    'libmicro.pipe_sst4k',
+    'libmicro.pipe_smt4k',
+    'libmicro.pipe_smp4k',
+    'libmicro.pipe_tst1',
+    'libmicro.pipe_tmt1',
+    'libmicro.pipe_tmp1',
+    'libmicro.pipe_tst4k',
+    'libmicro.pipe_tmt4k',
+    'libmicro.pipe_tmp4k',
+    'libmicro.conn_accept',
+    'libmicro.close_tcp'
   ]
 }
 
@@ -213,7 +473,8 @@ export const tableMode = {
   lmbench: 'default',
   netperf: 'netperf',
   speccpu2006: 'speccpu2006',
-  speccpu2017: 'speccpu2017'
+  speccpu2017: 'speccpu2017',
+  libmicro: 'libmicro'
 }
 
 export const tableColumnMap = {
@@ -1068,6 +1329,1033 @@ export const tableColumnMap = {
           label: 'Est.SPECrate2017_fp_base',
           prop: 'speccpu2017.Est.SPECrate2017_fp_base'
         }
+      ]
+    }
+  ],
+  libmicro: [
+    {
+      tableName: 'Function',
+      column: [
+        {
+          label: 'getpid',
+          prop: 'libmicro.getpid',
+        },
+        {
+          label: 'getenv',
+          prop: 'libmicro.getenv',
+        },
+        {
+          label: 'getenvT2',
+          prop: 'libmicro.getenvT2',
+        },
+        {
+          label: 'gettimeofday',
+          prop: 'libmicro.gettimeofday',
+        },
+        {
+          label: 'log',
+          prop: 'libmicro.log',
+        },
+        {
+          label: 'exp',
+          prop: 'libmicro.exp',
+        },
+        {
+          label: 'lrand48',
+          prop: 'libmicro.lrand48',
+        },
+        {
+          label: 'memset_10',
+          prop: 'libmicro.memset_10',
+        },
+        {
+          label: 'memset_256',
+          prop: 'libmicro.memset_256',
+        },
+        {
+          label: 'memset_256_u',
+          prop: 'libmicro.memset_256_u',
+        },
+        {
+          label: 'memset_1k',
+          prop: 'libmicro.memset_1k',
+        },
+        {
+          label: 'memset_4k',
+          prop: 'libmicro.memset_4k',
+        },
+        {
+          label: 'memset_4k_uc',
+          prop: 'libmicro.memset_4k_uc',
+        },
+        {
+          label: 'memset_10k',
+          prop: 'libmicro.memset_10k',
+        },
+        {
+          label: 'memset_1m',
+          prop: 'libmicro.memset_1m',
+        },
+        {
+          label: 'memset_10m',
+          prop: 'libmicro.memset_10m',
+        },
+        {
+          label: 'memsetP2_10m',
+          prop: 'libmicro.memsetP2_10m',
+        },
+        {
+          label: 'memrand',
+          prop: 'libmicro.memrand',
+        },
+        {
+          label: 'isatty_yes',
+          prop: 'libmicro.isatty_yes',
+        },
+        {
+          label: 'isatty_no',
+          prop: 'libmicro.isatty_no',
+        },
+        {
+          label: 'malloc_10',
+          prop: 'libmicro.malloc_10',
+        },
+        {
+          label: 'malloc_100',
+          prop: 'libmicro.malloc_100',
+        },
+        {
+          label: 'malloc_1k',
+          prop: 'libmicro.malloc_1k',
+        },
+        {
+          label: 'malloc_10k',
+          prop: 'libmicro.malloc_10k',
+        },
+        {
+          label: 'malloc_100k',
+          prop: 'libmicro.malloc_100k',
+        },
+        {
+          label: 'mallocT2_10',
+          prop: 'libmicro.mallocT2_10',
+        },
+        {
+          label: 'mallocT2_100',
+          prop: 'libmicro.mallocT2_100',
+        },
+        {
+          label: 'mallocT2_1k',
+          prop: 'libmicro.mallocT2_1k',
+        },
+        {
+          label: 'mallocT2_10k',
+          prop: 'libmicro.mallocT2_10k',
+        },
+        {
+          label: 'mallocT2_100k',
+          prop: 'libmicro.mallocT2_100k',
+        },
+        {
+          label: 'close_bad',
+          prop: 'libmicro.close_bad',
+        },
+        {
+          label: 'close_tmp',
+          prop: 'libmicro.close_tmp',
+        },
+        {
+          label: 'close_usr',
+          prop: 'libmicro.close_usr',
+        },
+        {
+          label: 'close_zero',
+          prop: 'libmicro.close_zero',
+        },
+        {
+          label: 'memcpy_10',
+          prop: 'libmicro.memcpy_10',
+        },
+        {
+          label: 'memcpy_1k',
+          prop: 'libmicro.memcpy_1k',
+        },
+        {
+          label: 'memcpy_10k',
+          prop: 'libmicro.memcpy_10k',
+        },
+        {
+          label: 'memcpy_1m',
+          prop: 'libmicro.memcpy_1m',
+        },
+        {
+          label: 'memcpy_10m',
+          prop: 'libmicro.memcpy_10m',
+        },
+        {
+          label: 'strcpy_10',
+          prop: 'libmicro.strcpy_10',
+        },
+        {
+          label: 'strchr_1k',
+          prop: 'libmicro.strchr_1k',
+        },
+        {
+          label: 'strcmp_10',
+          prop: 'libmicro.strcmp_10',
+        },
+        {
+          label: 'strcmp_1k',
+          prop: 'libmicro.strcmp_1k',
+        },
+        {
+          label: 'scasecmp_10',
+          prop: 'libmicro.scasecmp_10',
+        },
+        {
+          label: 'scasecmp_1k',
+          prop: 'libmicro.scasecmp_1k',
+        },
+        {
+          label: 'strtol',
+          prop: 'libmicro.strtol',
+        },
+        {
+          label: 'getcontext',
+          prop: 'libmicro.getcontext',
+        },
+        {
+          label: 'setcontext',
+          prop: 'libmicro.setcontext',
+        },
+        {
+          label: 'mutex_st',
+          prop: 'libmicro.mutex_st',
+        },
+        {
+          label: 'mutex_mt',
+          prop: 'libmicro.mutex_mt',
+        },
+        {
+          label: 'mutex_T2',
+          prop: 'libmicro.mutex_T2',
+        },
+        {
+          label: 'longjmp',
+          prop: 'libmicro.longjmp',
+        },
+        {
+          label: 'siglongjmp',
+          prop: 'libmicro.siglongjmp',
+        },
+        {
+          label: 'getrusage',
+          prop: 'libmicro.getrusage',
+        },
+        {
+          label: 'times',
+          prop: 'libmicro.times',
+        },
+        {
+          label: 'time',
+          prop: 'libmicro.time',
+        },
+        {
+          label: 'localtime_r',
+          prop: 'libmicro.localtime_r',
+        },
+        {
+          label: 'strftime',
+          prop: 'libmicro.strftime',
+        },
+        {
+          label: 'mktime',
+          prop: 'libmicro.mktime',
+        },
+        {
+          label: 'mktimeT2',
+          prop: 'libmicro.mktimeT2',
+        },
+        {
+          label: 'c_mutex_1',
+          prop: 'libmicro.c_mutex_1',
+        },
+        {
+          label: 'c_mutex_10',
+          prop: 'libmicro.c_mutex_10',
+        },
+        {
+          label: 'c_mutex_200',
+          prop: 'libmicro.c_mutex_200',
+        },
+        {
+          label: 'c_cond_1',
+          prop: 'libmicro.c_cond_1',
+        },
+        {
+          label: 'c_cond_10',
+          prop: 'libmicro.c_cond_10',
+        },
+        {
+          label: 'c_cond_200',
+          prop: 'libmicro.c_cond_200',
+        },
+        {
+          label: 'c_lockf_1',
+          prop: 'libmicro.c_lockf_1',
+        },
+        {
+          label: 'c_lockf_10',
+          prop: 'libmicro.c_lockf_10',
+        },
+        {
+          label: 'c_lockf_200',
+          prop: 'libmicro.c_lockf_200',
+        },
+        {
+          label: 'c_flock',
+          prop: 'libmicro.c_flock',
+        },
+        {
+          label: 'c_flock_10',
+          prop: 'libmicro.c_flock_10',
+        },
+        {
+          label: 'c_flock_200',
+          prop: 'libmicro.c_flock_200',
+        },
+        {
+          label: 'c_fcntl_1',
+          prop: 'libmicro.c_fcntl_1',
+        },
+        {
+          label: 'c_fcntl_10',
+          prop: 'libmicro.c_fcntl_10',
+        },
+        {
+          label: 'c_fcntl_200',
+          prop: 'libmicro.c_fcntl_200',
+        },
+        {
+          label: 'file_lock',
+          prop: 'libmicro.file_lock',
+        },
+        {
+          label: 'getsockname',
+          prop: 'libmicro.getsockname',
+        },
+        {
+          label: 'getpeername',
+          prop: 'libmicro.getpeername',
+        },
+        {
+          label: 'chdir_tmp',
+          prop: 'libmicro.chdir_tmp',
+        },
+        {
+          label: 'chdir_usr',
+          prop: 'libmicro.chdir_usr',
+        },
+        {
+          label: 'chgetwd_tmp',
+          prop: 'libmicro.chgetwd_tmp',
+        },
+        {
+          label: 'chgetwd_usr',
+          prop: 'libmicro.chgetwd_usr',
+        },
+        {
+          label: 'realpath_tmp',
+          prop: 'libmicro.realpath_tmp',
+        },
+        {
+          label: 'realpath_usr',
+          prop: 'libmicro.realpath_usr',
+        },
+        {
+          label: 'stat_tmp',
+          prop: 'libmicro.stat_tmp',
+        },
+        {
+          label: 'stat_usr',
+          prop: 'libmicro.stat_usr',
+        },
+        {
+          label: 'fcntl_tmp',
+          prop: 'libmicro.fcntl_tmp',
+        },
+        {
+          label: 'fcntl_usr',
+          prop: 'libmicro.fcntl_usr',
+        },
+        {
+          label: 'fcntl_ndelay',
+          prop: 'libmicro.fcntl_ndelay',
+        },
+        {
+          label: 'lseek_t8k',
+          prop: 'libmicro.lseek_t8k',
+        },
+        {
+          label: 'lseek_u8k',
+          prop: 'libmicro.lseek_u8k',
+        },
+        {
+          label: 'open_tmp',
+          prop: 'libmicro.open_tmp',
+        },
+        {
+          label: 'open_usr',
+          prop: 'libmicro.open_usr',
+        },
+        {
+          label: 'open_zero',
+          prop: 'libmicro.open_zero',
+        },
+        {
+          label: 'dup',
+          prop: 'libmicro.dup',
+        },
+        {
+          label: 'socket_u',
+          prop: 'libmicro.socket_u',
+        },
+        {
+          label: 'socket_i',
+          prop: 'libmicro.socket_i',
+        },
+        {
+          label: 'socketpair',
+          prop: 'libmicro.socketpair',
+        },
+        {
+          label: 'setsockopt',
+          prop: 'libmicro.setsockopt',
+        },
+        {
+          label: 'bind',
+          prop: 'libmicro.bind',
+        },
+        {
+          label: 'listen',
+          prop: 'libmicro.listen',
+        },
+        {
+          label: 'connection',
+          prop: 'libmicro.connection',
+        },
+        {
+          label: 'poll_10',
+          prop: 'libmicro.poll_10',
+        },
+        {
+          label: 'poll_100',
+          prop: 'libmicro.poll_100',
+        },
+        {
+          label: 'poll_1000',
+          prop: 'libmicro.poll_1000',
+        },
+        {
+          label: 'poll_w10',
+          prop: 'libmicro.poll_w10',
+        },
+        {
+          label: 'poll_w100',
+          prop: 'libmicro.poll_w100',
+        },
+        {
+          label: 'poll_w1000',
+          prop: 'libmicro.poll_w1000',
+        },
+        {
+          label: 'select_10',
+          prop: 'libmicro.select_10',
+        },
+        {
+          label: 'select_100',
+          prop: 'libmicro.select_100',
+        },
+        {
+          label: 'select_1000',
+          prop: 'libmicro.select_1000',
+        },
+        {
+          label: 'select_w10',
+          prop: 'libmicro.select_w10',
+        },
+        {
+          label: 'select_w100',
+          prop: 'libmicro.select_w100',
+        },
+        {
+          label: 'select_w1000',
+          prop: 'libmicro.select_w1000',
+        },
+        {
+          label: 'semop',
+          prop: 'libmicro.semop',
+        },
+        {
+          label: 'sigaction',
+          prop: 'libmicro.sigaction',
+        },
+        {
+          label: 'signal',
+          prop: 'libmicro.signal',
+        },
+        {
+          label: 'sigprocmask',
+          prop: 'libmicro.sigprocmask',
+        },
+        {
+          label: 'pthread_8',
+          prop: 'libmicro.pthread_8',
+        },
+        {
+          label: 'pthread_32',
+          prop: 'libmicro.pthread_32',
+        },
+        {
+          label: 'pthread_128',
+          prop: 'libmicro.pthread_128',
+        },
+        {
+          label: 'pthread_512',
+          prop: 'libmicro.pthread_512',
+        },
+        {
+          label: 'fork_10',
+          prop: 'libmicro.fork_10',
+        },
+        {
+          label: 'fork_100',
+          prop: 'libmicro.fork_100',
+        },
+        {
+          label: 'fork_1000',
+          prop: 'libmicro.fork_1000',
+        },
+        {
+          label: 'exit_10',
+          prop: 'libmicro.exit_10',
+        },
+        {
+          label: 'exit_100',
+          prop: 'libmicro.exit_100',
+        },
+        {
+          label: 'exit_1000',
+          prop: 'libmicro.exit_1000',
+        },
+        {
+          label: 'exit_10_nolibc',
+          prop: 'libmicro.exit_10_nolibc',
+        },
+        {
+          label: 'exec',
+          prop: 'libmicro.exec',
+        },
+        {
+          label: 'system',
+          prop: 'libmicro.system',
+        },
+        {
+          label: 'recurse',
+          prop: 'libmicro.recurse',
+        },
+        {
+          label: 'read_t1k',
+          prop: 'libmicro.read_t1k',
+        },
+        {
+          label: 'read_t10k',
+          prop: 'libmicro.read_t10k',
+        },
+        {
+          label: 'read_t100k',
+          prop: 'libmicro.read_t100k',
+        },
+        {
+          label: 'read_u1k',
+          prop: 'libmicro.read_u1k',
+        },
+        {
+          label: 'read_u10k',
+          prop: 'libmicro.read_u10k',
+        },
+        {
+          label: 'read_u100k',
+          prop: 'libmicro.read_u100k',
+        },
+        {
+          label: 'read_z1k',
+          prop: 'libmicro.read_z1k',
+        },
+        {
+          label: 'read_z10k',
+          prop: 'libmicro.read_z10k',
+        },
+        {
+          label: 'read_z100k',
+          prop: 'libmicro.read_z100k',
+        },
+        {
+          label: 'read_zw100k',
+          prop: 'libmicro.read_zw100k',
+        },
+        {
+          label: 'write_t1k',
+          prop: 'libmicro.write_t1k',
+        },
+        {
+          label: 'write_t10k',
+          prop: 'libmicro.write_t10k',
+        },
+        {
+          label: 'write_t100k',
+          prop: 'libmicro.write_t100k',
+        },
+        {
+          label: 'write_u1k',
+          prop: 'libmicro.write_u1k',
+        },
+        {
+          label: 'write_u10k',
+          prop: 'libmicro.write_u10k',
+        },
+        {
+          label: 'write_u100k',
+          prop: 'libmicro.write_u100k',
+        },
+        {
+          label: 'write_n1k',
+          prop: 'libmicro.write_n1k',
+        },
+        {
+          label: 'write_n10k',
+          prop: 'libmicro.write_n10k',
+        },
+        {
+          label: 'write_n100k',
+          prop: 'libmicro.write_n100k',
+        },
+        {
+          label: 'writev_t1k',
+          prop: 'libmicro.writev_t1k',
+        },
+        {
+          label: 'writev_t10k',
+          prop: 'libmicro.writev_t10k',
+        },
+        {
+          label: 'writev_t100k',
+          prop: 'libmicro.writev_t100k',
+        },
+        {
+          label: 'writev_u1k',
+          prop: 'libmicro.writev_u1k',
+        },
+        {
+          label: 'writev_u10k',
+          prop: 'libmicro.writev_u10k',
+        },
+        {
+          label: 'writev_u100k',
+          prop: 'libmicro.writev_u100k',
+        },
+        {
+          label: 'writev_n1k',
+          prop: 'libmicro.writev_n1k',
+        },
+        {
+          label: 'writev_n10k',
+          prop: 'libmicro.writev_n10k',
+        },
+        {
+          label: 'writev_n100k',
+          prop: 'libmicro.writev_n100k',
+        },
+        {
+          label: 'pread_t1k',
+          prop: 'libmicro.pread_t1k',
+        },
+        {
+          label: 'pread_t10k',
+          prop: 'libmicro.pread_t10k',
+        },
+        {
+          label: 'pread_t100k',
+          prop: 'libmicro.pread_t100k',
+        },
+        {
+          label: 'pread_u1k',
+          prop: 'libmicro.pread_u1k',
+        },
+        {
+          label: 'pread_u10k',
+          prop: 'libmicro.pread_u10k',
+        },
+        {
+          label: 'pread_u100k',
+          prop: 'libmicro.pread_u100k',
+        },
+        {
+          label: 'pread_z1k',
+          prop: 'libmicro.pread_z1k',
+        },
+        {
+          label: 'pread_z10k',
+          prop: 'libmicro.pread_z10k',
+        },
+        {
+          label: 'pread_z100k',
+          prop: 'libmicro.pread_z100k',
+        },
+        {
+          label: 'pread_zw100k',
+          prop: 'libmicro.pread_zw100k',
+        },
+        {
+          label: 'pwrite_t1k',
+          prop: 'libmicro.pwrite_t1k',
+        },
+        {
+          label: 'pwrite_t10k',
+          prop: 'libmicro.pwrite_t10k',
+        },
+        {
+          label: 'pwrite_t100k',
+          prop: 'libmicro.pwrite_t100k',
+        },
+        {
+          label: 'pwrite_u1k',
+          prop: 'libmicro.pwrite_u1k',
+        },
+        {
+          label: 'pwrite_u10k',
+          prop: 'libmicro.pwrite_u10k',
+        },
+        {
+          label: 'pwrite_u100k',
+          prop: 'libmicro.pwrite_u100k',
+        },
+        {
+          label: 'pwrite_n1k',
+          prop: 'libmicro.pwrite_n1k',
+        },
+        {
+          label: 'pwrite_n10k',
+          prop: 'libmicro.pwrite_n10k',
+        },
+        {
+          label: 'pwrite_n100k',
+          prop: 'libmicro.pwrite_n100k',
+        },
+        {
+          label: 'mmap_z8k',
+          prop: 'libmicro.mmap_z8k',
+        },
+        {
+          label: 'mmap_z128k',
+          prop: 'libmicro.mmap_z128k',
+        },
+        {
+          label: 'mmap_t8k',
+          prop: 'libmicro.mmap_t8k',
+        },
+        {
+          label: 'mmap_t128k',
+          prop: 'libmicro.mmap_t128k',
+        },
+        {
+          label: 'mmap_u8k',
+          prop: 'libmicro.mmap_u8k',
+        },
+        {
+          label: 'mmap_u128k',
+          prop: 'libmicro.mmap_u128k',
+        },
+        {
+          label: 'mmap_a8k',
+          prop: 'libmicro.mmap_a8k',
+        },
+        {
+          label: 'mmap_a128k',
+          prop: 'libmicro.mmap_a128k',
+        },
+        {
+          label: 'mmap_rz8k',
+          prop: 'libmicro.mmap_rz8k',
+        },
+        {
+          label: 'mmap_rz128k',
+          prop: 'libmicro.mmap_rz128k',
+        },
+        {
+          label: 'mmap_rt8k',
+          prop: 'libmicro.mmap_rt8k',
+        },
+        {
+          label: 'mmap_rt128k',
+          prop: 'libmicro.mmap_rt128k',
+        },
+        {
+          label: 'mmap_ru8k',
+          prop: 'libmicro.mmap_ru8k',
+        },
+        {
+          label: 'mmap_ru128k',
+          prop: 'libmicro.mmap_ru128k',
+        },
+        {
+          label: 'mmap_ra8k',
+          prop: 'libmicro.mmap_ra8k',
+        },
+        {
+          label: 'mmap_ra128k',
+          prop: 'libmicro.mmap_ra128k',
+        },
+        {
+          label: 'mmap_wz8k',
+          prop: 'libmicro.mmap_wz8k',
+        },
+        {
+          label: 'mmap_wz128k',
+          prop: 'libmicro.mmap_wz128k',
+        },
+        {
+          label: 'mmap_wt8k',
+          prop: 'libmicro.mmap_wt8k',
+        },
+        {
+          label: 'mmap_wt128k',
+          prop: 'libmicro.mmap_wt128k',
+        },
+        {
+          label: 'mmap_wu8k',
+          prop: 'libmicro.mmap_wu8k',
+        },
+        {
+          label: 'mmap_wu128k',
+          prop: 'libmicro.mmap_wu128k',
+        },
+        {
+          label: 'mmap_wa8k',
+          prop: 'libmicro.mmap_wa8k',
+        },
+        {
+          label: 'mmap_wa128k',
+          prop: 'libmicro.mmap_wa128k',
+        },
+        {
+          label: 'unmap_z8k',
+          prop: 'libmicro.unmap_z8k',
+        },
+        {
+          label: 'unmap_z128k',
+          prop: 'libmicro.unmap_z128k',
+        },
+        {
+          label: 'unmap_t8k',
+          prop: 'libmicro.unmap_t8k',
+        },
+        {
+          label: 'unmap_t128k',
+          prop: 'libmicro.unmap_t128k',
+        },
+        {
+          label: 'unmap_u8k',
+          prop: 'libmicro.unmap_u8k',
+        },
+        {
+          label: 'unmap_u128k',
+          prop: 'libmicro.unmap_u128k',
+        },
+        {
+          label: 'unmap_a8k',
+          prop: 'libmicro.unmap_a8k',
+        },
+        {
+          label: 'unmap_a128k',
+          prop: 'libmicro.unmap_a128k',
+        },
+        {
+          label: 'unmap_rz8k',
+          prop: 'libmicro.unmap_rz8k',
+        },
+        {
+          label: 'unmap_rz128k',
+          prop: 'libmicro.unmap_rz128k',
+        },
+        {
+          label: 'unmap_rt8k',
+          prop: 'libmicro.unmap_rt8k',
+        },
+        {
+          label: 'unmap_rt128k',
+          prop: 'libmicro.unmap_rt128k',
+        },
+        {
+          label: 'unmap_ru8k',
+          prop: 'libmicro.unmap_ru8k',
+        },
+        {
+          label: 'unmap_ru128k',
+          prop: 'libmicro.unmap_ru128k',
+        },
+        {
+          label: 'unmap_ra8k',
+          prop: 'libmicro.unmap_ra8k',
+        },
+        {
+          label: 'unmap_ra128k',
+          prop: 'libmicro.unmap_ra128k',
+        },
+        {
+          label: 'conn_connect',
+          prop: 'libmicro.conn_connect',
+        },
+        {
+          label: 'unmap_wz8k',
+          prop: 'libmicro.unmap_wz8k',
+        },
+        {
+          label: 'unmap_wz128k',
+          prop: 'libmicro.unmap_wz128k',
+        },
+        {
+          label: 'unmap_wt8k',
+          prop: 'libmicro.unmap_wt8k',
+        },
+        {
+          label: 'unmap_wt128k',
+          prop: 'libmicro.unmap_wt128k',
+        },
+        {
+          label: 'unmap_wu8k',
+          prop: 'libmicro.unmap_wu8k',
+        },
+        {
+          label: 'unmap_wu128k',
+          prop: 'libmicro.unmap_wu128k',
+        },
+        {
+          label: 'unmap_wa8k',
+          prop: 'libmicro.unmap_wa8k',
+        },
+        {
+          label: 'unmap_wa128k',
+          prop: 'libmicro.unmap_wa128k',
+        },
+        {
+          label: 'mprot_z8k',
+          prop: 'libmicro.mprot_z8k',
+        },
+        {
+          label: 'mprot_z128k',
+          prop: 'libmicro.mprot_z128k',
+        },
+        {
+          label: 'mprot_wz8k',
+          prop: 'libmicro.mprot_wz8k',
+        },
+        {
+          label: 'mprot_wz128k',
+          prop: 'libmicro.mprot_wz128k',
+        },
+        {
+          label: 'mprot_twz8k',
+          prop: 'libmicro.mprot_twz8k',
+        },
+        {
+          label: 'mprot_tw128k',
+          prop: 'libmicro.mprot_tw128k',
+        },
+        {
+          label: 'mprot_tw4m',
+          prop: 'libmicro.mprot_tw4m',
+        },
+        {
+          label: 'pipe_pst1',
+          prop: 'libmicro.pipe_pst1',
+        },
+        {
+          label: 'pipe_pmt1',
+          prop: 'libmicro.pipe_pmt1',
+        },
+        {
+          label: 'pipe_pmp1',
+          prop: 'libmicro.pipe_pmp1',
+        },
+        {
+          label: 'pipe_pst4k',
+          prop: 'libmicro.pipe_pst4k',
+        },
+        {
+          label: 'pipe_pmt4k',
+          prop: 'libmicro.pipe_pmt4k',
+        },
+        {
+          label: 'pipe_pmp4k',
+          prop: 'libmicro.pipe_pmp4k',
+        },
+        {
+          label: 'pipe_sst1',
+          prop: 'libmicro.pipe_sst1',
+        },
+        {
+          label: 'pipe_smt1',
+          prop: 'libmicro.pipe_smt1',
+        },
+        {
+          label: 'pipe_smp1',
+          prop: 'libmicro.pipe_smp1',
+        },
+        {
+          label: 'pipe_sst4k',
+          prop: 'libmicro.pipe_sst4k',
+        },
+        {
+          label: 'pipe_smt4k',
+          prop: 'libmicro.pipe_smt4k',
+        },
+        {
+          label: 'pipe_smp4k',
+          prop: 'libmicro.pipe_smp4k',
+        },
+        {
+          label: 'pipe_tst1',
+          prop: 'libmicro.pipe_tst1',
+        },
+        {
+          label: 'pipe_tmt1',
+          prop: 'libmicro.pipe_tmt1',
+        },
+        {
+          label: 'pipe_tmp1',
+          prop: 'libmicro.pipe_tmp1',
+        },
+        {
+          label: 'pipe_tst4k',
+          prop: 'libmicro.pipe_tst4k',
+        },
+        {
+          label: 'pipe_tmt4k',
+          prop: 'libmicro.pipe_tmt4k',
+        },
+        {
+          label: 'pipe_tmp4k',
+          prop: 'libmicro.pipe_tmp4k',
+        },
+        {
+          label: 'conn_accept',
+          prop: 'libmicro.conn_accept',
+        },
+        {
+          label: 'close_tcp',
+          prop: 'libmicro.close_tcp',
+        },
       ]
     }
   ],

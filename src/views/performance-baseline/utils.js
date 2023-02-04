@@ -107,6 +107,7 @@ const getjobStateData = (jobList) => {
 }
 
 const mapGroupDataToTableData = (ppGroup, suite) => {
+  console.log(ppGroup)
   const tableDatas = {}
   if (!tableColumnMap[suite]) {
     return {}
@@ -336,7 +337,7 @@ const computeMean = (inputArr) => {
   if (count === 0) {
     return -1 // 特殊标识
   }
-  return (sum / count).toFixed(2)
+  return (sum / count).toFixed(3)
 }
 
 const computeGeoMean = (inputArr) =>{
