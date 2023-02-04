@@ -203,6 +203,9 @@ const resetData = () => {
   ejobs = {}
   ejobsMap = {}
   tjobs = {}
+  osvOptions.value.clear()
+  testboxOptions.value.clear()
+  tagsOptions.value.clear()
 }
 
 const handleDimensionFiltering = (dimension: string, List: Array<string>) => {

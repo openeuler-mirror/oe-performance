@@ -77,7 +77,7 @@
       </el-col>
       <el-col :span="22">
         <div class="time-controller">
-          获取距当前
+          查询距当前
           <el-input-number
             v-model="searchTime"
             controls-position="right"
@@ -223,7 +223,7 @@ const setFeildsData = () => {
 // url上查询条件回填至查询项上
 const setFieldSelection = () => {
   const fieldKeys = Object.keys(fieldsConfig)
-  const { scene, ...fields } = route.query
+  const { scene, searchLimitTime, ...fields } = route.query
   Object.keys(fields).forEach(fieldKey => {
     if (fieldKeys.indexOf(fieldKey) > -1) {
       // 只添加当前选择框中存在的field选择
@@ -238,6 +238,7 @@ const setFieldSelection = () => {
       }
     }
   })
+  searchLimitTime && (searchTime.value = Number(searchLimitTime))
 }
 // 性能基线页面中:
 // 根据当前场景，显示不同的suite可选项
@@ -444,6 +445,7 @@ const setQueryToUrl = () => {
     }
   })
   newQuery['scene'] = route.query.scene as string
+  newQuery['searchLimitTime'] = String(searchTime.value)
   router.push({
     path: route.path,
     query: { ...newQuery }
@@ -561,6 +563,7 @@ span {
 .time-controller {
   display: inline-flex;
   align-items: center;
+  height: 32px;
   font-size: 14px;
   :deep(.el-input-number) {
     margin: 0 8px;
