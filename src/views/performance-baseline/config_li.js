@@ -16,6 +16,11 @@ export const testParamsMap = {
     'pp.netperf.test',
     'pp.netperf.send_size'
   ],
+  'fio-basic': [
+    'pp.fio-setup-basic.rw',
+    'pp.fio-setup-basic.rwmixread',
+    'pp.fio-setup-basic.bs',
+  ],
   speccpu2006: [
     'pp.speccpu2006.test_item',
     'pp.speccpu2006.num_type'
@@ -94,6 +99,12 @@ export const kpiListMap = {
   netperf: [
     'netperf.Throughput_Mbps',
     'netperf.Throughput_tps'
+  ],
+  'fio-basic': [
+    'fio.read_iops',
+    'fio.read_bw_MBps',
+    'fio.write_iops',
+    'fio.write_bw_MBps'
   ],
   speccpu2006: [
     'speccpu2006.400.perlbench_Rate',
@@ -472,6 +483,7 @@ export const tableMode = {
   unixbench: 'unixbench',
   lmbench: 'default',
   netperf: 'netperf',
+  'fio-basic': 'fio-basic',
   speccpu2006: 'speccpu2006',
   speccpu2017: 'speccpu2017',
   libmicro: 'libmicro'
@@ -851,6 +863,176 @@ export const tableColumnMap = {
         {label: 'TCP_CRR', prop: 'pp.netperf.test=TCP_CRR'}
       ]
     }
+  ],
+  'fio-basic': [
+    {
+      tableName: 'randrwread_iops_blocksize',
+      kpi: 'fio.read_iops',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'randrwread_bw_blocksize',
+      kpi: 'fio.read_bw_MBps',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'randrwwrite_iops_blocksize',
+      kpi: 'fio.write_iops',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'randrwwrite_bw_blocksize',
+      kpi: 'fio.write_bw_MBps',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'read_iops_blocksize',
+      kpi: 'fio.read_iops',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'read_bw_blocksize',
+      kpi: 'fio.read_bw_MBps',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'randread_iops_blocksize',
+      kpi: 'fio.read_iops',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'randread_bw_blocksize',
+      kpi: 'fio.read_bw_MBps',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'write_iops_blocksize',
+      kpi: 'fio.write_iops',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'write_bw_blocksize',
+      kpi: 'fio.write_bw_MBps',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'randwrite_iops_blocksize',
+      kpi: 'fio.write_iops',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
+    {
+      tableName: 'randwrite_bw_blocksize',
+      kpi: 'fio.write_bw_MBps',
+      column: [
+        {label: '4k', prop: 'pp.fio-setup-basic.bs=4k'},
+        {label: '16k', prop: 'pp.fio-setup-basic.bs=16k'},
+        {label: '32k', prop: 'pp.fio-setup-basic.bs=32k'},
+        {label: '64k', prop: 'pp.fio-setup-basic.bs=64k'},
+        {label: '128k', prop: 'pp.fio-setup-basic.bs=128k'},
+        {label: '256k', prop: 'pp.fio-setup-basic.bs=256k'},
+        {label: '512k', prop: 'pp.fio-setup-basic.bs=512k'},
+        {label: '1024k', prop: 'pp.fio-setup-basic.bs=1024k'},
+      ]
+    },
   ],
   speccpu2006: [
     {

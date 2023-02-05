@@ -25,7 +25,7 @@ export const suiteConfig: configObject = {
     suiteList: [{ suiteName: 'stream'}, { suiteName: 'lmbench'}],
   },
   storage: {
-    suiteList: [{ suiteName: 'fio'}, { suiteName: 'iozone', unavailable: true }],
+    suiteList: [{ suiteName: 'fio-basic'}, { suiteName: 'iozone', unavailable: true }],
   },
   network: {
     suiteList: [{ suiteName: 'netperf'}],

@@ -110,6 +110,7 @@ const getjobStateData = (jobList) => {
 }
 
 const mapGroupDataToTableData = (ppGroup, suite) => {
+  console.log(ppGroup)
   const tableDatas = {}
   if (!tableColumnMap[suite]) {
     return {}
@@ -122,6 +123,9 @@ const mapGroupDataToTableData = (ppGroup, suite) => {
   case 'netperf':
     // netperf不适用kpi做列，而是使用pp参数send_size或者test作为列名。需要转换数据维度
     groupDataForNetperf(ppGroup, tableDatas, suite)
+    break
+  case 'fio-basic':
+    groupDataForFioBasic(ppGroup, tableDatas, suite)
     break
   case 'speccpu2006':
     groupDataForSpeccpu2006(ppGroup, tableDatas, suite)
@@ -195,6 +199,53 @@ const groupDataForNetperf = (ppGroup, tableDatas, suite) => {
   addElementArrayToObj(tableDatas, 'TCP_STREAM', ppObjTCPStream)
   addElementArrayToObj(tableDatas, 'UDP_STREAM', ppObjDUPStream)
   addElementArrayToObj(tableDatas, 'Protocol_kind', ppObjProtoclKind)
+}
+
+const groupDataForFioBasic = (ppGroup, tableDatas, suite) => {
+  // pp参数需要合并，为每个表配置一个pp对象
+  const tempDataObj = {}
+  const kpiMap = {}
+  tableColumnMap[suite].forEach(table => {
+    tempDataObj[table.tableName] = { 'li-testcase': table.kpi }
+    kpiMap[table.tableName] = table.kpi
+  })
+  Object.keys(ppGroup).forEach(ppKey => {
+    const ppObj = {}
+    Object.keys(ppGroup[ppKey]).forEach(kpi => {
+      ppObj[kpi] = computeMean(ppGroup[ppKey][kpi])
+    })
+    const testKey = getPpParamAndValue(ppKey, 'pp.fio-setup-basic.rw')
+    const propName = getPpParamAndValue(ppKey, 'pp.fio-setup-basic.bs')
+    if (!testKey) return
+    switch (testKey.split('=')[1]) {
+    case 'randrw':
+      tempDataObj['randrwread_iops_blocksize'][propName] = ppObj[kpiMap['randrwread_iops_blocksize']]
+      tempDataObj['randrwread_bw_blocksize'][propName] = ppObj[kpiMap['randrwread_bw_blocksize']]
+      tempDataObj['randrwwrite_iops_blocksize'][propName] = ppObj[kpiMap['randrwwrite_iops_blocksize']]
+      tempDataObj['randrwwrite_bw_blocksize'][propName] = ppObj[kpiMap['randrwwrite_bw_blocksize']]
+      break
+    case 'read':
+      tempDataObj['read_iops_blocksize'][propName] = ppObj[kpiMap['read_iops_blocksize']]
+      tempDataObj['read_bw_blocksize'][propName] = ppObj[kpiMap['read_bw_blocksize']]
+      break
+    case 'randread':
+      tempDataObj['randread_iops_blocksize'][propName] = ppObj[kpiMap['randread_iops_blocksize']]
+      tempDataObj['randread_bw_blocksize'][propName] = ppObj[kpiMap['randread_bw_blocksize']]
+      break
+    case 'write':
+      tempDataObj['write_iops_blocksize'][propName] = ppObj[kpiMap['write_iops_blocksize']]
+      tempDataObj['write_bw_blocksize'][propName] = ppObj[kpiMap['write_bw_blocksize']]
+      break
+    case 'randwrite':
+      tempDataObj['randwrite_iops_blocksize'][propName] = ppObj[kpiMap['randwrite_iops_blocksize']]
+      tempDataObj['randwrite_bw_blocksize'][propName] = ppObj[kpiMap['randwrite_bw_blocksize']]
+      break
+    }
+  })
+  Object.keys(tempDataObj).forEach(tableName => {
+    computePerformanceValue(tempDataObj[tableName], tableColumnMap[suite].find(table => table.tableName === tableName))
+    addElementArrayToObj(tableDatas, tableName, tempDataObj[tableName])
+  })
 }
 
 const groupDataForSpeccpu2006 = (ppGroup, tableDatas, suite) => {
