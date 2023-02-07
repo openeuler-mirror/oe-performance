@@ -46,12 +46,12 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter, onBeforeRouteUpdate } from 'vue-router'
 import { sceneConfig } from '@/views/performance-baseline/config-file' 
 
 const router = useRouter()
 const route = useRoute()
-const currentKey = ref('bigData')
+const currentKey = ref('cpu')
 
 const handleMenuClick = (
   index: string,
@@ -69,13 +69,23 @@ const handleMenuClick = (
 }
 
 onMounted(() => {
-  if (route.query.scence) {
-    currentKey.value = route.query.scence as string
+  if (route.query.scene) {
+    currentKey.value = route.query.scene as string
   } else if (route.path === '/baseline/list') {
     // 如果是性能基线页面，但是有没有设置场景值的话，跳转至第一个场景（一般登录第一次进来或者顶部导航切换是没有场景的）
-    handleMenuClick('bigData', ['baseline-solution', 'bigData'])
+    handleMenuClick('cpu', ['baseline-basic', 'cpu'])
+    currentKey.value = 'cpu'
   } else {
     currentKey.value = String(route.name || '')
+  }
+})
+
+onBeforeRouteUpdate(async (to, from) => {
+  if (to.path === '/baseline/list' && to.path !== from.path) {
+    if (!to.query.scene) {
+      handleMenuClick('cpu', ['baseline-basic', 'cpu'])
+      currentKey.value = 'cpu'
+    }
   }
 })
 </script>

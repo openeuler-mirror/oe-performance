@@ -2,7 +2,19 @@
   <div>
     <el-card class="baseline-detail">
       <div class="main-title">
-        <span class="work-load-title">Workload性能值详情</span>
+        <h3 class="work-load-title">Workload性能值详情</h3>
+        <h4>测试套：{{ performanceDataStroe?.performanceData[submitId]?.suite }}</h4>
+        <p v-if="performanceDataStroe?.performanceData[submitId]?.suite!=='lmbench'">性能值：
+          {{ performanceValFormatter({},{},performanceDataStroe?.performanceData[submitId]?.performanceVal) }}
+        </p>
+        <template v-else>
+          <p>Bandwidth性能值：
+            {{ performanceValFormatter(
+              {},{},performanceDataStroe?.performanceData[submitId]?.performanceVal_local_bandwidths
+            ) }}
+          </p>Latency性能值：
+          {{ performanceValFormatter({},{},performanceDataStroe?.performanceData[submitId]?.performanceVal) }}
+        </template>
       </div>
       <div class="main-info">
         <div class="use-case-info main-item">
@@ -101,7 +113,22 @@
 </template>
   
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
+import { usePerformanceData } from '@/stores/performanceData'
 import workloadTableSection from './workload-table-section.vue'
+
+const router = useRouter()
+const performanceDataStroe = usePerformanceData()
+
+const submitId = router.currentRoute.value.params.submit_id
+
+const performanceValFormatter = (row, column, cellValue) => {
+  if (cellValue === undefined || cellValue === -1) {
+    return '暂无数据'
+  }
+  return cellValue
+}
+
 </script>
   
 <style lang="scss" scoped>

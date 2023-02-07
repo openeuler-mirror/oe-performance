@@ -1,6 +1,9 @@
 <template>
   <div class="oe-perf-section">
-    <search-pannel @search="getAllData" suiteByScene></search-pannel>
+    <search-pannel
+      @search="getAllData"
+      @reset-search-value="clearTableData"
+      suiteByScene></search-pannel>
   </div>
   <div class="oe-perf-section">
     <testment-table
@@ -42,17 +45,11 @@ const setMustCase = (searchParams) => {
   const tempArr = []
   Object.keys(searchParams).forEach(paramKey => {
     if (searchParams[paramKey]) {
-      if (paramKey === 'testbox') {
-        if (typeof searchParams[paramKey] === 'string') {
-          // 用户指定testbox
-          tempArr.push( { match: { testbox: searchParams[paramKey] } } )
-        } else {
-          // 用户通过硬件配置过滤
-          tempArr.push( { terms: { testbox: searchParams[paramKey] } } )
-        }
+      const matchObj = {}
+      matchObj[paramKey] = searchParams[paramKey]
+      if (Array.isArray(searchParams[paramKey])) {
+        searchParams[paramKey].length > 0 && tempArr.push({ terms: matchObj })
       } else {
-        const matchObj = {}
-        matchObj[paramKey] = searchParams[paramKey]
         tempArr.push({ match: matchObj })
       }
     }
@@ -60,7 +57,7 @@ const setMustCase = (searchParams) => {
   return tempArr
 }
 
-const getAllData = (params: searchParams) => {
+const getAllData = (params: searchParams, searchTime: number) => {
   searchParams.value = params
   submitDataLoading.value = true
 
@@ -72,7 +69,7 @@ const getAllData = (params: searchParams) => {
   }
 
   matchCases.push({ match: {job_state: 'finished'} })
-  matchCases.push({ range: { time: { gte: 'now-10d/d' } } })
+  matchCases.push({ range: { time: { gte: `now-${searchTime}d/d` } } })
 
   // 获取选择的套件下的submitID list
   getPerformanceData({
@@ -105,6 +102,10 @@ const getAllData = (params: searchParams) => {
   }).finally(() => {
     submitDataLoading.value = false
   })
+}
+
+const clearTableData = () => {
+  data.value =[]
 }
 </script>
 

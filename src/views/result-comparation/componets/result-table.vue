@@ -8,30 +8,39 @@
         :key="suite"
         lazy
       >
-        {{ suite }}
-        <div v-for="(config, tableIdx) in tableConfigs[suite]" :key="config.tableName">
-          {{ config.tableName }}
-          <el-table border :data="tableDatas[suite][tableIdx]">
-            <el-table-column
-              :prop="config.column[0].prop"
-              :label="config.column[0].label"
-              :key="config.column[0].prop"
-              width="200"
-              fixed
-            >
-            </el-table-column>
-            <el-table-column
-              v-for="item in config.column.slice(1)"
-              :prop="item.prop"
-              :label="item.label"
-              :key="item.prop">
-            </el-table-column>
-          </el-table>
-          <el-card v-if="tableDatas[suite][tableIdx].length !== 0" shadow="hover" style="margin-bottom:20px">
-            <compare-chart
-            :chartConfigs="tableConfigs[suite][tableIdx]"
-            :chartData="tableDatas[suite][tableIdx]"/>
-          </el-card>
+        <div v-if="isSuiteDataEmpty(tableDatas[suite])" class="empty-content">
+          <img src="@/assets/empty.png" />
+          <h5>暂无数据</h5>
+        </div>
+        <div
+          v-else
+          v-for="(config, tableIdx) in tableConfigs[suite]"
+          :key="config.tableName"
+        >
+          <template v-if="tableDatas[suite][tableIdx].length > 0">
+            {{ config.tableName }}
+            <el-table border :data="tableDatas[suite][tableIdx]">
+              <el-table-column
+                :prop="config.column[0].prop"
+                :label="config.column[0].label"
+                :key="config.column[0].prop"
+                min-width="200"
+                fixed
+              >
+              </el-table-column>
+              <el-table-column
+                v-for="item in config.column.slice(1)"
+                :prop="item.prop"
+                :label="item.label"
+                :key="item.prop">
+              </el-table-column>
+            </el-table>
+            <el-card v-if="tableDatas[suite][tableIdx].length !== 0" shadow="hover" style="margin-bottom:20px">
+              <compare-chart
+              :chartConfigs="tableConfigs[suite][tableIdx]"
+              :chartData="tableDatas[suite][tableIdx]"/>
+            </el-card>
+          </template>
         </div>
       </el-tab-pane>
     </el-tabs>
@@ -50,7 +59,11 @@ const props = defineProps({
   },
   dimension: {  // 数据组织维度
     type: String,
-    default: 'testbox'
+    default: 'osv'
+  },
+  filterListUnderDimension: {
+    type: Array,
+    default: () => []
   },
   suiteControl: {
     type: String,
@@ -71,7 +84,7 @@ const tableConfigs:Ref<any> = ref({})
 
 const tableDatas:Ref<any> = ref({})
 
-const generateTableConfigsAndData = (tjobs, dimension:string) => {
+const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string>) => {
   setTab()
   tableDatas.value = {}
   tableListOrder.forEach(suite => { // 遍历每一个套件
@@ -89,12 +102,13 @@ const generateTableConfigsAndData = (tjobs, dimension:string) => {
       const tableName = `${filterName || ''}${labelName}${directionName > 0 ? '（越大越好）':'（越小越好）'}`
       tempConfig['tableName'] = tableName
 
-      const tempColumn = [{ label: tableConfig.kpi, prop: 'dimensionId' }]
+      const tempColumn = [{ label: tableConfig.x_param, prop: 'dimensionId' }]
       const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
       tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
         // 1、拿到当前tjob的维度值
         const dimensionValue = tjob[dimension]
         if (!dimensionValue) return // 没有对应维度的话退出
+        if (filterList.length > 0 && filterList.indexOf(dimensionValue) < 0) return
         // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
         const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
         if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
@@ -213,6 +227,17 @@ const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
   return true
 }
 
+const isSuiteDataEmpty = (tableDatasUnderSuite) => {
+  let emptyFlag = true
+  if (tableDatasUnderSuite.length < 1) return true
+  tableDatasUnderSuite.forEach(tableDataByIdx => {
+    if (tableDataByIdx.length > 0) {
+      emptyFlag = false
+    }
+  })
+  return emptyFlag
+}
+
 const handleTabChange = () => {
   nextTick(() => {
     const event = new Event('resize')
@@ -222,7 +247,7 @@ const handleTabChange = () => {
 
 // 当表格数据或者展示维度切换时，更新表格配置数据
 watchEffect(() => {
-  generateTableConfigsAndData(props.tjobsAll, props.dimension)
+  generateTableConfigsAndData(props.tjobsAll, props.dimension, props.filterListUnderDimension)
 })
 </script>
   
@@ -232,5 +257,9 @@ watchEffect(() => {
 }
 .el-table {
   margin-bottom: 20px;
+}
+.empty-content {
+  padding: 80px 0;
+  text-align: center;
 }
 </style>
