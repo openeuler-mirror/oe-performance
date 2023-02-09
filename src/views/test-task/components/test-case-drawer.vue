@@ -1,5 +1,5 @@
 <template>
-    <el-drawer v-model="drawer" :direction="direction" :before-close="handleClose">
+    <el-drawer v-model="drawer" :direction="direction" :before-close="handleClose" width="500">
     <template #title>
       <h4>用例列表</h4>
     </template>
@@ -34,7 +34,6 @@
 </template>
 <script lang="ts" setup>
 import { ref, toRaw, defineEmits, reactive, computed } from 'vue'
-import { ElMessageBox } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -123,14 +122,8 @@ const data = [
 
 const emit = defineEmits(['changeDrawer', 'selectedExample'])
 function confirmClick() {
-  ElMessageBox.confirm('Are you confirm to chose?')
-    .then(() => {
-      emit('changeDrawer')
-      emit('selectedExample',selected)
-    })
-    .catch(() => {
-      // catch error
-    })
+  emit('changeDrawer')
+  emit('selectedExample',selected)
 }
 function cancelClick() {
   emit('changeDrawer')
