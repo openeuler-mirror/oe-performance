@@ -310,17 +310,6 @@ const handleSearchTable = () => {
     return
   } 
   emit('tableSearch', searcherKey.value, searcherValue.value)
-  // else if (searcherValue.value === '') {
-  //   ElMessage('请输入搜索内容！')
-  // } else {
-  //   tableData.value = originData.filter(
-  //     data =>
-  //       !searcherValue.value ||
-  //       data[searcherKey.value]
-  //         .toLowerCase()
-  //         .includes(searcherValue.value.toLowerCase())
-  //   )
-  // }
 }
 
 // 获取并合并jobs的逻辑
@@ -347,6 +336,7 @@ const getAllJobsData = (idList: any[]) => {
     },
   }).then(res => {
     const submitResult = constructSubmitDataList(res?.data?.hits?.hits)
+    performanceStore.resetSubmitIdList()
     submitResult.forEach((submitItem, idx) => {
       if (performanceStore.performanceData[submitItem.submitId]) {
         tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
@@ -355,12 +345,14 @@ const getAllJobsData = (idList: any[]) => {
       const submitData = combineJobs(submitItem.jobList)
       setDeviceInfoToObj(submitData)
       performanceStore.setPerformanceData(submitItem.submitId, submitData)
+      performanceStore.addSubmitIdToList(submitItem.submitId)
       tempArr[idx] = submitData
     })
   }).catch(err => {
     ElMessage({ message: err.message, type: 'error' })
   }).finally(() => {
     tableLoading.value = false
+    console.log(11, performanceStore.currentPageSubmitIdList)
   })
   return tempArr
 }

@@ -37,7 +37,7 @@
       </el-menu>
     </el-aside>
     <el-main>
-      <div class="breadcrumb-nav" @click="router.go(-1)">&lt;返回</div>
+      <div class="breadcrumb-nav" @click="handleGoBack">&lt;返回</div>
       <div class="sub-layout-content">
         <router-view></router-view>
       </div>
@@ -68,6 +68,10 @@ const handleMenuClick = (
   }
 }
 
+const handleGoBack = () => {
+  router.go(-1)
+}
+
 onMounted(() => {
   if (route.query.scene) {
     currentKey.value = route.query.scene as string
@@ -87,6 +91,7 @@ onBeforeRouteUpdate(async (to, from) => {
       currentKey.value = 'cpu'
     }
   }
+  console.log(22, to ,from)
 })
 </script>
 <style scoped lang="scss">
