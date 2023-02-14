@@ -37,7 +37,7 @@
       </el-menu>
     </el-aside>
     <el-main>
-      <div class="breadcrumb-nav" @click="handleGoBack">&lt;返回</div>
+      <div v-if="!isRoot" class="breadcrumb-nav" @click="handleGoBack">&lt;返回</div>
       <div class="sub-layout-content">
         <router-view></router-view>
       </div>
@@ -52,6 +52,9 @@ import { sceneConfig } from '@/views/performance-baseline/config-file'
 const router = useRouter()
 const route = useRoute()
 const currentKey = ref('cpu')
+
+const isRoot = ref(false)
+const isBack = ref(false)
 
 const handleMenuClick = (
   index: string,
@@ -69,6 +72,7 @@ const handleMenuClick = (
 }
 
 const handleGoBack = () => {
+  isBack.value = true
   router.go(-1)
 }
 
@@ -82,16 +86,32 @@ onMounted(() => {
   } else {
     currentKey.value = String(route.name || '')
   }
+
+  if (route.name === 'baseline-list') {
+    isRoot.value = true
+  }
 })
 
 onBeforeRouteUpdate(async (to, from) => {
+  // 从其他模块跳转到性能基线列表页
   if (to.path === '/baseline/list' && to.path !== from.path) {
     if (!to.query.scene) {
       handleMenuClick('cpu', ['baseline-basic', 'cpu'])
       currentKey.value = 'cpu'
     }
   }
-  console.log(22, to ,from)
+
+  if (to.path === '/baseline/list') {
+    isRoot.value = true
+  } else {
+    isRoot.value = false
+  }
+
+  // 记录从详情页返回列表的状态
+  if (isBack.value && to.name === 'baseline-list' && from.name === 'baseline-detail') {
+    to.meta['isGoback'] = true
+    isBack.value = false
+  }
 })
 </script>
 <style scoped lang="scss">

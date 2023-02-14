@@ -3,8 +3,6 @@ import { defineStore } from 'pinia'
 
 // submit维度新能数据获取及存储
 const performanceData = reactive(<{ [key: string]: any }>{})
-// 性能基线页，保存当前查询的列表数据submitId，用于从详情页返回时还原表格数据。
-const currentPageSubmitIdList = ref<string[]>([])
 
 const comparationList = ref(<{}>[])
 const loadingStatus = reactive({
@@ -23,14 +21,6 @@ export const usePerformanceData= defineStore('performanceData', () => {
     loadingStatus.searchLoading = state
   }
 
-  const resetSubmitIdList = () => {
-    currentPageSubmitIdList.value = []
-  }
-
-  const addSubmitIdToList = (submitId:string) => {
-    currentPageSubmitIdList.value.push(submitId)
-  }
-
   return {
     loadingStatus,
     changeLoadingStatus,
@@ -38,10 +28,32 @@ export const usePerformanceData= defineStore('performanceData', () => {
     setPerformanceData,
     comparationList,
     setComparationList,
+  }
+})
 
-    currentPageSubmitIdList,
+// 性能基线页，保存当前查询的列表数据submitId，用于从详情页返回时还原表格数据。
+const baselineSubmitList = ref<string[]>([])
+const baselineTableInfo = ref({})
+
+export const useBaselineTableInfoStore= defineStore('baselineTableInfo', () => {
+  const resetSubmitIdList = () => {
+    baselineSubmitList.value = []
+    baselineTableInfo.value = {}
+  }
+
+  const setSubmitList = (submitList:string[]) => {
+    baselineSubmitList.value = submitList
+  }
+  const setTableInfo = (tableInfo: {}) => {
+    baselineTableInfo.value = tableInfo
+  }
+
+  return {
+    baselineSubmitList,
+    baselineTableInfo,
     resetSubmitIdList,
-    addSubmitIdToList
+    setSubmitList,
+    setTableInfo
   }
 })
 

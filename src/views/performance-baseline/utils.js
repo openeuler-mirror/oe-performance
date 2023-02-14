@@ -110,7 +110,6 @@ const getjobStateData = (jobList) => {
 }
 
 const mapGroupDataToTableData = (ppGroup, suite) => {
-  console.log(ppGroup)
   const tableDatas = {}
   if (!tableColumnMap[suite]) {
     return {}
