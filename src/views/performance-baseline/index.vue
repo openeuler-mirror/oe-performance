@@ -16,13 +16,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 import TestmentTable from './components/testment-table.vue'
 import SearchPannel from '@/views/search-pannel/index.vue'
 
+import { useBaselineTableInfoStore } from '@/stores/performanceData'
+
 import { getPerformanceData } from '@/api/performance'
+
+const route = useRoute()
+const baselineTableInfoStore = useBaselineTableInfoStore()
 
 const data = ref<any[]>([])
 const searchParams = ref({})
@@ -34,6 +40,7 @@ const refreashData = () => {
 }
 
 const handleTableSearch = (searchKey, searchValue) => {
+  // 表格子搜索
   tableSearchParams.value = {
     searchKey,
     searchValue
@@ -83,17 +90,16 @@ const getAllData = (params: searchParams, searchTime: number) => {
       },
       aggs: {
         jobs_terms: {
-          terms: {
-            field: 'submit_id',
-            size: 10000 // 取全量
-          }
+          terms: { field: 'submit_id', size: 10000 }
         }
       }
     },
   }).then((res) => {
     // todo: 数据为空的异常处理
-    data.value = res.data.aggregations.jobs_terms.buckets
-      .map((item: any) => { return { submit_id: item.key }})
+    const submitList = res?.data?.aggregations?.jobs_terms?.buckets
+      .map((item: any) => { return { submit_id: item.key }}) || []
+    baselineTableInfoStore.setSubmitList(submitList)
+    data.value = submitList
   }).catch((err) => {
     ElMessage({
       message: err.message,
@@ -107,6 +113,14 @@ const getAllData = (params: searchParams, searchTime: number) => {
 const clearTableData = () => {
   data.value =[]
 }
+
+onMounted(() => {
+  if (route.meta.isGoback) {
+    if (baselineTableInfoStore.baselineSubmitList && baselineTableInfoStore.baselineSubmitList.length > 0) {
+      data.value = baselineTableInfoStore.baselineSubmitList
+    }
+  }
+})
 </script>
 
 <style></style>

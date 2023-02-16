@@ -407,7 +407,6 @@ const handleSearch = () => {
   if (jobParams.osv && Array.isArray(jobParams.osv)) {
     jobParams.osv = jobParams.osv.map((arr:string[]) => arr.join('@'))
   }
-
   if (Object.keys(hostParams).length > 0) {
     const testboxSearchList = []
     Object.keys(hostParams).forEach(hostFieldKey => {
@@ -426,7 +425,7 @@ const handleSearch = () => {
     })
     const searchParamData = { ...jobParams }
     // 当testbox存在时，说明用户指定了testboxId，此时使用硬件的筛选没有意义了
-    if (testboxSearchList.length > 0 && searchParamData.testbox.length < 1) { 
+    if (testboxSearchList.length > 0 && (!searchParamData.testbox || searchParamData.testbox.length < 1)) { 
       searchParamData.testbox = testboxSearchList
     }
 
@@ -486,15 +485,17 @@ watch(
   }
 )
 
-// 切换suite时，重新获取fields的可选值
+// 在基线页面切换suite时，重新获取fields的可选值
 // 需要调整
 watch(
   () => searchParams.value.suite,
-  (curv) => {
-    if (props.suiteByScene) {
+  (curv, prev) => {
+    // 当prev为false时， 说明是新进入的当前页面，而不是在列表模块间切换suite
+    if (props.suiteByScene && prev) {
       getFieldsOptions()
       getHostOptions()
       // 当suite不一致时，候选项可能会不能匹配原suite数据，因此需要重置搜索内容
+      // todo: 此处有待优化，searchParams重置后各个字段应和组件初始化后的各个字段保持一致。目前只给了一个suite字段。
       searchParams.value = { suite: curv }
     }
   }

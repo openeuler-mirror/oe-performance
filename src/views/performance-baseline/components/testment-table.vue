@@ -6,7 +6,7 @@
           type="primary"
           class="button"
           :disabled="
-            selectedTableRows.length < 2 || selectedTableRows.length > 5
+            true || selectedTableRows.length < 2 || selectedTableRows.length > 5
           "
           @click="handleComaration"
           >对比</el-button
@@ -170,7 +170,7 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watch, reactive, onMounted, watchEffect } from 'vue'
+import { PropType, ref, watch, reactive, onMounted, watchEffect, onBeforeMount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Search,
@@ -180,7 +180,7 @@ import {
 } from '@element-plus/icons-vue'
 import { config, sceneConfig } from '../config-file'
 import { ElMessage } from 'element-plus'
-import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
+import { usePerformanceData, useBaselineTableInfoStore, useTestboxStore } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
@@ -216,6 +216,7 @@ const emit = defineEmits<{
 const router = useRouter()
 const route = useRoute()
 const performanceStore = usePerformanceData()
+const baselineTableInfoStore = useBaselineTableInfoStore()
 const testboxStore = useTestboxStore()
 
 const searcherValue = ref('')
@@ -260,6 +261,8 @@ const disabled = ref(false)
 
 const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
+
+const changeSizeOnly = ref(false)
 
 const initailizeColumn = () => {
   const scene = route.query.scene ? route.query.scene : 'bigData'
@@ -310,17 +313,6 @@ const handleSearchTable = () => {
     return
   } 
   emit('tableSearch', searcherKey.value, searcherValue.value)
-  // else if (searcherValue.value === '') {
-  //   ElMessage('请输入搜索内容！')
-  // } else {
-  //   tableData.value = originData.filter(
-  //     data =>
-  //       !searcherValue.value ||
-  //       data[searcherKey.value]
-  //         .toLowerCase()
-  //         .includes(searcherValue.value.toLowerCase())
-  //   )
-  // }
 }
 
 // 获取并合并jobs的逻辑
@@ -450,21 +442,57 @@ watch(
 )
 
 // 自动分页
-watchEffect(() => {
+const paging = () => {
   const startIndex = (currentPage.value - 1) * pageSize.value
   // 数据分页
   idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
   total.value = props.dataList.length
-})
+  baselineTableInfoStore.setTableInfo({
+    currentPage: currentPage.value,
+    pageSize: pageSize.value
+  })
+}
+watch(
+  () => currentPage.value,
+  () => paging()
+)
+watch(
+  () => pageSize.value,
+  () => {
+    if (changeSizeOnly.value) {
+      changeSizeOnly.value = false
+    } else {
+      if (currentPage.value === 1) {
+        paging()
+      } else {
+        currentPage.value = 1
+      }
+    }
+  }
+)
+// 获取submitList后
+watch(
+  () => props.dataList,
+  () => paging()
+)
 
-// 当前页数据变化时，获取jobs数据
-watch(idList, () => {
-  tableData.value = getAllJobsData(idList.value)
-  // originData = JSON.parse(JSON.stringify(tableData.value))
-})
+// 分页后，获取jobs数据
+watch(
+  () => idList.value,
+  () => {
+    tableData.value = getAllJobsData(idList.value)
+  }
+)
 
 onMounted(() => {
   initailizeColumn()
+  if (route.meta.isGoback) {
+    if (baselineTableInfoStore.baselineTableInfo && baselineTableInfoStore.baselineTableInfo.currentPage) {
+      changeSizeOnly.value = true
+      pageSize.value = baselineTableInfoStore.baselineTableInfo.pageSize
+      currentPage.value = baselineTableInfoStore.baselineTableInfo.currentPage
+    }
+  }
 })
 </script>
 
