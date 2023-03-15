@@ -368,6 +368,7 @@ const handleComaration = () => {
   router.push({ name: 'basicPerformance' })
 }
 // 导出
+/* eslint-disable max-lines-per-function */
 const handleExportCsv = () => {
   if (selectedTableRows.value.length === 0) {
     ElMessage({
@@ -378,7 +379,12 @@ const handleExportCsv = () => {
     const data = []
     // 这里要深拷贝,不然影响列的字段
     const titleData: any[] = JSON.parse(JSON.stringify(allColumn.value))
-    titleData.splice(0, 0, { label: '提交编号', prop: 'submit_id' })
+    const extraColumn: any[] = [
+      { label: '提交编号', prop: 'submit_id' },
+      { label: '测试套', prop: 'suite' }
+    ]
+    titleData.splice(0, 0, ...extraColumn)
+    titleData.splice(titleData.length, 0, { label: '测试人', prop: 'my_account' })
     const title = titleData.map<string>((item: any) => item.label).join(',')
     const keys = titleData.map<string>((item: any) => item.prop)
     data.push(`${title}\r\n`)
@@ -390,7 +396,29 @@ const handleExportCsv = () => {
       const tmpStr = temp.join(',')
       data.push(`${tmpStr}\r\n`)
     })
-    const dataString = data.join('')
+    let dataString = data.join('').concat('\r\n\r\n')
+    // 只选择了一条,不用进行对比
+    if (selectedTableRows.value.length === 1) {
+      const testDatas = selectedTableRows.value[0]['tableDatas']
+      const subjects = Object.keys(testDatas)
+      subjects.forEach((value) => {
+        // 写入subject和测试指标的名字
+        dataString = dataString.concat(`${value}\r\n`)
+        const testDataItemKeys = Object.keys(testDatas[value][0])
+        testDataItemKeys.splice(testDataItemKeys.indexOf('li-testcase'),1)
+        // 指标名字经处理后写入
+        const tempArr = testDataItemKeys.map((item:string) => item.split('.')[1])
+        tempArr.splice(0,0,'提交编号')
+        dataString = dataString.concat(`${tempArr.join(',')}\r\n`)
+        // 写入各项指标值
+        const values:string[] = []
+        values.push(selectedTableRows.value[0]['submit_id'])
+        testDataItemKeys.forEach((item:string) => {
+          values.push(testDatas[value][0][item])
+        })
+        dataString = dataString.concat(`${values.join(',')}\r\n`)
+      })
+    }
     const blob = new Blob([`\uFEFF${dataString}`], {
       type: 'text/csv;charset=utf-8'
     })
