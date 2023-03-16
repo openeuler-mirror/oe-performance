@@ -101,6 +101,7 @@
       >
     </div>
     <el-table
+      ref="multipleTableRef"
       :data="tableData"
       v-loading="tableLoading || submitDataLoading"
       stripe
@@ -143,6 +144,25 @@
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total" />
+    <el-dialog
+      v-model="dialogVisible"
+      class="export-dialog"
+      title="选择基准"
+      width="70%"
+      @close="handleDialogClose">
+      <el-table
+        :data="testData"
+        stripe
+        style="width: 100%"
+        :header-cell-style="{ background: 'rgb(243,243,243)' }">
+        <el-table-column fixed prop="submit_id" label="提交编号" width="200" />
+        <el-table-column
+          :prop="item['prop']"
+          :label="item['label']"
+          :key="item['prop']"
+          v-for="(item) in testDataColumn"/>
+      </el-table>
+    </el-dialog>
   </div>
 </template>
 
@@ -156,7 +176,7 @@ import {
   WarningFilled
 } from '@element-plus/icons-vue'
 import { config, sceneConfig } from '../config-file'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElTable } from 'element-plus'
 import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
@@ -234,7 +254,10 @@ const disabled = ref(false)
 
 const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
-
+const dialogVisible = ref(false)
+const testData = ref<any[]>([])
+const testDataColumn = ref<any[]>([])
+const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 const initailizeColumn = () => {
   const scene = route.query.scene ? route.query.scene : 'bigData'
   let key: keyof typeof sceneConfig
@@ -397,6 +420,40 @@ const handleExportCsv = () => {
       data.push(`${tmpStr}\r\n`)
     })
     let dataString = data.join('').concat('\r\n\r\n')
+    if (selectedTableRows.value.length > 1) {
+      // 准备好弹窗内表格的内容
+      const testDatas = selectedTableRows.value[0]['tableDatas']
+      const subjects = Object.keys(testDatas)
+      subjects.forEach(item => {
+        let testDataItemKeys = Object.keys(testDatas[item][0])
+        testDataItemKeys.splice(testDataItemKeys.indexOf('li-testcase'),1)
+        testDataItemKeys = testDataItemKeys.map((item:string) => item.split('.')[1])
+        testDataItemKeys.forEach(value =>{
+          testDataColumn.value.push({
+            'prop': `${item}.${value}`,
+            'label': `${item}(${value})`
+          })
+        })
+      })
+      selectedTableRows.value.forEach(item => {
+        let detailData = {}
+        for (let subject in item['tableDatas']) {
+          for (let key in item['tableDatas'][subject][0]) {
+            if (key !== 'li-testcase') {
+              const tmp = key.split('.')[1]
+              detailData[`${subject}.${tmp}`] = item['tableDatas'][subject][0][key]
+            }
+          }
+        }
+        testData.value.push({
+          'submit_id': item['submit_id'],
+          ...detailData
+        })
+      })
+      dialogVisible.value = true
+      return
+      // 对比
+    }
     // 只选择了一条,不用进行对比
     if (selectedTableRows.value.length === 1) {
       const testDatas = selectedTableRows.value[0]['tableDatas']
@@ -428,6 +485,11 @@ const handleExportCsv = () => {
 
 const handleReFresh = () => {
   emit('refreash')
+}
+const handleDialogClose = () => {
+  testData.value = []
+  testDataColumn.value = []
+  multipleTableRef.value!.clearSelection()
 }
 const getProperty = (item:any, key:string) => {
   const index = key.split('.')
@@ -521,5 +583,12 @@ a {
 }
 .pagination {
   margin-top: 30px;
+}
+</style>
+<style lang="scss">
+.export-dialog {
+  .el-dialog__body {
+    padding-top: 20px;
+  }
 }
 </style>
