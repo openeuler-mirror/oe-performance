@@ -147,12 +147,21 @@
     <el-dialog
       v-model="dialogVisible"
       class="export-dialog"
-      title="选择基准"
       width="70%"
       @close="handleDialogClose">
+      <template #header>
+        <span style="font-size:20px;line-height: 24px;">选择基准</span>
+        <el-tooltip
+          content="选择一条作为基准,其他记录将与之进行比较"
+          placement="bottom">
+          <el-icon style="margin-left: 4px;" color="var(--oe-perf-color-secondary)"><InfoFilled /></el-icon>
+        </el-tooltip>
+      </template>
       <el-table
         :data="testData"
         stripe
+        highlight-current-row
+        @current-change="handleCurrentChange"
         style="width: 100%"
         :header-cell-style="{ background: 'rgb(243,243,243)' }">
         <el-table-column fixed prop="submit_id" label="提交编号" width="200" />
@@ -162,6 +171,11 @@
           :key="item['prop']"
           v-for="(item) in testDataColumn"/>
       </el-table>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" @click="handleExportMultiple" :loading="exportButtonLoading">导出</el-button>
+        </span>
+      </template>
     </el-dialog>
   </div>
 </template>
@@ -258,6 +272,7 @@ const dialogVisible = ref(false)
 const testData = ref<any[]>([])
 const testDataColumn = ref<any[]>([])
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
+const exportButtonLoading = ref(false)
 const initailizeColumn = () => {
   const scene = route.query.scene ? route.query.scene : 'bigData'
   let key: keyof typeof sceneConfig
@@ -391,95 +406,52 @@ const handleComaration = () => {
   router.push({ name: 'basicPerformance' })
 }
 // 导出
-/* eslint-disable max-lines-per-function */
 const handleExportCsv = () => {
   if (selectedTableRows.value.length === 0) {
     ElMessage({
       message: '请先选择要导出的数据',
       type: 'warning'
     })
-  } else {
-    const data = []
-    // 这里要深拷贝,不然影响列的字段
-    const titleData: any[] = JSON.parse(JSON.stringify(allColumn.value))
-    const extraColumn: any[] = [
-      { label: '提交编号', prop: 'submit_id' },
-      { label: '测试套', prop: 'suite' }
-    ]
-    titleData.splice(0, 0, ...extraColumn)
-    titleData.splice(titleData.length, 0, { label: '测试人', prop: 'my_account' })
-    const title = titleData.map<string>((item: any) => item.label).join(',')
-    const keys = titleData.map<string>((item: any) => item.prop)
-    data.push(`${title}\r\n`)
-    selectedTableRows.value.forEach((item: any) => {
-      const temp: string[] = []
-      keys.forEach((key: string) => {
-        temp.push(getProperty(item,key))
-      })
-      const tmpStr = temp.join(',')
-      data.push(`${tmpStr}\r\n`)
-    })
-    let dataString = data.join('').concat('\r\n\r\n')
-    if (selectedTableRows.value.length > 1) {
-      // 准备好弹窗内表格的内容
-      const testDatas = selectedTableRows.value[0]['tableDatas']
-      const subjects = Object.keys(testDatas)
-      subjects.forEach(item => {
-        let testDataItemKeys = Object.keys(testDatas[item][0])
-        testDataItemKeys.splice(testDataItemKeys.indexOf('li-testcase'),1)
-        testDataItemKeys = testDataItemKeys.map((item:string) => item.split('.')[1])
-        testDataItemKeys.forEach(value =>{
-          testDataColumn.value.push({
-            'prop': `${item}.${value}`,
-            'label': `${item}(${value})`
-          })
-        })
-      })
-      selectedTableRows.value.forEach(item => {
-        let detailData = {}
-        for (let subject in item['tableDatas']) {
-          for (let key in item['tableDatas'][subject][0]) {
-            if (key !== 'li-testcase') {
-              const tmp = key.split('.')[1]
-              detailData[`${subject}.${tmp}`] = item['tableDatas'][subject][0][key]
-            }
-          }
-        }
-        testData.value.push({
-          'submit_id': item['submit_id'],
-          ...detailData
-        })
-      })
-      dialogVisible.value = true
-      return
-      // 对比
-    }
-    // 只选择了一条,不用进行对比
-    if (selectedTableRows.value.length === 1) {
-      const testDatas = selectedTableRows.value[0]['tableDatas']
-      const subjects = Object.keys(testDatas)
-      subjects.forEach((value) => {
-        // 写入subject和测试指标的名字
-        dataString = dataString.concat(`${value}\r\n`)
-        const testDataItemKeys = Object.keys(testDatas[value][0])
-        testDataItemKeys.splice(testDataItemKeys.indexOf('li-testcase'),1)
-        // 指标名字经处理后写入
-        const tempArr = testDataItemKeys.map((item:string) => item.split('.')[1])
-        tempArr.splice(0,0,'提交编号')
-        dataString = dataString.concat(`${tempArr.join(',')}\r\n`)
-        // 写入各项指标值
-        const values:string[] = []
-        values.push(selectedTableRows.value[0]['submit_id'])
-        testDataItemKeys.forEach((item:string) => {
-          values.push(testDatas[value][0][item])
-        })
-        dataString = dataString.concat(`${values.join(',')}\r\n`)
-      })
-    }
+  } else if (selectedTableRows.value.length === 1) {
+    // 公共部分数据
+    const commonPartData = handleExportCommonPart()
+    // + workload数据
+    const dataString = handleExportSingle(commonPartData)
     const blob = new Blob([`\uFEFF${dataString}`], {
       type: 'text/csv;charset=utf-8'
     })
     downloadBlobFile(blob, '导出.csv')
+  } else {
+    // 准备好弹窗内表格的内容
+    const testDatas = selectedTableRows.value[0]['tableDatas']
+    const subjects = Object.keys(testDatas)
+    subjects.forEach(item => {
+      let testDataItemKeys = Object.keys(testDatas[item][0])
+      testDataItemKeys.splice(testDataItemKeys.indexOf('li-testcase'),1)
+      testDataItemKeys = testDataItemKeys.map((item:string) => item.split('.')[1])
+      testDataItemKeys.forEach(value =>{
+        testDataColumn.value.push({
+          'prop': `${item}.${value}`,
+          'label': `${item}(${value})`
+        })
+      })
+    })
+    selectedTableRows.value.forEach(item => {
+      let detailData = {}
+      for (let subject in item['tableDatas']) {
+        for (let key in item['tableDatas'][subject][0]) {
+          if (key !== 'li-testcase') {
+            const tmp = key.split('.')[1]
+            detailData[`${subject}.${tmp}`] = item['tableDatas'][subject][0][key]
+          }
+        }
+      }
+      testData.value.push({
+        'submit_id': item['submit_id'],
+        ...detailData
+      })
+    })
+    dialogVisible.value = true
   }
 }
 
@@ -487,9 +459,123 @@ const handleReFresh = () => {
   emit('refreash')
 }
 const handleDialogClose = () => {
+  exportButtonLoading.value = false
   testData.value = []
   testDataColumn.value = []
+  currentRow.value = undefined
   multipleTableRef.value!.clearSelection()
+}
+const currentRow = ref()
+const handleCurrentChange = (val:any) => {
+  currentRow.value = val
+  console.log(val)
+}
+const handleExportCommonPart = ():string => {
+  const data = []
+  // 这里要深拷贝,不然影响列的字段
+  const titleData: any[] = JSON.parse(JSON.stringify(allColumn.value))
+  const extraColumn: any[] = [
+    { label: '提交编号', prop: 'submit_id' },
+    { label: '测试套', prop: 'suite' }
+  ]
+  titleData.splice(0, 0, ...extraColumn)
+  titleData.splice(titleData.length, 0, { label: '测试人', prop: 'my_account' })
+  const title = titleData.map<string>((item: any) => item.label).join(',')
+  const keys = titleData.map<string>((item: any) => item.prop)
+  data.push(`${title}\r\n`)
+  selectedTableRows.value.forEach((item: any) => {
+    const temp: string[] = []
+    keys.forEach((key: string) => {
+      temp.push(getProperty(item,key))
+    })
+    const tmpStr = temp.join(',')
+    data.push(`${tmpStr}\r\n`)
+  })
+  return data.join('').concat('\r\n\r\n')
+}
+const handleExportSingle = (commonPartData:string):string => {
+  const testDatas = selectedTableRows.value[0]['tableDatas']
+  const subjects = Object.keys(testDatas)
+  subjects.forEach((value) => {
+    commonPartData = commonPartData.concat(`${value}\r\n`)
+    const testDataItemKeys = Object.keys(testDatas[value][0])
+    testDataItemKeys.splice(testDataItemKeys.indexOf('li-testcase'),1)
+    const tempArr = testDataItemKeys.map((item:string) => item.split('.')[1])
+    tempArr.splice(0,0,'提交编号')
+    commonPartData = commonPartData.concat(`${tempArr.join(',')}\r\n`)
+    // 写入各项指标值
+    const values:string[] = []
+    values.push(selectedTableRows.value[0]['submit_id'])
+    testDataItemKeys.forEach((item:string) => {
+      values.push(testDatas[value][0][item])
+    })
+    commonPartData = commonPartData.concat(`${values.join(',')}\r\n`)
+  })
+  return commonPartData;
+}
+/* eslint-disable max-lines-per-function */
+const handleExportMultiple = () => {
+  if (currentRow.value === undefined) {
+    ElMessage({
+      message: '请先选择一条记录作为基准',
+      type: 'warning'
+    })
+  } else {
+    exportButtonLoading.value = true
+    let commonPartData = handleExportCommonPart()
+    // 基准移到第一位
+    const index = testData.value.findIndex(item => item['submit_id'] === currentRow.value['submit_id'])
+    if(index !== -1){
+      testData.value.splice(0, 0, testData.value[index])
+      testData.value.splice(index + 1, 1)
+    }
+    // 表头
+    const testDataKeys:string[] = []
+    testDataKeys.push('提交编号')
+    for (let key in testData.value[0]) {
+      if (key !== 'submit_id') {
+        testDataKeys.push(key)
+      }
+    }
+    // 基准数据
+    const baseRecordData:string[] = []
+    testDataKeys.forEach(item => {
+      if (item === '提交编号') {
+        baseRecordData.push(testData.value[0]['submit_id'])
+      } else {
+        baseRecordData.push(testData.value[0][item])
+      }
+    })
+    testData.value.forEach((record, index) => {
+      if (index !== 0) {
+        commonPartData = commonPartData.concat(`${testDataKeys.join(',')}\r\n`)
+        commonPartData = commonPartData.concat(`${baseRecordData.join(',')}\r\n`)
+        const temp:string[] = []
+        const diffData:any[] = ['提升情况']
+        testDataKeys.forEach(item => {
+          if (item === '提交编号') {
+            temp.push(record['submit_id'])
+          } else {
+            temp.push(record[item])
+            diffData.push(Number(record[item]) - Number(testData.value[0][item]))
+          }
+        })
+        commonPartData = commonPartData.concat(`${temp.join(',')}\r\n`)
+        commonPartData = commonPartData.concat(`${diffData.join(',')}\r\n\r\n`)
+      }
+    })
+    const blob = new Blob([`\uFEFF${commonPartData}`], {
+      type: 'text/csv;charset=utf-8'
+    })
+    downloadBlobFile(blob, '导出.csv')
+    // 退出
+    dialogVisible.value = false
+    handleDialogClose()
+    ElMessage({
+      message: '导出成功',
+      type: 'success'
+    })
+  }
 }
 const getProperty = (item:any, key:string) => {
   const index = key.split('.')
