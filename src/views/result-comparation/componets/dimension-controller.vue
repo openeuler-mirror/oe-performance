@@ -3,9 +3,10 @@
     <div class="label">对比维度</div>
     <div class="dimension-controller-inner">
       <el-radio-group class="controller-item" v-model="dimension">
-        <el-radio-button label="osv" />
-        <el-radio-button label="testbox" />
-        <el-radio-button label="tags" />
+        <el-radio-button
+          v-for="(label,idx) in (Object.keys(filterOptions))"
+          :label="label"
+          :key="`${label}${idx}`"/>
       </el-radio-group>
       <el-select
         class="controller-item"
@@ -18,7 +19,7 @@
       >
         <el-option
           class="controller-item"
-          v-for="item in filterOptions[dimension]"
+          v-for="item in (filterOptions[dimension] || {})"
           :key="item"
           :label="item"
           :value="item"
@@ -32,16 +33,25 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+interface OptionData {
+  // osv: ['openEuler', 'centos']
+  [key:string]: Array<string|undefined> | undefined | null
+}
+
 const props = withDefaults(
   defineProps<{
-    osvOptions: Array<string|undefined>,
-    testboxOptions: Array<string|undefined>,
-    tagsOptions: Array<string|undefined>,
+    // osvOptions: Array<string|undefined>,
+    // testboxOptions: Array<string|undefined>,
+    // tagsOptions: Array<string|undefined>,
+    // groupOptions: Array<string|undefined>,
+    optionsData: OptionData
   }>(),
   { 
-    osvOptions: () => [],
-    testboxOptions: () => [],
-    tagsOptions: () => [],
+    // osvOptions: () => [],
+    // testboxOptions: () => [],
+    // tagsOptions: () => [],
+    // groupOptions: () => [],
+    optionsData: () => { return {} }
   }
 )
 
@@ -51,11 +61,7 @@ const emit = defineEmits<{
 
 const dimension = ref('osv')
 
-const filterOptions = ref({
-  osv: props.osvOptions,
-  testbox: props.testboxOptions,
-  tags: props.tagsOptions
-})
+const filterOptions = ref(props.optionsData)
 const filterList = ref([])
 
 const handleFiltering = () => {

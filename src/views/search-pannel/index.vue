@@ -122,6 +122,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { suiteConfig, fieldsConfiguration } from './config'
 
 import { useTestboxStore } from '@/stores/performanceData'
@@ -303,6 +304,11 @@ const getFieldsOptions = () => {
         addNewOptionValues(staticValues, listValues)
       }
     })
+  }).catch(err => {
+    ElMessage({
+      message: err.message,
+      type: 'error'
+    })
   }).finally(() => {
     jobFieldsLoading.value = false
   })
@@ -374,7 +380,12 @@ const getHostOptions = () => {
       const staticValues = fieldsConfig[`hw.${field}`].fieldSettings.listValues || []
       addNewOptionValues(staticValues, listValues)
     })
-  })).finally(() => {
+  })).catch(err => {
+    ElMessage({
+      message: err.message,
+      type: 'error'
+    })
+  }).finally(() => {
     hostFieldsLoading.value = false
   })
 }

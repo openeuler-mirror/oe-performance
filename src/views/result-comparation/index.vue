@@ -13,6 +13,16 @@
         :osv-options="osvOptions"
         :testbox-options="testboxOptions"
         :tags-options="tagsOptions"
+        :group-options="groupOptions"
+        :options-data="{
+          osv: osvOptions,
+          testbox: testboxOptions,
+          tags: tagsOptions,
+          pp: ppOptions,
+          suite: suiteOptions,
+          ss: ssOptions,
+          group: groupOptions
+        }"
         @filtering="handleDimensionFiltering"
       />
       <result-table 
@@ -28,6 +38,7 @@
     
 <script setup lang="ts">
 import { ref, Ref } from 'vue'
+import { ElMessage } from 'element-plus'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import dimensionController from './componets/dimension-controller.vue'
 import ResultTable from './componets/result-table.vue'
@@ -59,6 +70,10 @@ const isSearched = ref(false)
 const osvOptions = ref(new Set())
 const testboxOptions = ref(new Set())
 const tagsOptions = ref(new Set())
+const suiteOptions = ref(new Set())
+const ppOptions = ref(new Set())
+const ssOptions = ref(new Set())
+const groupOptions = ref(new Set())
 
 const filterDimension = ref('osv')
 const filterList:Ref<string[]> = ref([])
@@ -119,13 +134,16 @@ const getTotalData = (searchParams, searchTime: number) => {
       // 生成ejobs
       constructEjobData(tempFlattenItem, ejobs, ejobsMap)
       // 记录可选择项
-      tempFlattenItem['osv'] && osvOptions.value.add(tempFlattenItem['osv'])
-      tempFlattenItem['testbox'] && testboxOptions.value.add(tempFlattenItem['testbox'])
-      tempFlattenItem['tags'] && tagsOptions.value.add(tempFlattenItem['tags'])
+      getFilterOptions(tempFlattenItem)
     })
     console.log('ejobs: ', ejobs, ejobsMap)
     e2tConverter(ejobs, tjobs)
     inputData.value = tjobs
+  }).catch(err => {
+    ElMessage({
+      message: err.message,
+      type: 'error'
+    })
   }).finally(() => {
     isSearched.value = true
     searchLoading.value = false
@@ -206,11 +224,53 @@ const resetData = () => {
   osvOptions.value.clear()
   testboxOptions.value.clear()
   tagsOptions.value.clear()
+  suiteOptions.value.clear()
+  ppOptions.value.clear()
+  ssOptions.value.clear()
+  groupOptions.value.clear()
 }
 
 const handleDimensionFiltering = (dimension: string, List: Array<string>) => {
   filterDimension.value = dimension
   filterList.value = List
+}
+
+const getFilterOptions = (flattenJob) => {
+  flattenJob['osv'] && osvOptions.value.add(flattenJob['osv'])
+  flattenJob['testbox'] && testboxOptions.value.add(flattenJob['testbox'])
+  flattenJob['tags'] && tagsOptions.value.add(flattenJob['tags'])
+  flattenJob['group_id'] && groupOptions.value.add(flattenJob['group_id'])
+  flattenJob['suite'] && suiteOptions.value.add(flattenJob['suite'])
+  const ppParams = getPpParams(flattenJob)
+  flattenJob['ppParams'] = ppParams
+  ppParams && ppOptions.value.add(ppParams)
+  const ssParams = getSsParams(flattenJob)
+  flattenJob['ssParams'] = ssParams
+  ssParams && ssOptions.value.add(ssParams)
+}
+
+const getPpParams = (flattenJob) => {
+  const tempArr = []
+  Object.keys(flattenJob).sort().forEach(key => {
+    if (key.startsWith(`pp.${flattenJob.suite}`)) {
+      tempArr.push(`${key}=${flattenJob[key]}`)
+    }
+  })
+  return tempArr.join(',')
+}
+
+/**
+ * stats数据结构中可能会有写保存信息需要特殊处理。因此处理方法和pp的params的获取一致。
+ * @param flattenJob
+ */
+const getSsParams = (flattenJob) => {
+  const tempArr = []
+  Object.keys(flattenJob).sort().forEach(key => {
+    if (key.startsWith(`stats.${flattenJob.suite}`)) {
+      tempArr.push(`${key}=${flattenJob[key]}`)
+    }
+  })
+  return tempArr.join(',')
 }
 
 </script>
