@@ -181,7 +181,7 @@
         </el-tooltip>
       </template>
       <el-table
-        :data="testData"
+        :data="testDataVals"
         stripe
         highlight-current-row
         @current-change="handleCurrentChange"
@@ -192,7 +192,8 @@
           :prop="item['prop']"
           :label="item['label']"
           :key="item['prop']"
-          v-for="(item) in testDataColumn"/>
+          min-width="160"
+          v-for="(item) in testDataColumns"/>
       </el-table>
       <template #footer>
         <span class="dialog-footer">
@@ -218,6 +219,7 @@ import { usePerformanceData, useBaselineTableInfoStore, useTestboxStore } from '
 import { getPerformanceData } from '@/api/performance'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
+import { tableColumnMap } from '@/views/performance-baseline/config_li.js'
 
 export interface Column {
   label: string
@@ -282,7 +284,7 @@ const cloumnLabel = ref([] as string[])
 const isIndeterminate = ref(false)
 const checkAllColumn = ref(true)
 
-const selectedTableRows = ref(<{}[]>[])
+const selectedTableRows = ref<any[]>([])
 
 const idList = ref(<any>[])
 const currentPage = ref(1)
@@ -296,8 +298,8 @@ const disabled = ref(false)
 const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
 const dialogVisible = ref(false)
-const testData = ref<any[]>([])
-const testDataColumn = ref<any[]>([])
+const testDataVals = ref<any[]>([])
+const testDataColumns = ref<any[]>([])
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 const exportButtonLoading = ref(false)
 
@@ -432,42 +434,41 @@ const handleExportCsv = () => {
       type: 'warning'
     })
   } else if (selectedTableRows.value.length === 1) {
-    // 公共部分数据
     const commonPartData = handleExportCommonPart()
-    // + workload数据
     const dataString = handleExportSingle(commonPartData)
     const blob = new Blob([`\uFEFF${dataString}`], {
       type: 'text/csv;charset=utf-8'
     })
     downloadBlobFile(blob, '导出.csv')
+    multipleTableRef.value!.clearSelection()
   } else {
     // 准备好弹窗内表格的内容
-    const testDatas = selectedTableRows.value[0]['tableDatas']
-    const subjects = Object.keys(testDatas)
-    subjects.forEach(item => {
-      let testDataItemKeys = Object.keys(testDatas[item][0])
-      testDataItemKeys.splice(testDataItemKeys.indexOf('li-testcase'),1)
-      testDataItemKeys = testDataItemKeys.map((item:string) => item.split('.')[1])
-      testDataItemKeys.forEach(value =>{
-        testDataColumn.value.push({
-          'prop': `${item}.${value}`,
-          'label': `${item}(${value})`
+    const tableInfos:any[] = tableColumnMap[selectedTableRows.value[0]['suite']]
+    tableInfos.forEach((tableInfo:any) => {
+      testDataColumns.value.push({
+        prop: `performanceVal_${tableInfo['tableName']}`,
+        label: `${tableInfo['tableName']}(性能值)`
+      })
+      tableInfo['column'].forEach((column:any) => {
+        testDataColumns.value.push({
+          prop: `${tableInfo['tableName']}(${column['label']})`,
+          label: `${tableInfo['tableName']}(${column['label']})`
         })
       })
     })
-    selectedTableRows.value.forEach(item => {
-      let detailData = {}
-      for (let subject in item['tableDatas']) {
-        for (let key in item['tableDatas'][subject][0]) {
-          if (key !== 'li-testcase') {
-            const tmp = key.split('.')[1]
-            detailData[`${subject}.${tmp}`] = item['tableDatas'][subject][0][key]
-          }
-        }
-      }
-      testData.value.push({
-        'submit_id': item['submit_id'],
-        ...detailData
+    selectedTableRows.value.forEach((record:any) => {
+      let rowData:{ [propName:string]: any } = {}
+      tableInfos.forEach((tableInfo:any) => {
+        const performanceVal = record['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+        rowData[`performanceVal_${tableInfo['tableName']}`] = performanceVal
+        tableInfo['column'].forEach((column:any) => {
+          const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
+          rowData[`${tableInfo['tableName']}(${column['label']})`] = val
+        })
+      })
+      testDataVals.value.push({
+        submit_id: record['submit_id'],
+        ...rowData
       })
     })
     dialogVisible.value = true
@@ -486,26 +487,20 @@ const handleReFresh = () => {
 }
 const handleDialogClose = () => {
   exportButtonLoading.value = false
-  testData.value = []
-  testDataColumn.value = []
+  testDataVals.value = []
+  testDataColumns.value = []
   currentRow.value = undefined
   multipleTableRef.value!.clearSelection()
 }
 const currentRow = ref()
 const handleCurrentChange = (val:any) => {
   currentRow.value = val
-  console.log(val)
 }
 const handleExportCommonPart = ():string => {
   const data = []
   // 这里要深拷贝,不然影响列的字段
   const titleData: any[] = JSON.parse(JSON.stringify(allColumn.value))
-  const extraColumn: any[] = [
-    { label: '提交编号', prop: 'submit_id' },
-    { label: '测试套', prop: 'suite' }
-  ]
-  titleData.splice(0, 0, ...extraColumn)
-  titleData.splice(titleData.length, 0, { label: '测试人', prop: 'my_account' })
+  titleData.splice(0, 0, { label: '提交编号', prop: 'submit_id' })
   const title = titleData.map<string>((item: any) => item.label).join(',')
   const keys = titleData.map<string>((item: any) => item.prop)
   data.push(`${title}\r\n`)
@@ -521,21 +516,24 @@ const handleExportCommonPart = ():string => {
 }
 const handleExportSingle = (commonPartData:string):string => {
   const testDatas = selectedTableRows.value[0]['tableDatas']
-  const subjects = Object.keys(testDatas)
-  subjects.forEach((value) => {
-    commonPartData = commonPartData.concat(`${value}\r\n`)
-    const testDataItemKeys = Object.keys(testDatas[value][0])
-    testDataItemKeys.splice(testDataItemKeys.indexOf('li-testcase'),1)
-    const tempArr = testDataItemKeys.map((item:string) => item.split('.')[1])
-    tempArr.splice(0,0,'提交编号')
-    commonPartData = commonPartData.concat(`${tempArr.join(',')}\r\n`)
-    // 写入各项指标值
-    const values:string[] = []
-    values.push(selectedTableRows.value[0]['submit_id'])
-    testDataItemKeys.forEach((item:string) => {
-      values.push(testDatas[value][0][item])
+  const tableInfos:any[] = tableColumnMap[selectedTableRows.value[0]['suite']]
+  tableInfos.forEach(tableInfo => {
+    commonPartData = commonPartData.concat(`${tableInfo['tableName']}\r\n`)
+    const columnLabels:string[] = []
+    const columnValues:any[] = []
+    tableInfo['column'].forEach((column:any) => {
+      columnLabels.push(column['label'])
+      columnValues.push(testDatas[tableInfo['tableName']][0][column['prop']])
     })
-    commonPartData = commonPartData.concat(`${values.join(',')}\r\n`)
+    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+    const extraValues = [
+      selectedTableRows.value[0]['submit_id'],
+      testDatas[tableInfo['tableName']][0]['li-testcase'],
+      testDatas[tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+    ]
+    columnValues.splice(0, 0, ...extraValues)
+    commonPartData = commonPartData.concat(`${columnLabels.join(',')}\r\n`)
+    commonPartData = commonPartData.concat(`${columnValues.join(',')}\r\n\r\n`)
   })
   return commonPartData;
 }
@@ -550,40 +548,29 @@ const handleExportMultiple = () => {
     exportButtonLoading.value = true
     let commonPartData = handleExportCommonPart()
     // 基准移到第一位
-    const index = testData.value.findIndex(item => item['submit_id'] === currentRow.value['submit_id'])
+    const index = testDataVals.value.findIndex(item => item['submit_id'] === currentRow.value['submit_id'])
     if(index !== -1){
-      testData.value.splice(0, 0, testData.value[index])
-      testData.value.splice(index + 1, 1)
+      testDataVals.value.splice(0, 0, testDataVals.value[index])
+      testDataVals.value.splice(index + 1, 1)
     }
     // 表头
-    const testDataKeys:string[] = []
-    testDataKeys.push('提交编号')
-    for (let key in testData.value[0]) {
-      if (key !== 'submit_id') {
-        testDataKeys.push(key)
-      }
-    }
+    const columnLabels:string[] = Object.keys(testDataVals.value[0])
+    columnLabels[columnLabels.findIndex(item => item === 'submit_id')] = '提交编号'
     // 基准数据
-    const baseRecordData:string[] = []
-    testDataKeys.forEach(item => {
-      if (item === '提交编号') {
-        baseRecordData.push(testData.value[0]['submit_id'])
-      } else {
-        baseRecordData.push(testData.value[0][item])
-      }
-    })
-    testData.value.forEach((record, index) => {
+    const baseData = Object.values(testDataVals.value[0])
+    // 对比数据
+    testDataVals.value.forEach((record, index) => {
       if (index !== 0) {
-        commonPartData = commonPartData.concat(`${testDataKeys.join(',')}\r\n`)
-        commonPartData = commonPartData.concat(`${baseRecordData.join(',')}\r\n`)
+        commonPartData = commonPartData.concat(`${columnLabels.join(',')}\r\n`)
+        commonPartData = commonPartData.concat(`${baseData.join(',')}\r\n`)
         const temp:string[] = []
         const diffData:any[] = ['提升情况']
-        testDataKeys.forEach(item => {
+        columnLabels.forEach(item => {
           if (item === '提交编号') {
             temp.push(record['submit_id'])
           } else {
             temp.push(record[item])
-            diffData.push(Number(record[item]) - Number(testData.value[0][item]))
+            diffData.push(Number(record[item]) - Number(testDataVals.value[0][item]))
           }
         })
         commonPartData = commonPartData.concat(`${temp.join(',')}\r\n`)
