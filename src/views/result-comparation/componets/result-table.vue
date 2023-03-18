@@ -1,43 +1,51 @@
 <template>
   <div class="result-tables">
     <div
+      v-if="checkDataEmpty(tableDatas)"
+      class="empty-content">
+      <img src="@/assets/empty.png" />
+      <h5>暂无数据</h5>
+    </div>
+    <!--所有数据都为空时，展示empty样式--<div v-if="isSuiteDataEmpty(tableDatas[suite])" class="empty-content">
+
+    </div>-->
+    <div
+      class="result-tables-container"
       v-for="suite in Object.keys(tableConfigs)"
-      :key="suite">
-      <h3>{{ suite }}</h3>
-      <div v-if="isSuiteDataEmpty(tableDatas[suite])" class="empty-content">
-        <img src="@/assets/empty.png" />
-        <h5>暂无数据</h5>
-      </div>
-      <div
-        v-else
-        v-for="(config, tableIdx) in tableConfigs[suite]"
-        :key="config.tableName"
-      >
-        <template v-if="tableDatas[suite][tableIdx].length > 0">
-          {{ config.tableName }}
-          <el-table border :data="tableDatas[suite][tableIdx]">
-            <el-table-column
-              :prop="config.column[0].prop"
-              :label="config.column[0].label"
-              :key="config.column[0].prop"
-              min-width="200"
-              fixed
-            >
-            </el-table-column>
-            <el-table-column
-              v-for="item in config.column.slice(1)"
-              :prop="item.prop"
-              :label="item.label"
-              :key="item.prop">
-            </el-table-column>
-          </el-table>
-          <el-card v-if="tableDatas[suite][tableIdx].length !== 0" shadow="hover" style="margin-bottom:20px">
-            <compare-chart
-            :chartConfigs="tableConfigs[suite][tableIdx]"
-            :chartData="tableDatas[suite][tableIdx]"/>
-          </el-card>
-        </template>
-      </div>
+      :key="suite"
+    >
+      <template v-if="!isSuiteDataEmpty(tableDatas[suite] || [])">
+        <h3>{{ suite }}</h3>
+        <div
+          v-for="(config, tableIdx) in tableConfigs[suite]"
+          :key="config.tableName"
+        >
+          <template v-if="tableDatas[suite][tableIdx].length > 0">
+            {{ config.tableName }}
+            <el-table border :data="tableDatas[suite][tableIdx]">
+              <el-table-column
+                :prop="config.column[0].prop"
+                :label="config.column[0].label"
+                :key="config.column[0].prop"
+                min-width="200"
+                fixed
+              >
+              </el-table-column>
+              <el-table-column
+                v-for="item in config.column.slice(1)"
+                :prop="item.prop"
+                :label="item.label"
+                :key="item.prop">
+              </el-table-column>
+            </el-table>
+            <el-card v-if="tableDatas[suite][tableIdx].length !== 0" shadow="hover" style="margin-bottom:20px">
+              <compare-chart
+              :chartConfigs="tableConfigs[suite][tableIdx]"
+              :chartData="tableDatas[suite][tableIdx]"/>
+            </el-card>
+          </template>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -66,8 +74,8 @@ const props = defineProps({
   }
 })
 
-// 这里可以指定表格顺序
-const tableListOrder = [
+// 支持的suite类型，根据本字段获取数据这里可以指定表格顺序
+const supportedSuiteList = [
   'stream',
   'netperf',
   'lmbench',
@@ -82,7 +90,7 @@ const tableDatas:Ref<any> = ref({})
 const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string>) => {
   setTab()
   tableDatas.value = {}
-  tableListOrder.forEach(suite => { // 遍历每一个套件
+  filteringSuiteList().forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
     if (!tableConfigs.value[suite]) {tableConfigs.value[suite] = []}
     if (!tableDatas.value[suite]) {tableDatas.value[suite] = []}
@@ -128,6 +136,14 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       tableDatas.value[suite][tableIndex] = tempTableDataList
     })
   })
+}
+
+const filteringSuiteList = () => {
+  if (props.dimension === 'suite') {
+    return supportedSuiteList.filter(item => props.filterListUnderDimension.indexOf(item) > -1)
+  } else {
+    return supportedSuiteList
+  }
 }
 
 const setTab = () => {
@@ -222,11 +238,21 @@ const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
   return true
 }
 
-const isSuiteDataEmpty = (tableDatasUnderSuite) => {
+const isSuiteDataEmpty = (tableDatasUnderSuite: []) => {
   let emptyFlag = true
   if (tableDatasUnderSuite.length < 1) return true
   tableDatasUnderSuite.forEach(tableDataByIdx => {
-    if (tableDataByIdx.length > 0) {
+    if (Array.isArray(tableDataByIdx) && tableDataByIdx.length > 0) {
+      emptyFlag = false
+    }
+  })
+  return emptyFlag
+}
+
+const checkDataEmpty = (tableDatas: {}) => {
+  let emptyFlag = true
+  Object.keys(tableDatas).forEach(suite => {
+    if (!isSuiteDataEmpty(tableDatas[suite])) {
       emptyFlag = false
     }
   })
