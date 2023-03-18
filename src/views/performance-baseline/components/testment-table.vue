@@ -6,7 +6,7 @@
           type="primary"
           class="button"
           :disabled="
-            selectedTableRows.length < 2 || selectedTableRows.length > 5
+            true || selectedTableRows.length < 2 || selectedTableRows.length > 5
           "
           @click="handleComaration"
           >对比</el-button
@@ -112,7 +112,7 @@
       <el-table-column
         fixed="left"
         width="200"
-        label="提交编号"
+        label="Submit Id"
         prop="submit_id">
       </el-table-column>
       <template v-for="(item, index) in tableColumn">
@@ -121,7 +121,30 @@
           :prop="item.prop"
           :label="item.label"
           :key="index"
-          :width="item.width">
+          :width="item.width"
+          :min-width="item.minWidth"
+          :class-name="item.className"
+        >
+          <template #default="scope" v-if="item.prop==='performanceVal'">
+            <div
+              v-if="scope.row.suite!=='lmbench'"
+              class="important-value"
+            >{{ perfValformatter(scope.row.performanceVal) }}</div>
+            <div v-else>
+              <p>
+                <span>Bandwidth：</span>
+                <span class="important-value">
+                  {{ perfValformatter(scope.row.performanceVal_local_bandwidths) }}
+                </span>
+              </p>
+              <p>
+                <span>Latency：</span>
+                <span class="important-value">
+                  {{ perfValformatter(scope.row.performanceVal) }}
+                </span>
+              </p>
+            </div>
+          </template>
         </el-table-column>
       </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">
@@ -181,7 +204,7 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watch, reactive, onMounted, watchEffect } from 'vue'
+import { PropType, ref, watch, reactive, onMounted, watchEffect, onBeforeMount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Search,
@@ -191,7 +214,7 @@ import {
 } from '@element-plus/icons-vue'
 import { config, sceneConfig } from '../config-file'
 import { ElMessage, ElTable } from 'element-plus'
-import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
+import { usePerformanceData, useBaselineTableInfoStore, useTestboxStore } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
@@ -200,6 +223,9 @@ export interface Column {
   label: string
   prop: string
   show: boolean
+  width: string
+  formatter?: Function,
+  className?: string
 }
 export interface TableItem {
   [key: string]: any
@@ -224,6 +250,7 @@ const emit = defineEmits<{
 const router = useRouter()
 const route = useRoute()
 const performanceStore = usePerformanceData()
+const baselineTableInfoStore = useBaselineTableInfoStore()
 const testboxStore = useTestboxStore()
 
 const searcherValue = ref('')
@@ -246,7 +273,7 @@ const searcherOptions = [
 ]
 
 const tableData = ref<TableItem[]>([])
-let originData: TableItem[] = []
+// let originData: TableItem[] = []
 
 const allColumn = ref([] as Column[])
 const tableColumn = ref([] as Column[])
@@ -273,6 +300,9 @@ const testData = ref<any[]>([])
 const testDataColumn = ref<any[]>([])
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 const exportButtonLoading = ref(false)
+
+const changeSizeOnly = ref(false)
+
 const initailizeColumn = () => {
   const scene = route.query.scene ? route.query.scene : 'bigData'
   let key: keyof typeof sceneConfig
@@ -322,17 +352,6 @@ const handleSearchTable = () => {
     return
   } 
   emit('tableSearch', searcherKey.value, searcherValue.value)
-  // else if (searcherValue.value === '') {
-  //   ElMessage('请输入搜索内容！')
-  // } else {
-  //   tableData.value = originData.filter(
-  //     data =>
-  //       !searcherValue.value ||
-  //       data[searcherKey.value]
-  //         .toLowerCase()
-  //         .includes(searcherValue.value.toLowerCase())
-  //   )
-  // }
 }
 
 // 获取并合并jobs的逻辑
@@ -453,6 +472,13 @@ const handleExportCsv = () => {
     })
     dialogVisible.value = true
   }
+}
+
+const perfValformatter = (cellValue: number) => {
+  if (cellValue === undefined || cellValue === -1) {
+    return '暂无数据'
+  }
+  return cellValue
 }
 
 const handleReFresh = () => {
@@ -591,28 +617,58 @@ watch(
   }
 )
 
-// watchEffect(() => {
-//   if (searcherValue.value === '') {
-//     tableData.value = originData
-//   }
-// })
-
 // 自动分页
-watchEffect(() => {
+const paging = () => {
   const startIndex = (currentPage.value - 1) * pageSize.value
   // 数据分页
   idList.value = props.dataList.slice(startIndex, startIndex + pageSize.value)
   total.value = props.dataList.length
-})
+  baselineTableInfoStore.setTableInfo({
+    currentPage: currentPage.value,
+    pageSize: pageSize.value
+  })
+}
+watch(
+  () => currentPage.value,
+  () => paging()
+)
+watch(
+  () => pageSize.value,
+  () => {
+    if (changeSizeOnly.value) {
+      changeSizeOnly.value = false
+    } else {
+      if (currentPage.value === 1) {
+        paging()
+      } else {
+        currentPage.value = 1
+      }
+    }
+  }
+)
+// 获取submitList后
+watch(
+  () => props.dataList,
+  () => paging()
+)
 
-// 当前页数据变化时，获取jobs数据
-watch(idList, () => {
-  tableData.value = getAllJobsData(idList.value)
-  originData = JSON.parse(JSON.stringify(tableData.value))
-})
+// 分页后，获取jobs数据
+watch(
+  () => idList.value,
+  () => {
+    tableData.value = getAllJobsData(idList.value)
+  }
+)
 
 onMounted(() => {
   initailizeColumn()
+  if (route.meta.isGoback) {
+    if (baselineTableInfoStore.baselineTableInfo && baselineTableInfoStore.baselineTableInfo.currentPage) {
+      changeSizeOnly.value = true
+      pageSize.value = baselineTableInfoStore.baselineTableInfo.pageSize
+      currentPage.value = baselineTableInfoStore.baselineTableInfo.currentPage
+    }
+  }
 })
 </script>
 
@@ -669,6 +725,10 @@ a {
 }
 .pagination {
   margin-top: 30px;
+}
+
+.important-value {
+  color: var(--oe-perf-color-primary);
 }
 </style>
 <style lang="scss">

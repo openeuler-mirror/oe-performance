@@ -1,6 +1,9 @@
 <template>
   <div class="oe-perf-section">
-    <search-pannel @search="getAllData" suiteByScene></search-pannel>
+    <search-pannel
+      @search="getAllData"
+      @reset-search-value="clearTableData"
+      suiteByScene></search-pannel>
   </div>
   <div class="oe-perf-section">
     <testment-table
@@ -13,13 +16,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 import TestmentTable from './components/testment-table.vue'
 import SearchPannel from '@/views/search-pannel/index.vue'
 
+import { useBaselineTableInfoStore } from '@/stores/performanceData'
+
 import { getPerformanceData } from '@/api/performance'
+
+const route = useRoute()
+const baselineTableInfoStore = useBaselineTableInfoStore()
 
 const data = ref<any[]>([])
 const searchParams = ref({})
@@ -31,6 +40,7 @@ const refreashData = () => {
 }
 
 const handleTableSearch = (searchKey, searchValue) => {
+  // 表格子搜索
   tableSearchParams.value = {
     searchKey,
     searchValue
@@ -42,17 +52,11 @@ const setMustCase = (searchParams) => {
   const tempArr = []
   Object.keys(searchParams).forEach(paramKey => {
     if (searchParams[paramKey]) {
-      if (paramKey === 'testbox') {
-        if (typeof searchParams[paramKey] === 'string') {
-          // 用户指定testbox
-          tempArr.push( { match: { testbox: searchParams[paramKey] } } )
-        } else {
-          // 用户通过硬件配置过滤
-          tempArr.push( { terms: { testbox: searchParams[paramKey] } } )
-        }
+      const matchObj = {}
+      matchObj[paramKey] = searchParams[paramKey]
+      if (Array.isArray(searchParams[paramKey])) {
+        searchParams[paramKey].length > 0 && tempArr.push({ terms: matchObj })
       } else {
-        const matchObj = {}
-        matchObj[paramKey] = searchParams[paramKey]
         tempArr.push({ match: matchObj })
       }
     }
@@ -60,7 +64,7 @@ const setMustCase = (searchParams) => {
   return tempArr
 }
 
-const getAllData = (params: searchParams) => {
+const getAllData = (params: searchParams, searchTime: number) => {
   searchParams.value = params
   submitDataLoading.value = true
 
@@ -72,7 +76,7 @@ const getAllData = (params: searchParams) => {
   }
 
   matchCases.push({ match: {job_state: 'finished'} })
-  matchCases.push({ range: { time: { gte: 'now-10d/d' } } })
+  matchCases.push({ range: { time: { gte: `now-${searchTime}d/d` } } })
 
   // 获取选择的套件下的submitID list
   getPerformanceData({
@@ -86,17 +90,16 @@ const getAllData = (params: searchParams) => {
       },
       aggs: {
         jobs_terms: {
-          terms: {
-            field: 'submit_id',
-            size: 10000 // 取全量
-          }
+          terms: { field: 'submit_id', size: 10000 }
         }
       }
     },
   }).then((res) => {
     // todo: 数据为空的异常处理
-    data.value = res.data.aggregations.jobs_terms.buckets
-      .map((item: any) => { return { submit_id: item.key }})
+    const submitList = res?.data?.aggregations?.jobs_terms?.buckets
+      .map((item: any) => { return { submit_id: item.key }}) || []
+    baselineTableInfoStore.setSubmitList(submitList)
+    data.value = submitList
   }).catch((err) => {
     ElMessage({
       message: err.message,
@@ -106,6 +109,18 @@ const getAllData = (params: searchParams) => {
     submitDataLoading.value = false
   })
 }
+
+const clearTableData = () => {
+  data.value =[]
+}
+
+onMounted(() => {
+  if (route.meta.isGoback) {
+    if (baselineTableInfoStore.baselineSubmitList && baselineTableInfoStore.baselineSubmitList.length > 0) {
+      data.value = baselineTableInfoStore.baselineSubmitList
+    }
+  }
+})
 </script>
 
 <style></style>

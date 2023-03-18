@@ -27,7 +27,33 @@ export const usePerformanceData= defineStore('performanceData', () => {
     performanceData,
     setPerformanceData,
     comparationList,
-    setComparationList
+    setComparationList,
+  }
+})
+
+// 性能基线页，保存当前查询的列表数据submitId，用于从详情页返回时还原表格数据。
+const baselineSubmitList = ref<string[]>([])
+const baselineTableInfo = ref({})
+
+export const useBaselineTableInfoStore= defineStore('baselineTableInfo', () => {
+  const resetSubmitIdList = () => {
+    baselineSubmitList.value = []
+    baselineTableInfo.value = {}
+  }
+
+  const setSubmitList = (submitList:string[]) => {
+    baselineSubmitList.value = submitList
+  }
+  const setTableInfo = (tableInfo: {}) => {
+    baselineTableInfo.value = tableInfo
+  }
+
+  return {
+    baselineSubmitList,
+    baselineTableInfo,
+    resetSubmitIdList,
+    setSubmitList,
+    setTableInfo
   }
 })
 

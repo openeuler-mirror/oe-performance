@@ -1,18 +1,32 @@
 <template>
   <div class="baseline-detail-workload-tables" v-loading="loading">
     <!-- <el-card class=""> -->
-      <div class="table-wrap" v-for="tableInfo in tableColumnMap[detailData.suite]||[]" :key="tableInfo.tableName">
-          <div class="tableName">{{ tableInfo.tableName }}</div>
+      <div class="table-wrap" v-for="tableInfo in tableColumnMap[detailData.suite]" :key="tableInfo.tableName">
+          <div class="tableName">{{ tableInfo.tableLabel || tableInfo.tableName }}</div>
           <el-table
             :data="tableDatas[tableInfo.tableName]"
             border
           >
-            <el-table-column label="测试用例" prop="li-testcase"></el-table-column>
+            <el-table-column
+              label="测试参数"
+              prop="li-testcase"
+              min-width="100"
+            ></el-table-column>
+            <el-table-column
+              label="性能值"
+              :prop="`performanceVal_${tableInfo.tableName}`"
+              :formatter="tableCellFormatter"
+              min-width="100"
+              className="important-value"
+            ></el-table-column>
             <el-table-column
               v-for="column in tableInfo.column"
               :key="column.prop"
               :label="column.label"
-              :prop="column.prop">
+              :prop="column.prop"
+              :formatter="tableCellFormatter"
+              min-width="100"
+            >
             </el-table-column>
           </el-table>
         </div>
@@ -42,7 +56,6 @@ onMounted(() => {
   const submitId = router.currentRoute.value.params.submit_id
   if (performanceData[submitId]) {
     detailData.value = performanceData[submitId]
-    console.log(performanceData[submitId])
     tableDatas.value = detailData.value.tableDatas
   } else {
     loading.value = true
@@ -69,25 +82,37 @@ onMounted(() => {
         message: err.message,
         type: 'error'
       })
+      console.error(err)
     }).finally(() => {
       loading.value = false
     })
   }
 })
+
+const tableCellFormatter = (row, column, cellValue) => {
+  if (cellValue === undefined || cellValue === -1) {
+    return '暂无数据'
+  }
+  return cellValue
+}
+
 </script>
   
 <style lang="scss" scoped>
-  .pp-group-section {
-    border-bottom: 1px solid #ccc;
-    margin-bottom: 20px;
-  }
-  .baseline-detail-workload-tables{
-    .table-wrap{
-      margin-bottom: 30px;
-      .tableName{
-      margin-bottom: 10px;
+.pp-group-section {
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 20px;
+}
+.baseline-detail-workload-tables{
+  .table-wrap{
+    margin-bottom: 30px;
+    .tableName{
+    margin-bottom: 10px;
     }
-    }
-    
   }
+  :deep(td.important-value) {
+    color: var(--oe-perf-color-primary);
+  }
+}
+
 </style>
