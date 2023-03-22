@@ -82,13 +82,11 @@ const supportedSuiteList = [
   'unixbench',
   'libmicro'
 ]
-const tabName = ref('stream')
 const tableConfigs:Ref<any> = ref({})
 
 const tableDatas:Ref<any> = ref({})
 
 const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string>) => {
-  setTab()
   tableDatas.value = {}
   filteringSuiteList().forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
@@ -109,7 +107,7 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
       tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
         // 1、拿到当前tjob的维度值, 并根据选择的list过滤
-        const dimensionValue = tjob[dimension]
+        const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
         if (!dimensionValue) return // 没有对应维度的话退出
         if (filterList.length > 0 && filterList.indexOf(dimensionValue) < 0) return
         // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
@@ -138,19 +136,19 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
   })
 }
 
+const getDimensionValue = (tjob, dimension) => {
+  let dim = dimension
+  if (dimension === 'pp' || dimension === 'ss') {
+    dim = `${dimension}Params`
+  }
+  return tjob[dim]
+}
+
 const filteringSuiteList = () => {
   if (props.dimension === 'suite') {
     return supportedSuiteList.filter(item => props.filterListUnderDimension.indexOf(item) > -1)
   } else {
     return supportedSuiteList
-  }
-}
-
-const setTab = () => {
-  if (props.suiteControl) {
-    tabName.value = props.suiteControl
-  } else {
-    tabName.value = 'stream'
   }
 }
 
