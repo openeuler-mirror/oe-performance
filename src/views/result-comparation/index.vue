@@ -10,26 +10,23 @@
     <div v-if="!isSearched" class="banner-text">请搜索数据进行对比</div>
     <template v-else>
       <dimension-controller 
-        :osv-options="osvOptions"
-        :testbox-options="testboxOptions"
-        :tags-options="tagsOptions"
-        :group-options="groupOptions"
         :options-data="{
           osv: osvOptions,
           testbox: testboxOptions,
           tags: tagsOptions,
           pp: ppOptions,
-          suite: suiteOptions,
           ss: ssOptions,
           group: groupOptions
         }"
+        :suiteFilter="Array.from(suiteOptions) || []"
         @filtering="handleDimensionFiltering"
+        @suiteFiltering="handleSuiteFiltering"
       />
       <result-table 
         :tjobsAll="inputData"
         :dimension="filterDimension"
         :filterListUnderDimension="filterList"
-        :suiteControl="searchParams.suite && searchParams.suite[0]"
+        :suiteFilterList="suiteFilterList"
       ></result-table>
     </template>
 
@@ -76,7 +73,8 @@ const ssOptions = ref(new Set())
 const groupOptions = ref(new Set())
 
 const filterDimension = ref('osv')
-const filterList:Ref<string[]> = ref([])
+const filterList: Ref<string[]> = ref([])
+const suiteFilterList: Ref<string[]> = ref([])
 
 // 获取jobs数据
 const onSearch = (params, searchTime:number) => {
@@ -235,12 +233,17 @@ const handleDimensionFiltering = (dimension: string, List: Array<string>) => {
   filterList.value = List
 }
 
+const handleSuiteFiltering = (suiteList) => {
+  suiteFilterList.value = suiteList
+}
+
 const getFilterOptions = (flattenJob) => {
   flattenJob['osv'] && osvOptions.value.add(flattenJob['osv'])
   flattenJob['testbox'] && testboxOptions.value.add(flattenJob['testbox'])
   flattenJob['tags'] && tagsOptions.value.add(flattenJob['tags'])
   flattenJob['group_id'] && groupOptions.value.add(flattenJob['group_id'])
   flattenJob['suite'] && suiteOptions.value.add(flattenJob['suite'])
+  suiteFilterList.value = Array.from(suiteOptions.value)
   const ppParams = getPpParams(flattenJob)
   flattenJob['ppParams'] = ppParams
   ppParams && ppOptions.value.add(ppParams)

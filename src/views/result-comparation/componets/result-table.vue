@@ -68,9 +68,9 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  suiteControl: {
-    type: String,
-    default: ''
+  suiteFilterList: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -145,11 +145,7 @@ const getDimensionValue = (tjob, dimension) => {
 }
 
 const filteringSuiteList = () => {
-  if (props.dimension === 'suite') {
-    return supportedSuiteList.filter(item => props.filterListUnderDimension.indexOf(item) > -1)
-  } else {
-    return supportedSuiteList
-  }
+  return supportedSuiteList.filter(item => props.suiteFilterList.indexOf(item) > -1)
 }
 
 const setTableColConfig = (tempConfig, suite, tableIndex) => {
