@@ -515,13 +515,22 @@ const handleExportCommonPart = ():string => {
   const title = titleData.map<string>((item: any) => item.label).join(',')
   const keys = titleData.map<string>((item: any) => item.prop)
   data.push(`${title}\r\n`)
+
+  const values:any[] = []
   selectedTableRows.value.forEach((item: any) => {
     const temp: string[] = []
     keys.forEach((key: string) => {
       temp.push(getProperty(item,key))
     })
-    const tmpStr = temp.join(',')
-    data.push(`${tmpStr}\r\n`)
+    values.push(temp)
+  })
+  if (selectedTableRows.value[0]['suite'] === 'lmbench') {
+    selectedTableRows.value.forEach((item,index) => {
+      values[index][1] = `"Bandwidth=${item['performanceVal_local_bandwidths']},Latency=${item['performanceVal']}"`
+    })
+  }
+  values.forEach(record => {
+    data.push(`${record.join(',')}\r\n`)
   })
   return data.join('').concat('\r\n\r\n')
 }
