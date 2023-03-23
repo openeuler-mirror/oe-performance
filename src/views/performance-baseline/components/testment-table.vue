@@ -427,6 +427,7 @@ const handleComaration = () => {
   router.push({ name: 'basicPerformance' })
 }
 // 导出
+/* eslint-disable max-lines-per-function */
 const handleExportCsv = () => {
   if (selectedTableRows.value.length === 0) {
     ElMessage({
@@ -442,6 +443,16 @@ const handleExportCsv = () => {
     downloadBlobFile(blob, '导出.csv')
     multipleTableRef.value!.clearSelection()
   } else {
+    let suites = selectedTableRows.value.map<string>(record => record['suite'])
+    suites = Array.from(new Set(suites))
+    if (suites.length > 1) {
+      ElMessage({
+        message: '请选择相同测试套的数据',
+        type: 'warning'
+      })
+      multipleTableRef.value!.clearSelection()
+      return
+    }
     // 准备好弹窗内表格的内容
     const tableInfos:any[] = tableColumnMap[selectedTableRows.value[0]['suite']]
     tableInfos.forEach((tableInfo:any) => {
