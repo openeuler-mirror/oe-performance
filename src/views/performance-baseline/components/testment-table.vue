@@ -528,7 +528,7 @@ const handleExportSingle = (commonPartData:string):string => {
     columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
     const extraValues = [
       selectedTableRows.value[0]['submit_id'],
-      testDatas[tableInfo['tableName']][0]['li-testcase'],
+      `"${testDatas[tableInfo['tableName']][0]['li-testcase']}"`,
       testDatas[tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
     ]
     columnValues.splice(0, 0, ...extraValues)
