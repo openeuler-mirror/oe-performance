@@ -253,13 +253,6 @@ const checkDataEmpty = (tableDatas: {}) => {
   return emptyFlag
 }
 
-const handleTabChange = () => {
-  nextTick(() => {
-    const event = new Event('resize')
-    window.dispatchEvent(event)
-  })
-}
-
 // 当表格数据或者展示维度切换时，更新表格配置数据
 watchEffect(() => {
   generateTableConfigsAndData(props.tjobsAll, props.dimension, props.filterListUnderDimension)

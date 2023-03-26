@@ -2,6 +2,7 @@
   <div class="oe-checkbox-group">
     <el-checkbox
       class="checkbox-all"
+      v-if="options.length > 1"
       v-model="checkAll"
       :indeterminate="isIndeterminate"
       @change="handleCheckAllChange"
@@ -9,6 +10,7 @@
     >
     <div class="checkbox-options-contanier">
       <el-checkbox-group
+        v-if="options.length > 1"
         v-model="checkedValues"
         @change="handleCheckedItemChange"
       >
@@ -20,6 +22,7 @@
           {{item}}
         </el-checkbox>
       </el-checkbox-group>
+      <div v-else>{{ options[0] }}</div>
     </div>
   </div>
 </template>
@@ -31,11 +34,13 @@ import { isArrayTheSame_l1 } from '@/utils/utils'
 const props = withDefaults(
   defineProps<{
     modelValue: string[],
-    options: string[]
+    options: string[],
+    checkAllWhenOptionsChanged?: boolean // 当options变化时，是否自动全选。为false时，options变化后选择的值不变
   }>(),
   {
     modelValue: () => [],
-    options: () => []
+    options: () => [],
+    checkAllWhenOptionsChanged: false
   }
 )
 
@@ -77,11 +82,7 @@ watch(
   () => props.options,
   (curv, prev) => {
     if (isArrayTheSame_l1(prev, curv)) return
-    if (curv.length < prev.length) {
-      checkedValues.value = props.modelValue.filter(suite => props.options.indexOf(suite) > -1)
-    } else if (curv.length > prev.length) {
-      checkedValues.value = curv
-    }
+    props.checkAllWhenOptionsChanged && (checkedValues.value = curv)
   }
 )
 </script>
@@ -89,5 +90,8 @@ watch(
 <stlye lang="scss">
   .oe-checkbox-group {
     display: inline-flex;
+    .checkbox-all {
+      margin-right: 16px;
+    }
   }
 </stlye>

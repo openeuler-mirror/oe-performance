@@ -34,6 +34,7 @@
           v-model="suiteSelection"
           :options="suiteFilter"
           @change="handleSuiteFiltering"
+          :check-all-when-options-changed="true"
         />
       </el-row>
     </div>
