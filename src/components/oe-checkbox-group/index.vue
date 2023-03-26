@@ -25,7 +25,8 @@
 </template>
   
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { computed, watch } from 'vue'
+import { isArrayTheSame_l1 } from '@/utils/utils'
   
 const props = withDefaults(
   defineProps<{
@@ -63,7 +64,7 @@ const handleCheckAllChange = (val: boolean) => {
   checkedValues.value = val ? props.options : []
 }
 const handleCheckedItemChange = (value: string[]) => {
-  const checkedCount = value.length
+  // const checkedCount = value.length
   // checkAll.value = checkedCount === props.options.length
 
 }
@@ -71,6 +72,18 @@ const checkedValueChange = (value: string[]) => {
   emits('update:modelValue', value)
   emits('change', value)
 }
+
+watch(
+  () => props.options,
+  (curv, prev) => {
+    if (isArrayTheSame_l1(prev, curv)) return
+    if (curv.length < prev.length) {
+      checkedValues.value = props.modelValue.filter(suite => props.options.indexOf(suite) > -1)
+    } else if (curv.length > prev.length) {
+      checkedValues.value = curv
+    }
+  }
+)
 </script>
 
 <stlye lang="scss">

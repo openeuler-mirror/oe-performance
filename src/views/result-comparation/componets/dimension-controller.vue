@@ -75,8 +75,16 @@ const suiteSelection = ref(props.suiteFilter)
 const handleFiltering = () => {
   emit('filtering', dimension.value, filterList.value)
 }
+
+/**
+ * 当重新搜索后，可能会导致可选的测试套option变化。测试套option的变化需要suite的checkboxgroup更新选中数据
+ * 更新选中数据后可能会导致图标的echarts重绘。此时若上一个echarts实例还未绘制完就触发重绘会导致报错。
+ * 此处为数据更新给一个延迟，避免echarts重绘。
+ */
 const handleSuiteFiltering = (val:string[]) => {
-  emit('suiteFiltering', val)
+  setTimeout(() => {
+    emit('suiteFiltering', val)
+  }, 100);
 }
 </script>
 <style scoped lang="scss">

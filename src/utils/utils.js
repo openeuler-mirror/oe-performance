@@ -39,3 +39,19 @@ export function formatDate(date, fmt) {
   }
   return fmt
 }
+
+/**
+ * 判断两个array的内容是否一致，只进行第一层的元素对比。对比直接用等号进行判断。
+ * 故本方法只适用于元素为基本数据类型的数组。
+ * @returns 是否一致
+ */
+export function isArrayTheSame_l1(originArr, checkedArr) {
+  let sameFlag = true
+  if (originArr.length !== checkedArr.length) return false
+  originArr.forEach((item, idx) => {
+    if (item !== checkedArr[idx]) {
+      sameFlag = false
+    }
+  })
+  return sameFlag
+}
