@@ -1,36 +1,48 @@
 <template>
   <div class="dimension-controller">
-    <div class="label">对比维度</div>
+    <div class="main-label">对比维度</div>
     <div class="dimension-controller-inner">
       <el-row>
-      <el-radio-group class="controller-item" v-model="dimension">
-        <el-radio-button
-          v-for="(label,idx) in (Object.keys(filterOptions))"
-          :label="label"
-          :key="`${label}${idx}`"/>
-      </el-radio-group>
-      <el-select
-        class="controller-item"
-        v-model="filterList"
-        placeholder="请先搜索数据"
-        multiple
-        collapse-tags
-        collapse-tags-tooltip
-        clearable
-      >
-        <el-option
+        <el-radio-group class="controller-item" v-model="dimension">
+          <el-radio-button
+            v-for="(label,idx) in (Object.keys(filterOptions))"
+            :label="label"
+            :key="`${label}${idx}`"/>
+        </el-radio-group>
+        <el-select
           class="controller-item"
-          v-for="item in (filterOptions[dimension] || {})"
-          :key="item"
-          :label="item"
-          :value="item"
+          v-model="filterList"
+          placeholder="请先搜索数据"
+          multiple
+          collapse-tags
+          collapse-tags-tooltip
+          clearable
+        >
+          <el-option
+            class="controller-item"
+            v-for="item in (filterOptions[dimension] || {})"
+            :key="item"
+            :label="item"
+            :value="item"
+          />
+        </el-select>
+        <el-button type="primary" @click="handleFiltering">对比</el-button>
+      </el-row>
+      <el-row
+        v-for="(dim,idx) in (Object.keys(filterOptions))"
+        :key="`${dim}${idx}`"
+        class="dimension-row"
+      >
+        <span class="checkbox-group-label">{{ dim }}：</span>
+        <oe-checkbox-group
+          class="checkbox-group-component"
+          :options="Array.from(filterOptions[dim])"
         />
-      </el-select>
-      <el-button type="primary" @click="handleFiltering">对比</el-button>
       </el-row>
       <el-row>
-        <div>测试套：</div>
+        <span class="checkbox-group-label">测试套：</span>
         <oe-checkbox-group
+          class="checkbox-group-component"
           v-model="suiteSelection"
           :options="suiteFilter"
           @change="handleSuiteFiltering"
@@ -92,14 +104,34 @@ const handleSuiteFiltering = (val:string[]) => {
 .dimension-controller {
   display: flex;
   margin: 12px 0 24px 0;
-  .label {
+  .main-label {
     line-height: 32px;
     margin-right: 10px;
+    max-width: 80px;
+    min-width: 80px;
   }
   &-inner {
+    width: 90%;
     .controller-item:not(:last-child) {
       margin-right: 8px;
     }
+  }
+
+  .dimension-row {
+    padding: 16px 0;
+    border-bottom: 1px solid #efefef;
+  }
+
+  .checkbox-group-label {
+    display: inline-block;
+    line-height: 32px;
+    min-width: 70px;
+    max-width: 70px;
+    text-align: right;
+    margin-right: 8px;
+  }
+  .checkbox-group-component {
+    width: 90%;
   }
 }
 </style>

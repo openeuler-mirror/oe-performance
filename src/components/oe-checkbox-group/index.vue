@@ -1,29 +1,34 @@
 <template>
   <div class="oe-checkbox-group">
-    <el-checkbox
-      class="checkbox-all"
-      v-if="options.length > 1"
-      v-model="checkAll"
-      :indeterminate="isIndeterminate"
-      @change="handleCheckAllChange"
-      >All</el-checkbox
-    >
-    <div class="checkbox-options-contanier">
-      <el-checkbox-group
+    <div v-if="options.length === 0" class="plain-text">暂无数据</div>
+    <template v-else>
+      <el-checkbox
+        class="checkbox-all"
         v-if="options.length > 1"
-        v-model="checkedValues"
-        @change="handleCheckedItemChange"
+        v-model="checkAll"
+        :indeterminate="isIndeterminate"
+        @change="handleCheckAllChange"
+        >All</el-checkbox
       >
-        <el-checkbox
-          class="checkbox-options-item"
-          v-for="item in options"
-          :key="item"
-          :label="item">
-          {{item}}
-        </el-checkbox>
-      </el-checkbox-group>
-      <div v-else>{{ options[0] }}</div>
-    </div>
+      <div class="checkbox-options-contanier">
+        <el-scrollbar max-height="128px">
+          <el-checkbox-group
+            v-if="options.length > 1"
+            v-model="checkedValues"
+            @change="handleCheckedItemChange"
+          >
+            <el-checkbox
+              class="checkbox-options-item"
+              v-for="item in options"
+              :key="item"
+              :label="item">
+              {{item}}
+            </el-checkbox>
+          </el-checkbox-group>
+          <div class="plain-text" v-else>{{ options[0] }}</div>
+        </el-scrollbar>
+      </div>
+    </template>
   </div>
 </template>
   
@@ -92,6 +97,15 @@ watch(
     display: inline-flex;
     .checkbox-all {
       margin-right: 16px;
+    }
+
+    .plain-text {
+      line-height: 32px;
+      color: #333;
+    }
+
+    .checkbox-options-contanier {
+      width: calc(100% - 40px);
     }
   }
 </stlye>
