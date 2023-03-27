@@ -2,7 +2,7 @@
   <div class="dimension-controller">
     <div class="main-label">对比维度</div>
     <div class="dimension-controller-inner">
-      <el-row>
+      <!--<el-row>
         <el-radio-group class="controller-item" v-model="dimension">
           <el-radio-button
             v-for="(label,idx) in (Object.keys(filterOptions))"
@@ -27,16 +27,18 @@
           />
         </el-select>
         <el-button type="primary" @click="handleFiltering">对比</el-button>
-      </el-row>
+      </el-row>-->
       <el-row
         v-for="(dim,idx) in (Object.keys(filterOptions))"
         :key="`${dim}${idx}`"
-        class="dimension-row"
+        :class="{'dimension-row': true, 'dimension-checked': checkedDimension === dim}"
       >
         <span class="checkbox-group-label">{{ dim }}：</span>
         <oe-checkbox-group
+          v-model="checkedListByDimension[dim]"
           class="checkbox-group-component"
           :options="Array.from(filterOptions[dim])"
+          @change="val => dimensionChecked(dim, val)"
         />
       </el-row>
       <el-row>
@@ -54,8 +56,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import OeCheckboxGroup from '@/components/oe-checkbox-group/index.vue'
+
+import { isArrayTheSame_l1 } from '@/utils/utils'
 
 interface OptionData {
   // osv: ['openEuler', 'centos']
@@ -82,6 +86,9 @@ const dimension = ref('osv')
 
 const filterOptions = ref(props.optionsData)
 const filterList = ref([])
+const checkedListByDimension = ref({})
+
+const checkedDimension = ref('osv')
 
 const suiteSelection = ref(props.suiteFilter)
 
@@ -99,6 +106,40 @@ const handleSuiteFiltering = (val:string[]) => {
     emit('suiteFiltering', val)
   }, 100);
 }
+
+/**
+ * 选择维度后，更新图标的维度和过滤信息
+ * @param dim 维度，string
+ * @param val 当前维度的过滤值，string[]
+ */
+const dimensionChecked = (dim, val) => {
+  if (val && val.length > 0) {
+    checkedDimension.value = dim
+    emit('filtering', dim, val)
+  }
+}
+
+onMounted(() => {
+  // 初始化各个维度的数据结构
+  Object.keys(props.optionsData).forEach(suite => {
+    checkedListByDimension.value[suite] = []
+    // const initChecked = Array.from(props.optionsData[suite])[0]
+    // initChecked && (checkedListByDimension.value[suite] = [initChecked])
+  })
+})
+
+// watch(
+//   () => props.optionsData,
+//   (curv, prev) => {
+//     console.log(444)
+//     Object.keys(curv).forEach(suite => {
+//       console.log(555,Array.from(prev[suite]), Array.from(curv[suite]))
+//       if (isArrayTheSame_l1(Array.from(prev[suite]), Array.from(curv[suite]))) return
+//       console.log(1111, suite, curv[suite])
+//       checkedListByDimension.value[suite] = Array.from(curv[suite])
+//     })
+//   }
+// )
 </script>
 <style scoped lang="scss">
 .dimension-controller {
@@ -118,8 +159,12 @@ const handleSuiteFiltering = (val:string[]) => {
   }
 
   .dimension-row {
-    padding: 16px 0;
+    padding: 16px 0 16px 16px;
     border-bottom: 1px solid #efefef;
+    border-left: 2px solid transparent;
+    &.dimension-checked {
+      border-left: 2px solid var(--oe-perf-color-primary);
+    }
   }
 
   .checkbox-group-label {

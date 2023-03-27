@@ -16,7 +16,7 @@
           tags: tagsOptions,
           pp: ppOptions,
           ss: ssOptions,
-          group: groupOptions
+          'group_id': groupOptions
         }"
         :suiteFilter="Array.from(suiteOptions) || []"
         @filtering="handleDimensionFiltering"
