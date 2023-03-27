@@ -1,3 +1,12 @@
+export interface Column {
+  label: string
+  prop: string
+  show: boolean
+  width: string
+  formatter?: Function,
+  className?: string
+}
+
 export const columnConfig = [
   {
     label: '性能数据',
