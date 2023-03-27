@@ -567,35 +567,46 @@ const handleExportMultiple = () => {
   } else {
     exportButtonLoading.value = true
     let commonPartData = handleExportCommonPart()
-    // 基准移到第一位
-    const index = testDataVals.value.findIndex(item => item['submit_id'] === currentRow.value['submit_id'])
-    if(index !== -1){
-      testDataVals.value.splice(0, 0, testDataVals.value[index])
-      testDataVals.value.splice(index + 1, 1)
-    }
-    // 表头
-    const columnLabels:string[] = Object.keys(testDataVals.value[0])
-    columnLabels[columnLabels.findIndex(item => item === 'submit_id')] = '提交编号'
-    // 基准数据
-    const baseData = Object.values(testDataVals.value[0])
-    // 对比数据
-    testDataVals.value.forEach((record, index) => {
-      if (index !== 0) {
-        commonPartData = commonPartData.concat(`${columnLabels.join(',')}\r\n`)
-        commonPartData = commonPartData.concat(`${baseData.join(',')}\r\n`)
-        const temp:string[] = []
-        const diffData:any[] = ['提升情况']
-        columnLabels.forEach(item => {
-          if (item === '提交编号') {
-            temp.push(record['submit_id'])
-          } else {
-            temp.push(record[item])
-            diffData.push(Number(record[item]) - Number(testDataVals.value[0][item]))
-          }
+    const baseRecord = selectedTableRows.value.filter(record => record['submit_id'] === currentRow.value['submit_id'])
+    const otherRecords = selectedTableRows.value.filter(record => record['submit_id'] !== currentRow.value['submit_id'])
+    const { suite } = selectedTableRows.value[0]
+    tableColumnMap[suite].forEach((tableInfo:any) => {
+      // 表头和基准数据
+      const columnLabels:string[] = []
+      const baseDatas:any[] = []
+      tableInfo['column'].forEach((column:any) => {
+        columnLabels.push(column['label'])
+        baseDatas.push(baseRecord[0]['tableDatas'][tableInfo['tableName']][0][column['prop']])
+      })
+      const extraBaseDatas = [
+        baseRecord[0]['submit_id'],
+        `"${baseRecord[0]['tableDatas'][tableInfo['tableName']][0]['li-testcase']}"`,
+        baseRecord[0]['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+      ]
+      columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+      baseDatas.splice(0,0,...extraBaseDatas)
+      // 其他数据
+      otherRecords.forEach(record => {
+        const columnValues:any[] = []
+        const diffDatas:any[] = ['提升情况','']
+        tableInfo['column'].forEach((column:any,index:number) => {
+          const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
+          columnValues.push(val)
+          diffDatas.push(Number(val) - Number(baseDatas[index + 3]))
         })
-        commonPartData = commonPartData.concat(`${temp.join(',')}\r\n`)
-        commonPartData = commonPartData.concat(`${diffData.join(',')}\r\n\r\n`)
-      }
+        const extraValues = [
+          record['submit_id'],
+          `"${record['tableDatas'][tableInfo['tableName']][0]['li-testcase']}"`,
+          record['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+        ]
+        columnValues.splice(0, 0, ...extraValues)
+        diffDatas.splice(2,0,Number(extraValues[2]) - Number(baseDatas[2]))
+        commonPartData = commonPartData.concat(`${tableInfo['tableName']}\r\n`)
+        commonPartData = commonPartData.concat(`${columnLabels.join(',')}\r\n`)
+        commonPartData = commonPartData.concat(`${baseDatas.join(',')}\r\n`)
+        commonPartData = commonPartData.concat(`${columnValues.join(',')}\r\n`)
+        commonPartData = commonPartData.concat(`${diffDatas.join(',')}\r\n\r\n\r\n`)
+      })
     })
     const blob = new Blob([`\uFEFF${commonPartData}`], {
       type: 'text/csv;charset=utf-8'
