@@ -106,6 +106,7 @@ const isChangeDimensionClickValid = (dim) => {
 }
 
 const dimensionChecked = (dim) => {
+  if (checkedDimension.value === dim) return
   const checkList = checkedListByDimension.value[dim] || []
   if (isChangeDimensionClickValid(dim)) {
     checkedDimension.value = dim
@@ -129,27 +130,19 @@ const dimensionOptionChecked = (dim, val) => {
   }
 }
 
-onMounted(() => {
+const checkedListInit = () => {
   // 初始化各个维度的数据结构
   Object.keys(props.optionsData).forEach(suite => {
-    checkedListByDimension.value[suite] = []
-    // const initChecked = Array.from(props.optionsData[suite])[0]
-    // initChecked && (checkedListByDimension.value[suite] = [initChecked])
+    // 初始化后，所有维度默认选择第一个元素
+    const initChecked = Array.from(props.optionsData[suite])[0]
+    initChecked && (checkedListByDimension.value[suite] = [initChecked])
   })
+}
+
+defineExpose({
+  checkedListInit
 })
 
-// watch(
-//   () => props.optionsData,
-//   (curv, prev) => {
-//     console.log(444)
-//     Object.keys(curv).forEach(suite => {
-//       console.log(555,Array.from(prev[suite]), Array.from(curv[suite]))
-//       if (isArrayTheSame_l1(Array.from(prev[suite]), Array.from(curv[suite]))) return
-//       console.log(1111, suite, curv[suite])
-//       checkedListByDimension.value[suite] = Array.from(curv[suite])
-//     })
-//   }
-// )
 </script>
 <style scoped lang="scss">
 .dimension-controller {
@@ -199,8 +192,8 @@ onMounted(() => {
   .checkbox-group-label {
     display: inline-block;
     line-height: 32px;
-    min-width: 70px;
-    max-width: 70px;
+    min-width: 90px;
+    max-width: 90px;
     text-align: right;
     margin-right: 8px;
     .dimension-label {

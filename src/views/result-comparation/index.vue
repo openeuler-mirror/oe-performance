@@ -9,15 +9,9 @@
   <div class="oe-perf-section" v-loading="searchLoading">
     <template v-if="isSearched" >
       <h2 class="oe-perf-section-title">对比维度</h2>
-      <dimension-controller 
-        :options-data="{
-          osv: osvOptions,
-          testbox: testboxOptions,
-          tags: tagsOptions,
-          pp: ppOptions,
-          ss: ssOptions,
-          'group_id': groupOptions
-        }"
+      <dimension-controller
+        ref="dimensionControlerRef"
+        :options-data="optionsData"
         :suiteFilter="Array.from(suiteOptions) || []"
         @filtering="handleDimensionFiltering"
         @suiteFiltering="handleSuiteFiltering"
@@ -37,7 +31,7 @@
 </template>
     
 <script setup lang="ts">
-import { ref, Ref } from 'vue'
+import { onMounted, ref, Ref, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import dimensionController from './componets/dimension-controller.vue'
@@ -67,8 +61,11 @@ const searchLoading = ref(false)
 
 const isSearched = ref(false)
 
+const dimensionControlerRef = ref(null)
+const optionsData = ref({})
 const osvOptions = ref(new Set())
-const testboxOptions = ref(new Set())
+const archOptions = ref(new Set())
+const tboxGroupOptions = ref(new Set())
 const tagsOptions = ref(new Set())
 const suiteOptions = ref(new Set())
 const ppOptions = ref(new Set())
@@ -130,15 +127,13 @@ const getTotalData = (searchParams, searchTime: number) => {
       const tempFlattenItem = flattenObj(item._source)  
       // jobs转换成ejobs
       tempFlattenItem['osv'] = `${tempFlattenItem.os}@${tempFlattenItem.os_version}` // 增加需组装的参数
-      // 保存硬件信息
-      addHardwareInfoToJob(tempFlattenItem)
-      // 生成ejobs
-      constructEjobData(tempFlattenItem, ejobs, ejobsMap)
-      // 记录可选择项
-      getFilterOptions(tempFlattenItem)
+      addHardwareInfoToJob(tempFlattenItem)  // 保存硬件信息
+      constructEjobData(tempFlattenItem, ejobs, ejobsMap)  // 生成ejobs
+      getFilterOptions(tempFlattenItem)    // 记录可选择项
     })
     console.log('ejobs: ', ejobs, ejobsMap)
     e2tConverter(ejobs, tjobs)
+    filterList.value = (Array.from(optionsData.value[filterDimension.value])).slice(0,1) // 获取新数据后，图表默认展示osv维度的第一个元素
     inputData.value = tjobs
   }).catch(err => {
     ElMessage({
@@ -148,6 +143,7 @@ const getTotalData = (searchParams, searchTime: number) => {
   }).finally(() => {
     isSearched.value = true
     searchLoading.value = false
+    nextTick(() => dimensionControlerRef.value.checkedListInit()) // 触发dimensionController组件重置选项
   })
 }
 
@@ -223,7 +219,8 @@ const resetData = () => {
   ejobsMap = {}
   tjobs = {}
   osvOptions.value.clear()
-  testboxOptions.value.clear()
+  archOptions.value.clear()
+  tboxGroupOptions.value.clear()
   tagsOptions.value.clear()
   suiteOptions.value.clear()
   ppOptions.value.clear()
@@ -242,7 +239,8 @@ const handleSuiteFiltering = (suiteList) => {
 
 const getFilterOptions = (flattenJob) => {
   flattenJob['osv'] && osvOptions.value.add(flattenJob['osv'])
-  flattenJob['testbox'] && testboxOptions.value.add(flattenJob['testbox'])
+  flattenJob['arch'] && archOptions.value.add(flattenJob['arch'])
+  flattenJob['tbox_group'] && tboxGroupOptions.value.add(flattenJob['tbox_group'])
   flattenJob['tags'] && tagsOptions.value.add(flattenJob['tags'])
   flattenJob['group_id'] && groupOptions.value.add(flattenJob['group_id'])
   flattenJob['suite'] && suiteOptions.value.add(flattenJob['suite'])
@@ -253,6 +251,15 @@ const getFilterOptions = (flattenJob) => {
   const ssParams = getSsParams(flattenJob)
   flattenJob['ssParams'] = ssParams
   ssParams && ssOptions.value.add(ssParams)
+  optionsData.value = {
+    osv: osvOptions,
+    arch: archOptions,
+    tbox_group: tboxGroupOptions,
+    group_id: groupOptions,
+    tags: tagsOptions,
+    pp: ppOptions,
+    ss: ssOptions,
+  }
 }
 
 const getPpParams = (flattenJob) => {
@@ -278,7 +285,6 @@ const getSsParams = (flattenJob) => {
   })
   return tempArr.join(',')
 }
-
 </script>
   
 <style lang="scss" scoped>

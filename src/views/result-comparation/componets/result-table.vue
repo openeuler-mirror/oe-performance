@@ -87,6 +87,7 @@ const tableConfigs:Ref<any> = ref({})
 const tableDatas:Ref<any> = ref({})
 
 const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string>) => {
+  console.log(props.dimension, props.filterListUnderDimension)
   tableDatas.value = {}
   filteringSuiteList().forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
