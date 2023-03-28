@@ -34,20 +34,20 @@ export const exportSingle = (allColumn:Column[], selectedTableRows:any[], tableC
   const testDatas = selectedTableRows[0]['tableDatas']
   const tableInfos:any[] = tableColumnMap[selectedTableRows[0]['suite']]
   tableInfos.forEach(tableInfo => {
-    commonPartData = commonPartData.concat(`${tableInfo['tableName']}\r\n`)
     const columnLabels:string[] = []
     const columnValues:any[] = []
     tableInfo['column'].forEach((column:any) => {
       columnLabels.push(column['label'])
       columnValues.push(testDatas[tableInfo['tableName']][0][column['prop']])
     })
-    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
     const extraValues = [
       selectedTableRows[0]['submit_id'],
       `"${testDatas[tableInfo['tableName']][0]['li-testcase']}"`,
       testDatas[tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
     ]
+    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
     columnValues.splice(0, 0, ...extraValues)
+    commonPartData = commonPartData.concat(`${tableInfo['tableName']}\r\n`)
     commonPartData = commonPartData.concat(`${columnLabels.join(',')}\r\n`)
     commonPartData = commonPartData.concat(`${columnValues.join(',')}\r\n\r\n`)
   })
