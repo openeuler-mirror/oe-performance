@@ -5,7 +5,11 @@ const exportCommonPart = (allColumn:Column[], selectedTableRows:any[]):string =>
   const data = []
   // 这里要深拷贝,不然影响列的字段
   const titleData:any[] = JSON.parse(JSON.stringify(allColumn))
-  titleData.splice(0, 0, { label: '提交编号', prop: 'submit_id' })
+  const extraColumns = [
+    { label: '提交编号', prop: 'submit_id' },
+    { label: '性能数据', prop: 'performanceVal' }
+  ]
+  titleData.splice(0, 0, ...extraColumns)
   const title = titleData.map<string>((item: any) => item.label)
   const keys = titleData.map<string>((item: any) => item.prop)
   data.push(`${title.join(',')}\r\n`)
