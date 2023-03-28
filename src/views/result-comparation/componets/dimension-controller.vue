@@ -10,12 +10,28 @@
           'button-item': true
         }"
       >
-        <span class="checkbox-group-label">{{ dim }}：</span>
+        <div class="checkbox-group-label">
+          <span
+            v-if="isChangeDimensionClickValid(dim)"
+            class="dimension-label__controller"
+            @click="dimensionChecked(dim)">
+            {{ dim }}：
+          </span>
+          <el-tooltip
+            v-else-if="Array.from(filterOptions[dim]).length > 1"
+            content="请至少选择一个参数值"
+            placement="bottom"
+            effect="light"
+            >
+            <span class="dimension-label__controller">{{ dim }}：</span>
+          </el-tooltip>
+          <span v-else class="dimension-label">{{ dim }}：</span>
+        </div>
         <oe-checkbox-group
           v-model="checkedListByDimension[dim]"
           class="checkbox-group-component"
           :options="Array.from(filterOptions[dim])"
-          @change="val => dimensionChecked(dim, val)"
+          @change="val => dimensionOptionChecked(dim, val)"
         />
       </el-row>
       <el-row class="dimension-row">
@@ -84,12 +100,27 @@ const handleSuiteFiltering = (val:string[]) => {
   }, 100);
 }
 
+const isChangeDimensionClickValid = (dim) => {
+  const checkList = checkedListByDimension.value[dim] || []
+  return Array.from(filterOptions.value[dim]).length > 1 && checkList.length > 0
+}
+
+const dimensionChecked = (dim) => {
+  const checkList = checkedListByDimension.value[dim] || []
+  if (isChangeDimensionClickValid(dim)) {
+    checkedDimension.value = dim
+    setTimeout(() => {
+      emit('filtering', dim, checkList)
+    },100)
+  }
+}
+
 /**
  * 选择维度后，更新图标的维度和过滤信息
  * @param dim 维度，string
  * @param val 当前维度的过滤值，string[]
  */
-const dimensionChecked = (dim, val) => {
+const dimensionOptionChecked = (dim, val) => {
   if (val && val.length > 0) {
     checkedDimension.value = dim
     setTimeout(() => {
@@ -172,6 +203,15 @@ onMounted(() => {
     max-width: 70px;
     text-align: right;
     margin-right: 8px;
+    .dimension-label {
+      cursor: default;
+      &__controller {
+        cursor: pointer;
+        &:hover {
+          color: var(--oe-perf-color-primary);
+        }
+      }
+    }
   }
   .checkbox-group-component {
     width: 90%;
