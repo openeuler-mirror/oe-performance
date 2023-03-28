@@ -9,12 +9,6 @@ export interface Column {
 
 export const columnConfig = [
   {
-    label: '性能数据',
-    prop: 'performanceVal',
-    show: true,
-    width: 180,
-  },
-  {
     label: '测试套',
     prop: 'suite',
     show: true,

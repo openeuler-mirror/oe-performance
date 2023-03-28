@@ -112,20 +112,10 @@
       <el-table-column
         fixed="left"
         width="200"
-        label="Submit Id"
-        prop="submit_id">
-      </el-table-column>
-      <template v-for="(item, index) in tableColumn">
-        <el-table-column
-          v-if="item.show"
-          :prop="item.prop"
-          :label="item.label"
-          :key="index"
-          :width="item.width"
-          :min-width="item.minWidth"
-          :class-name="item.className"
-        >
-          <template #default="scope" v-if="item.prop==='performanceVal'">
+        label="性能数据"
+        prop="performanceVal"
+      >
+        <template #default="scope">
             <div
               v-if="scope.row.suite!=='lmbench'"
               class="important-value"
@@ -145,6 +135,17 @@
               </p>
             </div>
           </template>
+      </el-table-column>
+      <template v-for="(item, index) in tableColumn">
+        <el-table-column
+          v-if="item.show"
+          :prop="item.prop"
+          :label="item.label"
+          :key="index"
+          :width="item.width"
+          :min-width="item.minWidth"
+          :class-name="item.className"
+        >
         </el-table-column>
       </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">

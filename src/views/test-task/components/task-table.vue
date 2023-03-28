@@ -25,7 +25,7 @@
         >
             <template #prepend>
               <el-select v-model="searchSelection" style="width: 115px">
-                <el-option label="任务ID" value="taskId" />
+                <el-option label="submit id" value="taskId" />
                 <el-option label="测试套" value="suite"/>
                 <el-option label="创建者" value="creator" disabled/>
               </el-select>
@@ -59,7 +59,7 @@
              <el-icon size="20px"><StarFilled /></el-icon>
           </template>
         </el-table-column>-->
-        <el-table-column label="TaskID" prop="submit_id" fixed min-width="200">
+        <el-table-column label="Submit Id" prop="submit_id" fixed min-width="200">
          <template #default="scope">
            <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
              {{ scope.row.submit_id }}
