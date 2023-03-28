@@ -15,7 +15,7 @@
       :key="suite"
     >
       <template v-if="!isSuiteDataEmpty(tableDatas[suite] || [])">
-        <h3>{{ suite }}</h3>
+        <h3>测试套：{{ suite }}</h3>
         <div
           v-for="(config, tableIdx) in tableConfigs[suite]"
           :key="config.tableName"

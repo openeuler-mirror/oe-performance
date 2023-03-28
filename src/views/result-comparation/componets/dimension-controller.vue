@@ -1,37 +1,14 @@
 <template>
   <div class="dimension-controller">
-    <div class="main-label">对比维度</div>
     <div class="dimension-controller-inner">
-      <!--<el-row>
-        <el-radio-group class="controller-item" v-model="dimension">
-          <el-radio-button
-            v-for="(label,idx) in (Object.keys(filterOptions))"
-            :label="label"
-            :key="`${label}${idx}`"/>
-        </el-radio-group>
-        <el-select
-          class="controller-item"
-          v-model="filterList"
-          placeholder="请先搜索数据"
-          multiple
-          collapse-tags
-          collapse-tags-tooltip
-          clearable
-        >
-          <el-option
-            class="controller-item"
-            v-for="item in (filterOptions[dimension] || {})"
-            :key="item"
-            :label="item"
-            :value="item"
-          />
-        </el-select>
-        <el-button type="primary" @click="handleFiltering">对比</el-button>
-      </el-row>-->
       <el-row
         v-for="(dim,idx) in (Object.keys(filterOptions))"
         :key="`${dim}${idx}`"
-        :class="{'dimension-row': true, 'dimension-checked': checkedDimension === dim}"
+        :class="{
+          'dimension-row': true,
+          'dimension-checked': checkedDimension === dim,
+          'button-item': true
+        }"
       >
         <span class="checkbox-group-label">{{ dim }}：</span>
         <oe-checkbox-group
@@ -41,7 +18,7 @@
           @change="val => dimensionChecked(dim, val)"
         />
       </el-row>
-      <el-row>
+      <el-row class="dimension-row">
         <span class="checkbox-group-label">测试套：</span>
         <oe-checkbox-group
           class="checkbox-group-component"
@@ -115,7 +92,9 @@ const handleSuiteFiltering = (val:string[]) => {
 const dimensionChecked = (dim, val) => {
   if (val && val.length > 0) {
     checkedDimension.value = dim
-    emit('filtering', dim, val)
+    setTimeout(() => {
+      emit('filtering', dim, val)
+    },100)
   }
 }
 
@@ -152,7 +131,7 @@ onMounted(() => {
     min-width: 80px;
   }
   &-inner {
-    width: 90%;
+    width: 100%;
     .controller-item:not(:last-child) {
       margin-right: 8px;
     }
@@ -164,6 +143,25 @@ onMounted(() => {
     border-left: 2px solid transparent;
     &.dimension-checked {
       border-left: 2px solid var(--oe-perf-color-primary);
+    }
+
+    &.button-item {
+      :deep(.el-checkbox__label) {
+        padding: 4px 8px;
+        margin-left: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        &:hover {
+          border-color: var(--oe-perf-color-primary);
+        }
+      }
+      :deep(.el-checkbox.is-checked) {
+        .el-checkbox__label {
+          background-color: var(--oe-perf-color-primary);
+          color: #fff;
+          border-color: var(--oe-perf-color-primary);
+        }
+      }
     }
   }
 

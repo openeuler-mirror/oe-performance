@@ -7,8 +7,8 @@
     />
   </div>
   <div class="oe-perf-section" v-loading="searchLoading">
-    <div v-if="!isSearched" class="banner-text">请搜索数据进行对比</div>
-    <template v-else>
+    <template v-if="isSearched" >
+      <h2 class="oe-perf-section-title">对比维度</h2>
       <dimension-controller 
         :options-data="{
           osv: osvOptions,
@@ -22,14 +22,17 @@
         @filtering="handleDimensionFiltering"
         @suiteFiltering="handleSuiteFiltering"
       />
-      <result-table 
-        :tjobsAll="inputData"
-        :dimension="filterDimension"
-        :filterListUnderDimension="filterList"
-        :suiteFilterList="suiteFilterList"
-      ></result-table>
     </template>
-
+    <div v-else class="banner-text">请搜索数据进行对比</div>
+  </div>
+  <div v-if="isSearched" class="oe-perf-section" v-loading="searchLoading">
+    <h2 class="oe-perf-section-title">对比详情</h2>
+    <result-table 
+      :tjobsAll="inputData"
+      :dimension="filterDimension"
+      :filterListUnderDimension="filterList"
+      :suiteFilterList="suiteFilterList"
+    ></result-table>
   </div>
 </template>
     
@@ -281,5 +284,10 @@ const getSsParams = (flattenJob) => {
 <style lang="scss" scoped>
 .banner-text {
   text-align: center;
+}
+
+.oe-perf-section-title {
+  font-size: 24px;
+  margin-bottom: 24px;
 }
 </style>

@@ -105,7 +105,7 @@ watch(
     }
 
     .checkbox-options-contanier {
-      width: calc(100% - 40px);
+      width: calc(100% - 72px);
     }
   }
 </stlye>
