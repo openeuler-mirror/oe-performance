@@ -1,5 +1,9 @@
 import createAxios from '@/utils/request/axios';
 
+export interface DataObject {
+  [key: string]: any
+}
+
 const api = {
   requestDataApi: '/data-api/search'
 }
@@ -72,7 +76,7 @@ interface Aggs {
   [propName: string]: any
 }
 export function getJobValueList(params:any) {
-  const { jobFieldList, searchTime = 10, byScene } = params
+  const { jobFieldList, searchTime = 10, byScene, searchParams } = params
   const aggs: Aggs = {}
   const mustArr = []
   mustArr.push({ range: { time: { gte: `now-${searchTime}d/d` } } })
@@ -88,7 +92,18 @@ export function getJobValueList(params:any) {
       }
     }
   })
-  // aggs['nr_cpu'] = {terms: {field: 'nr_cpu', size:100}}
+  // 请求时根据目前已选的searchParam值进行过滤
+  Object.keys(searchParams).forEach((param: string) => {
+    if (!searchParams[param]) return
+    if (Array.isArray(searchParams[param]) && searchParams[param].length < 1) return
+    const tempObj = <DataObject>{}
+    if (param === 'osv' && Array.isArray(searchParams[param])) {
+      tempObj[param] = searchParams[param].map((arr:string[]) => arr.join('@'))
+    } else {
+      tempObj[param] = searchParams[param]
+    }
+    mustArr.push({ terms: tempObj})
+  })
   const query = {
     size: 10,
     query: {

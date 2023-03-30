@@ -47,6 +47,9 @@
               size="small"
               filterable
               clearable
+              @visible-change="paramSelected"
+              @remove-tag="paramSelected"
+              @clear="paramSelected"
             />
             <!--end-->
             <el-select
@@ -59,7 +62,11 @@
               collapse-tags
               collapse-tags-tooltip
               clearable
-              size="small">
+              size="small"
+              @visible-change="paramSelected"
+              @remove-tag="paramSelected"
+              @clear="paramSelected"
+            >
               <el-option
                 v-for="(item, listIndex) in subField[paramKey].fieldSettings
                   .listValues"
@@ -162,7 +169,8 @@ const testboxStore = useTestboxStore()
 const fieldsListForRender = ref([] as string[])
 const suiteList = ref([])
 // uite = ref('unixbench')
-const testboxList = ref([])
+const testboxList = ref([] as objectItem[])
+const filteredTestboxList = ref([] as objectItem[])
 const jobFieldsLoading = ref(false)
 const hostFieldsLoading = ref(false)
 
@@ -176,6 +184,18 @@ const cascaderProps = { multiple: true }
 
 interface objectItem {
   [key: string]: string | string[] | string[][]
+}
+
+// 页面初始化方法
+const initailizing = () => {
+  fieldsListForRender.value = initailizefieldsList() // 初始化选项配置数据
+  setFeildsData() // 记录有哪些选项
+  setFieldSelection() // 将url上的查询条件的值读取到查询数据searchParam中
+
+  if (props.suiteByScene) { // 在性能基线模块中根据路由自动设置suite查询条件
+    setSuiteList()
+    setDefaultSuite()
+  }
 }
 
 // 修改fieldConfig的格式，方便展示
@@ -196,19 +216,7 @@ const initailizefieldsList = () => {
   return temp
 }
 
-// 页面初始化方法
-const initailizing = () => {
-  fieldsListForRender.value = initailizefieldsList()
-  setFeildsData()
-  setFieldSelection()
-
-  if (props.suiteByScene) {
-    setSuiteList()
-    setDefaultSuite()
-  }
-}
-
-// 设置可查询项
+// 记录有哪些查询项目，并区分是hosts项目还是jobs项目
 const setFeildsData = () => {
   const fieldKeys = Object.keys(fieldsConfig)
 
@@ -276,13 +284,24 @@ const setDefaultSuite = (forcedUpdateSuite=false) => {
   })
 }
 
-// 获取搜索条件
+/* ====================以上为init相关方法======================= */
+
+// 获取并更新搜索条件中每个param的可选项，只有job表中涉及的条件
 const getFieldsOptions = () => {
   jobFieldsLoading.value  = true
+  const searchParamObject = JSON.parse(JSON.stringify(searchParams.value))
+  // 如果搜索了硬件参数，需根据硬件参数过滤出的testboxList来限制job参数的获取
+  console.log(333, getSearchParamsByFields(searchParams.value, hostFieldList))
+  if ((!searchParamObject.testbox || searchParamObject.testbox?.length <1)
+    && filteredTestboxList.value.length > 0
+    && !isSearchParamsEmpty(getSearchParamsByFields(searchParams.value, hostFieldList))) {
+    searchParamObject.testbox = filteredTestboxList.value.map(testbox => testbox.testboxId)
+  }
   getJobValueList({
     jobFieldList,
     searchTime: searchTime.value,
-    byScene: (props.suiteByScene && searchParams.value.suite) || (props.fieldsBySecne.length > 0 && props.fieldsBySecne)
+    byScene:(props.suiteByScene && searchParams.value.suite) || (props.fieldsBySecne.length > 0 && props.fieldsBySecne),
+    searchParams: getSearchParamsByFields(searchParamObject, jobFieldList)
   }).then(res => {
     const aggs = res.data.aggregations || {}
     Object.keys(aggs).forEach(field => {
@@ -314,7 +333,30 @@ const getFieldsOptions = () => {
   })
 }
 
-// 设置osv 分组选项
+// 工具函数
+const isSearchParamsEmpty = (searchParams) => {
+  if (Object.keys(searchParams).length < 1) return true
+  let isEmpty = true
+  Object.keys(searchParams).forEach(field => {
+    if (Object.keys(searchParams[field]).length > 0) {
+      isEmpty = false
+    }
+  })
+  return isEmpty
+}
+
+// 工具函数
+const getSearchParamsByFields = (searchParams: objectItem, fieldList: Array<String>) => {
+  const tempObj = <objectItem>{}
+  Object.keys(searchParams).forEach(field => {
+    if (fieldList.indexOf(field) > -1) {
+      tempObj[field] = searchParams[field]
+    }
+  })
+  return tempObj
+}
+
+// 工具函数，设置osv数据格式以支持分组选项组件
 const constrcutOsvOptions = (osvList) => {
   if (!osvList || osvList.length < 1) return []
   const osMap = {}
@@ -352,10 +394,12 @@ const constrcutOsvOptions = (osvList) => {
   return osvListNew
   // sourceArr.push(...osvListNew)
 }
-// 获取主机相关搜索条件。
+
+// 获取并更新搜索条件中每个param的可选项，只有hosts表中涉及的条件
 const getHostOptions = () => {
   hostFieldsLoading.value = true
   const fieldList = hostFieldList.map((field:string) => field.replace('hw.', ''))
+  const hostSearchParams = getSearchParamsByFields(searchParams.value, hostFieldList)
   getTestBoxes().then((testboxRes => {
     testboxList.value = testboxRes.data.hits.hits.map(item => {
       return {
@@ -364,10 +408,12 @@ const getHostOptions = () => {
       }
     })
     testboxStore.setTestboxData(testboxList.value)
-    fieldList.forEach(field => {
+    filteredTestboxList.value 
+      = filteringTestboxBySearchParams(testboxList.value, hostSearchParams, searchParams.value.testbox)
+    fieldList.forEach(field => { // 遍历硬件的fieldList，从testBoxList聚合信息。
       const listValues = []
       const repeatMap = {}
-      testboxList.value.forEach(testbox => {
+      filteredTestboxList.value.forEach(testbox => {
         if (testbox[field] && !repeatMap[testbox[field]]) {
           listValues.push({
             value: testbox[field]
@@ -386,10 +432,39 @@ const getHostOptions = () => {
       type: 'error'
     })
   }).finally(() => {
+    // 获取硬件信息后，在获取job选项。因为有可能需要根据信息选项过滤jobs选项
+    getFieldsOptions()
     hostFieldsLoading.value = false
   })
 }
-// 将inputArr中与sourceArr不同的选项追加到sourceArr中
+
+// 工具函数，根据查询参数过滤获取到的testbox
+const filteringTestboxBySearchParams = (
+  testboxList: Array<objectItem>,
+  searchParams: objectItem,
+  searchParamTestbox: Array<string>
+) => {
+  // 如果用户选择了testbox，则直接由testbox过滤
+  if (searchParamTestbox && Array.isArray(searchParamTestbox) && searchParamTestbox.length > 0) {
+    return testboxList.filter(testbox => searchParamTestbox.indexOf(testbox.testboxId) > -1)
+  }
+  const searchParamList = Object.keys(searchParams)
+    .filter(hwField => Object.keys(searchParams[hwField]).length > 0)
+  if (searchParamList.length < 1) 
+    return JSON.parse(JSON.stringify(testboxList))
+
+  return testboxList.filter(testbox => {
+    let isTestboxMatch = false
+    searchParamList.forEach(hwField => {
+      if (searchParams[hwField].indexOf(testbox[hwField.replace('hw.','')]) > -1) {
+        isTestboxMatch = true
+      }
+    })
+    return isTestboxMatch
+  })
+}
+
+// 工具函数，将inputArr中与sourceArr不同的选项追加到sourceArr中
 const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
   // 只需要m+n的运算复杂度
   const sourceMap = {} as any
@@ -402,6 +477,7 @@ const addNewOptionValues = (sourceArr: any[], inputArr: any[]) => {
   sourceArr.sort((prev, curv) => prev.value - curv.value)
 }
 
+// 重置逻辑
 const handleReset = () => {
   if (props.suiteByScene) {
     searchParams.value = { suite: searchParams.value.suite }
@@ -410,6 +486,7 @@ const handleReset = () => {
   }
 }
 
+// 查询逻辑
 const handleSearch = () => {
   // 记录查询条件到url上
   setQueryToUrl()
@@ -446,7 +523,7 @@ const handleSearch = () => {
   }
 }
 
-// 将筛选条件添加到url中
+// 工具函数，将筛选条件添加到url中
 const setQueryToUrl = () => {
   const newQuery = {} as objectItem
   Object.keys(searchParams.value).forEach(field => {
@@ -463,7 +540,7 @@ const setQueryToUrl = () => {
     query: { ...newQuery }
   })
 }
-// 将查询参数区分成主机参数和一般参数
+// 工具函数，将查询参数区分成主机参数和一般参数
 const splitParamsByOrigin = (paramObj: objectItem) => {
   const hostParams = {} as objectItem
   const jobParams = {} as objectItem
@@ -477,13 +554,23 @@ const splitParamsByOrigin = (paramObj: objectItem) => {
   return { hostParams, jobParams }
 }
 
+// 更新查询项逻辑
 const handleUpdateFields = () => {
-  getFieldsOptions()
+  getFieldsOptions() // 因为host表获取的是全部时间的，因此只有job选项需要更新。
   if (props.suiteByScene) {
     const oldSuite = searchParams.value.suite
     searchParams.value = {}
     searchParams.value.suite = oldSuite
   }
+}
+
+const searchParamForOptionsUpdate = ref({})
+
+const paramSelected = (isOpen: boolean) => {
+  if (isOpen === true) return
+  if (JSON.stringify(searchParams.value) === JSON.stringify(searchParamForOptionsUpdate.value)) return
+  searchParamForOptionsUpdate.value = JSON.parse(JSON.stringify(searchParams.value))
+  getHostOptions()
 }
 
 // 当场景切换时，初始化页面
@@ -503,7 +590,6 @@ watch(
   (curv, prev) => {
     // 当prev为false时， 说明是新进入的当前页面，而不是在列表模块间切换suite
     if (props.suiteByScene && prev) {
-      getFieldsOptions()
       getHostOptions()
       // 当suite不一致时，候选项可能会不能匹配原suite数据，因此需要重置搜索内容
       // todo: 此处有待优化，searchParams重置后各个字段应和组件初始化后的各个字段保持一致。目前只给了一个suite字段。
@@ -514,7 +600,6 @@ watch(
 
 onMounted(() => {
   initailizing()
-  getFieldsOptions()
   getHostOptions()
 })
 
