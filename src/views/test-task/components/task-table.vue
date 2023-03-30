@@ -168,9 +168,7 @@ import { Search } from '@element-plus/icons-vue'
 import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 // api
 import { getPerformanceData } from '@/api/performance'
-// type
-import type { TableColumnCtx } from 'element-plus/es/components/table/src/table-column/defaults'
-import { User } from '../interface'
+
 // utils
 import { formatDate } from '@/utils/utils'
 import { combineJobs } from '@/views/performance-baseline/utils.js'

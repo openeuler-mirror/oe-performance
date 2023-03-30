@@ -291,7 +291,6 @@ const getFieldsOptions = () => {
   jobFieldsLoading.value  = true
   const searchParamObject = JSON.parse(JSON.stringify(searchParams.value))
   // 如果搜索了硬件参数，需根据硬件参数过滤出的testboxList来限制job参数的获取
-  console.log(333, getSearchParamsByFields(searchParams.value, hostFieldList))
   if ((!searchParamObject.testbox || searchParamObject.testbox?.length <1)
     && filteredTestboxList.value.length > 0
     && !isSearchParamsEmpty(getSearchParamsByFields(searchParams.value, hostFieldList))) {

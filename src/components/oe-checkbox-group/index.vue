@@ -15,7 +15,6 @@
           <el-checkbox-group
             v-if="options.length > 1"
             v-model="checkedValues"
-            @change="handleCheckedItemChange"
           >
             <el-checkbox
               class="checkbox-options-item"
@@ -73,11 +72,7 @@ const checkAll = computed({
 const handleCheckAllChange = (val: boolean) => {
   checkedValues.value = val ? props.options : []
 }
-const handleCheckedItemChange = (value: string[]) => {
-  // const checkedCount = value.length
-  // checkAll.value = checkedCount === props.options.length
 
-}
 const checkedValueChange = (value: string[]) => {
   emits('update:modelValue', value)
   emits('change', value)

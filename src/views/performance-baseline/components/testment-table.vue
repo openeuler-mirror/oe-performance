@@ -206,7 +206,7 @@
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watch, reactive, onMounted, watchEffect, onBeforeMount } from 'vue'
+import { PropType, ref, watch, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Search,

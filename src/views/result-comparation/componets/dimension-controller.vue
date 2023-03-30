@@ -49,10 +49,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref } from 'vue'
 import OeCheckboxGroup from '@/components/oe-checkbox-group/index.vue'
-
-import { isArrayTheSame_l1 } from '@/utils/utils'
 
 interface OptionData {
   // osv: ['openEuler', 'centos']
@@ -75,19 +73,13 @@ const emit = defineEmits<{
   (event: 'suiteFiltering', filterArr: Array<string>): void
 }>()
 
-const dimension = ref('osv')
-
 const filterOptions = ref(props.optionsData)
-const filterList = ref([])
+
 const checkedListByDimension = ref({})
 
 const checkedDimension = ref('osv')
 
 const suiteSelection = ref(props.suiteFilter)
-
-const handleFiltering = () => {
-  emit('filtering', dimension.value, filterList.value)
-}
 
 /**
  * 当重新搜索后，可能会导致可选的测试套option变化。测试套option的变化需要suite的checkboxgroup更新选中数据

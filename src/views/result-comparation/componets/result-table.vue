@@ -51,7 +51,7 @@
 </template>
     
 <script setup lang="ts">
-import { ref, Ref, watchEffect, nextTick } from 'vue'
+import { ref, Ref, watchEffect } from 'vue'
 import CompareChart from './compare-chart.vue'
 import { jobModel, suiteTables } from '../config'
 
@@ -87,7 +87,6 @@ const tableConfigs:Ref<any> = ref({})
 const tableDatas:Ref<any> = ref({})
 
 const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string>) => {
-  console.log(props.dimension, props.filterListUnderDimension)
   tableDatas.value = {}
   filteringSuiteList().forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]

@@ -31,7 +31,7 @@
 </template>
     
 <script setup lang="ts">
-import { onMounted, ref, Ref, nextTick } from 'vue'
+import { ref, Ref, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import dimensionController from './componets/dimension-controller.vue'
@@ -131,7 +131,6 @@ const getTotalData = (searchParams, searchTime: number) => {
       constructEjobData(tempFlattenItem, ejobs, ejobsMap)  // 生成ejobs
       getFilterOptions(tempFlattenItem)    // 记录可选择项
     })
-    console.log('ejobs: ', ejobs, ejobsMap)
     e2tConverter(ejobs, tjobs)
     filterList.value = (Array.from(optionsData.value[filterDimension.value])).slice(0,1) // 获取新数据后，图表默认展示osv维度的第一个元素
     inputData.value = tjobs
@@ -211,7 +210,6 @@ const e2tConverter = (ejobs, tjobs) => {
       }
     })
   })
-  console.log('tjobs:', tjobs)
 }
 
 const resetData = () => {
