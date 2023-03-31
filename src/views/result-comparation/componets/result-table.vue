@@ -1,19 +1,22 @@
 <template>
   <div class="result-tables">
-    <el-tabs v-model="tabName" @tabChange="handleTabChange">
-      <el-tab-pane
-        v-for="suite in Object.keys(tableConfigs)"
-        :label="suite"
-        :name="suite"
-        :key="suite"
-        lazy
-      >
-        <div v-if="isSuiteDataEmpty(tableDatas[suite])" class="empty-content">
-          <img src="@/assets/empty.png" />
-          <h5>暂无数据</h5>
-        </div>
+    <div
+      v-if="checkDataEmpty(tableDatas)"
+      class="empty-content">
+      <img src="@/assets/empty.png" />
+      <h5>暂无数据</h5>
+    </div>
+    <!--所有数据都为空时，展示empty样式--<div v-if="isSuiteDataEmpty(tableDatas[suite])" class="empty-content">
+
+    </div>-->
+    <div
+      class="result-tables-container"
+      v-for="suite in Object.keys(tableConfigs)"
+      :key="suite"
+    >
+      <template v-if="!isSuiteDataEmpty(tableDatas[suite] || [])">
+        <h3>测试套：{{ suite }}</h3>
         <div
-          v-else
           v-for="(config, tableIdx) in tableConfigs[suite]"
           :key="config.tableName"
         >
@@ -42,13 +45,13 @@
             </el-card>
           </template>
         </div>
-      </el-tab-pane>
-    </el-tabs>
+      </template>
+    </div>
   </div>
 </template>
     
 <script setup lang="ts">
-import { ref, Ref, watchEffect, nextTick } from 'vue'
+import { ref, Ref, watchEffect } from 'vue'
 import CompareChart from './compare-chart.vue'
 import { jobModel, suiteTables } from '../config'
 
@@ -65,29 +68,27 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
-  suiteControl: {
-    type: String,
-    default: ''
+  suiteFilterList: {
+    type: Array,
+    default: () => []
   }
 })
 
-// 这里可以指定表格顺序
-const tableListOrder = [
+// 支持的suite类型，根据本字段获取数据这里可以指定表格顺序
+const supportedSuiteList = [
   'stream',
   'netperf',
   'lmbench',
   'unixbench',
   'libmicro'
 ]
-const tabName = ref('stream')
 const tableConfigs:Ref<any> = ref({})
 
 const tableDatas:Ref<any> = ref({})
 
 const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string>) => {
-  setTab()
   tableDatas.value = {}
-  tableListOrder.forEach(suite => { // 遍历每一个套件
+  filteringSuiteList().forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
     if (!tableConfigs.value[suite]) {tableConfigs.value[suite] = []}
     if (!tableDatas.value[suite]) {tableDatas.value[suite] = []}
@@ -105,8 +106,8 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       const tempColumn = [{ label: tableConfig.x_param, prop: 'dimensionId' }]
       const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
       tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
-        // 1、拿到当前tjob的维度值
-        const dimensionValue = tjob[dimension]
+        // 1、拿到当前tjob的维度值, 并根据选择的list过滤
+        const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
         if (!dimensionValue) return // 没有对应维度的话退出
         if (filterList.length > 0 && filterList.indexOf(dimensionValue) < 0) return
         // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
@@ -135,12 +136,16 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
   })
 }
 
-const setTab = () => {
-  if (props.suiteControl) {
-    tabName.value = props.suiteControl
-  } else {
-    tabName.value = 'stream'
+const getDimensionValue = (tjob, dimension) => {
+  let dim = dimension
+  if (dimension === 'pp' || dimension === 'ss') {
+    dim = `${dimension}Params`
   }
+  return tjob[dim]
+}
+
+const filteringSuiteList = () => {
+  return supportedSuiteList.filter(item => props.suiteFilterList.indexOf(item) > -1)
 }
 
 const setTableColConfig = (tempConfig, suite, tableIndex) => {
@@ -227,22 +232,25 @@ const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
   return true
 }
 
-const isSuiteDataEmpty = (tableDatasUnderSuite) => {
+const isSuiteDataEmpty = (tableDatasUnderSuite: []) => {
   let emptyFlag = true
   if (tableDatasUnderSuite.length < 1) return true
   tableDatasUnderSuite.forEach(tableDataByIdx => {
-    if (tableDataByIdx.length > 0) {
+    if (Array.isArray(tableDataByIdx) && tableDataByIdx.length > 0) {
       emptyFlag = false
     }
   })
   return emptyFlag
 }
 
-const handleTabChange = () => {
-  nextTick(() => {
-    const event = new Event('resize')
-    window.dispatchEvent(event)
+const checkDataEmpty = (tableDatas: {}) => {
+  let emptyFlag = true
+  Object.keys(tableDatas).forEach(suite => {
+    if (!isSuiteDataEmpty(tableDatas[suite])) {
+      emptyFlag = false
+    }
   })
+  return emptyFlag
 }
 
 // 当表格数据或者展示维度切换时，更新表格配置数据

@@ -1,6 +1,6 @@
 <template>
   <el-card shadow="always" v-loading="loading">
-    <h2>{{`任务ID: ${detailData?.submit_id || ''}`}}</h2>
+    <h2>{{`Submit Id: ${detailData?.submit_id || ''}`}}</h2>
     <el-row :gutter="20">
       <el-col :span="18">
         <el-descriptions :column="2">
@@ -67,7 +67,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="Task Id" prop="submit_id" min-width="250"/>
+      <el-table-column label="Submit Id" prop="submit_id" min-width="250"/>
       <el-table-column label="Test Suite" prop="suite" />
       <el-table-column label="总计/通过/失败/其他" prop="count" width="250">
         <template #default="scope">

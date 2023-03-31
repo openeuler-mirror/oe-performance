@@ -61,7 +61,7 @@ export const useBaselineTableInfoStore= defineStore('baselineTableInfo', () => {
 const testboxList = ref(<{}>[])
 const testboxMap = reactive(<{ [key: string]: any }>{})
 export const useTestboxStore = defineStore('testboxStore', () => {
-  const setTestboxData = (list: []) => {
+  const setTestboxData = (list: {testboxId:string}[]) => {
     testboxList.value = list
     list.forEach((testboxItem:{testboxId:string}) => {
       testboxMap[testboxItem.testboxId] = testboxItem

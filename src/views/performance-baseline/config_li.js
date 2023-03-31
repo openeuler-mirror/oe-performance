@@ -836,6 +836,7 @@ export const tableColumnMap = {
         {label: '9000', prop: 'pp.netperf.send_size=9000'},
         {label: '16384', prop: 'pp.netperf.send_size=16384'},
         {label: '32768', prop: 'pp.netperf.send_size=32768'},
+        {label: '65536', prop: 'pp.netperf.send_size=65536'}
       ]
     },
     {

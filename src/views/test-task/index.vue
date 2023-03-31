@@ -71,7 +71,7 @@ const handleStateFiltering = (jobState: string) => {
   getDataList(activeName.value)
 }
 
-const getDataList = (type: string) => {
+const getDataList = () => {
   dataLoading.value = true
   // 组织搜索条件
   const boolObj = {}
@@ -121,7 +121,7 @@ const getDataList = (type: string) => {
 }
 
 // 获取job的状态枚举值和属性
-const getJobsState = (type: string) => {
+const getJobsState = () => {
   getTaskStatusCounts().then((res) => {
     const tempDataList = res.data.aggregations.job_state.buckets
     healthState.value = computeJobsHealthAmount(tempDataList)

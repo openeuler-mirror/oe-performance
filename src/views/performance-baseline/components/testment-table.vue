@@ -101,6 +101,7 @@
       >
     </div>
     <el-table
+      ref="multipleTableRef"
       :data="tableData"
       v-loading="tableLoading || submitDataLoading"
       stripe
@@ -111,20 +112,10 @@
       <el-table-column
         fixed="left"
         width="200"
-        label="Submit Id"
-        prop="submit_id">
-      </el-table-column>
-      <template v-for="(item, index) in tableColumn">
-        <el-table-column
-          v-if="item.show"
-          :prop="item.prop"
-          :label="item.label"
-          :key="index"
-          :width="item.width"
-          :min-width="item.minWidth"
-          :class-name="item.className"
-        >
-          <template #default="scope" v-if="item.prop==='performanceVal'">
+        label="性能数据"
+        prop="performanceVal"
+      >
+        <template #default="scope">
             <div
               v-if="scope.row.suite!=='lmbench'"
               class="important-value"
@@ -144,6 +135,17 @@
               </p>
             </div>
           </template>
+      </el-table-column>
+      <template v-for="(item, index) in tableColumn">
+        <el-table-column
+          v-if="item.show"
+          :prop="item.prop"
+          :label="item.label"
+          :key="index"
+          :width="item.width"
+          :min-width="item.minWidth"
+          :class-name="item.className"
+        >
         </el-table-column>
       </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">
@@ -166,11 +168,45 @@
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total" />
+    <el-dialog
+      v-model="dialogVisible"
+      class="export-dialog"
+      width="70%"
+      @close="handleDialogClose">
+      <template #header>
+        <span style="font-size:20px;line-height: 24px;">选择基准</span>
+        <el-tooltip
+          content="选择一条作为基准,其他记录将与之进行比较"
+          placement="bottom">
+          <el-icon style="margin-left: 4px;" color="var(--oe-perf-color-secondary)"><InfoFilled /></el-icon>
+        </el-tooltip>
+      </template>
+      <el-table
+        :data="testDataVals"
+        stripe
+        highlight-current-row
+        @current-change="handleCurrentChange"
+        style="width: 100%"
+        :header-cell-style="{ background: 'rgb(243,243,243)' }">
+        <el-table-column fixed prop="submit_id" label="提交编号" width="200" />
+        <el-table-column
+          :prop="item['prop']"
+          :label="item['label']"
+          :key="item['prop']"
+          min-width="160"
+          v-for="(item) in testDataColumns"/>
+      </el-table>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button type="primary" @click="handleExportMultiple" :loading="exportButtonLoading">导出</el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { PropType, ref, watch, reactive, onMounted, watchEffect, onBeforeMount } from 'vue'
+import { PropType, ref, watch, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   Search,
@@ -178,21 +214,14 @@ import {
   RefreshLeft,
   WarningFilled
 } from '@element-plus/icons-vue'
-import { config, sceneConfig } from '../config-file'
-import { ElMessage } from 'element-plus'
+import { config, sceneConfig, Column } from '../config-file'
+import { ElMessage, ElTable } from 'element-plus'
 import { usePerformanceData, useBaselineTableInfoStore, useTestboxStore } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
-import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
+import { tableColumnMap } from '@/views/performance-baseline/config_li.js'
+import { exportSingle, exportMultiple } from '@/views/performance-baseline/export-data'
 
-export interface Column {
-  label: string
-  prop: string
-  show: boolean
-  width: string
-  formatter?: Function,
-  className?: string
-}
 export interface TableItem {
   [key: string]: any
 }
@@ -248,7 +277,7 @@ const cloumnLabel = ref([] as string[])
 const isIndeterminate = ref(false)
 const checkAllColumn = ref(true)
 
-const selectedTableRows = ref(<{}[]>[])
+const selectedTableRows = ref<any[]>([])
 
 const idList = ref(<any>[])
 const currentPage = ref(1)
@@ -261,6 +290,11 @@ const disabled = ref(false)
 
 const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
+const dialogVisible = ref(false)
+const testDataVals = ref<any[]>([])
+const testDataColumns = ref<any[]>([])
+const multipleTableRef = ref<InstanceType<typeof ElTable>>()
+const exportButtonLoading = ref(false)
 
 const changeSizeOnly = ref(false)
 
@@ -386,33 +420,57 @@ const handleComaration = () => {
   router.push({ name: 'basicPerformance' })
 }
 // 导出
+/* eslint-disable max-lines-per-function */
 const handleExportCsv = () => {
   if (selectedTableRows.value.length === 0) {
     ElMessage({
       message: '请先选择要导出的数据',
       type: 'warning'
     })
+  } else if (selectedTableRows.value.length === 1) {
+    exportSingle(allColumn.value, selectedTableRows.value, tableColumnMap)
+    multipleTableRef.value!.clearSelection()
   } else {
-    const data = []
-    // 这里要深拷贝,不然影响列的字段
-    const titleData: any[] = JSON.parse(JSON.stringify(allColumn.value))
-    titleData.splice(0, 0, { label: '提交编号', prop: 'submit_id' })
-    const title = titleData.map<string>((item: any) => item.label).join(',')
-    const keys = titleData.map<string>((item: any) => item.prop)
-    data.push(`${title}\r\n`)
-    selectedTableRows.value.forEach((item: any) => {
-      const temp: string[] = []
-      keys.forEach((key: string) => {
-        temp.push(getProperty(item,key))
+    let suites = selectedTableRows.value.map<string>(record => record['suite'])
+    suites = Array.from(new Set(suites))
+    if (suites.length > 1) {
+      ElMessage({
+        message: '请选择相同测试套的数据',
+        type: 'warning'
       })
-      const tmpStr = temp.join(',')
-      data.push(`${tmpStr}\r\n`)
+      multipleTableRef.value!.clearSelection()
+      return
+    }
+    // 准备好弹窗内表格的内容
+    const tableInfos:any[] = tableColumnMap[selectedTableRows.value[0]['suite']]
+    tableInfos.forEach((tableInfo:any) => {
+      testDataColumns.value.push({
+        prop: `performanceVal_${tableInfo['tableName']}`,
+        label: `${tableInfo['tableName']}(性能值)`
+      })
+      tableInfo['column'].forEach((column:any) => {
+        testDataColumns.value.push({
+          prop: `${tableInfo['tableName']}(${column['label']})`,
+          label: `${tableInfo['tableName']}(${column['label']})`
+        })
+      })
     })
-    const dataString = data.join('')
-    const blob = new Blob([`\uFEFF${dataString}`], {
-      type: 'text/csv;charset=utf-8'
+    selectedTableRows.value.forEach((record:any) => {
+      let rowData:{ [propName:string]: any } = {}
+      tableInfos.forEach((tableInfo:any) => {
+        const performanceVal = record['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+        rowData[`performanceVal_${tableInfo['tableName']}`] = performanceVal
+        tableInfo['column'].forEach((column:any) => {
+          const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
+          rowData[`${tableInfo['tableName']}(${column['label']})`] = val
+        })
+      })
+      testDataVals.value.push({
+        submit_id: record['submit_id'],
+        ...rowData
+      })
     })
-    downloadBlobFile(blob, '导出.csv')
+    dialogVisible.value = true
   }
 }
 
@@ -426,14 +484,37 @@ const perfValformatter = (cellValue: number) => {
 const handleReFresh = () => {
   emit('refreash')
 }
-
-const getProperty = (item:any, key:string) => {
-  const index = key.split('.')
-  index.forEach(e => {
-    item = item[e] || ''
-  })
-  return item
+const handleDialogClose = () => {
+  exportButtonLoading.value = false
+  testDataVals.value = []
+  testDataColumns.value = []
+  currentRow.value = undefined
+  multipleTableRef.value!.clearSelection()
 }
+const currentRow = ref()
+const handleCurrentChange = (val:any) => {
+  currentRow.value = val
+}
+
+const handleExportMultiple = () => {
+  if (currentRow.value === undefined) {
+    ElMessage({
+      message: '请先选择一条记录作为基准',
+      type: 'warning'
+    })
+  } else {
+    exportButtonLoading.value = true
+    exportMultiple(allColumn.value,selectedTableRows.value,tableColumnMap,currentRow.value)
+    // 退出
+    dialogVisible.value = false
+    handleDialogClose()
+    ElMessage({
+      message: '导出成功',
+      type: 'success'
+    })
+  }
+}
+
 watch(
   () => route.query.scene,
   () => {
@@ -553,5 +634,12 @@ a {
 
 .important-value {
   color: var(--oe-perf-color-primary);
+}
+</style>
+<style lang="scss">
+.export-dialog {
+  .el-dialog__body {
+    padding-top: 20px;
+  }
 }
 </style>

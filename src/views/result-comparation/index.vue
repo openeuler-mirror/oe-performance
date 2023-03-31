@@ -7,27 +7,32 @@
     />
   </div>
   <div class="oe-perf-section" v-loading="searchLoading">
-    <div v-if="!isSearched" class="banner-text">请搜索数据进行对比</div>
-    <template v-else>
-      <dimension-controller 
-        :osv-options="osvOptions"
-        :testbox-options="testboxOptions"
-        :tags-options="tagsOptions"
+    <template v-if="isSearched" >
+      <h2 class="oe-perf-section-title">对比维度</h2>
+      <dimension-controller
+        ref="dimensionControlerRef"
+        :options-data="optionsData"
+        :suiteFilter="Array.from(suiteOptions) || []"
         @filtering="handleDimensionFiltering"
+        @suiteFiltering="handleSuiteFiltering"
       />
-      <result-table 
-        :tjobsAll="inputData"
-        :dimension="filterDimension"
-        :filterListUnderDimension="filterList"
-        :suiteControl="searchParams.suite && searchParams.suite[0]"
-      ></result-table>
     </template>
-
+    <div v-else class="banner-text">请搜索数据进行对比</div>
+  </div>
+  <div v-if="isSearched" class="oe-perf-section" v-loading="searchLoading">
+    <h2 class="oe-perf-section-title">对比详情</h2>
+    <result-table 
+      :tjobsAll="inputData"
+      :dimension="filterDimension"
+      :filterListUnderDimension="filterList"
+      :suiteFilterList="suiteFilterList"
+    ></result-table>
   </div>
 </template>
     
 <script setup lang="ts">
-import { ref, Ref } from 'vue'
+import { ref, Ref, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import dimensionController from './componets/dimension-controller.vue'
 import ResultTable from './componets/result-table.vue'
@@ -56,12 +61,20 @@ const searchLoading = ref(false)
 
 const isSearched = ref(false)
 
+const dimensionControlerRef = ref(null)
+const optionsData = ref({})
 const osvOptions = ref(new Set())
-const testboxOptions = ref(new Set())
+const archOptions = ref(new Set())
+const tboxGroupOptions = ref(new Set())
 const tagsOptions = ref(new Set())
+const suiteOptions = ref(new Set())
+const ppOptions = ref(new Set())
+const ssOptions = ref(new Set())
+const groupOptions = ref(new Set())
 
 const filterDimension = ref('osv')
-const filterList:Ref<string[]> = ref([])
+const filterList: Ref<string[]> = ref([])
+const suiteFilterList: Ref<string[]> = ref([])
 
 // 获取jobs数据
 const onSearch = (params, searchTime:number) => {
@@ -114,21 +127,22 @@ const getTotalData = (searchParams, searchTime: number) => {
       const tempFlattenItem = flattenObj(item._source)  
       // jobs转换成ejobs
       tempFlattenItem['osv'] = `${tempFlattenItem.os}@${tempFlattenItem.os_version}` // 增加需组装的参数
-      // 保存硬件信息
-      addHardwareInfoToJob(tempFlattenItem)
-      // 生成ejobs
-      constructEjobData(tempFlattenItem, ejobs, ejobsMap)
-      // 记录可选择项
-      tempFlattenItem['osv'] && osvOptions.value.add(tempFlattenItem['osv'])
-      tempFlattenItem['testbox'] && testboxOptions.value.add(tempFlattenItem['testbox'])
-      tempFlattenItem['tags'] && tagsOptions.value.add(tempFlattenItem['tags'])
+      addHardwareInfoToJob(tempFlattenItem)  // 保存硬件信息
+      constructEjobData(tempFlattenItem, ejobs, ejobsMap)  // 生成ejobs
+      getFilterOptions(tempFlattenItem)    // 记录可选择项
     })
-    console.log('ejobs: ', ejobs, ejobsMap)
     e2tConverter(ejobs, tjobs)
+    filterList.value = (Array.from(optionsData.value[filterDimension.value])).slice(0,1) // 获取新数据后，图表默认展示osv维度的第一个元素
     inputData.value = tjobs
+  }).catch(err => {
+    ElMessage({
+      message: err.message,
+      type: 'error'
+    })
   }).finally(() => {
     isSearched.value = true
     searchLoading.value = false
+    nextTick(() => dimensionControlerRef.value.checkedListInit()) // 触发dimensionController组件重置选项
   })
 }
 
@@ -196,7 +210,6 @@ const e2tConverter = (ejobs, tjobs) => {
       }
     })
   })
-  console.log('tjobs:', tjobs)
 }
 
 const resetData = () => {
@@ -204,8 +217,13 @@ const resetData = () => {
   ejobsMap = {}
   tjobs = {}
   osvOptions.value.clear()
-  testboxOptions.value.clear()
+  archOptions.value.clear()
+  tboxGroupOptions.value.clear()
   tagsOptions.value.clear()
+  suiteOptions.value.clear()
+  ppOptions.value.clear()
+  ssOptions.value.clear()
+  groupOptions.value.clear()
 }
 
 const handleDimensionFiltering = (dimension: string, List: Array<string>) => {
@@ -213,10 +231,67 @@ const handleDimensionFiltering = (dimension: string, List: Array<string>) => {
   filterList.value = List
 }
 
+const handleSuiteFiltering = (suiteList) => {
+  suiteFilterList.value = suiteList
+}
+
+const getFilterOptions = (flattenJob) => {
+  flattenJob['osv'] && osvOptions.value.add(flattenJob['osv'])
+  flattenJob['arch'] && archOptions.value.add(flattenJob['arch'])
+  flattenJob['tbox_group'] && tboxGroupOptions.value.add(flattenJob['tbox_group'])
+  flattenJob['tags'] && tagsOptions.value.add(flattenJob['tags'])
+  flattenJob['group_id'] && groupOptions.value.add(flattenJob['group_id'])
+  flattenJob['suite'] && suiteOptions.value.add(flattenJob['suite'])
+  suiteFilterList.value = Array.from(suiteOptions.value)
+  const ppParams = getPpParams(flattenJob)
+  flattenJob['ppParams'] = ppParams
+  ppParams && ppOptions.value.add(ppParams)
+  const ssParams = getSsParams(flattenJob)
+  flattenJob['ssParams'] = ssParams
+  ssParams && ssOptions.value.add(ssParams)
+  optionsData.value = {
+    osv: osvOptions,
+    arch: archOptions,
+    tbox_group: tboxGroupOptions,
+    group_id: groupOptions,
+    tags: tagsOptions,
+    pp: ppOptions,
+    ss: ssOptions,
+  }
+}
+
+const getPpParams = (flattenJob) => {
+  const tempArr = []
+  Object.keys(flattenJob).sort().forEach(key => {
+    if (key.startsWith(`pp.${flattenJob.suite}`)) {
+      tempArr.push(`${key}=${flattenJob[key]}`)
+    }
+  })
+  return tempArr.join(',')
+}
+
+/**
+ * stats数据结构中可能会有写保存信息需要特殊处理。因此处理方法和pp的params的获取一致。
+ * @param flattenJob
+ */
+const getSsParams = (flattenJob) => {
+  const tempArr = []
+  Object.keys(flattenJob).sort().forEach(key => {
+    if (key.startsWith(`stats.${flattenJob.suite}`)) {
+      tempArr.push(`${key}=${flattenJob[key]}`)
+    }
+  })
+  return tempArr.join(',')
+}
 </script>
   
 <style lang="scss" scoped>
 .banner-text {
   text-align: center;
+}
+
+.oe-perf-section-title {
+  font-size: 24px;
+  margin-bottom: 24px;
 }
 </style>

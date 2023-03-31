@@ -9,6 +9,7 @@ import './mock'
 // 组件工具
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
+import '@/assets/fonts/font.css'
 import '@/styles/index.scss'
 
 const app = createApp(App);
