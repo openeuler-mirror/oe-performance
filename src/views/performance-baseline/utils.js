@@ -6,6 +6,8 @@ import { flattenObj } from '@/utils/utils'
 
 import { testParamsMap, kpiListMap, tableMode, tableColumnMap } from '@/views/performance-baseline/config_li.js'
 
+export const invalidNumberSymbol = -1
+
 export const combineJobs = (jobList) => {
   const tempList = jobList.map(job => job._source)
     .map(job => prePrecessJob(job))
@@ -383,7 +385,7 @@ const computeMean = (inputArr) => {
   let sum = 0
   let count = 0
   if (!Array.isArray(inputArr)) {
-    return -1
+    return invalidNumberSymbol
   }
   inputArr.forEach(val => {
     if (isNaN(val)) {
@@ -394,7 +396,7 @@ const computeMean = (inputArr) => {
   })
   // 无数据情况
   if (count === 0) {
-    return -1 // 特殊标识
+    return invalidNumberSymbol // 特殊标识
   }
   return (sum / count).toFixed(3)
 }
@@ -404,7 +406,7 @@ const computeGeoMean = (inputArr) =>{
   let count = 0
   const tempArr = inputArr.filter(val => val >= 0)
   if (tempArr.length < 1) {
-    return -1 // 无数据情况
+    return invalidNumberSymbol // 无数据情况
   }
   tempArr.forEach(val => {
     testmentVal *= val

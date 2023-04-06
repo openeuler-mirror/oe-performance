@@ -1,4 +1,5 @@
 import { Column } from './config-file'
+import { invalidNumberSymbol } from './utils'
 import { downloadBlobFile } from '@/utils/request/downloadBlobFile'
 
 const exportCommonPart = (allColumn:Column[], selectedTableRows:any[]):string => {
@@ -40,17 +41,25 @@ export const exportSingle = (allColumn:Column[], selectedTableRows:any[], tableC
   tableInfos.forEach(tableInfo => {
     const columnLabels:string[] = []
     const columnValues:any[] = []
-    tableInfo['column'].forEach((column:any) => {
-      columnLabels.push(column['label'])
-      columnValues.push(testDatas[tableInfo['tableName']][0][column['prop']])
-    })
-    const extraValues = [
-      selectedTableRows[0]['submit_id'],
-      `"${testDatas[tableInfo['tableName']][0]['li-testcase']}"`,
-      testDatas[tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
-    ]
-    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
-    columnValues.splice(0, 0, ...extraValues)
+    if (testDatas[tableInfo['tableName']]) {
+      tableInfo['column'].forEach((column:any) => {
+        columnLabels.push(column['label'])
+        const columnVal = testDatas[tableInfo['tableName']][0][column['prop']]
+        columnValues.push(columnVal === invalidNumberSymbol ? '暂无数据' : columnVal)
+      })
+      const extraValues = [
+        selectedTableRows[0]['submit_id'],
+        `"${testDatas[tableInfo['tableName']][0]['li-testcase']}"`,
+        testDatas[tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+      ]
+      columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+      columnValues.splice(0, 0, ...extraValues)
+    } else {
+      // 有的数据中可能缺少某些表格的数据
+      columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+      columnValues.splice(0, 0, ...[selectedTableRows[0]['submit_id'],'N/A','N/A'])
+    }
+
     commonPartData = commonPartData.concat(`${tableInfo['tableName']}\r\n`)
     commonPartData = commonPartData.concat(`${columnLabels.join(',')}\r\n`)
     commonPartData = commonPartData.concat(`${columnValues.join(',')}\r\n\r\n`)
@@ -67,39 +76,9 @@ export const exportMultiple = (allColumn:Column[], selectedTableRows:any[], tabl
     // 表头和基准数据
     const columnLabels:string[] = []
     const baseDatas:any[] = []
-    tableInfo['column'].forEach((column:any) => {
-      columnLabels.push(column['label'])
-      baseDatas.push(baseRecord[0]['tableDatas'][tableInfo['tableName']][0][column['prop']])
-    })
-    const extraBaseDatas = [
-      baseRecord[0]['submit_id'],
-      `"${baseRecord[0]['tableDatas'][tableInfo['tableName']][0]['li-testcase']}"`,
-      baseRecord[0]['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
-    ]
-    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
-    baseDatas.splice(0,0,...extraBaseDatas)
+    generateBaseDatasAndColumn(tableInfo, columnLabels, baseDatas, baseRecord)
     // 其他数据
-    otherRecords.forEach(record => {
-      const columnValues:any[] = []
-      const diffDatas:any[] = ['提升情况','']
-      tableInfo['column'].forEach((column:any,index:number) => {
-        const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
-        columnValues.push(val)
-        diffDatas.push(Number(val) - Number(baseDatas[index + 3]))
-      })
-      const extraValues = [
-        record['submit_id'],
-        `"${record['tableDatas'][tableInfo['tableName']][0]['li-testcase']}"`,
-        record['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
-      ]
-      columnValues.splice(0, 0, ...extraValues)
-      diffDatas.splice(2,0,Number(extraValues[2]) - Number(baseDatas[2]))
-      commonPartData = commonPartData.concat(`${tableInfo['tableName']}\r\n`)
-      commonPartData = commonPartData.concat(`${columnLabels.join(',')}\r\n`)
-      commonPartData = commonPartData.concat(`${baseDatas.join(',')}\r\n`)
-      commonPartData = commonPartData.concat(`${columnValues.join(',')}\r\n`)
-      commonPartData = commonPartData.concat(`${diffDatas.join(',')}\r\n\r\n\r\n`)
-    })
+    commonPartData = generateOtherDataAndCompareTable(tableInfo, columnLabels, baseDatas, otherRecords, commonPartData)
   })
   doDownload(commonPartData)
 }
@@ -117,4 +96,70 @@ const getProperty = (item:any, key:string):string => {
     item = item[e] || ''
   })
   return item
+}
+
+const generateBaseDatasAndColumn = (tableInfo: any, columnLabels: string[], baseDatas:any[], baseRecord:any[]) => {
+  const recordDataByTable = baseRecord[0]['tableDatas'][tableInfo['tableName']]
+  tableInfo['column'].forEach((column:any) => {
+    columnLabels.push(column['label'])
+    if (recordDataByTable) { // 对应表格有数据时才获取
+      const columnVal = baseRecord[0]['tableDatas'][tableInfo['tableName']][0][column['prop']]
+      baseDatas.push(columnVal === invalidNumberSymbol ? '暂无数据' : columnVal)
+    }
+  })
+  if (recordDataByTable) {
+    const extraBaseDatas = [
+      baseRecord[0]['submit_id'],
+      `"${baseRecord[0]['tableDatas'][tableInfo['tableName']][0]['li-testcase']}"`,
+      baseRecord[0]['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+    ]
+    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+    baseDatas.splice(0,0,...extraBaseDatas)
+  } else {
+    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+    baseDatas.splice(0,0,...[baseRecord[0]['submit_id'], '暂无数据', '暂无数据'])
+  }
+}
+
+const generateOtherDataAndCompareTable = (
+  tableInfo: any, columnLabels: string[], baseDatas: any[], otherRecords: any[], commonPartData:string
+) => {
+  otherRecords.forEach((record: any) => {
+    const recordDataByTable = record['tableDatas'][tableInfo['tableName']]
+    const columnValues:any[] = []
+    const diffDatas:any[] = ['提升情况','']
+    tableInfo['column'].forEach((column:any,index:number) => {
+      if (recordDataByTable) {
+        const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
+        columnValues.push(val === invalidNumberSymbol ? '暂无数据' : val)
+        if (!val || val === invalidNumberSymbol || !baseDatas[index + 3] || isNaN(baseDatas[index + 3])) {
+          diffDatas.push('N/A')
+        } else {
+          diffDatas.push(`${(Number(val) - Number(baseDatas[index + 3]))/Number(baseDatas[index + 3])*100}%`)
+        }
+      } else {
+        columnValues.push('N/A')
+        diffDatas.push('N/A')
+      }
+    })
+    if (recordDataByTable && baseDatas[2] && !isNaN(baseDatas[2])) {
+      const extraValues = [
+        record['submit_id'],
+        `"${record['tableDatas'][tableInfo['tableName']][0]['li-testcase']}"`,
+        record['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+      ]
+      columnValues.splice(0, 0, ...extraValues)
+      diffDatas.splice(2,0,`${(Number(extraValues[2]) - Number(baseDatas[2]))/Number(baseDatas[2])*100}%`)
+    } else {
+      columnValues.splice(0, 0, ...[record['submit_id'], 'N/A', 'N/A'])
+      diffDatas.splice(2,0, 'N/A')
+    }
+
+    commonPartData = commonPartData.concat(`${tableInfo['tableName']}\r\n`)
+      .concat(`${columnLabels.join(',')}\r\n`)
+      .concat(`${baseDatas.join(',')}\r\n`)
+      .concat(`${columnValues.join(',')}\r\n`)
+      .concat(`${diffDatas.join(',')}\r\n\r\n\r\n`)
+  })
+  return commonPartData
 }

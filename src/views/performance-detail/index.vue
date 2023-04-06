@@ -704,7 +704,7 @@ import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 import { getPerformanceData, getTestBoxes } from '@/api/performance'
 // import { getDetail } from '@/api/detail'
 
-import { combineJobs } from '@/views/performance-baseline/utils.js'
+import { combineJobs, invalidNumberSymbol } from '@/views/performance-baseline/utils.js'
 
 const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
@@ -796,7 +796,7 @@ const setDeviceInfoToObj = (resultObj) => {
 }
 
 const performanceValFormatter = (row, column, cellValue) => {
-  if (cellValue === undefined || cellValue === -1) {
+  if (cellValue === undefined || cellValue === invalidNumberSymbol) {
     return '暂无数据'
   }
   return cellValue

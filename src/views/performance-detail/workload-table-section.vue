@@ -41,7 +41,7 @@ import { ElMessage } from 'element-plus'
 import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 import { tableColumnMap } from '@/views/performance-baseline/config_li.js'
-import { combineJobs } from '@/views/performance-baseline/utils.js'
+import { combineJobs, invalidNumberSymbol } from '@/views/performance-baseline/utils.js'
 
 const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
@@ -90,7 +90,7 @@ onMounted(() => {
 })
 
 const tableCellFormatter = (row, column, cellValue) => {
-  if (cellValue === undefined || cellValue === -1) {
+  if (cellValue === undefined || cellValue === invalidNumberSymbol) {
     return '暂无数据'
   }
   return cellValue
