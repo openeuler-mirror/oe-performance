@@ -115,6 +115,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { usePerformanceData } from '@/stores/performanceData'
+import { invalidNumberSymbol } from '@/views/performance-baseline/utils'
 import workloadTableSection from './workload-table-section.vue'
 
 const router = useRouter()
@@ -123,7 +124,7 @@ const performanceDataStroe = usePerformanceData()
 const submitId = router.currentRoute.value.params.submit_id
 
 const performanceValFormatter = (row, column, cellValue) => {
-  if (cellValue === undefined || cellValue === -1) {
+  if (cellValue === undefined || cellValue === invalidNumberSymbol) {
     return '暂无数据'
   }
   return cellValue
