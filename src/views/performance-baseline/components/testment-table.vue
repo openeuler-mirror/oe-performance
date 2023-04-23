@@ -168,58 +168,13 @@
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total" />
-    <el-dialog
-      v-model="dialogVisible"
-      class="export-dialog"
-      width="70%"
-      @close="handleDialogClose">
-      <template #header>
-        <div class="export-dialog-header">
-          <h3>选择基准</h3>
-          <p>请选择一条作为基准,其他记录将与之进行比较</p>
-        </div>
-      </template>
-      <el-table
-        ref="exportTableRef"
-        :data="testDataVals"
-        stripe
-        highlight-current-row
-        @current-change="currentRow => handleCurrentChange(currentRow)"
-        style="width: 100%"
-        :header-cell-style="{ background: 'rgb(243,243,243)' }">
-        <el-table-column fixed width="50">
-          <template #default="scope">
-            <el-radio
-              v-model="currentCheckboxData[scope.$index]"
-              :label="scope.row.submit_id"
-              @change="cuurentCheckboxSelected"
-            />
-          </template>
-        </el-table-column>
-        <el-table-column fixed prop="submit_id" label="提交编号" width="200" show-overflow-tooltip/>
-        <el-table-column
-          min-width="100"
-          label="总性能值"
-          prop="performanceVal"
-        >
-          <template #default="scope">
-            <div class="important-value">{{ perfValformatter(scope.row.performanceVal) }}</div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :prop="item['prop']"
-          :label="item['label']"
-          :key="item['prop']"
-          min-width="160"
-          :formatter="tableCellFormatter"
-          v-for="(item) in testDataColumns"/>
-      </el-table>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button type="primary" @click="handleExportMultiple" :loading="exportButtonLoading">导出</el-button>
-        </span>
-      </template>
-    </el-dialog>
+    <BenchmarkSelection
+      :visible="benchMarkDialogVisible"
+      :table-datas="testDataVals"
+      :table-columns="testDataColumns"
+      :all-column="allColumn"
+      :selected-table-rows="selectedTableRows"
+      @closeDialog="handleDialogClose"/>
   </div>
 </template>
 
@@ -238,7 +193,8 @@ import { usePerformanceData, useBaselineTableInfoStore, useTestboxStore } from '
 import { getPerformanceData } from '@/api/performance'
 import { combineJobs, invalidNumberSymbol } from '@/views/performance-baseline/utils.js'
 import { tableColumnMap } from '@/views/performance-baseline/config_li.js'
-import { exportSingle, exportMultiple } from '@/views/performance-baseline/export-data'
+import { exportSingle } from '@/views/performance-baseline/export-data'
+import BenchmarkSelection from './benchmark-selection.vue'
 
 export interface TableItem {
   [key: string]: any
@@ -308,11 +264,10 @@ const disabled = ref(false)
 
 const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
-const dialogVisible = ref(false)
+const benchMarkDialogVisible = ref(false)
 const testDataVals = ref<any[]>([])
 const testDataColumns = ref<any[]>([])
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
-const exportButtonLoading = ref(false)
 
 const changeSizeOnly = ref(false)
 
@@ -438,8 +393,6 @@ const handleComaration = () => {
   router.push({ name: 'basicPerformance' })
 }
 // 导出
-const exportTableRef = ref()
-/* eslint-disable max-lines-per-function */
 const handleExportCsv = () => {
   if (selectedTableRows.value.length === 0) {
     ElMessage({
@@ -450,61 +403,66 @@ const handleExportCsv = () => {
     exportSingle(allColumn.value, selectedTableRows.value, tableColumnMap)
     multipleTableRef.value!.clearSelection()
   } else {
-    let suites = selectedTableRows.value.map<string>(record => record['suite'])
-    suites = Array.from(new Set(suites))
-    if (suites.length > 1) {
-      ElMessage({
-        message: '请选择相同测试套的数据',
-        type: 'warning'
-      })
-      multipleTableRef.value!.clearSelection()
-      return
-    }
-    // 准备好弹窗内表格的内容
-    const tableInfos:any[] = tableColumnMap[selectedTableRows.value[0]['suite']]
-    tableInfos.forEach((tableInfo:any) => {  // 设置基准选择表格的列
-      testDataColumns.value.push({
-        prop: `performanceVal_${tableInfo['tableName']}`,
-        label: `${tableInfo['tableName']}(性能值)`
-      })
-      tableInfo['column'].forEach((column:any) => {
+    if (checkIfSameSuite()) {
+      // 准备好弹窗内表格的内容
+      const tableInfos:any[] = tableColumnMap[selectedTableRows.value[0]['suite']]
+      tableInfos.forEach((tableInfo:any) => {  // 设置基准选择表格的列
         testDataColumns.value.push({
-          prop: `${tableInfo['tableName']}(${column['label']})`,
-          label: `${tableInfo['tableName']}(${column['label']})`
+          prop: `performanceVal_${tableInfo['tableName']}`,
+          label: `${tableInfo['tableName']}(性能值)`
         })
-      })
-    })
-    selectedTableRows.value.forEach((record:any) => {
-      let rowData:{ [propName:string]: any } = {}
-      tableInfos.forEach((tableInfo:any) => {
-        // 有的数据中可能缺少某些表格的数据
-        if (!record['tableDatas'][tableInfo['tableName']]){
-          return
-        }
-        const performanceVal = record['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
-        rowData[`performanceVal_${tableInfo['tableName']}`] = performanceVal
         tableInfo['column'].forEach((column:any) => {
-          const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
-          rowData[`${tableInfo['tableName']}(${column['label']})`] = val
+          testDataColumns.value.push({
+            prop: `${tableInfo['tableName']}(${column['label']})`,
+            label: `${tableInfo['tableName']}(${column['label']})`
+          })
         })
       })
-      testDataVals.value.push({
-        submit_id: record['submit_id'],
-        performanceVal: record['performanceVal'],
-        ...rowData
+      selectedTableRows.value.forEach((record:any) => {
+        let rowData:{ [propName:string]: any } = {}
+        tableInfos.forEach((tableInfo:any) => {
+          // 有的数据中可能缺少某些表格的数据
+          if (!record['tableDatas'][tableInfo['tableName']]){
+            return
+          }
+          const performanceVal = record['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+          rowData[`performanceVal_${tableInfo['tableName']}`] = performanceVal
+          tableInfo['column'].forEach((column:any) => {
+            const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
+            rowData[`${tableInfo['tableName']}(${column['label']})`] = val
+          })
+        })
+        testDataVals.value.push({
+          submit_id: record['submit_id'],
+          performanceVal: record['performanceVal'],
+          ...rowData
+        })
       })
-    })
-    dialogVisible.value = true
+      benchMarkDialogVisible.value = true
+    }
   }
 }
 
-const perfValformatter = (cellValue: number) => {
-  if (cellValue === undefined || cellValue === invalidNumberSymbol) {
-    return '暂无数据'
+const checkIfSameSuite = () => {
+  let suites = selectedTableRows.value.map<string>(record => record['suite'])
+  suites = Array.from(new Set(suites))
+  if (suites.length > 1) {
+    ElMessage({
+      message: '请选择相同测试套的数据',
+      type: 'warning'
+    })
+    multipleTableRef.value!.clearSelection()
+    return false
   }
-  return cellValue
+  return true
 }
-const tableCellFormatter = (row, column, cellValue) => {
+const handleDialogClose = () => {
+  benchMarkDialogVisible.value = false
+  multipleTableRef.value!.clearSelection()
+  testDataVals.value = []
+  testDataColumns.value = []
+}
+const perfValformatter = (cellValue: number) => {
   if (cellValue === undefined || cellValue === invalidNumberSymbol) {
     return '暂无数据'
   }
@@ -513,54 +471,6 @@ const tableCellFormatter = (row, column, cellValue) => {
 
 const handleReFresh = () => {
   emit('refreash')
-}
-const currentCheckboxData = ref([])
-const currentRow = ref()
-
-const handleDialogClose = () => {
-  exportButtonLoading.value = false
-  testDataVals.value = []
-  testDataColumns.value = []
-  currentRow.value = undefined
-  currentCheckboxData.value = []
-  multipleTableRef.value!.clearSelection()
-}
-
-// 联动控制基准选择和radio
-const handleCurrentChange = (val:any) => {
-  currentRow.value = val
-  if (!val) return  // 取消选择时，val会为null
-  const radioSelectedList = <string>[]
-  testDataVals.value.forEach(() => {
-    radioSelectedList.push(val.submit_id)
-  })
-  currentCheckboxData.value = radioSelectedList
-}
-const cuurentCheckboxSelected = (val) => {
-  // 当checkbox取消时，取消当前行的选择
-  if (!val) {
-    exportTableRef.value.setCurrentRow()
-    currentRow.value = undefined
-  }
-}
-
-const handleExportMultiple = () => {
-  if (currentRow.value) {
-    exportButtonLoading.value = true
-    exportMultiple(allColumn.value,selectedTableRows.value,tableColumnMap,currentRow.value)
-    // 退出
-    dialogVisible.value = false
-    handleDialogClose()
-    ElMessage({
-      message: '导出成功',
-      type: 'success'
-    })
-  } else {
-    ElMessage({
-      message: '请先选择一条记录作为基准',
-      type: 'warning'
-    })
-  }
 }
 
 watch(
@@ -682,30 +592,5 @@ a {
 
 .important-value {
   color: var(--oe-perf-color-primary);
-}
-</style>
-<style lang="scss">
-.export-dialog {
-  .el-dialog__body {
-    padding-top: 8px;
-  }
-  &-header {
-    display: flex;
-    align-items: baseline;
-    line-height: 32px;
-    h3 {
-      font-size: 20px;
-    }
-    p {
-      margin-left: 8px;
-      font-size: 12px;
-    }
-  }
-  .el-radio__label {
-    display: none;
-  }
-  tbody .el-table__row {
-    cursor: pointer;
-  }
 }
 </style>
