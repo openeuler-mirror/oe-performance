@@ -96,36 +96,19 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       const tempConfig = { tableName: '', column: [] }
       const tempTableDataList = tableDatas.value[suite][tableIndex] || [] // 拿到每个表格对应的数据list
       // 生成表格名
-      const filterName = tableConfig.filters
-        && `${Object.keys(tableConfig.filters)[0]}=${tableConfig.filters[Object.keys(tableConfig.filters)[0]]}`
-      const labelName = jobModel.kpis[`stats.${suite}.${tableConfig.kpi}`].label
-      const directionName = jobModel.kpis[`stats.${suite}.${tableConfig.kpi}`].direction
-      const tableName = `${filterName || ''}${labelName}${directionName > 0 ? '（越大越好）':'（越小越好）'}`
-      tempConfig['tableName'] = tableName
+      tempConfig['tableName'] = constructTableName(tableConfig, suite)
 
       const tempColumn = [{ label: tableConfig.x_param, prop: 'dimensionId' }]
       const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
-      tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
-        // 1、拿到当前tjob的维度值, 并根据选择的list过滤
-        const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
-        if (!dimensionValue) return // 没有对应维度的话退出
-        if (filterList.length > 0 && filterList.indexOf(dimensionValue) < 0) return
-        // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
-        const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
-        if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
-        // 3、根据col获取对应的数据设置在tempDataMap[dimensionValue]上
-        if (!tempDataMap[dimensionValue]) {
-        // 如果是一个新的demision，则初始化一下数据
-          tempDataMap[dimensionValue] = {}
-        }
-        setValuesFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataMap[dimensionValue])
-      })
-      // 赋值列
+      // 遍历tjob，找出对应的数据存在dataMap（对应维度的数组中）。同时找出tjob中存在的列名，保存在tempColumn表格配置中
+      setTjobValuesToDataMapAndColumn(tjobs, suite, { dimension, filterList} , tableConfig, { tempColumn, tempDataMap })
+      
+      // 赋值列/
       tempConfig['column'] = tempColumn
       setTableColConfig(tempConfig, suite, tableIndex)
-      
       // 拼装好的数据进行赋值
       // 需要遍历tempDataMap中的各个dimension，然后push入tempTableataList即可
+      console.log(2,tempDataMap)
       Object.keys(tempDataMap).forEach(dimension => {
         const calculatedObj = calculateValues(tempDataMap[dimension]) // 计算平均值
         calculatedObj['dimensionId'] = dimension // 添加数据名称
@@ -134,6 +117,7 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       tableDatas.value[suite][tableIndex] = tempTableDataList
     })
   })
+  console.log(1,tableDatas.value)
 }
 
 const getDimensionValue = (tjob, dimension) => {
@@ -146,6 +130,14 @@ const getDimensionValue = (tjob, dimension) => {
 
 const filteringSuiteList = () => {
   return supportedSuiteList.filter(item => props.suiteFilterList.indexOf(item) > -1)
+}
+
+const constructTableName = (tableConfig, suite) => {
+  const filterName = tableConfig.filters
+    && `${Object.keys(tableConfig.filters)[0]}=${tableConfig.filters[Object.keys(tableConfig.filters)[0]]}`
+  const labelName = jobModel.kpis[`stats.${suite}.${tableConfig.kpi}`].label
+  const directionName = jobModel.kpis[`stats.${suite}.${tableConfig.kpi}`].direction
+  return `${filterName || ''}${labelName}${directionName > 0 ? '（越大越好）':'（越小越好）'}`
 }
 
 const setTableColConfig = (tempConfig, suite, tableIndex) => {
@@ -183,6 +175,43 @@ const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
   return columnName
 }
 
+/**
+ * 遍历tjob，根据输入的表格配置获取表格中对应的数据和列名
+ * @param tjobs 
+ * @param suite 
+ * @param dimensionFilterConfig 
+ * @param tableConfig 
+ * @param manipulateDataObj 
+ */
+const setTjobValuesToDataMapAndColumn = (tjobs, suite, dimensionFilterConfig, tableConfig, manipulateDataObj) => {
+  const { dimension, filterList} = dimensionFilterConfig
+  const { tempColumn, tempDataMap} = manipulateDataObj
+  tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
+    // 1、拿到当前tjob的维度值, 并根据选择的list过滤
+    const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
+    if (!dimensionValue) return // 没有对应维度的话退出
+    if (filterList.length > 0
+     && filterList.indexOf(dimensionValue) < 0) return
+    // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
+    const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
+    if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
+    // 3、根据col获取对应的数据设置在tempDataMap[dimensionValue]上
+    if (!tempDataMap[dimensionValue]) {
+    // 如果是一个新的demision，则初始化一下数据
+      tempDataMap[dimensionValue] = {}
+    }
+    setValuesFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataMap[dimensionValue])
+  })
+}
+
+/**
+ * 将数据设置给tempDataObj中
+ * @param tjob 
+ * @param suite 
+ * @param columnName 
+ * @param tableConfig 
+ * @param tempDataObj 
+ */
 const setValuesFromTjobByCol = (tjob, suite, columnName, tableConfig, tempDataObj) => {
   if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
     return
