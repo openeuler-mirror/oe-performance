@@ -54,6 +54,7 @@
 import { ref, Ref, watchEffect } from 'vue'
 import CompareChart from './compare-chart.vue'
 import { jobModel, suiteTables } from '../config'
+import { supportedSuiteList, getDimensionValue, isTjobPassedFilterCheck } from '../utils/tjobCompute'
 
 const props = defineProps({
   tjobsAll: {
@@ -74,19 +75,10 @@ const props = defineProps({
   }
 })
 
-// 支持的suite类型，根据本字段获取数据这里可以指定表格顺序
-const supportedSuiteList = [
-  'stream',
-  'netperf',
-  'lmbench',
-  'unixbench',
-  'libmicro'
-]
 const tableConfigs:Ref<any> = ref({})
-
 const tableDatas:Ref<any> = ref({})
 
-const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string>) => {
+const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string|unknown>) => {
   tableDatas.value = {}
   filteringSuiteList().forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
@@ -108,7 +100,6 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       setTableColConfig(tempConfig, suite, tableIndex)
       // 拼装好的数据进行赋值
       // 需要遍历tempDataMap中的各个dimension，然后push入tempTableataList即可
-      console.log(2,tempDataMap)
       Object.keys(tempDataMap).forEach(dimension => {
         const calculatedObj = calculateValues(tempDataMap[dimension]) // 计算平均值
         calculatedObj['dimensionId'] = dimension // 添加数据名称
@@ -117,15 +108,6 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       tableDatas.value[suite][tableIndex] = tempTableDataList
     })
   })
-  console.log(1,tableDatas.value)
-}
-
-const getDimensionValue = (tjob, dimension) => {
-  let dim = dimension
-  if (dimension === 'pp' || dimension === 'ss') {
-    dim = `${dimension}Params`
-  }
-  return tjob[dim]
 }
 
 const filteringSuiteList = () => {
@@ -243,22 +225,6 @@ const calculateValues = (obj) => {
     }
   })
   return tempObj
-}
-
-const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
-  // 如果当前表格有filters的话，需要通过filters来判断是否要获取当前数据的值。
-  if (tableConfig.filters) {
-    const filterKey = Object.keys(tableConfig.filters)[0]
-    let filteredValue = tjob[`pp.${suite}.${filterKey}`]
-    if (suite === 'unixbench') { // unixbench过滤器的值需要特殊处理，除了nr_task=1的，都为100%
-      filteredValue = filteredValue === 1 ? '1' : '100%'
-    }
-    if (filteredValue !== tableConfig.filters[filterKey]) {
-      return false // 如果有过滤器的情况下，过滤其中的值如果不匹配则忽略当前数据
-    }
-    return true
-  }
-  return true
 }
 
 const isSuiteDataEmpty = (tableDatasUnderSuite: []) => {

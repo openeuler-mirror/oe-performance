@@ -20,6 +20,15 @@
     <div v-else class="banner-text">请搜索数据进行对比</div>
   </div>
   <div v-if="isSearched" class="oe-perf-section" v-loading="searchLoading">
+    <h2 class="oe-perf-section-title">开发者性能大表</h2>
+    <dev-perf-table 
+      :tjobsAll="inputData"
+      :dimension="filterDimension"
+      :filterListUnderDimension="filterList"
+      :suiteFilterList="suiteFilterList"
+    ></dev-perf-table>
+  </div>
+  <div v-if="isSearched" class="oe-perf-section" v-loading="searchLoading">
     <h2 class="oe-perf-section-title">对比详情</h2>
     <result-table 
       :tjobsAll="inputData"
@@ -36,6 +45,7 @@ import { ElMessage } from 'element-plus'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import dimensionController from './componets/dimension-controller.vue'
 import ResultTable from './componets/result-table.vue'
+import DevPerfTable from './componets/dev-perf-table.vue'
 // util tool
 import { flattenObj } from '@/utils/utils'
 // store
@@ -186,7 +196,7 @@ const e2tConverter = (ejobs, tjobs) => {
       if (kpiMaps[suiteKey]) {
         Object.keys(kpiMaps[suiteKey]).forEach(kpi => { // 遍历所有kpi，每个kpi生成一个tjob
           const tjob = JSON.parse(JSON.stringify(tempJob))
-          tjob[`pp.${suiteKey}.testcase`] = kpiMaps[suiteKey][kpi].testcase  // todo，libmicro需要调用func生成结果
+          tjob[`pp.${suiteKey}.testcase`] = kpiMaps[suiteKey][kpi].testcase
           tjob[`stats.${suiteKey}.${kpiMaps[suiteKey][kpi].kpi}`] = ejob[`stats.${suiteKey}.${kpi}`]
           if (tjobs[suiteKey]) {
             tjobs[suiteKey].push(tjob)

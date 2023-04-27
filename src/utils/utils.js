@@ -1,3 +1,5 @@
+export const invalidNumberSymbol = -1
+
 export function flattenObj(ob){
   let result = {};
 
@@ -54,4 +56,75 @@ export function isArrayTheSame_l1(originArr, checkedArr) {
     }
   })
   return sameFlag
+}
+
+/**
+ * 计算平均值
+ * @param {*} inputArr 
+ * @returns 
+ */
+export const computeMean = (inputArr) => {
+  let sum = 0
+  let count = 0
+  if (!Array.isArray(inputArr)) {
+    return invalidNumberSymbol
+  }
+  inputArr.forEach(val => {
+    if (isNaN(val)) {
+      return
+    }
+    sum += Number(val)
+    count += 1
+  })
+  // 无数据情况
+  if (count === 0) {
+    return invalidNumberSymbol // 特殊标识
+  }
+  return (sum / count).toFixed(3)
+}
+/**
+ * 计算几何平均值
+ */
+export const computeGeoMean = (inputArr) =>{
+  let testmentVal = 1
+  let count = 0
+  const tempArr = inputArr.filter(val => val >= 0) // 性能值应为正数
+  if (tempArr.length < 1) {
+    return invalidNumberSymbol // 无数据情况
+  }
+  tempArr.forEach(val => {
+    testmentVal *= val
+    count += 1
+  })
+  return Math.pow(testmentVal, 1/count).toFixed(3)
+}
+
+/**
+ * 计算标准偏差
+ *   def sample_variance
+    avg = average
+    sum = inject(0) { |acc, i| acc + (i - avg)**2 }
+    1 / length.to_f * sum
+  end
+
+  def standard_deviation
+    Math.sqrt(sample_variance)
+  end
+
+  def relative_stddev
+    standard_deviation * 100 / average
+  end
+ */
+export const computeStddev = (inputArr) => {
+  const tempArr = inputArr.filter(val => val >= 0) // 性能值应为正数
+  if (tempArr.length < 1) {
+    return invalidNumberSymbol // 无数据情况
+  }
+  const avg = computeMean(inputArr)
+  let sum = 0
+  inputArr.forEach(num => {
+    sum += Math.pow(num - avg, 2)
+  })
+  sum = sum / inputArr.length
+  return (Math.sqrt(sum) / avg).toFixed(3)
 }

@@ -4,3 +4,7 @@ declare module 'js-cookie' {
   export function get(key:string): string
   export function remove(key: string): void
 }
+
+declare interface DictObject {
+  [key: string]: any
+}
