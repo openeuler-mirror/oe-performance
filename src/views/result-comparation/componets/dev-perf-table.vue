@@ -1,11 +1,26 @@
 <template>
   <div>
-    <el-table border>
+    <el-table
+      border
+      :data="tableData"
+    >
       <el-table-column
         v-for="(column, idx) in tableColumns"
         :key="`${column.label}_${idx}`"
         :label="column.label"
-        :prop="column.prop"/>
+        :prop="column.prop"
+        :width="column.minWidth"
+        :formatter="column.formatter"
+      />
+      <el-table-column prop="kpi" label="kpi" min-width="150px"></el-table-column>
+      <el-table-column prop="params" label="params" min-width="400px"></el-table-column>
+      <el-table-column prop="jobs" label="jobs">
+        <template #default>
+          <router-link :to="`/`">
+            查看
+          </router-link>
+        </template>
+      </el-table-column>
     </el-table>
   </div>
 </template>
@@ -43,7 +58,7 @@
 import { ref, Ref, watchEffect } from 'vue'
 import { suiteTables } from '../config'
 import { supportedSuiteList, getDimensionValue, isTjobPassedFilterCheck } from '../utils/tjobCompute'
-import { computeMean, computeStddev } from '@/utils/utils'
+import { computeMean, computeStddev, formatterPercentage } from '@/utils/utils'
 
 interface InitialDataByTable {
   kpi: String,
@@ -75,7 +90,7 @@ const props = defineProps({
 const dataMap:Ref<DictObject> = ref({})
 
 const tableColumns:Ref<Array<DictObject>> = ref([])
-const tableData = ref([])
+const tableData:Ref<Array<DictObject>> = ref([])
 
 const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string|unknown>) => {
   dataMap.value = {}
@@ -130,12 +145,12 @@ const getPerfDataByTable = (dataItem: DictObject, suite:string, tableIndex: numb
   }
   if (!dataItem.perfData) {
     dataItem.perfData = {}
-    dataItem.perfData[suite] = []
+    dataItem.perfData[suite] = {}
     dataItem.perfData[suite][tableIndex] = initialDataByTable
     return dataItem.perfData[suite][tableIndex]
   } 
   if (!dataItem.perfData[suite]) {
-    dataItem.perfData[suite] = []
+    dataItem.perfData[suite] = {}
     dataItem.perfData[suite][tableIndex] = initialDataByTable
     return dataItem.perfData[suite][tableIndex]
   } 
@@ -158,9 +173,10 @@ const isTjobBelongToCurrentTable = (tjob, suite, tableConfig) => {
 
 const computeAllResultValue = (dataMap: DictObject) => {
   Object.keys(dataMap).forEach(dim => {
+    if (!dataMap[dim].perfData) return
     Object.keys(dataMap[dim].perfData).forEach(suite => {
-      dataMap[dim].perfData[suite].forEach((perfDataByTable: InitialDataByTable) => {
-        computingGeoMeanAndStddev(perfDataByTable)
+      Object.keys(dataMap[dim].perfData[suite]).forEach((tableIndex) => {
+        computingGeoMeanAndStddev(dataMap[dim].perfData[suite][tableIndex])
       })
     })
   })
@@ -176,18 +192,43 @@ const computingGeoMeanAndStddev = (perfData: InitialDataByTable) => {
 }
 
 const constructTableData = (dataMap: DictObject) => {
+  tableData.value= []
   const dimList = Object.keys(dataMap)
   tableColumns.value = generateTableColumn(dimList)
   filteringSuiteList().forEach((suite:string) => {
-    
-  })
-  dimList.forEach(dim => {
-    Object.keys(dataMap[dim].perfData).forEach(suite => {
-      dataMap[dim].perfData[suite].forEach((perfDataByTable: InitialDataByTable) => {
-        
+    suiteTables[suite].forEach((tableConfig: Array<DictObject>, tableIndex: number) => {
+      const paramsList = getParamListUnderTable(dataMap, suite, tableIndex)
+      paramsList.forEach((params:string) => {
+        const rowData:DictObject = {}
+        let basePerfVal:number
+        dimList.forEach((dim, idx) => {
+          if (!isPerfDataExsitUnderTable) return
+          // 设置kpi和params数据
+          if (!rowData.kpi) rowData.kpi = dataMap[dim].perfData[suite][tableIndex].kpi
+          if (!rowData.params) rowData.params = params
+
+          if (!dataMap[dim].perfData[suite][tableIndex].dataResult[params]) return
+          if (idx === 0) { // 记录基线数据，用来计算%change
+            basePerfVal = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
+          } else {
+            const currentPerfVal = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
+            if (basePerfVal) {
+              rowData[`change_${idx}`] = ((currentPerfVal - basePerfVal) / basePerfVal).toFixed(3)
+            }
+          }
+          rowData[`perfVal_${idx}`] = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
+          rowData[`stddev_${idx}`] = dataMap[dim].perfData[suite][tableIndex].dataResult[params][1]
+          if (rowData.jobs) {
+            rowData.jobs.push(...dataMap[dim].perfData[suite][tableIndex].jobListOfParam[params])
+          } else {
+            rowData.jobs = dataMap[dim].perfData[suite][tableIndex].jobListOfParam[params]
+          }
+        })
+        tableData.value.push(rowData)
       })
     })
   })
+  console.log(111,tableData)
 }
 
 /**
@@ -198,15 +239,36 @@ const generateTableColumn = (dimList: Array<string>) => {
   const tempArr:Array<DictObject> = []
   dimList.forEach((dim:string, index:number) => {
     if (index !== 0) {
-      tempArr.push({ label: '%change', prop: `change_${index}`})
+      tempArr.push({ label: '%change', prop: `change_${index}`, minWidth: '90px', formatter: formatterPercentage})
     }
-    tempArr.push({ label: dim, prop: `perfVal_${index}` })
-    tempArr.push({ label: '%stddev', prop: `stddev_${index}` })
+    tempArr.push({ label: dim, prop: `perfVal_${index}`, minWidth: '200px' })
+    tempArr.push({ label: '%stddev', prop: `stddev_${index}`, minWidth: '80px', formatter: formatterPercentage })
   })
-  tempArr.push({ label: 'kpi', prop: 'kpi' })
-  tempArr.push({ label: 'params', prop: 'params' })
-  tempArr.push({ label: 'jobs', prop: 'jobs' })
   return tempArr
+}
+
+/**
+ * 从所有数据中提取出某个table下所有可能的param的列表
+ * @param dataMap
+ * @param suite 
+ * @param tableIndex 
+ */
+const getParamListUnderTable = (dataMap:DictObject, suite: string, tableIndex: number) => {
+  const tempSet = new Set()
+  Object.keys(dataMap).forEach((dimVal:string) => {
+    if (!isPerfDataExsitUnderTable(dataMap, dimVal, suite, tableIndex)) return
+    dataMap[dimVal].perfData[suite][tableIndex].paramsList.forEach((param:string) => {
+      tempSet.add(param)
+    })
+  })
+  return Array.from(tempSet).sort()
+}
+
+const isPerfDataExsitUnderTable = (dataMap:DictObject, dim:string, suite:string, tableIndex: number) => {
+  if (!dataMap[dim].perfData) return false
+  if (!dataMap[dim].perfData[suite]) return false
+  if (!dataMap[dim].perfData[suite][tableIndex]) return false
+  return true
 }
 
 // 当表格数据或者展示维度切换时，更新表格配置数据

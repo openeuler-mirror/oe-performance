@@ -128,3 +128,11 @@ export const computeStddev = (inputArr) => {
   sum = sum / inputArr.length
   return (Math.sqrt(sum) / avg).toFixed(3)
 }
+
+/**
+ * 
+ */
+export const formatterPercentage = (row,col,val) => {
+  if (!val) return ''
+  return `${(val * 100).toFixed(1)}%`
+}
