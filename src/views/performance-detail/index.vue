@@ -597,11 +597,11 @@
 
             <el-descriptions-item :span="2" class-name="col-value">
               <template #label>
-                <span>性能数据</span>
+                <span>总体几何平均值</span>
                 <span>
                   <el-tooltip
                     effect="dark"
-                    content="性能数据"
+                    content="取所有测试结果几何平均值的几何平均值"
                     placement="top-start">
                     <span class="icon"
                       ><el-icon color="var(--oe-perf-color-secondary)"
@@ -617,13 +617,13 @@
               </span>
               <template v-else>
                 <p>
-                  <span>Bandwidth性能值：</span>
+                  <span>Bandwidth几何平均值：</span>
                   <span class="important-value">
                     {{ performanceValFormatter({},{},detailData.performanceVal_local_bandwidths) }}
                   </span>
                 </p>
                 <p>
-                  <span>Latency性能值：</span>
+                  <span>Latency几何平均值：</span>
                   <span class="important-value">
                     {{ performanceValFormatter({},{},detailData.performanceVal) }}
                   </span>

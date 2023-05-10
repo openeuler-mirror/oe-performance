@@ -13,7 +13,7 @@
               min-width="100"
             ></el-table-column>
             <el-table-column
-              label="性能值"
+              label="几何平均值"
               :prop="`performanceVal_${tableInfo.tableName}`"
               :formatter="tableCellFormatter"
               min-width="100"

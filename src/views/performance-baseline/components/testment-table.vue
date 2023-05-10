@@ -112,7 +112,7 @@
       <el-table-column
         fixed="left"
         width="200"
-        label="性能数据"
+        label="性能几何平均值"
         prop="performanceVal"
       >
         <template #default="scope">
