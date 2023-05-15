@@ -20,22 +20,27 @@
     <div v-else class="banner-text">请搜索数据进行对比</div>
   </div>
   <div v-if="isSearched" class="oe-perf-section" v-loading="searchLoading">
-    <h2 class="oe-perf-section-title">开发者性能大表</h2>
-    <dev-perf-table 
-      :tjobsAll="inputData"
-      :dimension="filterDimension"
-      :filterListUnderDimension="filterList"
-      :suiteFilterList="suiteFilterList"
-    ></dev-perf-table>
-  </div>
-  <div v-if="isSearched" class="oe-perf-section" v-loading="searchLoading">
-    <h2 class="oe-perf-section-title">对比详情</h2>
-    <result-table 
-      :tjobsAll="inputData"
-      :dimension="filterDimension"
-      :filterListUnderDimension="filterList"
-      :suiteFilterList="suiteFilterList"
-    ></result-table>
+    <el-tabs v-model="tabName" class="demo-tabs">
+      <el-tab-pane label="性能对比" name="comparationResult">
+        <h2 class="oe-perf-section-title">对比详情</h2>
+        <result-table 
+          :tjobsAll="inputData"
+          :dimension="filterDimension"
+          :filterListUnderDimension="filterList"
+          :suiteFilterList="suiteFilterList"
+        ></result-table>
+      </el-tab-pane>
+      <el-tab-pane label="开发者性能大表" name="performanceTable">
+        <h2 class="oe-perf-section-title">开发者性能大表</h2>
+        <dev-perf-table 
+          :tjobsAll="inputData"
+          :dimension="filterDimension"
+          :filterListUnderDimension="filterList"
+          :suiteFilterList="suiteFilterList"
+        ></dev-perf-table>
+      </el-tab-pane>
+    </el-tabs>
+    
   </div>
 </template>
     
@@ -64,6 +69,8 @@ let ejobs = {}
 let ejobsMap = {}
 // tjobs
 let tjobs = {}
+
+const tabName = ref('comparationResult')
 
 let inputData = ref({})
 const searchParams = ref({})
@@ -117,7 +124,7 @@ const getTotalData = (searchParams, searchTime: number) => {
     'query': {
       size: 10000,
       _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
-        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'time'
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'time', 'result_root'
       ],
       'query': {
         bool: {

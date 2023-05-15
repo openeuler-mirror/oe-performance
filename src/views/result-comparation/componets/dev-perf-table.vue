@@ -15,13 +15,43 @@
       <el-table-column prop="kpi" label="kpi" min-width="150px"></el-table-column>
       <el-table-column prop="params" label="params" min-width="400px"></el-table-column>
       <el-table-column prop="jobs" label="jobs">
-        <template #default>
-          <router-link :to="`/`">
-            查看
-          </router-link>
+        <template #default="scope">
+          <el-link type="primary" :underline="false" @click="() => showJobListDialog(scope.row)">
+            链接
+          </el-link>
         </template>
       </el-table-column>
     </el-table>
+    <el-dialog
+      class="job-list-dialog"
+      v-model="jobListDialogVisible"
+      title="Jobs 列表"
+      width="800px"
+      :before-close="closeJobListDialog"
+    >
+      <div>
+        <el-table :data="jobListData" border>
+          <el-table-column prop="id" label="job id" min-width="150px"></el-table-column>
+          <el-table-column :prop="dimension" label="维度" min-width="150px"></el-table-column>
+          <el-table-column prop="perfVal" label="kpi value" min-width="150px">
+            <template #default="scope">
+              <span>{{ scope.row[`stats.${scope.row.suite}.${jobListKpi}`] }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="jobs" label="jobs">
+            <template #default="scope">
+              <el-link
+                type="primary"
+                :underline="false"
+                @click="goJobDetail(`https://api.compass-ci.openeuler.org${scope.row.result_root}`)"
+              >
+                详情
+              </el-link>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -56,6 +86,7 @@
  *    }
  */
 import { ref, Ref, watchEffect } from 'vue'
+import { useRouter } from 'vue-router'
 import { suiteTables } from '../config'
 import { supportedSuiteList, getDimensionValue, isTjobPassedFilterCheck } from '../utils/tjobCompute'
 import { computeMean, computeStddev, formatterPercentage } from '@/utils/utils'
@@ -87,7 +118,12 @@ const props = defineProps({
   }
 })
 
+const router = useRouter()
+
 const dataMap:Ref<DictObject> = ref({})
+const jobListDialogVisible = ref(false)
+const jobListData = ref([])
+const jobListKpi = ref('')
 
 const tableColumns:Ref<Array<DictObject>> = ref([])
 const tableData:Ref<Array<DictObject>> = ref([])
@@ -269,6 +305,20 @@ const isPerfDataExsitUnderTable = (dataMap:DictObject, dim:string, suite:string,
   if (!dataMap[dim].perfData[suite]) return false
   if (!dataMap[dim].perfData[suite][tableIndex]) return false
   return true
+}
+
+const showJobListDialog = (row:DictObject) => {
+  jobListData.value = row.jobs
+  jobListKpi.value = row.kpi
+  jobListDialogVisible.value = true
+}
+
+const closeJobListDialog = () => {
+  jobListDialogVisible.value = false
+}
+
+const goJobDetail = (url:string) => {
+  window.open(url)
 }
 
 // 当表格数据或者展示维度切换时，更新表格配置数据
