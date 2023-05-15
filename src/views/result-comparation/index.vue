@@ -294,7 +294,7 @@ const getPpParams = (flattenJob) => {
 const getSsParams = (flattenJob) => {
   const tempArr = []
   Object.keys(flattenJob).sort().forEach(key => {
-    if (key.startsWith(`stats.${flattenJob.suite}`)) {
+    if (key.startsWith(`ss.${flattenJob.suite}`)) {
       tempArr.push(`${key}=${flattenJob[key]}`)
     }
   })

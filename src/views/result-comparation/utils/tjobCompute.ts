@@ -20,6 +20,16 @@ export const getDimensionValue = (tjob: stringIndexedObject, dimension: string) 
   return tjob[dim]
 }
 
+export const getDimensionLabel = (dimension: string) => {
+  let dim = dimension
+  if (dimension === 'pp') {
+    dim = 'program and parameter'
+  } else if (dimension === 'ss') {
+    dim = 'software stack'
+  }
+  return dim
+}
+
 // 检查当期那tjob是否能通过tableConfig（data-modal）中的filter
 export const isTjobPassedFilterCheck = (tjob: stringIndexedObject, suite:string, tableConfig: stringIndexedObject) => {
   // 如果当前表格有filters的话，需要通过filters来判断是否要获取当前数据的值。

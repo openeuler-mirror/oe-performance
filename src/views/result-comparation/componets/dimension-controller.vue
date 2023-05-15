@@ -15,7 +15,7 @@
             v-if="isChangeDimensionClickValid(dim)"
             class="dimension-label__controller"
             @click="dimensionChecked(dim)">
-            {{ dim }}：
+            {{ getDimensionLabel(dim) }}：
           </span>
           <el-tooltip
             v-else-if="Array.from(filterOptions[dim]).length > 1"
@@ -23,9 +23,9 @@
             placement="bottom"
             effect="light"
             >
-            <span class="dimension-label__controller">{{ dim }}：</span>
+            <span class="dimension-label__controller">{{ getDimensionLabel(dim) }}：</span>
           </el-tooltip>
-          <span v-else class="dimension-label">{{ dim }}：</span>
+          <span v-else class="dimension-label">{{ getDimensionLabel(dim) }}：</span>
         </div>
         <oe-checkbox-group
           v-model="checkedListByDimension[dim]"
@@ -51,6 +51,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import OeCheckboxGroup from '@/components/oe-checkbox-group/index.vue'
+
+import { getDimensionLabel } from '../utils/tjobCompute'
 
 interface OptionData {
   // osv: ['openEuler', 'centos']
@@ -184,8 +186,7 @@ defineExpose({
   .checkbox-group-label {
     display: inline-block;
     line-height: 32px;
-    min-width: 90px;
-    max-width: 90px;
+    width:190px;
     text-align: right;
     margin-right: 8px;
     .dimension-label {
@@ -199,7 +200,8 @@ defineExpose({
     }
   }
   .checkbox-group-component {
-    width: 90%;
+    flex: 1;
+    width: 50%;
   }
 }
 </style>
