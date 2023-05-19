@@ -13,7 +13,13 @@
         :formatter="column.formatter"
       />
       <el-table-column prop="kpi" label="kpi" min-width="150px"></el-table-column>
-      <el-table-column prop="params" label="params" min-width="400px"></el-table-column>
+      <el-table-column prop="params" label="params" min-width="400px">
+        <template #default="scope">
+          <p v-for="(param, idx) in scope.row.params.split(',')" :key="idx">
+            {{ param }}
+          </p>
+        </template>
+      </el-table-column>
       <el-table-column prop="jobs" label="jobs">
         <template #default="scope">
           <el-link type="primary" :underline="false" @click="() => showJobListDialog(scope.row)">
