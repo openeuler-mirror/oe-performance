@@ -94,9 +94,9 @@ const filterList: Ref<string[]> = ref([])
 const suiteFilterList: Ref<string[]> = ref([])
 
 // 获取jobs数据
-const onSearch = (params, searchTime:number) => {
+const onSearch = (params, searchTime:number, searchTotal: number) => {
   searchParams.value = params
-  getTotalData(params, searchTime)
+  getTotalData(params, searchTime, searchTotal)
 }
 
 const setMustCase = (searchParams) => {
@@ -115,14 +115,14 @@ const setMustCase = (searchParams) => {
   return tempArr
 }
 
-const getTotalData = (searchParams, searchTime: number) => {
+const getTotalData = (searchParams, searchTime: number, searchTotal: number) => {
   searchLoading.value = true
   const mustCases = setMustCase(searchParams)
 
   getPerformanceData({
     'index': 'jobs',
     'query': {
-      size: 10000,
+      size: searchTotal,
       _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
         'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'time', 'result_root'
       ],

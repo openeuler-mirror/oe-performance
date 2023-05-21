@@ -14,6 +14,7 @@
         <el-button type="primary" class="button" @click="handleExportCsv"
           >导出</el-button
         >
+        <p v-if="dataList.length > 0" class="jobs-count">共计{{ jobCount }}条jobs</p>
       </div>
       <el-input
         class="oe-input-with-select table-searcher"
@@ -163,7 +164,7 @@
       v-model:currentPage="currentPage"
       v-model:page-size="pageSize"
       :page-sizes="pageSizes"
-      :small="small"
+      small
       :disabled="disabled"
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
@@ -252,6 +253,10 @@ const props = defineProps({
   submitDataLoading: {
     type: Boolean,
     default: false
+  },
+  jobCount: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -299,10 +304,9 @@ const selectedTableRows = ref<any[]>([])
 
 const idList = ref(<any>[])
 const currentPage = ref(1)
-const pageSize = ref(5)
+const pageSize = ref(10)
 const pageSizes = ref([10, 20, 50])
-const total = ref(1)
-const small = ref(false)
+const total = ref(0)
 const background = ref(false)
 const disabled = ref(false)
 
@@ -638,6 +642,12 @@ a {
     min-width: 200px;
     .button {
       min-width: 90px;
+    }
+    .jobs-count {
+      display: inline-block;
+      margin-left: 8px;
+      line-height: 32px;
+      vertical-align: top;
     }
   }
 

@@ -9,6 +9,7 @@
     <testment-table
       :dataList="data"
       :submitDataLoading="submitDataLoading"
+      :jobCount="jobCount"
       @tableSearch="handleTableSearch"
       @refreash="refreashData"
     ></testment-table>
@@ -31,6 +32,7 @@ const route = useRoute()
 const baselineTableInfoStore = useBaselineTableInfoStore()
 
 const data = ref<any[]>([])
+const jobCount = ref(0)
 const searchParams = ref({})
 const tableSearchParams = ref({})
 const submitDataLoading = ref(false)
@@ -64,7 +66,7 @@ const setMustCase = (searchParams) => {
   return tempArr
 }
 
-const getAllData = (params: searchParams, searchTime: number) => {
+const getAllData = (params: searchParams, searchTime: number, searchTotal: number) => {
   searchParams.value = params
   submitDataLoading.value = true
 
@@ -90,7 +92,7 @@ const getAllData = (params: searchParams, searchTime: number) => {
       },
       aggs: {
         jobs_terms: {
-          terms: { field: 'submit_id', size: 10000 }
+          terms: { field: 'submit_id', size: searchTotal }
         }
       }
     },
@@ -100,6 +102,7 @@ const getAllData = (params: searchParams, searchTime: number) => {
       .map((item: any) => { return { submit_id: item.key }}) || []
     baselineTableInfoStore.setSubmitList(submitList)
     data.value = submitList
+    jobCount.value = res?.data?.hits?.total?.value
   }).catch((err) => {
     ElMessage({
       message: err.message,

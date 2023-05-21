@@ -23,24 +23,23 @@
       <el-col :span="22">
         <el-row
           class="react-row"
-          v-for="(subField, fieldIndex) in fieldsListForRender"
-          :key="fieldIndex">
+        >
           <el-col
             :xs="24"
             :sm="12"
             :lg="6"
             class="field-item"
-            v-for="(paramKey, index) in Object.keys(subField)"
+            v-for="(paramKey, index) in Object.keys(fieldsConfigForRender)"
             :key="index"
           >
-            <span class="fields-label">{{ `${subField[paramKey].label}:` }}</span>
+            <span class="fields-label">{{ `${fieldsConfigForRender[paramKey].label}:` }}</span>
             <!--for osv group-->
             <el-cascader
               class="field-selection"
               v-if="paramKey==='osv'"
               v-model="searchParams[paramKey]"
-              :loading="subField[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
-              :options="subField[paramKey].fieldSettings.listValues"
+              :loading="fieldsConfigForRender[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
+              :options="fieldsConfigForRender[paramKey].fieldSettings.listValues"
               :props="cascaderProps"
               collapse-tags
               collapse-tags-tooltip
@@ -56,7 +55,7 @@
               v-else
               class="field-selection"
               v-model="searchParams[paramKey]"
-              :loading="subField[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
+              :loading="fieldsConfigForRender[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
               filterable
               multiple
               collapse-tags
@@ -68,49 +67,49 @@
               @clear="paramSelected"
             >
               <el-option
-                v-for="(item, listIndex) in subField[paramKey].fieldSettings
+                v-for="(item, listIndex) in fieldsConfigForRender[paramKey].fieldSettings
                   .listValues"
                 :label="item.label || item.value"
                 :value="item.value"
                 :key="listIndex" />
             </el-select>
           </el-col>
+          <el-col
+            :xs="24"
+            :sm="12"
+            :lg="6"
+            class="field-item"
+          >
+            <span class="fields-label">{{ `数据时间:` }}</span>
+            <el-input-number
+              class="field-selection"
+              v-model="searchTime"
+              controls-position="right"
+              size="small"
+              :min="1"
+              :precision="0"
+              :controls="false"
+            />
+          </el-col>
+          <el-col
+            :xs="24"
+            :sm="12"
+            :lg="6"
+            class="field-item"
+          >
+            <span class="fields-label">{{ `数据量:` }}</span>
+            <el-input-number
+              class="field-selection"
+              v-model="searchTotal"
+              controls-position="right"
+              size="small"
+              :min="1"
+              :max="10000"
+              :precision="0"
+              :controls="false"
+            />
+          </el-col>
         </el-row>
-      </el-col>
-    </el-row>
-    <el-row :gutter="4">
-      <el-col :span="2">
-        <span class="search-field-section-label">数据时间:</span>
-      </el-col>
-      <el-col :span="22">
-        <div class="time-controller">
-          查询距当前
-          <el-input-number
-            v-model="searchTime"
-            controls-position="right"
-            size="small"
-            :min="1"
-            :max="365"
-            :precision="0"
-          />
-          天的数据
-          <el-button
-            class="update-button"
-            link
-            type="primary"
-            :disabled="jobFieldsLoading || hostFieldsLoading"
-            @click="handleUpdateFields"
-          >更新筛选项</el-button>
-          <div class="loading-icon" v-if="jobFieldsLoading || hostFieldsLoading" v-loading="1"></div>
-          <el-tooltip placement="top" effect="light">
-            <template #content>
-              <p>提示1：系统默认搜索 距当前时间10天 内的数据。用户可根据需要修改.</p>
-              <p>如果使用较长跨度的搜索时间，可能会导致查询时间较长。</p>
-              <p>提示2：修改搜索时间后，请手动更新筛选项，获取目标时间跨度内的数据可筛选项。</p>
-            </template>
-            <el-icon class="update-tooltip"><QuestionFilled /></el-icon>
-          </el-tooltip>
-        </div>
       </el-col>
     </el-row>
     <el-row justify="center">
@@ -155,7 +154,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  (event: 'search', params: searchParams, searchTime: number): void,
+  (event: 'search', params: searchParams, searchTime: number, searchTotal:number): void,
   // 当搜索条件重置是
   (event: 'resetSearchValue'): void
 }>()
@@ -166,7 +165,7 @@ const route = useRoute()
 const router = useRouter()
 const testboxStore = useTestboxStore()
 
-const fieldsListForRender = ref([] as string[])
+const fieldsConfigForRender = ref({})
 const suiteList = ref([])
 // uite = ref('unixbench')
 const testboxList = ref([] as objectItem[])
@@ -179,6 +178,7 @@ const hostFieldList = [] as any // 中间数据，用来循环host类型的field
 const jobFieldList = [] as any // 中间数据，用来循环job类型的field字段
 
 const searchTime = ref(10)
+const searchTotal = ref(3000)
 const searchParams = ref({} as objectItem)
 const cascaderProps = { multiple: true }
 
@@ -188,7 +188,7 @@ interface objectItem {
 
 // 页面初始化方法
 const initailizing = () => {
-  fieldsListForRender.value = initailizefieldsList() // 初始化选项配置数据
+  fieldsConfigForRender.value = initailizefieldsList() // 初始化选项配置数据
   setFeildsData() // 记录有哪些选项
   setFieldSelection() // 将url上的查询条件的值读取到查询数据searchParam中
 
@@ -204,16 +204,19 @@ const initailizefieldsList = () => {
   if (props.suiteByScene) {
     fieldKeys = fieldKeys.filter(key => key !== 'suite')
   }
-  const len = Math.ceil(fieldKeys.length / 4)
-  let temp = []
-  for (let i = 0; i < len; i++) {
-    const tempSec = {} as any
-    for (let j = 0; j < 4 && i * 4 + j < fieldKeys.length; j++) {
-      tempSec[fieldKeys[i * 4 + j]] = fieldsConfig[fieldKeys[i * 4 + j]]
-    }
-    temp.push(tempSec)
-  }
-  return temp
+  // const len = Math.ceil(fieldKeys.length / 4)
+  const tempObj = {} 
+  fieldKeys.forEach(key => {
+    tempObj[key] = fieldsConfig[key]
+  })
+  // for (let i = 0; i < len; i++) {
+  //   const tempSec = {} as any
+  //   for (let j = 0; j < 4 && i * 4 + j < fieldKeys.length; j++) {
+  //     tempSec[fieldKeys[i * 4 + j]] = fieldsConfig[fieldKeys[i * 4 + j]]
+  //   }
+  //   temp.push(tempSec)
+  // }
+  return tempObj
 }
 
 // 记录有哪些查询项目，并区分是hosts项目还是jobs项目
@@ -234,7 +237,7 @@ const setFeildsData = () => {
 // url上查询条件回填至查询项上
 const setFieldSelection = () => {
   const fieldKeys = Object.keys(fieldsConfig)
-  const { scene, searchLimitTime, ...fields } = route.query
+  const { scene, searchLimitTime, searchLimitTotal, ...fields } = route.query
   Object.keys(fields).forEach(fieldKey => {
     if (fieldKeys.indexOf(fieldKey) > -1) {
       // 只添加当前选择框中存在的field选择
@@ -250,6 +253,7 @@ const setFieldSelection = () => {
     }
   })
   searchLimitTime && (searchTime.value = Number(searchLimitTime))
+  searchLimitTotal && (searchTotal.value = Number(searchLimitTotal))  
 }
 // 性能基线页面中:
 // 根据当前场景，显示不同的suite可选项
@@ -299,6 +303,7 @@ const getFieldsOptions = () => {
   getJobValueList({
     jobFieldList,
     searchTime: searchTime.value,
+    searchTotal: searchTotal.value,
     byScene:(props.suiteByScene && searchParams.value.suite) || (props.fieldsBySecne.length > 0 && props.fieldsBySecne),
     searchParams: getSearchParamsByFields(searchParamObject, jobFieldList)
   }).then(res => {
@@ -487,6 +492,12 @@ const handleReset = () => {
 
 // 查询逻辑
 const handleSearch = () => {
+  if (isNaN(searchTime.value) || searchTime.value === null) {
+    searchTime.value = 10
+  }
+  if (isNaN(searchTotal.value) || searchTotal.value === null) {
+    searchTime.value = 3000
+  }
   // 记录查询条件到url上
   setQueryToUrl()
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
@@ -516,9 +527,9 @@ const handleSearch = () => {
       searchParamData.testbox = testboxSearchList
     }
 
-    emit('search', searchParamData, searchTime.value)
+    emit('search', searchParamData, searchTime.value, searchTotal.value)
   } else {
-    emit('search', jobParams, searchTime.value)
+    emit('search', jobParams, searchTime.value, searchTotal.value)
   }
 }
 
@@ -534,6 +545,7 @@ const setQueryToUrl = () => {
   })
   newQuery['scene'] = route.query.scene as string
   newQuery['searchLimitTime'] = String(searchTime.value)
+  newQuery['searchLimitTotal'] = String(searchTotal.value)
   router.push({
     path: route.path,
     query: { ...newQuery }
