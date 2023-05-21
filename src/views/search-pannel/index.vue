@@ -89,6 +89,7 @@
               :min="1"
               :precision="0"
               :controls="false"
+              @change="paramEnterChagned"
             />
           </el-col>
           <el-col
@@ -581,6 +582,10 @@ const paramSelected = (isOpen: boolean) => {
   if (isOpen === true) return
   if (JSON.stringify(searchParams.value) === JSON.stringify(searchParamForOptionsUpdate.value)) return
   searchParamForOptionsUpdate.value = JSON.parse(JSON.stringify(searchParams.value))
+  getHostOptions()
+}
+
+const paramEnterChagned = () => {
   getHostOptions()
 }
 

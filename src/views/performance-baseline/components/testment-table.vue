@@ -16,31 +16,6 @@
         >
         <p v-if="dataList.length > 0" class="jobs-count">共计{{ jobCount }}条jobs</p>
       </div>
-      <el-input
-        class="oe-input-with-select table-searcher"
-        v-model="searcherValue"
-        placeholder="请输入搜索内容"
-        clearable>
-        <template #prepend>
-          <el-select
-            class="searcher-selector"
-            v-model="searcherKey"
-            placeholder="搜索条件"
-            clearable
-          >
-            <el-option
-              v-for="item in searcherOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-              :disabled="item.disabled"
-              />
-          </el-select>
-        </template>
-        <template #append>
-          <el-button :icon="Search" @click="handleSearchTable" />
-        </template>
-      </el-input>
       <div class="button-group-right">
         <el-button
           :icon="RefreshLeft"
