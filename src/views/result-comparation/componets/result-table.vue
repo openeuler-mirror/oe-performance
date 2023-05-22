@@ -172,8 +172,7 @@ const setTjobValuesToDataMapAndColumn = (tjobs, suite, dimensionFilterConfig, ta
     // 1、拿到当前tjob的维度值, 并根据选择的list过滤
     const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
     if (!dimensionValue) return // 没有对应维度的话退出
-    if (filterList.length > 0
-     && filterList.indexOf(dimensionValue) < 0) return
+    if (!checkTjobDimensionVal(dimensionValue, filterList, dimension)) return
     // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
     const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
     if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
@@ -184,6 +183,24 @@ const setTjobValuesToDataMapAndColumn = (tjobs, suite, dimensionFilterConfig, ta
     }
     setValuesFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataMap[dimensionValue])
   })
+}
+
+/**
+ * 通过filterList过滤tjob。
+ * @param dimensionVal 
+ * @param filterList 
+ */
+const checkTjobDimensionVal = (dimensionVal:string, filterList:[string], dimension:string) => {
+  if (filterList.length <= 0) return true
+  if (dimension === 'pp') {
+    let flag = false
+    filterList.forEach(param => {
+      if (dimensionVal.indexOf(param) > -1) flag = true
+    })
+    return flag
+  } else {
+    return filterList.indexOf(dimensionVal) >= 0
+  }
 }
 
 /**

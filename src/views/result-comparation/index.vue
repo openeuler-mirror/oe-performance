@@ -252,6 +252,10 @@ const handleSuiteFiltering = (suiteList) => {
   suiteFilterList.value = suiteList
 }
 
+/**
+ * 获取job中的信息，记录各个维度的可选项
+ * @param flattenJob 
+ */
 const getFilterOptions = (flattenJob) => {
   flattenJob['osv'] && osvOptions.value.add(flattenJob['osv'])
   flattenJob['arch'] && archOptions.value.add(flattenJob['arch'])
@@ -260,9 +264,9 @@ const getFilterOptions = (flattenJob) => {
   flattenJob['group_id'] && groupOptions.value.add(flattenJob['group_id'])
   flattenJob['suite'] && suiteOptions.value.add(flattenJob['suite'])
   suiteFilterList.value = Array.from(suiteOptions.value)
-  const ppParams = getPpParams(flattenJob)
-  flattenJob['ppParams'] = ppParams
-  ppParams && ppOptions.value.add(ppParams)
+  const ppParamsList = getPpParams(flattenJob) // 获取组合的ppParams
+  flattenJob['ppParams'] = ppParamsList.join(',')
+  ppParamsList.length > 0 && addPpParamToOptions(ppParamsList, ppOptions)
   const ssParams = getSsParams(flattenJob)
   flattenJob['ssParams'] = ssParams
   ssParams && ssOptions.value.add(ssParams)
@@ -284,7 +288,13 @@ const getPpParams = (flattenJob) => {
       tempArr.push(`${key}=${flattenJob[key]}`)
     }
   })
-  return tempArr.join(',')
+  return tempArr
+}
+
+const addPpParamToOptions = (paramList, ppOptions) => {
+  paramList.forEach((paramPair: string) => {
+    ppOptions.value.add(paramPair.replace(/^pp./,''))
+  })
 }
 
 /**

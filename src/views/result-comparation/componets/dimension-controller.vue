@@ -30,7 +30,7 @@
         <oe-checkbox-group
           v-model="checkedListByDimension[dim]"
           class="checkbox-group-component"
-          :options="Array.from(filterOptions[dim])"
+          :options="Array.from(filterOptions[dim]).sort(paramSorter)"
           @change="val => dimensionOptionChecked(dim, val)"
         />
       </el-row>
@@ -52,7 +52,7 @@
 import { ref } from 'vue'
 import OeCheckboxGroup from '@/components/oe-checkbox-group/index.vue'
 
-import { getDimensionLabel } from '../utils/tjobCompute'
+import { getDimensionLabel, paramSorter } from '../utils/tjobCompute'
 
 interface OptionData {
   // osv: ['openEuler', 'centos']

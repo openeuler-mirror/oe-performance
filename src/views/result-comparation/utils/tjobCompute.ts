@@ -47,3 +47,20 @@ export const isTjobPassedFilterCheck = (tjob: stringIndexedObject, suite:string,
   }
   return true
 }
+
+/**
+ * ppParams排序,对param=n类型字段进行特殊处理，如果n可以转换为数字的话，根据n排序。
+ * @param pairPrev 
+ * @param pairNext 
+ * @returns 
+ */
+export const paramSorter = (pairPrev:string, pairNext:string) => {
+  if (pairPrev.indexOf('=') < 0) return pairPrev > pairNext ? 1 : -1
+  const prevArr = pairPrev.split('=')
+  const nextArr = pairNext.split('=')
+  if (prevArr[0]===nextArr[0]) {
+    return Number(prevArr[1]) > Number(nextArr[1]) ? 1 : -1
+  } else {
+    return pairPrev > pairNext ? 1 : -1
+  }
+}
