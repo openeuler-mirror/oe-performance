@@ -11,9 +11,12 @@
           @click="handleComaration"
           >对比</el-button
         >
-        <el-button type="primary" class="button" @click="handleExportCsv"
-          >导出</el-button
-        >
+        <ExportModal
+          :visible="exportModalVisible"
+          :all-column="allColumn"
+          :selected-table-rows="selectedTableRows"
+          @openModal="exportModalVisible = true"
+          @closeModal="closeExportModal"/>
       </div>
       <el-input
         class="oe-input-with-select table-searcher"
@@ -168,13 +171,6 @@
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
       :total="total" />
-    <BenchmarkSelection
-      :visible="benchMarkDialogVisible"
-      :table-datas="testDataVals"
-      :table-columns="testDataColumns"
-      :all-column="allColumn"
-      :selected-table-rows="selectedTableRows"
-      @closeDialog="handleDialogClose"/>
   </div>
 </template>
 
@@ -192,9 +188,7 @@ import { ElMessage, ElTable } from 'element-plus'
 import { usePerformanceData, useBaselineTableInfoStore, useTestboxStore } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 import { combineJobs, invalidNumberSymbol } from '@/views/performance-baseline/utils.js'
-import { tableColumnMap } from '@/views/performance-baseline/config_li.js'
-import { exportSingle } from '@/views/performance-baseline/export-data'
-import BenchmarkSelection from './benchmark-selection.vue'
+import ExportModal from './export-modal.vue'
 
 export interface TableItem {
   [key: string]: any
@@ -264,10 +258,6 @@ const disabled = ref(false)
 
 const reFreshLodaing = ref(false)
 const tableLoading = ref(false)
-const benchMarkDialogVisible = ref(false)
-const testDataVals = ref<any[]>([])
-const testDataColumns = ref<any[]>([])
-const multipleTableRef = ref<InstanceType<typeof ElTable>>()
 
 const changeSizeOnly = ref(false)
 
@@ -393,74 +383,11 @@ const handleComaration = () => {
   router.push({ name: 'basicPerformance' })
 }
 // 导出
-const handleExportCsv = () => {
-  if (selectedTableRows.value.length === 0) {
-    ElMessage({
-      message: '请先选择要导出的数据',
-      type: 'warning'
-    })
-  } else if (selectedTableRows.value.length === 1) {
-    exportSingle(allColumn.value, selectedTableRows.value, tableColumnMap)
-    multipleTableRef.value!.clearSelection()
-  } else {
-    if (checkIfSameSuite()) {
-      // 准备好弹窗内表格的内容
-      const tableInfos:any[] = tableColumnMap[selectedTableRows.value[0]['suite']]
-      tableInfos.forEach((tableInfo:any) => {  // 设置基准选择表格的列
-        testDataColumns.value.push({
-          prop: `performanceVal_${tableInfo['tableName']}`,
-          label: `${tableInfo['tableName']}(性能值)`
-        })
-        tableInfo['column'].forEach((column:any) => {
-          testDataColumns.value.push({
-            prop: `${tableInfo['tableName']}(${column['label']})`,
-            label: `${tableInfo['tableName']}(${column['label']})`
-          })
-        })
-      })
-      selectedTableRows.value.forEach((record:any) => {
-        let rowData:{ [propName:string]: any } = {}
-        tableInfos.forEach((tableInfo:any) => {
-          // 有的数据中可能缺少某些表格的数据
-          if (!record['tableDatas'][tableInfo['tableName']]){
-            return
-          }
-          const performanceVal = record['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
-          rowData[`performanceVal_${tableInfo['tableName']}`] = performanceVal
-          tableInfo['column'].forEach((column:any) => {
-            const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
-            rowData[`${tableInfo['tableName']}(${column['label']})`] = val
-          })
-        })
-        testDataVals.value.push({
-          submit_id: record['submit_id'],
-          performanceVal: record['performanceVal'],
-          ...rowData
-        })
-      })
-      benchMarkDialogVisible.value = true
-    }
-  }
-}
-
-const checkIfSameSuite = () => {
-  let suites = selectedTableRows.value.map<string>(record => record['suite'])
-  suites = Array.from(new Set(suites))
-  if (suites.length > 1) {
-    ElMessage({
-      message: '请选择相同测试套的数据',
-      type: 'warning'
-    })
-    multipleTableRef.value!.clearSelection()
-    return false
-  }
-  return true
-}
-const handleDialogClose = () => {
-  benchMarkDialogVisible.value = false
+const exportModalVisible = ref(false)
+const multipleTableRef = ref<InstanceType<typeof ElTable>>()
+const closeExportModal = () => {
+  exportModalVisible.value = false
   multipleTableRef.value!.clearSelection()
-  testDataVals.value = []
-  testDataColumns.value = []
 }
 const perfValformatter = (cellValue: number) => {
   if (cellValue === undefined || cellValue === invalidNumberSymbol) {
