@@ -1,6 +1,7 @@
 <template>
-  <div>
+  <div class="dev-perf-table">
     <el-table
+      class="main-table"
       border
       :data="tableData"
     >
@@ -35,7 +36,7 @@
       width="800px"
       :before-close="closeJobListDialog"
     >
-      <div>
+      <div class="dialog-talbe-container">
         <el-table :data="jobListData" border>
           <el-table-column prop="id" label="job id" min-width="150px"></el-table-column>
           <el-table-column :prop="dimension" label="维度" min-width="150px"></el-table-column>
@@ -93,9 +94,8 @@
  *    }
  */
 import { ref, Ref, watchEffect } from 'vue'
-import { useRouter } from 'vue-router'
 import { suiteTables } from '../config'
-import { supportedSuiteList, getDimensionValue, isTjobPassedFilterCheck } from '../utils/tjobCompute'
+import { supportedSuiteList, getDimensionValue, isTjobPassedFilterCheck,checkTjobDimensionVal } from '../utils/tjobCompute'
 import { computeMean, computeStddev, formatterPercentage } from '@/utils/utils'
 
 interface InitialDataByTable {
@@ -115,17 +115,15 @@ const props = defineProps({
     type: String,
     default: 'osv'
   },
-  filterListUnderDimension: {
-    type: Array,
-    default: () => []
+  filterListDataUnderDimension: {
+    type: Object,
+    default: () => {}
   },
   suiteFilterList: {
     type: Array,
     default: () => []
   }
 })
-
-const router = useRouter()
 
 const dataMap:Ref<DictObject> = ref({})
 const jobListDialogVisible = ref(false)
@@ -135,15 +133,14 @@ const jobListKpi = ref('')
 const tableColumns:Ref<Array<DictObject>> = ref([])
 const tableData:Ref<Array<DictObject>> = ref([])
 
-const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string|unknown>) => {
+const generateTableConfigsAndData = (tjobs, dimension:string, filterListData: DictObject) => {
   dataMap.value = {}
   filteringSuiteList().forEach(suite => {
     suiteTables[suite].forEach((tableConfig: Array<DictObject>, tableIndex: number) => {
       tjobs[suite] && tjobs[suite].forEach(tjob => {
         const dimensionValue = getDimensionValue(tjob, dimension)
         if (!dimensionValue) return
-        if (filterList.length > 0
-          && filterList.indexOf(dimensionValue) < 0) return
+        if (!checkTjobDimensionVal(tjob, filterListData)) return
         if (!isTjobBelongToCurrentTable(tjob, suite, tableConfig)) {
           return
         }
@@ -164,7 +161,6 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       computeAllResultValue(dataMap.value)
     })
   })
-  console.log(dataMap.value)
   constructTableData(dataMap.value)
 }
 
@@ -245,11 +241,11 @@ const constructTableData = (dataMap: DictObject) => {
         const rowData:DictObject = {}
         let basePerfVal:number
         dimList.forEach((dim, idx) => {
-          if (!isPerfDataExsitUnderTable) return
+          if (!isPerfDataExsitUnderTable(dataMap, dim, suite, tableIndex)) return
           // 设置kpi和params数据
           if (!rowData.kpi) rowData.kpi = dataMap[dim].perfData[suite][tableIndex].kpi
           if (!rowData.params) rowData.params = params
-
+          
           if (!dataMap[dim].perfData[suite][tableIndex].dataResult[params]) return
           if (idx === 0) { // 记录基线数据，用来计算%change
             basePerfVal = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
@@ -271,7 +267,6 @@ const constructTableData = (dataMap: DictObject) => {
       })
     })
   })
-  console.log(111,tableData)
 }
 
 /**
@@ -330,6 +325,27 @@ const goJobDetail = (url:string) => {
 
 // 当表格数据或者展示维度切换时，更新表格配置数据
 watchEffect(() => {
-  generateTableConfigsAndData(props.tjobsAll, props.dimension, props.filterListUnderDimension)
+  generateTableConfigsAndData(props.tjobsAll, props.dimension, props.filterListDataUnderDimension)
 })
 </script>
+
+<style lang="scss" scoped>
+.dev-perf-table {
+  .main-table {
+    :deep(td) {
+      &:nth-child(6n+3),&:nth-child(6n+4),&:nth-child(6n+5) {
+        background-color: #f6f6f6;
+      }
+    }
+    :deep(th) {
+      background-color: #f3f7ff;
+    }
+  } 
+}
+.job-list-dialog {
+  .dialog-talbe-container {
+    max-height:400px;
+    overflow-y:auto;
+  }
+}
+</style>

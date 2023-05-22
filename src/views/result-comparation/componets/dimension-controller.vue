@@ -10,7 +10,8 @@
         <el-icon><QuestionFilled /></el-icon>
         <template #content>
           1、点击维度名称可切换对比的维度。<br />
-          2、选择维度中的参数按钮可以过滤展示想看到的数据。
+          2、选择维度中的过滤项可以对job进行过滤。若不选择则对应维度下不进行过滤。<br/>
+          3、不同维度中选择的过滤项以交集的形式对job进行过滤。
         </template>
       </el-tooltip>
     </p>
@@ -110,13 +111,6 @@ const dimensionChecked = (dim) => {
   setTimeout(() => {
     emit('filtering', dim, checkedListByDimension.value)
   },100)
-  // const checkList = checkedListByDimension.value[dim] || []
-  // if (isChangeDimensionClickValid(dim)) {
-  //   checkedDimension.value = dim
-  //   setTimeout(() => {
-  //     emit('filtering', dim, checkList)
-  //   },100)
-  // }
 }
 
 /**
@@ -126,7 +120,6 @@ const dimensionChecked = (dim) => {
  */
 const dimensionOptionChecked = (dim, val) => {
   if (val && val.length > 0) {
-    // checkedDimension.value = dim
     checkedListByDimension.value[dim] = val || []
     setTimeout(() => {
       emit('filtering', checkedDimension.value, checkedListByDimension.value)
@@ -137,7 +130,7 @@ const dimensionOptionChecked = (dim, val) => {
 const checkedListInit = () => {
   // 初始化各个维度的数据结构
   Object.keys(props.optionsData).forEach(dim => {
-    // 初始化后，所有维度默认选择第一个元素
+    // 当对应维度下有值时，设置一个空数组（相当于没有过滤条件）
     const optionVal = Array.from(props.optionsData[dim])[0]
     optionVal && (checkedListByDimension.value[dim] = [])
   })

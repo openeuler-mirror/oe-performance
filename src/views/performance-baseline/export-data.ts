@@ -125,7 +125,6 @@ const generateOtherDataAndCompareTable = (
   tableInfo: any, columnLabels: string[], baseDatas: any[], otherRecords: any[], commonPartData:string
 ) => {
   otherRecords.forEach((record: any) => {
-    console.log(66, baseDatas)
     const recordDataByTable = record['tableDatas'][tableInfo['tableName']]
     const columnValues:any[] = []
     const diffDatas:any[] = [`较${baseDatas[0]}提升情况`,'']

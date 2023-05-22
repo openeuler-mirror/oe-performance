@@ -8,7 +8,8 @@
   </div>
   <div class="oe-perf-section" v-loading="searchLoading">
     <template v-if="isSearched" >
-      <h2 class="oe-perf-section-title">对比维度</h2>
+      <h2 class="oe-perf-section-title">请选择维度及过滤项</h2>
+      <p>共{{ jobCount }}条job</p>
       <dimension-controller
         ref="dimensionControlerRef"
         :options-data="optionsData"
@@ -22,7 +23,6 @@
   <div v-if="isSearched" class="oe-perf-section" v-loading="searchLoading">
     <el-tabs v-model="tabName" class="demo-tabs">
       <el-tab-pane label="性能对比" name="comparationResult">
-        <h2 class="oe-perf-section-title">对比详情</h2>
         <result-table 
           :tjobsAll="inputData"
           :dimension="filterDimension"
@@ -31,13 +31,12 @@
         ></result-table>
       </el-tab-pane>
       <el-tab-pane label="开发者性能大表" name="performanceTable">
-        <h2 class="oe-perf-section-title">开发者性能大表</h2>
-        <!--<dev-perf-table 
+        <dev-perf-table 
           :tjobsAll="inputData"
           :dimension="filterDimension"
-          :filterListUnderDimension="filterListData"
+          :filterListDataUnderDimension="filterListData"
           :suiteFilterList="suiteFilterList"
-        ></dev-perf-table>-->
+        ></dev-perf-table>
       </el-tab-pane>
     </el-tabs>
     
@@ -69,6 +68,7 @@ let ejobs = {}
 let ejobsMap = {}
 // tjobs
 let tjobs = {}
+const jobCount = ref(0)
 
 const tabName = ref('comparationResult')
 
@@ -138,6 +138,7 @@ const getTotalData = (searchParams, searchTime: number, searchTotal: number) => 
     },
   }).then(res => {
     resetData() 
+    jobCount.value = res?.data?.hits?.total?.value
     res?.data?.hits?.hits?.filter(item => {
       return item._source.stats && Object.keys(item._source.stats).length > 0
     }).forEach(item => {
@@ -149,7 +150,6 @@ const getTotalData = (searchParams, searchTime: number, searchTotal: number) => 
       getFilterOptions(tempFlattenItem)    // 记录可选择项
     })
     e2tConverter(ejobs, tjobs)
-    // filterList.value = (Array.from(optionsData.value[filterDimension.value])).slice(0,1) // 获取新数据后，图表默认展示osv维度的第一个元素
     inputData.value = tjobs
   }).catch(err => {
     ElMessage({
@@ -246,7 +246,6 @@ const resetData = () => {
 const handleDimensionFiltering = (dimension: string, checkedListObject: DictObject) => {
   filterDimension.value = dimension
   filterListData.value = checkedListObject
-  console.log(dimension, checkedListObject)
 }
 
 const handleSuiteFiltering = (suiteList) => {
