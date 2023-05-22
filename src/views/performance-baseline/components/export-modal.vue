@@ -2,7 +2,7 @@
   <el-button type="primary" class="button" @click="handleExport(props.allColumn,props.selectedTableRows)">
     导出
   </el-button>
-  <div class="export-modal">
+  <div>
     <el-dialog
       :model-value="props.visible"
       class="export-dialog"
@@ -183,7 +183,7 @@ const handleDialogClose = () => {
   modal.exportButtonLoading = false
   emit('closeModal')
 }
-const tableCellFormatter = (row:any, column:any, cellValue: number | undefined) => {
+const tableCellFormatter = (row:any, column:any, cellValue:any) => {
   if (cellValue === undefined || cellValue === invalidNumberSymbol) {
     return '暂无数据'
   }
@@ -206,7 +206,7 @@ const perfValformatter = (cellValue: number) => {
 }
 </style>
 <style lang="scss">
-.export-modal {
+.export-dialog {
   .el-dialog__body {
     padding-top: 8px;
   }
