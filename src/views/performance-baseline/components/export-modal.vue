@@ -83,7 +83,7 @@ const emit = defineEmits(['closeModal','openModal'])
 
 
 const modal = reactive({
-  currentTableRow:<any>{},
+  currentTableRow:<any>undefined,
   bindingRadio:'',
   tableColumns:<any[]>[],
   tableVals:<any[]>[],
