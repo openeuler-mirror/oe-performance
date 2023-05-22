@@ -54,7 +54,12 @@
 import { ref, Ref, watchEffect } from 'vue'
 import CompareChart from './compare-chart.vue'
 import { jobModel, suiteTables } from '../config'
-import { supportedSuiteList, getDimensionValue, isTjobPassedFilterCheck } from '../utils/tjobCompute'
+import { 
+  supportedSuiteList,
+  getDimensionValue,
+  isTjobPassedFilterCheck,
+  checkTjobDimensionVal
+} from '../utils/tjobCompute'
 
 const props = defineProps({
   tjobsAll: {
@@ -65,9 +70,9 @@ const props = defineProps({
     type: String,
     default: 'osv'
   },
-  filterListUnderDimension: {
-    type: Array,
-    default: () => []
+  filterListDataUnderDimension: {
+    type: Object,
+    default: () => {}
   },
   suiteFilterList: {
     type: Array,
@@ -78,7 +83,7 @@ const props = defineProps({
 const tableConfigs:Ref<any> = ref({})
 const tableDatas:Ref<any> = ref({})
 
-const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string|unknown>) => {
+const generateTableConfigsAndData = (tjobs, dimension:string, filterListData: Object) => {
   tableDatas.value = {}
   filteringSuiteList().forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
@@ -93,8 +98,12 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       const tempColumn = [{ label: tableConfig.x_param, prop: 'dimensionId' }]
       const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
       // 遍历tjob，找出对应的数据存在dataMap（对应维度的数组中）。同时找出tjob中存在的列名，保存在tempColumn表格配置中
-      setTjobValuesToDataMapAndColumn(tjobs, suite, { dimension, filterList} , tableConfig, { tempColumn, tempDataMap })
-      
+      setTjobValuesToDataMapAndColumn(
+        tjobs, suite,
+        { dimension, filterListData},
+        tableConfig,
+        { tempColumn, tempDataMap }
+      )
       // 赋值列/
       tempConfig['column'] = tempColumn
       setTableColConfig(tempConfig, suite, tableIndex)
@@ -166,13 +175,13 @@ const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
  * @param manipulateDataObj 
  */
 const setTjobValuesToDataMapAndColumn = (tjobs, suite, dimensionFilterConfig, tableConfig, manipulateDataObj) => {
-  const { dimension, filterList} = dimensionFilterConfig
+  const { dimension, filterListData} = dimensionFilterConfig
   const { tempColumn, tempDataMap} = manipulateDataObj
   tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
     // 1、拿到当前tjob的维度值, 并根据选择的list过滤
     const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
     if (!dimensionValue) return // 没有对应维度的话退出
-    if (!checkTjobDimensionVal(dimensionValue, filterList, dimension)) return
+    if (!checkTjobDimensionVal(tjob, filterListData)) return
     // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
     const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
     if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
@@ -183,24 +192,6 @@ const setTjobValuesToDataMapAndColumn = (tjobs, suite, dimensionFilterConfig, ta
     }
     setValuesFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataMap[dimensionValue])
   })
-}
-
-/**
- * 通过filterList过滤tjob。
- * @param dimensionVal 
- * @param filterList 
- */
-const checkTjobDimensionVal = (dimensionVal:string, filterList:[string], dimension:string) => {
-  if (filterList.length <= 0) return true
-  if (dimension === 'pp') {
-    let flag = false
-    filterList.forEach(param => {
-      if (dimensionVal.indexOf(param) > -1) flag = true
-    })
-    return flag
-  } else {
-    return filterList.indexOf(dimensionVal) >= 0
-  }
 }
 
 /**
@@ -267,7 +258,7 @@ const checkDataEmpty = (tableDatas: {}) => {
 
 // 当表格数据或者展示维度切换时，更新表格配置数据
 watchEffect(() => {
-  generateTableConfigsAndData(props.tjobsAll, props.dimension, props.filterListUnderDimension)
+  generateTableConfigsAndData(props.tjobsAll, props.dimension, props.filterListDataUnderDimension)
 })
 </script>
   

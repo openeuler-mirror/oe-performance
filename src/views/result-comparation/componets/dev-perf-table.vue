@@ -63,6 +63,7 @@
 
 <script setup lang="ts">
 /**
+ * 5.22: 所有的filterList替换为filterData。y_param通过filterData[dim]控制
  * props.filterList相当于y_param列表，基于y_param维度组织数据。最后绘制表格时，从data_map中提取对应数据进行对比。
  * 1、遍历支持解析的suite列表
  * 2、不同suite下的不同表格会有不同的params。为保证params的顺序需要在遍历tjobs前先遍历当前suite对应的tableConfig.

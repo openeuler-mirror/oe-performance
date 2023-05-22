@@ -64,3 +64,25 @@ export const paramSorter = (pairPrev:string, pairNext:string) => {
     return pairPrev > pairNext ? 1 : -1
   }
 }
+
+/**
+ * 通过filterListData过滤tjob。针对pp参数做特殊处理
+ * @param dimensionVal 
+ * @param filterListData 
+ */
+export const checkTjobDimensionVal = (tjob:DictObject, filterListData:DictObject) => {
+  let passedFlag = true
+  Object.keys(filterListData).forEach((dim:string) => {
+    if (filterListData[dim].length <= 0) return
+    if (dim === 'pp') {
+      let paramMatched = false
+      filterListData[dim].forEach((param:string) => {
+        if (getDimensionValue(tjob, dim).indexOf(param) > -1) paramMatched = true
+      })
+      if (!paramMatched) passedFlag = false
+    } else {
+      if (filterListData[dim].indexOf(getDimensionValue(tjob, dim)) < 0) passedFlag = false
+    }
+  })
+  return passedFlag
+}

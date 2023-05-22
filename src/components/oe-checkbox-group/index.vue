@@ -3,13 +3,6 @@
     <div v-if="options.length === 0" class="plain-text">暂无数据</div>
     <template v-else>
       <template v-if="options.length > 1">
-        <el-checkbox
-          class="checkbox-all"
-          v-model="checkAll"
-          :indeterminate="isIndeterminate"
-          @change="handleCheckAllChange"
-          >All</el-checkbox
-        >
         <div class="checkbox-options-contanier">
           <el-scrollbar max-height="128px">
             <el-checkbox-group
@@ -63,19 +56,6 @@ const checkedValues = computed({
     checkedValueChange(val)
   }
 })
-
-const isIndeterminate = computed(() => {
-  return checkedValues.value.length > 0 && checkedValues.value.length !== props.options.length
-})
-
-const checkAll = computed({
-  get: () => checkedValues.value.length > 0 && checkedValues.value.length === props.options.length,
-  set: val => val
-})
-
-const handleCheckAllChange = (val: boolean) => {
-  checkedValues.value = val ? props.options : []
-}
 
 const checkedValueChange = (value: string[]) => {
   emits('update:modelValue', value)

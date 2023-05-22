@@ -26,18 +26,18 @@
         <result-table 
           :tjobsAll="inputData"
           :dimension="filterDimension"
-          :filterListUnderDimension="filterList"
+          :filterListDataUnderDimension="filterListData"
           :suiteFilterList="suiteFilterList"
         ></result-table>
       </el-tab-pane>
       <el-tab-pane label="开发者性能大表" name="performanceTable">
         <h2 class="oe-perf-section-title">开发者性能大表</h2>
-        <dev-perf-table 
+        <!--<dev-perf-table 
           :tjobsAll="inputData"
           :dimension="filterDimension"
-          :filterListUnderDimension="filterList"
+          :filterListUnderDimension="filterListData"
           :suiteFilterList="suiteFilterList"
-        ></dev-perf-table>
+        ></dev-perf-table>-->
       </el-tab-pane>
     </el-tabs>
     
@@ -90,7 +90,7 @@ const ssOptions = ref(new Set())
 const groupOptions = ref(new Set())
 
 const filterDimension = ref('osv')
-const filterList: Ref<string[]> = ref([])
+const filterListData = ref({})
 const suiteFilterList: Ref<string[]> = ref([])
 
 // 获取jobs数据
@@ -149,7 +149,7 @@ const getTotalData = (searchParams, searchTime: number, searchTotal: number) => 
       getFilterOptions(tempFlattenItem)    // 记录可选择项
     })
     e2tConverter(ejobs, tjobs)
-    filterList.value = (Array.from(optionsData.value[filterDimension.value])).slice(0,1) // 获取新数据后，图表默认展示osv维度的第一个元素
+    // filterList.value = (Array.from(optionsData.value[filterDimension.value])).slice(0,1) // 获取新数据后，图表默认展示osv维度的第一个元素
     inputData.value = tjobs
   }).catch(err => {
     ElMessage({
@@ -243,9 +243,10 @@ const resetData = () => {
   groupOptions.value.clear()
 }
 
-const handleDimensionFiltering = (dimension: string, List: Array<string>) => {
+const handleDimensionFiltering = (dimension: string, checkedListObject: DictObject) => {
   filterDimension.value = dimension
-  filterList.value = List
+  filterListData.value = checkedListObject
+  console.log(dimension, checkedListObject)
 }
 
 const handleSuiteFiltering = (suiteList) => {
