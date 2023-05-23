@@ -19,6 +19,18 @@
     <el-row class="search-field-section" :gutter="4">
       <el-col :span="2">
         <span>筛选内容:</span>
+        <el-tooltip
+          popper-class="tooltip-popper"
+          placement="bottom-start"
+        >
+          <el-icon><QuestionFilled /></el-icon>
+          <template #content>
+            <ul>
+              <li>数据时间：搜索至今N天的数据</li>
+              <li>数据量限制：控制搜索返回的数据量。默认3000条，最大10000条</li>
+            </ul>
+          </template>
+        </el-tooltip>
       </el-col>
       <el-col :span="22">
         <el-row
@@ -98,7 +110,7 @@
             :lg="6"
             class="field-item"
           >
-            <span class="fields-label">{{ `数据量:` }}</span>
+            <span class="fields-label">{{ `数据量限制:` }}</span>
             <el-input-number
               class="field-selection"
               v-model="searchTotal"
@@ -653,7 +665,7 @@ onMounted(() => {
 
 .search-field-section {
   z-index:5;
-  margin-bottom: 30px;
+  margin-bottom: 12px;
   &-label {
     line-height: 32px;
   }
@@ -679,7 +691,20 @@ onMounted(() => {
       z-index: 1;
     }
   }
+  .el-tooltip__trigger {
+    cursor: pointer;
+    vertical-align: top;
+    top:2px;
+    margin-left:2px;
+  }
 }
+.tooltip-popper {
+  padding:4px;
+  ul {
+    margin-left: 11px;
+  }
+}
+
 span {
   font-size: 14px;
   min-width: 60px;

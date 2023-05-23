@@ -6,11 +6,12 @@
       <el-tooltip
         class="box-item"
         placement="top"
+        effect="light"
       >
         <el-icon><QuestionFilled /></el-icon>
         <template #content>
-          1、点击维度名称可切换对比的维度。<br />
-          2、选择维度中的过滤项可以对job进行过滤。若不选择则对应维度下不进行过滤。<br/>
+          1、点击维度名称可切换对比的维度。无数据的维度不能选择<br />
+          2、选择维度中的过滤项可以对job进行过滤。若不选择,则对应维度下不进行过滤。<br/>
           3、不同维度中选择的过滤项以交集的形式对job进行过滤。
         </template>
       </el-tooltip>

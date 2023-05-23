@@ -14,7 +14,7 @@
         <el-button type="primary" class="button" @click="handleExportCsv"
           >导出</el-button
         >
-        <p v-if="dataList.length > 0" class="jobs-count">共计{{ jobCount }}条jobs</p>
+        <p v-if="dataList.length > 0" class="jobs-count">当前数据由{{ jobCount }}条job汇总</p>
       </div>
       <div class="button-group-right">
         <el-button
@@ -73,7 +73,7 @@
       <span> 已选择 {{ selectedTableRows.length }}项 </span>
       <el-divider direction="vertical" />
       <span
-        >数据所用"测试用例名称"一致可以进行对比操作(最多勾选5条)，可以导出当前所选数据。</span
+        >可以最多勾选5条数据进行导出；导出时可选择基准数据进行对比。</span
       >
     </div>
     <el-table
@@ -336,14 +336,6 @@ const handleCheckedTableCloumn = (value: any[]) => {
 
 const handleSelectionChange = (selectedRow: any) => {
   selectedTableRows.value = selectedRow
-}
-
-const handleSearchTable = () => {
-  if (searcherKey.value === '') {
-    ElMessage('请选择搜索条件！')
-    return
-  } 
-  emit('tableSearch', searcherKey.value, searcherValue.value)
 }
 
 // 获取并合并jobs的逻辑
@@ -623,6 +615,8 @@ a {
       margin-left: 8px;
       line-height: 32px;
       vertical-align: top;
+      font-size: 12px;
+      color: #999;
     }
   }
 

@@ -336,6 +336,9 @@ watchEffect(() => {
       &:nth-child(6n+3),&:nth-child(6n+4),&:nth-child(6n+5) {
         background-color: #f6f6f6;
       }
+      &:nth-last-child(1),&:nth-last-child(2),&:nth-last-child(3){
+        background-color: #fff;
+      }
     }
     :deep(th) {
       background-color: #f3f7ff;
