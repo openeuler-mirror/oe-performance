@@ -9,6 +9,7 @@
     <testment-table
       :dataList="data"
       :submitDataLoading="submitDataLoading"
+      :jobCount="jobCount"
       @tableSearch="handleTableSearch"
       @refreash="refreashData"
     ></testment-table>
@@ -31,12 +32,15 @@ const route = useRoute()
 const baselineTableInfoStore = useBaselineTableInfoStore()
 
 const data = ref<any[]>([])
+const jobCount = ref(0)
 const searchParams = ref({})
+const searchLimitTime = ref(10)
+const searchLimitTotal = ref(3000)
 const tableSearchParams = ref({})
 const submitDataLoading = ref(false)
 
 const refreashData = () => {
-  getAllData(searchParams.value)
+  getAllData(searchParams.value, searchLimitTime.value, searchLimitTotal.value)
 }
 
 const handleTableSearch = (searchKey, searchValue) => {
@@ -64,8 +68,10 @@ const setMustCase = (searchParams) => {
   return tempArr
 }
 
-const getAllData = (params: searchParams, searchTime: number) => {
+const getAllData = (params: searchParams, searchTime: number, searchTotal: number) => {
   searchParams.value = params
+  searchLimitTime.value = searchTime
+  searchLimitTotal.value = searchTotal
   submitDataLoading.value = true
 
   const matchCases = setMustCase(params)
@@ -90,7 +96,7 @@ const getAllData = (params: searchParams, searchTime: number) => {
       },
       aggs: {
         jobs_terms: {
-          terms: { field: 'submit_id', size: 10000 }
+          terms: { field: 'submit_id', size: searchTotal }
         }
       }
     },
@@ -99,7 +105,10 @@ const getAllData = (params: searchParams, searchTime: number) => {
     const submitList = res?.data?.aggregations?.jobs_terms?.buckets
       .map((item: any) => { return { submit_id: item.key }}) || []
     baselineTableInfoStore.setSubmitList(submitList)
+    baselineTableInfoStore.setGeneralSearchParam({searchLimitTime,searchLimitTotal,suite:searchParams.value.suite})
     data.value = submitList
+    jobCount.value = res?.data?.hits?.total?.value
+    baselineTableInfoStore.setJobCount(jobCount.value)
   }).catch((err) => {
     ElMessage({
       message: err.message,
@@ -118,6 +127,10 @@ onMounted(() => {
   if (route.meta.isGoback) {
     if (baselineTableInfoStore.baselineSubmitList && baselineTableInfoStore.baselineSubmitList.length > 0) {
       data.value = baselineTableInfoStore.baselineSubmitList
+      searchLimitTime.value = baselineTableInfoStore.searchParamData.searchLimitTime
+      searchLimitTotal.value = baselineTableInfoStore.searchParamData.searchLimitTotal
+      searchParams.value.suite = baselineTableInfoStore.searchParamData.suite
+      jobCount.value = baselineTableInfoStore.jobCount
     }
   }
 })

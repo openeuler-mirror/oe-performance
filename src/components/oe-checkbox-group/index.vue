@@ -2,29 +2,26 @@
   <div class="oe-checkbox-group">
     <div v-if="options.length === 0" class="plain-text">暂无数据</div>
     <template v-else>
-      <el-checkbox
-        class="checkbox-all"
-        v-if="options.length > 1"
-        v-model="checkAll"
-        :indeterminate="isIndeterminate"
-        @change="handleCheckAllChange"
-        >All</el-checkbox
-      >
-      <div class="checkbox-options-contanier">
+      <template v-if="options.length > 1">
+        <div class="checkbox-options-contanier">
+          <el-scrollbar max-height="128px">
+            <el-checkbox-group
+              v-model="checkedValues"
+            >
+              <el-checkbox
+                class="checkbox-options-item"
+                v-for="item in options"
+                :key="item"
+                :label="item">
+                {{item}}
+              </el-checkbox>
+            </el-checkbox-group>
+          </el-scrollbar>
+        </div>
+      </template>
+      <div class="plain-text" v-else>
         <el-scrollbar max-height="128px">
-          <el-checkbox-group
-            v-if="options.length > 1"
-            v-model="checkedValues"
-          >
-            <el-checkbox
-              class="checkbox-options-item"
-              v-for="item in options"
-              :key="item"
-              :label="item">
-              {{item}}
-            </el-checkbox>
-          </el-checkbox-group>
-          <div class="plain-text" v-else>{{ options[0] }}</div>
+          {{ options[0] }}
         </el-scrollbar>
       </div>
     </template>
@@ -60,19 +57,6 @@ const checkedValues = computed({
   }
 })
 
-const isIndeterminate = computed(() => {
-  return checkedValues.value.length > 0 && checkedValues.value.length !== props.options.length
-})
-
-const checkAll = computed({
-  get: () => checkedValues.value.length > 0 && checkedValues.value.length === props.options.length,
-  set: val => val
-})
-
-const handleCheckAllChange = (val: boolean) => {
-  checkedValues.value = val ? props.options : []
-}
-
 const checkedValueChange = (value: string[]) => {
   emits('update:modelValue', value)
   emits('change', value)
@@ -97,6 +81,7 @@ watch(
     .plain-text {
       line-height: 32px;
       color: #333;
+      width: 100%;
     }
 
     .checkbox-options-contanier {

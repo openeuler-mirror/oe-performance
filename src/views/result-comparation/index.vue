@@ -8,7 +8,8 @@
   </div>
   <div class="oe-perf-section" v-loading="searchLoading">
     <template v-if="isSearched" >
-      <h2 class="oe-perf-section-title">对比维度</h2>
+      <h2 class="oe-perf-section-title">请选择维度及过滤项</h2>
+      <p>共{{ jobCount }}条job</p>
       <dimension-controller
         ref="dimensionControlerRef"
         :options-data="optionsData"
@@ -20,13 +21,25 @@
     <div v-else class="banner-text">请搜索数据进行对比</div>
   </div>
   <div v-if="isSearched" class="oe-perf-section" v-loading="searchLoading">
-    <h2 class="oe-perf-section-title">对比详情</h2>
-    <result-table 
-      :tjobsAll="inputData"
-      :dimension="filterDimension"
-      :filterListUnderDimension="filterList"
-      :suiteFilterList="suiteFilterList"
-    ></result-table>
+    <el-tabs v-model="tabName" class="demo-tabs">
+      <el-tab-pane label="性能对比" name="comparationResult">
+        <result-table 
+          :tjobsAll="inputData"
+          :dimension="filterDimension"
+          :filterListDataUnderDimension="filterListData"
+          :suiteFilterList="suiteFilterList"
+        ></result-table>
+      </el-tab-pane>
+      <el-tab-pane label="开发者性能大表" name="performanceTable">
+        <dev-perf-table 
+          :tjobsAll="inputData"
+          :dimension="filterDimension"
+          :filterListDataUnderDimension="filterListData"
+          :suiteFilterList="suiteFilterList"
+        ></dev-perf-table>
+      </el-tab-pane>
+    </el-tabs>
+    
   </div>
 </template>
     
@@ -36,6 +49,7 @@ import { ElMessage } from 'element-plus'
 import SearchPannel from '@/views/search-pannel/index.vue'
 import dimensionController from './componets/dimension-controller.vue'
 import ResultTable from './componets/result-table.vue'
+import DevPerfTable from './componets/dev-perf-table.vue'
 // util tool
 import { flattenObj } from '@/utils/utils'
 // store
@@ -54,6 +68,9 @@ let ejobs = {}
 let ejobsMap = {}
 // tjobs
 let tjobs = {}
+const jobCount = ref(0)
+
+const tabName = ref('comparationResult')
 
 let inputData = ref({})
 const searchParams = ref({})
@@ -73,13 +90,13 @@ const ssOptions = ref(new Set())
 const groupOptions = ref(new Set())
 
 const filterDimension = ref('osv')
-const filterList: Ref<string[]> = ref([])
+const filterListData = ref({})
 const suiteFilterList: Ref<string[]> = ref([])
 
 // 获取jobs数据
-const onSearch = (params, searchTime:number) => {
+const onSearch = (params, searchTime:number, searchTotal: number) => {
   searchParams.value = params
-  getTotalData(params, searchTime)
+  getTotalData(params, searchTime, searchTotal)
 }
 
 const setMustCase = (searchParams) => {
@@ -98,16 +115,16 @@ const setMustCase = (searchParams) => {
   return tempArr
 }
 
-const getTotalData = (searchParams, searchTime: number) => {
+const getTotalData = (searchParams, searchTime: number, searchTotal: number) => {
   searchLoading.value = true
   const mustCases = setMustCase(searchParams)
 
   getPerformanceData({
     'index': 'jobs',
     'query': {
-      size: 10000,
+      size: searchTotal,
       _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
-        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'time'
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'time', 'result_root'
       ],
       'query': {
         bool: {
@@ -121,6 +138,7 @@ const getTotalData = (searchParams, searchTime: number) => {
     },
   }).then(res => {
     resetData() 
+    jobCount.value = res?.data?.hits?.total?.value
     res?.data?.hits?.hits?.filter(item => {
       return item._source.stats && Object.keys(item._source.stats).length > 0
     }).forEach(item => {
@@ -132,7 +150,6 @@ const getTotalData = (searchParams, searchTime: number) => {
       getFilterOptions(tempFlattenItem)    // 记录可选择项
     })
     e2tConverter(ejobs, tjobs)
-    filterList.value = (Array.from(optionsData.value[filterDimension.value])).slice(0,1) // 获取新数据后，图表默认展示osv维度的第一个元素
     inputData.value = tjobs
   }).catch(err => {
     ElMessage({
@@ -186,7 +203,7 @@ const e2tConverter = (ejobs, tjobs) => {
       if (kpiMaps[suiteKey]) {
         Object.keys(kpiMaps[suiteKey]).forEach(kpi => { // 遍历所有kpi，每个kpi生成一个tjob
           const tjob = JSON.parse(JSON.stringify(tempJob))
-          tjob[`pp.${suiteKey}.testcase`] = kpiMaps[suiteKey][kpi].testcase  // todo，libmicro需要调用func生成结果
+          tjob[`pp.${suiteKey}.testcase`] = kpiMaps[suiteKey][kpi].testcase
           tjob[`stats.${suiteKey}.${kpiMaps[suiteKey][kpi].kpi}`] = ejob[`stats.${suiteKey}.${kpi}`]
           if (tjobs[suiteKey]) {
             tjobs[suiteKey].push(tjob)
@@ -226,15 +243,19 @@ const resetData = () => {
   groupOptions.value.clear()
 }
 
-const handleDimensionFiltering = (dimension: string, List: Array<string>) => {
+const handleDimensionFiltering = (dimension: string, checkedListObject: DictObject) => {
   filterDimension.value = dimension
-  filterList.value = List
+  filterListData.value = checkedListObject
 }
 
 const handleSuiteFiltering = (suiteList) => {
   suiteFilterList.value = suiteList
 }
 
+/**
+ * 获取job中的信息，记录各个维度的可选项
+ * @param flattenJob 
+ */
 const getFilterOptions = (flattenJob) => {
   flattenJob['osv'] && osvOptions.value.add(flattenJob['osv'])
   flattenJob['arch'] && archOptions.value.add(flattenJob['arch'])
@@ -243,9 +264,9 @@ const getFilterOptions = (flattenJob) => {
   flattenJob['group_id'] && groupOptions.value.add(flattenJob['group_id'])
   flattenJob['suite'] && suiteOptions.value.add(flattenJob['suite'])
   suiteFilterList.value = Array.from(suiteOptions.value)
-  const ppParams = getPpParams(flattenJob)
-  flattenJob['ppParams'] = ppParams
-  ppParams && ppOptions.value.add(ppParams)
+  const ppParamsList = getPpParams(flattenJob) // 获取组合的ppParams
+  flattenJob['ppParams'] = ppParamsList.join(',')
+  ppParamsList.length > 0 && addPpParamToOptions(ppParamsList, ppOptions)
   const ssParams = getSsParams(flattenJob)
   flattenJob['ssParams'] = ssParams
   ssParams && ssOptions.value.add(ssParams)
@@ -267,7 +288,13 @@ const getPpParams = (flattenJob) => {
       tempArr.push(`${key}=${flattenJob[key]}`)
     }
   })
-  return tempArr.join(',')
+  return tempArr
+}
+
+const addPpParamToOptions = (paramList, ppOptions) => {
+  paramList.forEach((paramPair: string) => {
+    ppOptions.value.add(paramPair.replace(/^pp./,''))
+  })
 }
 
 /**
@@ -277,7 +304,7 @@ const getPpParams = (flattenJob) => {
 const getSsParams = (flattenJob) => {
   const tempArr = []
   Object.keys(flattenJob).sort().forEach(key => {
-    if (key.startsWith(`stats.${flattenJob.suite}`)) {
+    if (key.startsWith(`ss.${flattenJob.suite}`)) {
       tempArr.push(`${key}=${flattenJob[key]}`)
     }
   })

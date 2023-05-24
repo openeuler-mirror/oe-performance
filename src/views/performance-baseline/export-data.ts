@@ -8,7 +8,7 @@ const exportCommonPart = (allColumn:Column[], selectedTableRows:any[]):string =>
   const titleData:any[] = JSON.parse(JSON.stringify(allColumn))
   const extraColumns = [
     { label: '提交编号', prop: 'submit_id' },
-    { label: '性能数据', prop: 'performanceVal' }
+    { label: '总体几何平均值', prop: 'performanceVal' }
   ]
   titleData.splice(0, 0, ...extraColumns)
   const title = titleData.map<string>((item: any) => item.label)
@@ -52,11 +52,11 @@ export const exportSingle = (allColumn:Column[], selectedTableRows:any[], tableC
         `"${testDatas[tableInfo['tableName']][0]['li-testcase']}"`,
         testDatas[tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
       ]
-      columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+      columnLabels.splice(0, 0, ...['提交编号', '测试参数', '几何平均值'])
       columnValues.splice(0, 0, ...extraValues)
     } else {
       // 有的数据中可能缺少某些表格的数据
-      columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+      columnLabels.splice(0, 0, ...['提交编号', '测试参数', '几何平均值'])
       columnValues.splice(0, 0, ...[selectedTableRows[0]['submit_id'],'N/A','N/A'])
     }
 
@@ -113,10 +113,10 @@ const generateBaseDatasAndColumn = (tableInfo: any, columnLabels: string[], base
       `"${baseRecord[0]['tableDatas'][tableInfo['tableName']][0]['li-testcase']}"`,
       baseRecord[0]['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
     ]
-    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '几何平均值'])
     baseDatas.splice(0,0,...extraBaseDatas)
   } else {
-    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '性能值'])
+    columnLabels.splice(0, 0, ...['提交编号', '测试参数', '几何平均值'])
     baseDatas.splice(0,0,...[baseRecord[0]['submit_id'], '暂无数据', '暂无数据'])
   }
 }
@@ -127,7 +127,7 @@ const generateOtherDataAndCompareTable = (
   otherRecords.forEach((record: any) => {
     const recordDataByTable = record['tableDatas'][tableInfo['tableName']]
     const columnValues:any[] = []
-    const diffDatas:any[] = ['提升情况','']
+    const diffDatas:any[] = [`较${baseDatas[0]}提升情况`,'']
     tableInfo['column'].forEach((column:any,index:number) => {
       if (recordDataByTable) {
         const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
