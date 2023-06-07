@@ -32,7 +32,7 @@
         <el-table-column fixed prop="submit_id" label="提交编号" width="200" show-overflow-tooltip/>
         <el-table-column
           min-width="100"
-          label="总性能值"
+          label="性能几何平均值"
           prop="performanceVal"
         >
           <template #default="scope">
