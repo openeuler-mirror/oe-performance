@@ -17,32 +17,8 @@
           :selected-table-rows="selectedTableRows"
           @openModal="exportModalVisible = true"
           @closeModal="closeExportModal"/>
+        <p v-if="dataList.length > 0" class="jobs-count">当前数据由{{ jobCount }}条job汇总</p>
       </div>
-      <el-input
-        class="oe-input-with-select table-searcher"
-        v-model="searcherValue"
-        placeholder="请输入搜索内容"
-        clearable>
-        <template #prepend>
-          <el-select
-            class="searcher-selector"
-            v-model="searcherKey"
-            placeholder="搜索条件"
-            clearable
-          >
-            <el-option
-              v-for="item in searcherOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-              :disabled="item.disabled"
-              />
-          </el-select>
-        </template>
-        <template #append>
-          <el-button :icon="Search" @click="handleSearchTable" />
-        </template>
-      </el-input>
       <div class="button-group-right">
         <el-button
           :icon="RefreshLeft"
@@ -100,7 +76,7 @@
       <span> 已选择 {{ selectedTableRows.length }}项 </span>
       <el-divider direction="vertical" />
       <span
-        >数据所用"测试用例名称"一致可以进行对比操作(最多勾选5条)，可以导出当前所选数据。</span
+        >可以最多勾选5条数据进行导出；导出时可选择基准数据进行对比。</span
       >
     </div>
     <el-table
@@ -115,7 +91,7 @@
       <el-table-column
         fixed="left"
         width="200"
-        label="性能数据"
+        label="性能几何平均值"
         prop="performanceVal"
       >
         <template #default="scope">
@@ -166,7 +142,7 @@
       v-model:currentPage="currentPage"
       v-model:page-size="pageSize"
       :page-sizes="pageSizes"
-      :small="small"
+      small
       :disabled="disabled"
       :background="background"
       layout="total, sizes, prev, pager, next, jumper"
@@ -202,6 +178,10 @@ const props = defineProps({
   submitDataLoading: {
     type: Boolean,
     default: false
+  },
+  jobCount: {
+    type: Number,
+    default: 0
   }
 })
 
@@ -249,10 +229,9 @@ const selectedTableRows = ref<any[]>([])
 
 const idList = ref(<any>[])
 const currentPage = ref(1)
-const pageSize = ref(5)
+const pageSize = ref(10)
 const pageSizes = ref([10, 20, 50])
-const total = ref(1)
-const small = ref(false)
+const total = ref(0)
 const background = ref(false)
 const disabled = ref(false)
 
@@ -302,14 +281,6 @@ const handleCheckedTableCloumn = (value: any[]) => {
 
 const handleSelectionChange = (selectedRow: any) => {
   selectedTableRows.value = selectedRow
-}
-
-const handleSearchTable = () => {
-  if (searcherKey.value === '') {
-    ElMessage('请选择搜索条件！')
-    return
-  } 
-  emit('tableSearch', searcherKey.value, searcherValue.value)
 }
 
 // 获取并合并jobs的逻辑
@@ -475,6 +446,14 @@ a {
     min-width: 200px;
     .button {
       min-width: 90px;
+    }
+    .jobs-count {
+      display: inline-block;
+      margin-left: 8px;
+      line-height: 32px;
+      vertical-align: top;
+      font-size: 12px;
+      color: #999;
     }
   }
 

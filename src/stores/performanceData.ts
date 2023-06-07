@@ -34,6 +34,12 @@ export const usePerformanceData= defineStore('performanceData', () => {
 // 性能基线页，保存当前查询的列表数据submitId，用于从详情页返回时还原表格数据。
 const baselineSubmitList = ref<string[]>([])
 const baselineTableInfo = ref({})
+const searchParamData = {
+  searchLimitTime: 10,
+  searchLimitTotal: 3000,
+  suite: ''
+}
+const jobCount = ref(0)
 
 export const useBaselineTableInfoStore= defineStore('baselineTableInfo', () => {
   const resetSubmitIdList = () => {
@@ -47,13 +53,25 @@ export const useBaselineTableInfoStore= defineStore('baselineTableInfo', () => {
   const setTableInfo = (tableInfo: {}) => {
     baselineTableInfo.value = tableInfo
   }
+  const setGeneralSearchParam = (data: DictObject) => {
+    searchParamData.searchLimitTime = data.searchLimitTime.value || 10
+    searchParamData.searchLimitTotal = data.searchLimitTotal.value || 3000
+    searchParamData.suite = data.suite
+  }
+  const setJobCount = (count:number) => {
+    jobCount.value = count
+  }
 
   return {
     baselineSubmitList,
     baselineTableInfo,
+    searchParamData,
+    jobCount,
     resetSubmitIdList,
     setSubmitList,
-    setTableInfo
+    setTableInfo,
+    setGeneralSearchParam,
+    setJobCount
   }
 })
 

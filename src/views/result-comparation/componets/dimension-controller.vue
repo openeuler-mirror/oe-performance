@@ -1,5 +1,21 @@
 <template>
   <div class="dimension-controller">
+    <p class="indicator-text">
+      当前对比维度：
+      <span class="dimension-val">{{ checkedDimension }}</span>
+      <el-tooltip
+        class="box-item"
+        placement="top"
+        effect="light"
+      >
+        <el-icon><QuestionFilled /></el-icon>
+        <template #content>
+          1、点击维度名称可切换对比的维度。无数据的维度不能选择<br />
+          2、选择维度中的过滤项可以对job进行过滤。若不选择,则对应维度下不进行过滤。<br/>
+          3、不同维度中选择的过滤项以交集的形式对job进行过滤。
+        </template>
+      </el-tooltip>
+    </p>
     <div class="dimension-controller-inner">
       <el-row
         v-for="(dim,idx) in (Object.keys(filterOptions))"
@@ -15,22 +31,14 @@
             v-if="isChangeDimensionClickValid(dim)"
             class="dimension-label__controller"
             @click="dimensionChecked(dim)">
-            {{ dim }}：
+            {{ getDimensionLabel(dim) }}：
           </span>
-          <el-tooltip
-            v-else-if="Array.from(filterOptions[dim]).length > 1"
-            content="请至少选择一个参数值"
-            placement="bottom"
-            effect="light"
-            >
-            <span class="dimension-label__controller">{{ dim }}：</span>
-          </el-tooltip>
-          <span v-else class="dimension-label">{{ dim }}：</span>
+          <span v-else class="dimension-label">{{ getDimensionLabel(dim) }}：</span>
         </div>
         <oe-checkbox-group
           v-model="checkedListByDimension[dim]"
           class="checkbox-group-component"
-          :options="Array.from(filterOptions[dim])"
+          :options="Array.from(filterOptions[dim]).sort(paramSorter)"
           @change="val => dimensionOptionChecked(dim, val)"
         />
       </el-row>
@@ -52,6 +60,8 @@
 import { ref } from 'vue'
 import OeCheckboxGroup from '@/components/oe-checkbox-group/index.vue'
 
+import { getDimensionLabel, paramSorter } from '../utils/tjobCompute'
+
 interface OptionData {
   // osv: ['openEuler', 'centos']
   [key:string]: Array<string|undefined> | undefined | null
@@ -69,7 +79,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  (event: 'filtering', dimension: string, filterArr: Array<string>): void
+  (event: 'filtering', dimension: string, filterObj: DictObject): void
   (event: 'suiteFiltering', filterArr: Array<string>): void
 }>()
 
@@ -93,19 +103,15 @@ const handleSuiteFiltering = (val:string[]) => {
 }
 
 const isChangeDimensionClickValid = (dim) => {
-  const checkList = checkedListByDimension.value[dim] || []
-  return Array.from(filterOptions.value[dim]).length > 1 && checkList.length > 0
+  return Array.from(filterOptions.value[dim]).length > 0
 }
 
 const dimensionChecked = (dim) => {
   if (checkedDimension.value === dim) return
-  const checkList = checkedListByDimension.value[dim] || []
-  if (isChangeDimensionClickValid(dim)) {
-    checkedDimension.value = dim
-    setTimeout(() => {
-      emit('filtering', dim, checkList)
-    },100)
-  }
+  checkedDimension.value = dim
+  setTimeout(() => {
+    emit('filtering', dim, checkedListByDimension.value)
+  },100)
 }
 
 /**
@@ -115,19 +121,19 @@ const dimensionChecked = (dim) => {
  */
 const dimensionOptionChecked = (dim, val) => {
   if (val && val.length > 0) {
-    checkedDimension.value = dim
+    checkedListByDimension.value[dim] = val || []
     setTimeout(() => {
-      emit('filtering', dim, val)
+      emit('filtering', checkedDimension.value, checkedListByDimension.value)
     },100)
   }
 }
 
 const checkedListInit = () => {
   // 初始化各个维度的数据结构
-  Object.keys(props.optionsData).forEach(suite => {
-    // 初始化后，所有维度默认选择第一个元素
-    const initChecked = Array.from(props.optionsData[suite])[0]
-    initChecked && (checkedListByDimension.value[suite] = [initChecked])
+  Object.keys(props.optionsData).forEach(dim => {
+    // 当对应维度下有值时，设置一个空数组（相当于没有过滤条件）
+    const optionVal = Array.from(props.optionsData[dim])[0]
+    optionVal && (checkedListByDimension.value[dim] = [])
   })
 }
 
@@ -138,8 +144,19 @@ defineExpose({
 </script>
 <style scoped lang="scss">
 .dimension-controller {
-  display: flex;
   margin: 12px 0 24px 0;
+  .indicator-text {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 0;
+    .dimension-val {
+      color: var(--oe-perf-color-primary);
+    }
+    .el-icon {
+      margin-left: 8px;
+      cursor: pointer;
+    }
+  }
   .main-label {
     line-height: 32px;
     margin-right: 10px;
@@ -155,10 +172,15 @@ defineExpose({
 
   .dimension-row {
     padding: 16px 0 16px 16px;
-    border-bottom: 1px solid #efefef;
-    border-left: 2px solid transparent;
+    border: 1px solid transparent;
+    border-left: 10px solid transparent;
+    margin-left: -10px;
+    &:not(:last-child) {
+      border-bottom: 1px solid #efefef;
+    }
     &.dimension-checked {
-      border-left: 2px solid var(--oe-perf-color-primary);
+      border: 1px solid var(--oe-perf-color-primary);
+      border-left-width: 10px;
     }
 
     &.button-item {
@@ -184,8 +206,7 @@ defineExpose({
   .checkbox-group-label {
     display: inline-block;
     line-height: 32px;
-    min-width: 90px;
-    max-width: 90px;
+    width:190px;
     text-align: right;
     margin-right: 8px;
     .dimension-label {
@@ -199,7 +220,8 @@ defineExpose({
     }
   }
   .checkbox-group-component {
-    width: 90%;
+    flex: 1;
+    width: 50%;
   }
 }
 </style>

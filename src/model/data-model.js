@@ -135,6 +135,15 @@ export const jobModel = {
                                 listValues: [], // 查询hosts后动态赋值
                         },
                 },
+                my_account: { // 根据需求新增
+                        label: '测试人',
+                        type: 'select',
+                        origin: 'jobs',
+                        valueSources: ['value'],
+                        fieldSettings: {
+                                listValues: [], // 查询jobs后动态赋值
+                        },
+                },
         },
 
         kpis: {

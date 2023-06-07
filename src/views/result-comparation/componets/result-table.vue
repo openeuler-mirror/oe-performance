@@ -54,6 +54,12 @@
 import { ref, Ref, watchEffect } from 'vue'
 import CompareChart from './compare-chart.vue'
 import { jobModel, suiteTables } from '../config'
+import { 
+  supportedSuiteList,
+  getDimensionValue,
+  isTjobPassedFilterCheck,
+  checkTjobDimensionVal
+} from '../utils/tjobCompute'
 
 const props = defineProps({
   tjobsAll: {
@@ -64,9 +70,9 @@ const props = defineProps({
     type: String,
     default: 'osv'
   },
-  filterListUnderDimension: {
-    type: Array,
-    default: () => []
+  filterListDataUnderDimension: {
+    type: Object,
+    default: () => {}
   },
   suiteFilterList: {
     type: Array,
@@ -74,19 +80,10 @@ const props = defineProps({
   }
 })
 
-// 支持的suite类型，根据本字段获取数据这里可以指定表格顺序
-const supportedSuiteList = [
-  'stream',
-  'netperf',
-  'lmbench',
-  'unixbench',
-  'libmicro'
-]
 const tableConfigs:Ref<any> = ref({})
-
 const tableDatas:Ref<any> = ref({})
 
-const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<string>) => {
+const generateTableConfigsAndData = (tjobs, dimension:string, filterListData: Object) => {
   tableDatas.value = {}
   filteringSuiteList().forEach(suite => { // 遍历每一个套件
     const tableConfigsInSuite = suiteTables[suite]
@@ -96,34 +93,20 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
       const tempConfig = { tableName: '', column: [] }
       const tempTableDataList = tableDatas.value[suite][tableIndex] || [] // 拿到每个表格对应的数据list
       // 生成表格名
-      const filterName = tableConfig.filters
-        && `${Object.keys(tableConfig.filters)[0]}=${tableConfig.filters[Object.keys(tableConfig.filters)[0]]}`
-      const labelName = jobModel.kpis[`stats.${suite}.${tableConfig.kpi}`].label
-      const directionName = jobModel.kpis[`stats.${suite}.${tableConfig.kpi}`].direction
-      const tableName = `${filterName || ''}${labelName}${directionName > 0 ? '（越大越好）':'（越小越好）'}`
-      tempConfig['tableName'] = tableName
+      tempConfig['tableName'] = constructTableName(tableConfig, suite)
 
       const tempColumn = [{ label: tableConfig.x_param, prop: 'dimensionId' }]
       const tempDataMap = {} // 当前表格下的数据字典，字典的键是dimensionId。
-      tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
-        // 1、拿到当前tjob的维度值, 并根据选择的list过滤
-        const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
-        if (!dimensionValue) return // 没有对应维度的话退出
-        if (filterList.length > 0 && filterList.indexOf(dimensionValue) < 0) return
-        // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
-        const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
-        if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
-        // 3、根据col获取对应的数据设置在tempDataMap[dimensionValue]上
-        if (!tempDataMap[dimensionValue]) {
-        // 如果是一个新的demision，则初始化一下数据
-          tempDataMap[dimensionValue] = {}
-        }
-        setValuesFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataMap[dimensionValue])
-      })
-      // 赋值列
+      // 遍历tjob，找出对应的数据存在dataMap（对应维度的数组中）。同时找出tjob中存在的列名，保存在tempColumn表格配置中
+      setTjobValuesToDataMapAndColumn(
+        tjobs, suite,
+        { dimension, filterListData},
+        tableConfig,
+        { tempColumn, tempDataMap }
+      )
+      // 赋值列/
       tempConfig['column'] = tempColumn
       setTableColConfig(tempConfig, suite, tableIndex)
-      
       // 拼装好的数据进行赋值
       // 需要遍历tempDataMap中的各个dimension，然后push入tempTableataList即可
       Object.keys(tempDataMap).forEach(dimension => {
@@ -136,16 +119,16 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterList: Array<
   })
 }
 
-const getDimensionValue = (tjob, dimension) => {
-  let dim = dimension
-  if (dimension === 'pp' || dimension === 'ss') {
-    dim = `${dimension}Params`
-  }
-  return tjob[dim]
-}
-
 const filteringSuiteList = () => {
   return supportedSuiteList.filter(item => props.suiteFilterList.indexOf(item) > -1)
+}
+
+const constructTableName = (tableConfig, suite) => {
+  const filterName = tableConfig.filters
+    && `${Object.keys(tableConfig.filters)[0]}=${tableConfig.filters[Object.keys(tableConfig.filters)[0]]}`
+  const labelName = jobModel.kpis[`stats.${suite}.${tableConfig.kpi}`].label
+  const directionName = jobModel.kpis[`stats.${suite}.${tableConfig.kpi}`].direction
+  return `${filterName || ''}${labelName}${directionName > 0 ? '（越大越好）':'（越小越好）'}`
 }
 
 const setTableColConfig = (tempConfig, suite, tableIndex) => {
@@ -183,6 +166,42 @@ const getColNameFromTjob = (tjob, suite, tableConfig, tempColumn) => {
   return columnName
 }
 
+/**
+ * 遍历tjob，根据输入的表格配置获取表格中对应的数据和列名
+ * @param tjobs 
+ * @param suite 
+ * @param dimensionFilterConfig 
+ * @param tableConfig 
+ * @param manipulateDataObj 
+ */
+const setTjobValuesToDataMapAndColumn = (tjobs, suite, dimensionFilterConfig, tableConfig, manipulateDataObj) => {
+  const { dimension, filterListData} = dimensionFilterConfig
+  const { tempColumn, tempDataMap} = manipulateDataObj
+  tjobs[suite] && tjobs[suite].forEach(tjob => { // 遍历一个suite下的所有tjob
+    // 1、拿到当前tjob的维度值, 并根据选择的list过滤
+    const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
+    if (!dimensionValue) return // 没有对应维度的话退出
+    if (!checkTjobDimensionVal(tjob, filterListData)) return
+    // 2、拿到当前tjob对应的列名：将tjob中能根据x_param匹配到的值作为表格的列。
+    const columnName = getColNameFromTjob(tjob, suite, tableConfig, tempColumn)
+    if (!columnName) return // 没有对应的列名，说明当前tjob的数据不属于当前表格，因此不做其他处理，跳出。
+    // 3、根据col获取对应的数据设置在tempDataMap[dimensionValue]上
+    if (!tempDataMap[dimensionValue]) {
+    // 如果是一个新的demision，则初始化一下数据
+      tempDataMap[dimensionValue] = {}
+    }
+    setValuesFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataMap[dimensionValue])
+  })
+}
+
+/**
+ * 将数据设置给tempDataObj中
+ * @param tjob 
+ * @param suite 
+ * @param columnName 
+ * @param tableConfig 
+ * @param tempDataObj 
+ */
 const setValuesFromTjobByCol = (tjob, suite, columnName, tableConfig, tempDataObj) => {
   if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
     return
@@ -216,22 +235,6 @@ const calculateValues = (obj) => {
   return tempObj
 }
 
-const isTjobPassedFilterCheck = (tjob, suite, tableConfig) => {
-  // 如果当前表格有filters的话，需要通过filters来判断是否要获取当前数据的值。
-  if (tableConfig.filters) {
-    const filterKey = Object.keys(tableConfig.filters)[0]
-    let filteredValue = tjob[`pp.${suite}.${filterKey}`]
-    if (suite === 'unixbench') { // unixbench过滤器的值需要特殊处理，除了nr_task=1的，都为100%
-      filteredValue = filteredValue === 1 ? '1' : '100%'
-    }
-    if (filteredValue !== tableConfig.filters[filterKey]) {
-      return false // 如果有过滤器的情况下，过滤其中的值如果不匹配则忽略当前数据
-    }
-    return true
-  }
-  return true
-}
-
 const isSuiteDataEmpty = (tableDatasUnderSuite: []) => {
   let emptyFlag = true
   if (tableDatasUnderSuite.length < 1) return true
@@ -255,7 +258,7 @@ const checkDataEmpty = (tableDatas: {}) => {
 
 // 当表格数据或者展示维度切换时，更新表格配置数据
 watchEffect(() => {
-  generateTableConfigsAndData(props.tjobsAll, props.dimension, props.filterListUnderDimension)
+  generateTableConfigsAndData(props.tjobsAll, props.dimension, props.filterListDataUnderDimension)
 })
 </script>
   

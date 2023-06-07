@@ -3,6 +3,7 @@ import App from './App.vue'
 import router from './router'
 import pinia from './stores'
 import ElementPlus from 'element-plus'
+import elementZhCNLocale from 'element-plus/lib/locale/lang/zh-cn'
 
 import './mock'
 
@@ -21,5 +22,5 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 app.use(router)
   // .use(i18n)
   .use(pinia)
-  .use(ElementPlus)
+  .use(ElementPlus, { locale: elementZhCNLocale })
   .mount('#app')

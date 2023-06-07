@@ -4,15 +4,15 @@
       <div class="main-title">
         <h3 class="work-load-title">Workload性能值详情</h3>
         <h4>测试套：{{ performanceDataStroe?.performanceData[submitId]?.suite }}</h4>
-        <p v-if="performanceDataStroe?.performanceData[submitId]?.suite!=='lmbench'">性能值：
+        <p v-if="performanceDataStroe?.performanceData[submitId]?.suite!=='lmbench'">总体几何平均值：
           {{ performanceValFormatter({},{},performanceDataStroe?.performanceData[submitId]?.performanceVal) }}
         </p>
         <template v-else>
-          <p>Bandwidth性能值：
+          <p>Bandwidth结果几何平均值：
             {{ performanceValFormatter(
               {},{},performanceDataStroe?.performanceData[submitId]?.performanceVal_local_bandwidths
             ) }}
-          </p>Latency性能值：
+          </p>Latency结果几何平均值：
           {{ performanceValFormatter({},{},performanceDataStroe?.performanceData[submitId]?.performanceVal) }}
         </template>
       </div>
