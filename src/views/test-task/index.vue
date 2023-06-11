@@ -72,6 +72,7 @@ const handleStateFiltering = (jobState: string) => {
 }
 
 const getDataList = () => {
+  if (dataLoading.value) return
   dataLoading.value = true
   // 组织搜索条件
   const boolObj = {}
@@ -79,8 +80,8 @@ const getDataList = () => {
   mustList.push({ 'range': {'time': {'gte': 'now-10d/d'} } })
   if (searchValue.value) {
     const searchObj = {}
-    searchObj[searchKey.value] = searchValue.value
-    mustList.push({ fuzzy: searchObj })
+    searchObj[searchKey.value] = `*${searchValue.value}*`
+    mustList.push({ wildcard: searchObj })
   }
   if (jobStateFilter.value) {
     if (jobStateFilter.value === 'others') {
