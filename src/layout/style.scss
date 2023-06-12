@@ -5,7 +5,7 @@ $breadcrumb-nav-height: 32px;
   padding: 0;
 }
 .sub-layout-content {
-  min-height: calc(100vh - $header-height - $breadcrumb-nav-height);
+  min-height: calc(100vh - $header-height);
   background: var(--oe-perf-bg-layout);
   padding: var(--oe-perf-padding);
 }

@@ -32,6 +32,34 @@
               >
               </el-table-column>
               <el-table-column
+                v-if="!checkFilterListDataEmpty(filterListDataUnderDimension)"
+                prop="matchedFilters"
+                label="过滤参数"
+                min-width="180"
+              >
+                <template #header>
+                  <div class="filter-tag-header">
+                    过滤参数
+                    <el-tooltip
+                      class="box-item"
+                      placement="top"
+                      effect="light"
+                    >
+                      <el-icon><QuestionFilled /></el-icon>
+                      <template #content>
+                        数据意义：筛选出当前数据的过滤条件。<br/>
+                        如果一个筛选维度下有不同的筛选项存在，则当前数据可能包含分别匹配到不同筛选项的job。
+                      </template>
+                    </el-tooltip>
+                  </div>
+                </template>
+                <template #default="scope">
+                  <span class="filter-tag" v-for="filterVal in scope.row.matchedFilters" :key="filterVal">
+                    {{ filterVal }}
+                  </span>
+                </template>
+              </el-table-column>
+              <el-table-column
                 v-for="item in config.column.slice(1)"
                 :prop="item.prop"
                 :label="item.label"
@@ -58,7 +86,8 @@ import {
   supportedSuiteList,
   getDimensionValue,
   isTjobPassedFilterCheck,
-  checkTjobDimensionVal
+  checkTjobDimensionVal,
+  getMatchedFilterValList
 } from '../utils/tjobCompute'
 
 const props = defineProps({
@@ -109,9 +138,11 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterListData: Ob
       setTableColConfig(tempConfig, suite, tableIndex)
       // 拼装好的数据进行赋值
       // 需要遍历tempDataMap中的各个dimension，然后push入tempTableataList即可
+      console.log(tempDataMap)
       Object.keys(tempDataMap).forEach(dimension => {
         const calculatedObj = calculateValues(tempDataMap[dimension]) // 计算平均值
         calculatedObj['dimensionId'] = dimension // 添加数据名称
+        calculatedObj['matchedFilters'] = tempDataMap[dimension].matchedFilterValues
         tempTableDataList.push(calculatedObj)
       })
       tableDatas.value[suite][tableIndex] = tempTableDataList
@@ -191,11 +222,12 @@ const setTjobValuesToDataMapAndColumn = (tjobs, suite, dimensionFilterConfig, ta
       tempDataMap[dimensionValue] = {}
     }
     setValuesFromTjobByCol(tjob, suite, columnName, tableConfig, tempDataMap[dimensionValue])
+    setMatchedFilterValue(tjob, suite, tableConfig, filterListData, tempDataMap[dimensionValue])
   })
 }
 
 /**
- * 将数据设置给tempDataObj中
+ * 将数据设置给tempDataObj中。tempDataObj对应一个维度的数据。
  * @param tjob 
  * @param suite 
  * @param columnName 
@@ -214,9 +246,30 @@ const setValuesFromTjobByCol = (tjob, suite, columnName, tableConfig, tempDataOb
   }
 }
 
+/**
+ * 将匹配的过滤参数设置给tempDataObj。
+ */
+const setMatchedFilterValue = (tjob, suite, tableConfig, filterListData, tempDataObj) => {
+  if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
+    return
+  }
+  const matchedList = getMatchedFilterValList(tjob, filterListData)
+
+  if (tempDataObj.matchedFilterValues) {
+    matchedList.forEach((matchString:string) => {
+      if (tempDataObj.matchedFilterValues.indexOf(matchString) < 0) {
+        tempDataObj.matchedFilterValues.push(matchString)
+      }
+    })
+  } else {
+    tempDataObj.matchedFilterValues = matchedList
+  }
+}
+
 const calculateValues = (obj) => {
   const tempObj = {}
   Object.keys(obj).forEach(param => {
+    if (param === 'matchedFilterValues') return // 非计算数据
     let count = 0
     let sum = 0
     // 求和
@@ -256,6 +309,18 @@ const checkDataEmpty = (tableDatas: {}) => {
   return emptyFlag
 }
 
+const checkFilterListDataEmpty = (filterListData: DictObject) => {
+  let isEmpty = true
+  const keys = Object.keys(filterListData)
+  if (keys.length <= 0) return isEmpty
+  keys.forEach((dim:string) => {
+    if (filterListData[dim] && Array.isArray(filterListData[dim]) && filterListData[dim].length > 0) {
+      isEmpty = false
+    }
+  })
+  return isEmpty
+}
+
 // 当表格数据或者展示维度切换时，更新表格配置数据
 watchEffect(() => {
   generateTableConfigsAndData(props.tjobsAll, props.dimension, props.filterListDataUnderDimension)
@@ -272,5 +337,26 @@ watchEffect(() => {
 .empty-content {
   padding: 80px 0;
   text-align: center;
+}
+
+.filter-tag {
+  display: inline-block;
+  font-size: 12px;
+  background-color: var(--oe-perf-color-primary);
+  color:#fff;
+  padding: 2px 4px;
+  border-radius: 3px;
+  &:not(:last-child) {
+    margin-right: 2px;
+    margin-bottom: 2px;
+  }
+
+  &-header {
+    .el-icon {
+      vertical-align: top;
+      margin-top: 3px;
+      cursor: pointer;
+    }
+  }
 }
 </style>
