@@ -79,7 +79,6 @@ const searchLoading = ref(false)
 const isSearched = ref(false)
 
 const dimensionControlerRef = ref(null)
-const optionsData = ref({})
 const osvOptions = ref(new Set())
 const archOptions = ref(new Set())
 const tboxGroupOptions = ref(new Set())
@@ -88,6 +87,15 @@ const suiteOptions = ref(new Set())
 const ppOptions = ref(new Set())
 const ssOptions = ref(new Set())
 const groupOptions = ref(new Set())
+const optionsData = ref({
+  osv: osvOptions,
+  arch: archOptions,
+  tbox_group: tboxGroupOptions,
+  group_id: groupOptions,
+  tags: tagsOptions,
+  pp: ppOptions,
+  ss: ssOptions,
+})
 
 const filterDimension = ref('osv')
 const filterListData = ref({})
@@ -270,15 +278,6 @@ const getFilterOptions = (flattenJob) => {
   const ssParams = getSsParams(flattenJob)
   flattenJob['ssParams'] = ssParams
   ssParams && ssOptions.value.add(ssParams)
-  optionsData.value = {
-    osv: osvOptions,
-    arch: archOptions,
-    tbox_group: tboxGroupOptions,
-    group_id: groupOptions,
-    tags: tagsOptions,
-    pp: ppOptions,
-    ss: ssOptions,
-  }
 }
 
 const getPpParams = (flattenJob) => {
