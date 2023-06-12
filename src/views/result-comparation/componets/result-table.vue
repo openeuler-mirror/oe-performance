@@ -138,7 +138,6 @@ const generateTableConfigsAndData = (tjobs, dimension:string, filterListData: Ob
       setTableColConfig(tempConfig, suite, tableIndex)
       // 拼装好的数据进行赋值
       // 需要遍历tempDataMap中的各个dimension，然后push入tempTableataList即可
-      console.log(tempDataMap)
       Object.keys(tempDataMap).forEach(dimension => {
         const calculatedObj = calculateValues(tempDataMap[dimension]) // 计算平均值
         calculatedObj['dimensionId'] = dimension // 添加数据名称

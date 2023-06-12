@@ -257,7 +257,6 @@ const getAllJobsData = (idList: any[]) => {
         tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
         return
       }
-      console.log(submitItem.jobList)
       const submitData = combineJobs(submitItem.jobList)
       setDeviceInfoToObj(submitData)
       performanceStore.setPerformanceData(submitItem.submitId, submitData)

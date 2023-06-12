@@ -250,7 +250,9 @@ const setFeildsData = () => {
 // url上查询条件回填至查询项上
 const setFieldSelection = () => {
   const fieldKeys = Object.keys(fieldsConfig)
+  /* eslint-disable */ // 规避scene没有使用的报错
   const { scene, searchLimitTime, searchLimitTotal, ...fields } = route.query
+  /* eslint-enable */
   Object.keys(fields).forEach(fieldKey => {
     if (fieldKeys.indexOf(fieldKey) > -1) {
       // 只添加当前选择框中存在的field选择
@@ -579,14 +581,14 @@ const splitParamsByOrigin = (paramObj: objectItem) => {
 }
 
 // 更新查询项逻辑
-const handleUpdateFields = () => {
-  getFieldsOptions() // 因为host表获取的是全部时间的，因此只有job选项需要更新。
-  if (props.suiteByScene) {
-    const oldSuite = searchParams.value.suite
-    searchParams.value = {}
-    searchParams.value.suite = oldSuite
-  }
-}
+// const handleUpdateFields = () => {
+//   getFieldsOptions() // 因为host表获取的是全部时间的，因此只有job选项需要更新。
+//   if (props.suiteByScene) {
+//     const oldSuite = searchParams.value.suite
+//     searchParams.value = {}
+//     searchParams.value.suite = oldSuite
+//   }
+// }
 
 const searchParamForOptionsUpdate = ref({})
 

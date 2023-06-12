@@ -6,12 +6,6 @@ declare module 'vue-router' {
   }
 }
 
-const RouteView = {
-  render() {
-    return <router-view></router-view>
-  }
-}
-
 const asyncRoutes: Array<RouteRecordRaw> = [
   {
     path: '/',

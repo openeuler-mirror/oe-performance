@@ -137,7 +137,6 @@ const getJobData = (submitId:string) => {
     setDeviceInfoToObj(resultObj)
     setPerformanceData(submitId, resultObj) // save submit data to store
     detailData.value = resultObj
-    console.log(detailData)
   }).catch((err) => {
     ElMessage({
       message: err.message,
