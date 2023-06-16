@@ -27,11 +27,11 @@
               <el-select v-model="searchSelection" style="width: 115px">
                 <el-option label="submit id" value="taskId" />
                 <el-option label="测试套" value="suite"/>
-                <el-option label="创建者" value="creator" disabled/>
+                <el-option label="测试人" value="my_account"/>
               </el-select>
             </template>
             <template #append>
-              <el-button :icon="Search" :disabled="tableLoading"/>
+              <el-button :icon="Search" :disabled="tableLoading" @click="onSearch"/>
             </template>
          </el-input>
      </el-col>
@@ -53,12 +53,6 @@
         style="width: 100%"
         stripe
       >
-        <!--<el-table-column width="58">
-          <template #default>
-           <el-icon size="20px" @click="changeStar"><Star /></el-icon>
-             <el-icon size="20px"><StarFilled /></el-icon>
-          </template>
-        </el-table-column>-->
         <el-table-column label="Submit Id" prop="submit_id" fixed min-width="200">
          <template #default="scope">
            <router-link :to="`/testTask/taskDetails/${scope.row.submit_id}`">
@@ -109,7 +103,7 @@
        ]"
        :filter-method="filterHandler"/>
        -->
-       <el-table-column width="140">
+        <el-table-column width="140">
          <template #header>
            总计/成功/失败
          </template>
@@ -123,6 +117,7 @@
           </div>
          </template>
        </el-table-column>
+       <el-table-column prop="my_account" label="测试人" width="120" show-overflow-tooltip/>
        <!--
        <el-table-column prop="address" label="所属项目" width="165" show-overflow-tooltip />
        <el-table-column prop="date" label="创建人" />
@@ -243,7 +238,7 @@ const getAllJobsData = (idList: any[]) => {
       size: 10000,
       _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
         'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time',
-        'my_account', 'group_id'
+        'my_account', 'group_id','result_root'
       ],
       'query': {
         constant_score : {
@@ -262,7 +257,6 @@ const getAllJobsData = (idList: any[]) => {
         tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
         return
       }
-      console.log(submitItem.jobList)
       const submitData = combineJobs(submitItem.jobList)
       setDeviceInfoToObj(submitData)
       performanceStore.setPerformanceData(submitItem.submitId, submitData)

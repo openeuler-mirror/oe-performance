@@ -86,3 +86,32 @@ export const checkTjobDimensionVal = (tjob:DictObject, filterListData:DictObject
   })
   return passedFlag
 }
+
+/**
+ * 通过filterListData过滤tjob，获取到当前tjob匹配到的filter参数列表。
+ * @param tjob
+ * @param filterListData 
+ */
+export const getMatchedFilterValList = (tjob: DictObject, filterListData: DictObject) => {
+  const tempSet = new Set()
+  // 特殊情况，filterListData为空或者全obj[dim]为空时，返回[]。
+
+  Object.keys(filterListData).forEach((dim:string) => {
+    if (filterListData[dim].length <= 0) return
+    const testVal = getDimensionValue(tjob, dim)
+    if (dim === 'pp') {
+      filterListData[dim].forEach((param:string) => {
+        if (testVal.indexOf(param) > -1) {
+          tempSet.add(`pp:${param}`)
+        }
+      })
+    } else {
+      const matchedIdx = filterListData[dim].indexOf(testVal)
+      if (matchedIdx > -1) {
+        tempSet.add(`${dim}:${filterListData[dim][matchedIdx]}`)
+      }
+    }
+  })
+  
+  return Array.from(tempSet)
+}

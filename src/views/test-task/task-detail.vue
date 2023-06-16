@@ -4,7 +4,7 @@
     <el-row :gutter="20">
       <el-col :span="18">
         <el-descriptions :column="2">
-          <el-descriptions-item label="创建人">{{ detailData.subqueue   }}</el-descriptions-item>
+          <el-descriptions-item label="测试人">{{ detailData.my_account   }}</el-descriptions-item>
           <el-descriptions-item label="所属项目"></el-descriptions-item>
           <el-descriptions-item label="创建时间">
             {{ detailData.submit_time ?
@@ -30,38 +30,49 @@
           <div m="4" class="job-table">
             <el-table :data="detailData?.jobList" style="width: 100%">
               <el-table-column prop="id" label="Job Id" width="160" fixed sortable/>
-              <el-table-column prop="job_state" label="Job状态" width="110" sortable sortBy="job_state">
-                <template #default="scope">
-                  <span :class="`state-${scope.row.job_state}`">{{ scope.row.job_state }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="job_stage" label="Job Stage" width="120" sortable sortBy="job_stage">
-                <template #default="scope">
-                  <span :class="`state-${scope.row.job_stage}`">{{ scope.row.job_stage }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column prop="job_health" label="Job Health" width="120" sortable sortBy="job_health">
-                <template #default="scope">
-                  <span :class="`state-${scope.row.job_health}`">{{ scope.row.job_health }}</span>
-                </template>
-              </el-table-column>
-              <el-table-column label="Test Params" min-width="230" sortable>
-                {{ detailData['li-testcase'] || 'N/A' }}
-              </el-table-column>
-              <el-table-column label="开始时间" width="200" sortable sortBy="start_time">
-                <template #default="scope">
-                  {{ scope.row.start_time ?
-                    formatDate(new Date(scope.row.start_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
-                  }}
-                </template>
-              </el-table-column>
-              <el-table-column label="结束时间" width="200" sortable sortBy="end_time">
-                <template #default="scope">
-                  {{ scope.row.start_time ? 
-                    formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
-                  }}
-                </template>
-              </el-table-column>
+                <el-table-column prop="job_state" label="Job状态" width="110" sortable sortBy="job_state">
+                  <template #default="scope">
+                    <span :class="`state-${scope.row.job_state}`">{{ scope.row.job_state }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="job_stage" label="Job Stage" width="120" sortable sortBy="job_stage">
+                  <template #default="scope">
+                    <span :class="`state-${scope.row.job_stage}`">{{ scope.row.job_stage }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="job_health" label="Job Health" width="120" sortable sortBy="job_health">
+                  <template #default="scope">
+                    <span :class="`state-${scope.row.job_health}`">{{ scope.row.job_health }}</span>
+                  </template>
+                </el-table-column>
+                <el-table-column label="Test Params" min-width="230" sortable>
+                  {{ detailData['li-testcase'] || 'N/A' }}
+                </el-table-column>
+                <el-table-column label="开始时间" width="200" sortable sortBy="start_time">
+                  <template #default="scope">
+                    {{ scope.row.start_time ?
+                      formatDate(new Date(scope.row.start_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+                    }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="结束时间" width="200" sortable sortBy="end_time">
+                  <template #default="scope">
+                    {{ scope.row.start_time ? 
+                      formatDate(new Date(scope.row.end_time), 'yyyy/MM/dd hh:mm:ss') : 'N/A'
+                    }}
+                  </template>
+                </el-table-column>
+                <el-table-column label="job详情" prop="job">
+                  <template #default="scope">
+                    <el-link
+                      type="primary"
+                      :underline="false"
+                      @click="goJobDetail(`https://api.compass-ci.openeuler.org${scope.row.result_root}`)"
+                    >
+                      查看
+                    </el-link>
+                  </template>
+                </el-table-column>
               <el-table-column width="15" />
             </el-table>
           </div>
@@ -111,8 +122,9 @@ const getJobData = (submitId:string) => {
     index: 'jobs',
     query: {
       size: 10000,
-      _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
-        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time'
+      _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel', 'my_account',
+        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time',
+        'result_root'
       ],
       query: {
         term: {
@@ -125,7 +137,6 @@ const getJobData = (submitId:string) => {
     setDeviceInfoToObj(resultObj)
     setPerformanceData(submitId, resultObj) // save submit data to store
     detailData.value = resultObj
-    console.log(detailData)
   }).catch((err) => {
     ElMessage({
       message: err.message,
@@ -158,6 +169,10 @@ const getDetailData = () => {
       getJobData(taskId)
     })
   }
+}
+
+const goJobDetail = (url:string) => {
+  window.open(url)
 }
 
 onMounted(() => {

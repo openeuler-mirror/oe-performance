@@ -154,7 +154,6 @@
 import { PropType, ref, watch, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
-  Search,
   Setting,
   RefreshLeft,
   WarningFilled
@@ -195,25 +194,6 @@ const route = useRoute()
 const performanceStore = usePerformanceData()
 const baselineTableInfoStore = useBaselineTableInfoStore()
 const testboxStore = useTestboxStore()
-
-const searcherValue = ref('')
-const searcherKey = ref('my_account')
-const searcherOptions = [
-  {
-    label: '测试人',
-    value: 'my_account'
-  },
-  {
-    label: '测试用例',
-    value: 'submit_id',
-    disabled: true // 该属性未录入数据库
-  },
-  {
-    label: '任务名称',
-    value: 'missionName',
-    disabled: true // 该属性未录入数据库
-  }
-]
 
 const tableData = ref<TableItem[]>([])
 // let originData: TableItem[] = []
