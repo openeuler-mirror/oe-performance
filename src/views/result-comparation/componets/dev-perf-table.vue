@@ -12,6 +12,7 @@
         :prop="column.prop"
         :width="column.minWidth"
         :formatter="column.formatter"
+        :sortable="column.label==='%change'||column.label==='%stddev'"
       />
       <el-table-column prop="kpi" label="kpi" min-width="150px"></el-table-column>
       <el-table-column prop="params" label="params" min-width="400px">
@@ -277,10 +278,10 @@ const generateTableColumn = (dimList: Array<string>) => {
   const tempArr:Array<DictObject> = []
   dimList.forEach((dim:string, index:number) => {
     if (index !== 0) {
-      tempArr.push({ label: '%change', prop: `change_${index}`, minWidth: '90px', formatter: formatterPercentage})
+      tempArr.push({ label: '%change', prop: `change_${index}`, minWidth: '110px', formatter: formatterPercentage})
     }
     tempArr.push({ label: dim, prop: `perfVal_${index}`, minWidth: '200px' })
-    tempArr.push({ label: '%stddev', prop: `stddev_${index}`, minWidth: '80px', formatter: formatterPercentage })
+    tempArr.push({ label: '%stddev', prop: `stddev_${index}`, minWidth: '105px', formatter: formatterPercentage })
   })
   return tempArr
 }
