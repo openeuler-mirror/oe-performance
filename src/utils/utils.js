@@ -133,6 +133,23 @@ export const computeStddev = (inputArr) => {
  * 
  */
 export const formatterPercentage = (row,col,val) => {
-  if (!val) return ''
+  if (!val) return 'N/A'
   return `${(val * 100).toFixed(1)}%`
+}
+
+export const perfSortMethod = (prev, cur, cases, key) => {
+  switch(cases ) {
+  case 'stddev':
+  case 'change':
+    if (prev[key] && cur[key]) {
+      return prev[key] - cur[key]
+    } else if (prev[key]) {
+      return 1
+    } else if (cur[key]) {
+      return -1
+    } else {
+      return 0
+    }
+  }
+
 }
