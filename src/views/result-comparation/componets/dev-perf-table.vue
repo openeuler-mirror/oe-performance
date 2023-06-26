@@ -12,6 +12,8 @@
         :prop="column.prop"
         :width="column.minWidth"
         :formatter="column.formatter"
+        :sort-method="column.sortMethod"
+        :sortable="column.label==='%change'||column.label==='%stddev'"
       />
       <el-table-column prop="kpi" label="kpi" min-width="150px"></el-table-column>
       <el-table-column prop="params" label="params" min-width="400px">
@@ -96,7 +98,7 @@
 import { ref, Ref, watchEffect } from 'vue'
 import { suiteTables } from '../config'
 import { supportedSuiteList, getDimensionValue, isTjobPassedFilterCheck,checkTjobDimensionVal } from '../utils/tjobCompute'
-import { computeMean, computeStddev, formatterPercentage } from '@/utils/utils'
+import { computeMean, computeStddev, formatterPercentage, perfSortMethod } from '@/utils/utils'
 
 interface InitialDataByTable {
   kpi: String,
@@ -277,10 +279,10 @@ const generateTableColumn = (dimList: Array<string>) => {
   const tempArr:Array<DictObject> = []
   dimList.forEach((dim:string, index:number) => {
     if (index !== 0) {
-      tempArr.push({ label: '%change', prop: `change_${index}`, minWidth: '90px', formatter: formatterPercentage})
+      tempArr.push({ label: '%change', prop: `change_${index}`, minWidth: '110px', formatter: formatterPercentage, sortMethod: (a,b) => perfSortMethod(a,b,'change',`change_${index}`)})
     }
     tempArr.push({ label: dim, prop: `perfVal_${index}`, minWidth: '200px' })
-    tempArr.push({ label: '%stddev', prop: `stddev_${index}`, minWidth: '80px', formatter: formatterPercentage })
+    tempArr.push({ label: '%stddev', prop: `stddev_${index}`, minWidth: '105px', formatter: formatterPercentage, sortMethod: (a,b) => perfSortMethod(a,b,'stddev',`stddev_${index}`) })
   })
   return tempArr
 }

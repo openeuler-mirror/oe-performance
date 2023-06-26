@@ -23,7 +23,7 @@
         <TaskDoughnut :stateData="detailData?.jobStateData"/>
       </el-col>
     </el-row>
-    <el-table :data="[detailData]" style="width: 100%" class="task-table">
+    <el-table :data="[detailData]" style="width: 100%" class="task-table" default-expand-all>
       <el-table-column type="expand">
         <!-- ="props" -->
         <template #default>

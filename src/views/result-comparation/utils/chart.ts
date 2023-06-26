@@ -8,10 +8,6 @@ const option = function(title:string, data:any[], cases:string[]){
       {
         name: item['dimensionId'],
         type: 'bar',
-        // stack: 'total',
-        label: {
-          show: true
-        },
         emphasis: {
           focus: 'series'
         },
