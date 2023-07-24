@@ -40,7 +40,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { usePerformanceData } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
-import { tableColumnMap } from '@/views/performance-baseline/config_li.js'
+import { tableColumnMap } from '@/views/performance-baseline/config_li'
 import { combineJobs, invalidNumberSymbol } from '@/views/performance-baseline/utils.js'
 
 const router = useRouter()

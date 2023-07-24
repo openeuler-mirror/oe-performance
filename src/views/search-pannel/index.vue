@@ -11,7 +11,7 @@
             v-for="(item, index) in suiteList"
             :key="index"
             :label="item.suiteName"
-            :disabled="item.unavailable"/>
+            :disabled="item.unavailable" />
         </el-checkbox-group>
       </el-col>
     </el-row>
@@ -19,10 +19,7 @@
     <el-row class="search-field-section" :gutter="4">
       <el-col :span="2">
         <span>筛选内容:</span>
-        <el-tooltip
-          popper-class="tooltip-popper"
-          placement="bottom-start"
-        >
+        <el-tooltip popper-class="tooltip-popper" placement="bottom-start">
           <el-icon><QuestionFilled /></el-icon>
           <template #content>
             <ul>
@@ -33,25 +30,30 @@
         </el-tooltip>
       </el-col>
       <el-col :span="22">
-        <el-row
-          class="react-row"
-        >
+        <el-row class="react-row">
           <el-col
             :xs="24"
             :sm="12"
             :lg="6"
             class="field-item"
             v-for="(paramKey, index) in Object.keys(fieldsConfigForRender)"
-            :key="index"
-          >
-            <span class="fields-label">{{ `${fieldsConfigForRender[paramKey].label}:` }}</span>
+            :key="index">
+            <span class="fields-label">{{
+              `${fieldsConfigForRender[paramKey].label}:`
+            }}</span>
             <!--for osv group-->
             <el-cascader
               class="field-selection"
-              v-if="paramKey==='osv'"
+              v-if="paramKey === 'osv'"
               v-model="searchParams[paramKey]"
-              :loading="fieldsConfigForRender[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
-              :options="fieldsConfigForRender[paramKey].fieldSettings.listValues"
+              :loading="
+                fieldsConfigForRender[paramKey].origin === 'jobs'
+                  ? jobFieldsLoading
+                  : hostFieldsLoading
+              "
+              :options="
+                fieldsConfigForRender[paramKey].fieldSettings.listValues
+              "
               :props="cascaderProps"
               collapse-tags
               collapse-tags-tooltip
@@ -60,14 +62,17 @@
               clearable
               @visible-change="paramSelected"
               @remove-tag="paramSelected"
-              @clear="paramSelected"
-            />
+              @clear="paramSelected" />
             <!--end-->
             <el-select
               v-else
               class="field-selection"
               v-model="searchParams[paramKey]"
-              :loading="fieldsConfigForRender[paramKey].origin === 'jobs' ? jobFieldsLoading : hostFieldsLoading"
+              :loading="
+                fieldsConfigForRender[paramKey].origin === 'jobs'
+                  ? jobFieldsLoading
+                  : hostFieldsLoading
+              "
               filterable
               multiple
               collapse-tags
@@ -76,22 +81,16 @@
               size="small"
               @visible-change="paramSelected"
               @remove-tag="paramSelected"
-              @clear="paramSelected"
-            >
+              @clear="paramSelected">
               <el-option
-                v-for="(item, listIndex) in fieldsConfigForRender[paramKey].fieldSettings
-                  .listValues"
+                v-for="(item, listIndex) in fieldsConfigForRender[paramKey]
+                  .fieldSettings.listValues"
                 :label="item.label || item.value"
                 :value="item.value"
                 :key="listIndex" />
             </el-select>
           </el-col>
-          <el-col
-            :xs="24"
-            :sm="12"
-            :lg="6"
-            class="field-item"
-          >
+          <el-col :xs="24" :sm="12" :lg="6" class="field-item">
             <span class="fields-label">{{ `数据时间:` }}</span>
             <el-input-number
               class="field-selection"
@@ -101,15 +100,9 @@
               :min="1"
               :precision="0"
               :controls="false"
-              @change="paramEnterChagned"
-            />
+              @change="paramEnterChagned" />
           </el-col>
-          <el-col
-            :xs="24"
-            :sm="12"
-            :lg="6"
-            class="field-item"
-          >
+          <el-col :xs="24" :sm="12" :lg="6" class="field-item">
             <span class="fields-label">{{ `数据量限制:` }}</span>
             <el-input-number
               class="field-selection"
@@ -119,19 +112,14 @@
               :min="1"
               :max="10000"
               :precision="0"
-              :controls="false"
-            />
+              :controls="false" />
           </el-col>
         </el-row>
       </el-col>
     </el-row>
     <el-row justify="center">
       <el-button @click="handleReset">重置</el-button>
-      <el-button
-        type="primary"
-        @click="handleSearch"
-        :loading="searchLoading"
-        >
+      <el-button type="primary" @click="handleSearch" :loading="searchLoading">
         搜索
       </el-button>
     </el-row>
@@ -167,7 +155,12 @@ const props = defineProps({
 })
 
 const emit = defineEmits<{
-  (event: 'search', params: searchParams, searchTime: number, searchTotal:number): void,
+  (
+    event: 'search',
+    params: BaseLine.SearchParams,
+    searchTime: number,
+    searchTotal: number
+  ): void
   // 当搜索条件重置是
   (event: 'resetSearchValue'): void
 }>()
@@ -205,7 +198,8 @@ const initailizing = () => {
   setFeildsData() // 记录有哪些选项
   setFieldSelection() // 将url上的查询条件的值读取到查询数据searchParam中
 
-  if (props.suiteByScene) { // 在性能基线模块中根据路由自动设置suite查询条件
+  if (props.suiteByScene) {
+    // 在性能基线模块中根据路由自动设置suite查询条件
     setSuiteList()
     setDefaultSuite()
   }
@@ -218,7 +212,7 @@ const initailizefieldsList = () => {
     fieldKeys = fieldKeys.filter(key => key !== 'suite')
   }
   // const len = Math.ceil(fieldKeys.length / 4)
-  const tempObj = {} 
+  const tempObj = {}
   fieldKeys.forEach(key => {
     tempObj[key] = fieldsConfig[key]
   })
@@ -257,7 +251,9 @@ const setFieldSelection = () => {
     if (fieldKeys.indexOf(fieldKey) > -1) {
       // 只添加当前选择框中存在的field选择
       if (fieldKey === 'osv') {
-        searchParams.value[fieldKey] = parseQueryStringTo2dArray(fields[fieldKey])
+        searchParams.value[fieldKey] = parseQueryStringTo2dArray(
+          fields[fieldKey]
+        )
       } else {
         if (Array.isArray(fields[fieldKey])) {
           searchParams.value[fieldKey] = fields[fieldKey]
@@ -268,7 +264,7 @@ const setFieldSelection = () => {
     }
   })
   searchLimitTime && (searchTime.value = Number(searchLimitTime))
-  searchLimitTotal && (searchTotal.value = Number(searchLimitTotal))  
+  searchLimitTotal && (searchTotal.value = Number(searchLimitTotal))
 }
 // 性能基线页面中:
 // 根据当前场景，显示不同的suite可选项
@@ -281,7 +277,7 @@ const setSuiteList = () => {
 }
 // 性能基线页面中:
 // 设置默认选中的suite，如果url中有，则使用url的
-const setDefaultSuite = (forcedUpdateSuite=false) => {
+const setDefaultSuite = (forcedUpdateSuite = false) => {
   let suite = []
   const queryObj = route.query
   if (queryObj.suite) {
@@ -293,7 +289,9 @@ const setDefaultSuite = (forcedUpdateSuite=false) => {
   }
   searchParams.value['suite'] = []
   if (suite.length < 1 || forcedUpdateSuite) {
-    searchParams.value['suite'] = suiteList.value[0] && [suiteList.value[0].suiteName]
+    searchParams.value['suite'] = suiteList.value[0] && [
+      suiteList.value[0].suiteName
+    ]
     return
   }
   suite.forEach(suiteItem => {
@@ -306,54 +304,67 @@ const setDefaultSuite = (forcedUpdateSuite=false) => {
 /* ====================以上为init相关方法======================= */
 
 // 获取并更新搜索条件中每个param的可选项，只有job表中涉及的条件
-const getFieldsOptions = () => {
-  jobFieldsLoading.value  = true
+function getFieldsOptions() {
+  jobFieldsLoading.value = true
   const searchParamObject = JSON.parse(JSON.stringify(searchParams.value))
   // 如果搜索了硬件参数，需根据硬件参数过滤出的testboxList来限制job参数的获取
-  if ((!searchParamObject.testbox || searchParamObject.testbox?.length <1)
-    && filteredTestboxList.value.length > 0
-    && !isSearchParamsEmpty(getSearchParamsByFields(searchParams.value, hostFieldList))) {
-    searchParamObject.testbox = filteredTestboxList.value.map(testbox => testbox.testboxId)
+  if (
+    (!searchParamObject.testbox || searchParamObject.testbox?.length < 1) &&
+    filteredTestboxList.value.length > 0 &&
+    !isSearchParamsEmpty(
+      getSearchParamsByFields(searchParams.value, hostFieldList)
+    )
+  ) {
+    searchParamObject.testbox = filteredTestboxList.value.map(
+      testbox => testbox.testboxId
+    )
   }
   getJobValueList({
     jobFieldList,
     searchTime: searchTime.value,
     searchTotal: searchTotal.value,
-    byScene:(props.suiteByScene && searchParams.value.suite) || (props.fieldsBySecne.length > 0 && props.fieldsBySecne),
+    byScene:
+      (props.suiteByScene && searchParams.value.suite) ||
+      (props.fieldsBySecne.length > 0 && props.fieldsBySecne),
     searchParams: getSearchParamsByFields(searchParamObject, jobFieldList)
-  }).then(res => {
-    const aggs = res.data.aggregations || {}
-    Object.keys(aggs).forEach(field => {
-      // 通过请求获取的可选项
-      const listValues = aggs[field].buckets.map((item: any) => {
-        return {
-          value: item.key
+  })
+    .then(res => {
+      const aggs = res.data.aggregations || {}
+      Object.keys(aggs).forEach(field => {
+        // 通过请求获取的可选项
+        const listValues = aggs[field].buckets.map((item: any) => {
+          return {
+            value: item.key
+          }
+        })
+        // 重置listValues
+        const originData = JSON.parse(
+          JSON.stringify(fieldsConfiguration[field].fieldSettings.listValues)
+        )
+        fieldsConfig[field].fieldSettings.listValues = originData
+        // 获取对应field的listValues引用
+        const staticValues = fieldsConfig[field].fieldSettings.listValues || []
+        if (field === 'osv') {
+          const osvOptions = constrcutOsvOptions(listValues)
+          addNewOptionValues(staticValues, osvOptions)
+        } else {
+          addNewOptionValues(staticValues, listValues)
         }
       })
-      // 重置listValues
-      const originData = JSON.parse(JSON.stringify(fieldsConfiguration[field].fieldSettings.listValues))
-      fieldsConfig[field].fieldSettings.listValues = originData
-      // 获取对应field的listValues引用
-      const staticValues = fieldsConfig[field].fieldSettings.listValues || []
-      if (field === 'osv') {
-        const osvOptions = constrcutOsvOptions(listValues)
-        addNewOptionValues(staticValues, osvOptions)
-      } else {
-        addNewOptionValues(staticValues, listValues)
-      }
     })
-  }).catch(err => {
-    ElMessage({
-      message: err.message,
-      type: 'error'
+    .catch(err => {
+      ElMessage({
+        message: err.message,
+        type: 'error'
+      })
     })
-  }).finally(() => {
-    jobFieldsLoading.value = false
-  })
+    .finally(() => {
+      jobFieldsLoading.value = false
+    })
 }
 
 // 工具函数
-const isSearchParamsEmpty = (searchParams) => {
+const isSearchParamsEmpty = searchParams => {
   if (Object.keys(searchParams).length < 1) return true
   let isEmpty = true
   Object.keys(searchParams).forEach(field => {
@@ -365,7 +376,10 @@ const isSearchParamsEmpty = (searchParams) => {
 }
 
 // 工具函数
-const getSearchParamsByFields = (searchParams: objectItem, fieldList: Array<String>) => {
+const getSearchParamsByFields = (
+  searchParams: objectItem,
+  fieldList: Array<String>
+) => {
   const tempObj = <objectItem>{}
   Object.keys(searchParams).forEach(field => {
     if (fieldList.indexOf(field) > -1) {
@@ -376,11 +390,11 @@ const getSearchParamsByFields = (searchParams: objectItem, fieldList: Array<Stri
 }
 
 // 工具函数，设置osv数据格式以支持分组选项组件
-const constrcutOsvOptions = (osvList) => {
+const constrcutOsvOptions = osvList => {
   if (!osvList || osvList.length < 1) return []
   const osMap = {}
   const osvListNew = []
-  osvList.forEach((osv:string) => {
+  osvList.forEach((osv: string) => {
     const osParams = osv?.value.split('@')
     const os = osParams[0]
     let osLabel = os
@@ -390,8 +404,8 @@ const constrcutOsvOptions = (osvList) => {
     if (osv.label) {
       if (version) {
         const tempLabel = osv.label.split(' ')
-        osLabel = tempLabel.slice(0, tempLabel.length -1).join(' ')
-        versionLabel = tempLabel[tempLabel.length -1]
+        osLabel = tempLabel.slice(0, tempLabel.length - 1).join(' ')
+        versionLabel = tempLabel[tempLabel.length - 1]
       } else {
         osLabel = osv.label
       }
@@ -409,52 +423,71 @@ const constrcutOsvOptions = (osvList) => {
       }
     }
   })
-  Object.keys(osMap).forEach(os => { osvListNew.push(osMap[os]) })
+  Object.keys(osMap).forEach(os => {
+    osvListNew.push(osMap[os])
+  })
   return osvListNew
   // sourceArr.push(...osvListNew)
 }
 
 // 获取并更新搜索条件中每个param的可选项，只有hosts表中涉及的条件
-const getHostOptions = () => {
+function getHostOptions() {
   hostFieldsLoading.value = true
-  const fieldList = hostFieldList.map((field:string) => field.replace('hw.', ''))
-  const hostSearchParams = getSearchParamsByFields(searchParams.value, hostFieldList)
-  getTestBoxes().then((testboxRes => {
-    testboxList.value = testboxRes.data.hits.hits.map(item => {
-      return {
-        testboxId: item._id,
-        ...item._source
-      }
-    })
-    testboxStore.setTestboxData(testboxList.value)
-    filteredTestboxList.value 
-      = filteringTestboxBySearchParams(testboxList.value, hostSearchParams, searchParams.value.testbox)
-    fieldList.forEach(field => { // 遍历硬件的fieldList，从testBoxList聚合信息。
-      const listValues = []
-      const repeatMap = {}
-      filteredTestboxList.value.forEach(testbox => {
-        if (testbox[field] && !repeatMap[testbox[field]]) {
-          listValues.push({
-            value: testbox[field]
-          })
-          repeatMap[testbox[field]] = 1
+  const fieldList = hostFieldList.map((field: string) =>
+    field.replace('hw.', '')
+  )
+  const hostSearchParams = getSearchParamsByFields(
+    searchParams.value,
+    hostFieldList
+  )
+  getTestBoxes()
+    .then(testboxRes => {
+      testboxList.value = testboxRes.data.hits.hits.map(item => {
+        return {
+          testboxId: item._id,
+          ...item._source
         }
       })
-      const originData = JSON.parse(JSON.stringify(fieldsConfiguration[`hw.${field}`].fieldSettings.listValues))
-      fieldsConfig[`hw.${field}`].fieldSettings.listValues = originData
-      const staticValues = fieldsConfig[`hw.${field}`].fieldSettings.listValues || []
-      addNewOptionValues(staticValues, listValues)
+      testboxStore.setTestboxData(testboxList.value)
+      filteredTestboxList.value = filteringTestboxBySearchParams(
+        testboxList.value,
+        hostSearchParams,
+        searchParams.value.testbox
+      )
+      fieldList.forEach(field => {
+        // 遍历硬件的fieldList，从testBoxList聚合信息。
+        const listValues = []
+        const repeatMap = {}
+        filteredTestboxList.value.forEach(testbox => {
+          if (testbox[field] && !repeatMap[testbox[field]]) {
+            listValues.push({
+              value: testbox[field]
+            })
+            repeatMap[testbox[field]] = 1
+          }
+        })
+        const originData = JSON.parse(
+          JSON.stringify(
+            fieldsConfiguration[`hw.${field}`].fieldSettings.listValues
+          )
+        )
+        fieldsConfig[`hw.${field}`].fieldSettings.listValues = originData
+        const staticValues =
+          fieldsConfig[`hw.${field}`].fieldSettings.listValues || []
+        addNewOptionValues(staticValues, listValues)
+      })
     })
-  })).catch(err => {
-    ElMessage({
-      message: err.message,
-      type: 'error'
+    .catch(err => {
+      ElMessage({
+        message: err.message,
+        type: 'error'
+      })
     })
-  }).finally(() => {
-    // 获取硬件信息后，在获取job选项。因为有可能需要根据信息选项过滤jobs选项
-    getFieldsOptions()
-    hostFieldsLoading.value = false
-  })
+    .finally(() => {
+      // 获取硬件信息后，在获取job选项。因为有可能需要根据信息选项过滤jobs选项
+      getFieldsOptions()
+      hostFieldsLoading.value = false
+    })
 }
 
 // 工具函数，根据查询参数过滤获取到的testbox
@@ -464,18 +497,26 @@ const filteringTestboxBySearchParams = (
   searchParamTestbox: Array<string>
 ) => {
   // 如果用户选择了testbox，则直接由testbox过滤
-  if (searchParamTestbox && Array.isArray(searchParamTestbox) && searchParamTestbox.length > 0) {
-    return testboxList.filter(testbox => searchParamTestbox.indexOf(testbox.testboxId) > -1)
+  if (
+    searchParamTestbox &&
+    Array.isArray(searchParamTestbox) &&
+    searchParamTestbox.length > 0
+  ) {
+    return testboxList.filter(
+      testbox => searchParamTestbox.indexOf(testbox.testboxId) > -1
+    )
   }
-  const searchParamList = Object.keys(searchParams)
-    .filter(hwField => Object.keys(searchParams[hwField]).length > 0)
-  if (searchParamList.length < 1) 
-    return JSON.parse(JSON.stringify(testboxList))
+  const searchParamList = Object.keys(searchParams).filter(
+    hwField => Object.keys(searchParams[hwField]).length > 0
+  )
+  if (searchParamList.length < 1) return JSON.parse(JSON.stringify(testboxList))
 
   return testboxList.filter(testbox => {
     let isTestboxMatch = false
     searchParamList.forEach(hwField => {
-      if (searchParams[hwField].indexOf(testbox[hwField.replace('hw.','')]) > -1) {
+      if (
+        searchParams[hwField].indexOf(testbox[hwField.replace('hw.', '')]) > -1
+      ) {
         isTestboxMatch = true
       }
     })
@@ -506,7 +547,7 @@ const handleReset = () => {
 }
 
 // 查询逻辑
-const handleSearch = () => {
+function handleSearch() {
   if (isNaN(searchTime.value) || searchTime.value === null) {
     searchTime.value = 10
   }
@@ -518,7 +559,7 @@ const handleSearch = () => {
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
   // osv特殊处理
   if (jobParams.osv && Array.isArray(jobParams.osv)) {
-    jobParams.osv = jobParams.osv.map((arr:string[]) => arr.join('@'))
+    jobParams.osv = jobParams.osv.map((arr: string[]) => arr.join('@'))
   }
   if (Object.keys(hostParams).length > 0) {
     const testboxSearchList = []
@@ -526,19 +567,33 @@ const handleSearch = () => {
       const fieldKeyInTestbox = hostFieldKey.replace('hw.', '')
       let tempIdList = []
       if (Array.isArray(hostParams[hostFieldKey])) {
-        tempIdList = testboxList.value.filter(testbox => {
-          return testbox[fieldKeyInTestbox] && hostParams[hostFieldKey].indexOf(testbox[fieldKeyInTestbox]) > -1
-        }).map(testbox => testbox.testboxId)
+        tempIdList = testboxList.value
+          .filter(testbox => {
+            return (
+              testbox[fieldKeyInTestbox] &&
+              hostParams[hostFieldKey].indexOf(testbox[fieldKeyInTestbox]) > -1
+            )
+          })
+          .map(testbox => testbox.testboxId)
       } else {
-        tempIdList = testboxList.value.filter(testbox => {
-          return testbox[fieldKeyInTestbox] && String(testbox[fieldKeyInTestbox]) === String(hostParams[hostFieldKey])
-        }).map(testbox => testbox.testboxId)
+        tempIdList = testboxList.value
+          .filter(testbox => {
+            return (
+              testbox[fieldKeyInTestbox] &&
+              String(testbox[fieldKeyInTestbox]) ===
+                String(hostParams[hostFieldKey])
+            )
+          })
+          .map(testbox => testbox.testboxId)
       }
       testboxSearchList.push(...tempIdList)
     })
     const searchParamData = { ...jobParams }
     // 当testbox存在时，说明用户指定了testboxId，此时使用硬件的筛选没有意义了
-    if (testboxSearchList.length > 0 && (!searchParamData.testbox || searchParamData.testbox.length < 1)) { 
+    if (
+      testboxSearchList.length > 0 &&
+      (!searchParamData.testbox || searchParamData.testbox.length < 1)
+    ) {
       searchParamData.testbox = testboxSearchList
     }
 
@@ -594,8 +649,14 @@ const searchParamForOptionsUpdate = ref({})
 
 const paramSelected = (isOpen: boolean) => {
   if (isOpen === true) return
-  if (JSON.stringify(searchParams.value) === JSON.stringify(searchParamForOptionsUpdate.value)) return
-  searchParamForOptionsUpdate.value = JSON.parse(JSON.stringify(searchParams.value))
+  if (
+    JSON.stringify(searchParams.value) ===
+    JSON.stringify(searchParamForOptionsUpdate.value)
+  )
+    return
+  searchParamForOptionsUpdate.value = JSON.parse(
+    JSON.stringify(searchParams.value)
+  )
   getHostOptions()
 }
 
@@ -632,7 +693,6 @@ onMounted(() => {
   initailizing()
   getHostOptions()
 })
-
 </script>
 
 <style scoped lang="scss">
@@ -660,13 +720,12 @@ onMounted(() => {
   border-bottom-right-radius: 5px;
 }
 
-.suite-selection-label  {
+.suite-selection-label {
   line-height: 32px;
 }
 
-
 .search-field-section {
-  z-index:5;
+  z-index: 5;
   margin-bottom: 12px;
   &-label {
     line-height: 32px;
@@ -696,12 +755,12 @@ onMounted(() => {
   .el-tooltip__trigger {
     cursor: pointer;
     vertical-align: top;
-    top:2px;
-    margin-left:2px;
+    top: 2px;
+    margin-left: 2px;
   }
 }
 .tooltip-popper {
-  padding:4px;
+  padding: 4px;
   ul {
     margin-left: 11px;
   }
@@ -720,7 +779,7 @@ span {
     margin: 0 8px;
   }
   .update-button {
-    margin-left:12px;
+    margin-left: 12px;
   }
   :deep(.loading-icon) {
     width: 12px;
@@ -729,7 +788,7 @@ span {
     }
   }
   :deep(.update-tooltip) {
-    margin-left:8px;
+    margin-left: 8px;
     cursor: pointer;
   }
 }

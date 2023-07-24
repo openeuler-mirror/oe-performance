@@ -4,7 +4,7 @@
 import { reactive } from 'vue'
 import { flattenObj, computeGeoMean} from '@/utils/utils'
 
-import { testParamsMap, kpiListMap, tableMode, tableColumnMap } from '@/views/performance-baseline/config_li.js'
+import { testParamsMap, kpiListMap, tableMode, tableColumnMap } from '@/views/performance-baseline/config_li.ts'
 
 export const invalidNumberSymbol = -1
 

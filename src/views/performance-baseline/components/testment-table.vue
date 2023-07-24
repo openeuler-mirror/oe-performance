@@ -16,8 +16,10 @@
           :all-column="allColumn"
           :selected-table-rows="selectedTableRows"
           @openModal="exportModalVisible = true"
-          @closeModal="closeExportModal"/>
-        <p v-if="dataList.length > 0" class="jobs-count">当前数据由{{ jobCount }}条job汇总</p>
+          @closeModal="closeExportModal" />
+        <p v-if="dataList.length > 0" class="jobs-count">
+          当前数据由{{ jobCount }}条job汇总
+        </p>
       </div>
       <div class="button-group-right">
         <el-button
@@ -75,9 +77,7 @@
       <el-icon><WarningFilled color="rgb(16,142,233)" /></el-icon>
       <span> 已选择 {{ selectedTableRows.length }}项 </span>
       <el-divider direction="vertical" />
-      <span
-        >可以最多勾选5条数据进行导出；导出时可选择基准数据进行对比。</span
-      >
+      <span>可以最多勾选5条数据进行导出；导出时可选择基准数据进行对比。</span>
     </div>
     <el-table
       ref="multipleTableRef"
@@ -85,35 +85,34 @@
       v-loading="tableLoading || submitDataLoading"
       stripe
       :header-cell-style="{ background: 'rgb(243,243,243)' }"
-      @selection-change="handleSelectionChange"
-    >
+      @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="30" />
       <el-table-column
         fixed="left"
         width="200"
         label="性能几何平均值"
-        prop="performanceVal"
-      >
+        prop="performanceVal">
         <template #default="scope">
-            <div
-              v-if="scope.row.suite!=='lmbench'"
-              class="important-value"
-            >{{ perfValformatter(scope.row.performanceVal) }}</div>
-            <div v-else>
-              <p>
-                <span>Bandwidth：</span>
-                <span class="important-value">
-                  {{ perfValformatter(scope.row.performanceVal_local_bandwidths) }}
-                </span>
-              </p>
-              <p>
-                <span>Latency：</span>
-                <span class="important-value">
-                  {{ perfValformatter(scope.row.performanceVal) }}
-                </span>
-              </p>
-            </div>
-          </template>
+          <div v-if="scope.row.suite !== 'lmbench'" class="important-value">
+            {{ perfValformatter(scope.row.performanceVal) }}
+          </div>
+          <div v-else>
+            <p>
+              <span>Bandwidth：</span>
+              <span class="important-value">
+                {{
+                  perfValformatter(scope.row.performanceVal_local_bandwidths)
+                }}
+              </span>
+            </p>
+            <p>
+              <span>Latency：</span>
+              <span class="important-value">
+                {{ perfValformatter(scope.row.performanceVal) }}
+              </span>
+            </p>
+          </div>
+        </template>
       </el-table-column>
       <template v-for="(item, index) in tableColumn">
         <el-table-column
@@ -122,9 +121,8 @@
           :label="item.label"
           :key="index"
           :width="item.width"
-          :min-width="item.minWidth"
-          :class-name="item.className"
-        >
+          :min-width="item.width"
+          :class-name="item.className">
         </el-table-column>
       </template>
       <el-table-column prop="detail" label="详细数据" fixed="right">
@@ -153,16 +151,19 @@
 <script setup lang="ts">
 import { PropType, ref, watch, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import {
-  Setting,
-  RefreshLeft,
-  WarningFilled
-} from '@element-plus/icons-vue'
+import { Setting, RefreshLeft, WarningFilled } from '@element-plus/icons-vue'
 import { config, sceneConfig, Column } from '../config-file'
-import { ElMessage, ElTable } from 'element-plus'
-import { usePerformanceData, useBaselineTableInfoStore, useTestboxStore } from '@/stores/performanceData'
+import { ElMessage, ElTable, CheckboxValueType } from 'element-plus'
+import {
+  usePerformanceData,
+  useBaselineTableInfoStore,
+  useTestboxStore
+} from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
-import { combineJobs, invalidNumberSymbol } from '@/views/performance-baseline/utils.js'
+import {
+  combineJobs,
+  invalidNumberSymbol
+} from '@/views/performance-baseline/utils.js'
 import ExportModal from './export-modal.vue'
 
 export interface TableItem {
@@ -202,27 +203,28 @@ const allColumn = ref([] as Column[])
 const tableColumn = ref([] as Column[])
 const allColumnLabel = ref([] as string[])
 const cloumnLabel = ref([] as string[])
-const isIndeterminate = ref(false)
-const checkAllColumn = ref(true)
+const isIndeterminate = ref<boolean>(false)
+const checkAllColumn = ref<boolean>(true)
 
 const selectedTableRows = ref<any[]>([])
 
 const idList = ref(<any>[])
-const currentPage = ref(1)
-const pageSize = ref(10)
-const pageSizes = ref([10, 20, 50])
-const total = ref(0)
-const background = ref(false)
-const disabled = ref(false)
+const currentPage = ref<number>(1)
+const pageSize = ref<number>(10)
+const pageSizes = ref<number[]>([10, 20, 50])
+const total = ref<number>(0)
+const background = ref<boolean>(false)
+const disabled = ref<boolean>(false)
 
-const reFreshLodaing = ref(false)
-const tableLoading = ref(false)
+const reFreshLodaing = ref<boolean>(false)
+const tableLoading = ref<boolean>(false)
 
-const changeSizeOnly = ref(false)
+const changeSizeOnly = ref<boolean>(false)
 
-const initailizeColumn = () => {
+function initailizeColumn(): void {
   const scene = route.query.scene ? route.query.scene : 'bigData'
   let key: keyof typeof sceneConfig
+
   for (key in sceneConfig) {
     if (sceneConfig[key].findIndex(item => item.prop === scene) !== -1) {
       allColumn.value = config[scene as string].column
@@ -235,7 +237,7 @@ const initailizeColumn = () => {
   }
 }
 
-const handlecheckAllColumn = (val: any) => {
+const handlecheckAllColumn = (val: CheckboxValueType): void => {
   if (val) {
     tableColumn.value.forEach(cloumn => {
       cloumn.show = true
@@ -248,8 +250,9 @@ const handlecheckAllColumn = (val: any) => {
   cloumnLabel.value = val ? allColumnLabel.value : []
   isIndeterminate.value = false
 }
-const handleCheckedTableCloumn = (value: any[]) => {
-  const checkedCount = value.length
+
+const handleCheckedTableCloumn = (value: CheckboxValueType[]): void => {
+  const checkedCount: number = value.length
   tableColumn.value.forEach(cloumn => {
     cloumn.show =
       value.findIndex(item => item === cloumn.label) === -1 ? false : true
@@ -259,55 +262,79 @@ const handleCheckedTableCloumn = (value: any[]) => {
     checkedCount > 0 && checkedCount < allColumn.value.length
 }
 
-const handleSelectionChange = (selectedRow: any) => {
+const handleSelectionChange = (selectedRow: any[]) => {
   selectedTableRows.value = selectedRow
 }
 
 // 获取并合并jobs的逻辑
-const getAllJobsData = (idList: any[]) => {
+function getAllJobsData(idList: any[]) {
   tableLoading.value = true
   const tempArr: any[] = reactive(Object.assign([], idList))
   getPerformanceData({
-    'index': 'jobs',
-    'query': {
+    index: 'jobs',
+    query: {
       size: 10000,
-      _source: ['suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel',
-        'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time',
-        'my_account', 'group_id'
+      _source: [
+        'suite',
+        'id',
+        'submit_id',
+        'group_id',
+        'tags',
+        'os',
+        'os_version',
+        'osv',
+        'arch',
+        'kernel',
+        'testbox',
+        'tbox_group',
+        'pp',
+        'stats',
+        'job_state',
+        'job_stage',
+        'job_health',
+        'time',
+        'start_time',
+        'end_time',
+        'submit_time',
+        'my_account',
+        'group_id'
       ],
-      'query': {
-        constant_score : {
-          filter : {
-            terms : { 
-              submit_id : idList.map(item => item.submit_id)
+      query: {
+        constant_score: {
+          filter: {
+            terms: {
+              submit_id: idList.map(item => item.submit_id)
             }
           }
         }
       }
-    },
-  }).then(res => {
-    const submitResult = constructSubmitDataList(res?.data?.hits?.hits)
-    submitResult.forEach((submitItem, idx) => {
-      if (performanceStore.performanceData[submitItem.submitId]) {
-        tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
-        return
-      }
-      const submitData = combineJobs(submitItem.jobList)
-      setDeviceInfoToObj(submitData)
-      performanceStore.setPerformanceData(submitItem.submitId, submitData)
-      tempArr[idx] = submitData
-    })
-  }).catch(err => {
-    ElMessage({ message: err.message, type: 'error' })
-  }).finally(() => {
-    tableLoading.value = false
+    }
   })
+    .then(res => {
+      const submitResult = constructSubmitDataList(res?.data?.hits?.hits)
+      submitResult.forEach((submitItem: any, idx: number) => {
+        if (performanceStore.performanceData[submitItem.submitId]) {
+          tempArr[idx] = performanceStore.performanceData[submitItem.submitId]
+          return
+        }
+        const submitData = combineJobs(submitItem.jobList)
+        setDeviceInfoToObj(submitData)
+        performanceStore.setPerformanceData(submitItem.submitId, submitData)
+        tempArr[idx] = submitData
+      })
+    })
+    .catch(err => {
+      ElMessage({ message: err.message, type: 'error' })
+    })
+    .finally(() => {
+      tableLoading.value = false
+    })
   return tempArr
 }
 
-const constructSubmitDataList = (jobList) => {
+function constructSubmitDataList(jobList: any[]) {
   const submitList = <any>[]
-  const submitMap = {}
+  const submitMap = <any>{}
   jobList.forEach(job => {
     const submitId = job?._source?.submit_id
     if (submitMap[submitId]) {
@@ -323,9 +350,9 @@ const constructSubmitDataList = (jobList) => {
   return submitList
 }
 
-const setDeviceInfoToObj = (resultObj) => {
+function setDeviceInfoToObj(resultObj: any) {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
-  resultObj.device =  testbox.device || {}
+  resultObj.device = testbox.device || {}
 }
 
 // 对比
@@ -340,14 +367,14 @@ const closeExportModal = () => {
   exportModalVisible.value = false
   multipleTableRef.value!.clearSelection()
 }
-const perfValformatter = (cellValue: number) => {
+function perfValformatter(cellValue: number): number | string {
   if (cellValue === undefined || cellValue === invalidNumberSymbol) {
     return '暂无数据'
   }
   return cellValue
 }
 
-const handleReFresh = () => {
+const handleReFresh = (): void => {
   emit('refreash')
 }
 
@@ -404,7 +431,7 @@ watch(
 onMounted(() => {
   initailizeColumn()
   if (route.meta.isGoback) {
-    if (baselineTableInfoStore.baselineTableInfo && baselineTableInfoStore.baselineTableInfo.currentPage) {
+    if (baselineTableInfoStore.baselineTableInfo?.currentPage) {
       changeSizeOnly.value = true
       pageSize.value = baselineTableInfoStore.baselineTableInfo.pageSize
       currentPage.value = baselineTableInfoStore.baselineTableInfo.currentPage
