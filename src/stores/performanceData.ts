@@ -10,6 +10,7 @@ const loadingStatus = reactive({
 })
 export const usePerformanceData = defineStore('performanceData', () => {
   const setPerformanceData = (key: string, data: any) => {
+    // performanceData[key] = data
     performanceData[key] = data
   }
 
