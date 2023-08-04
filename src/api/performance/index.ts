@@ -1,4 +1,4 @@
-import createAxios from '@/utils/request/axios';
+import createAxios from '@/utils/request/axios'
 
 export interface DataObject {
   [key: string]: any
@@ -8,7 +8,7 @@ const api = {
   requestDataApi: '/data-api/search'
 }
 
-export function getSearchParams(params:any) {
+export function getSearchParams(params: any) {
   return createAxios({
     url: api.requestDataApi,
     method: 'post',
@@ -16,7 +16,9 @@ export function getSearchParams(params:any) {
   })
 }
 
-export function getPerformanceData(params:any) {
+export function getPerformanceData(
+  params: PerformanceApi.PerformanceDataParams
+) {
   return createAxios({
     url: api.requestDataApi,
     method: 'post',
@@ -75,7 +77,7 @@ export function getTestBoxes() {
 interface Aggs {
   [propName: string]: any
 }
-export function getJobValueList(params:any) {
+export function getJobValueList(params: any) {
   const { jobFieldList, searchTime = 10, byScene, searchParams } = params
   const aggs: Aggs = {}
   const mustArr = []
@@ -83,7 +85,7 @@ export function getJobValueList(params:any) {
   if (byScene && byScene?.length > 0) {
     mustArr.push({ terms: { suite: byScene } })
   }
-  jobFieldList.forEach((field:string) => {
+  jobFieldList.forEach((field: string) => {
     if (field === 'tags') return // 只要包含tag就会全部返回空
     aggs[field] = {
       terms: {
@@ -95,21 +97,22 @@ export function getJobValueList(params:any) {
   // 请求时根据目前已选的searchParam值进行过滤
   Object.keys(searchParams).forEach((param: string) => {
     if (!searchParams[param]) return
-    if (Array.isArray(searchParams[param]) && searchParams[param].length < 1) return
+    if (Array.isArray(searchParams[param]) && searchParams[param].length < 1)
+      return
     const tempObj = <DataObject>{}
     if (param === 'osv' && Array.isArray(searchParams[param])) {
-      tempObj[param] = searchParams[param].map((arr:string[]) => arr.join('@'))
+      tempObj[param] = searchParams[param].map((arr: string[]) => arr.join('@'))
     } else {
       tempObj[param] = searchParams[param]
     }
-    mustArr.push({ terms: tempObj})
+    mustArr.push({ terms: tempObj })
   })
   const query = {
     size: 10,
     query: {
       bool: {
         must: mustArr
-      } 
+      }
     },
     aggs
   }
@@ -123,10 +126,10 @@ export function getJobValueList(params:any) {
   })
 }
 // host表中的几个数据聚合不到,目前没有使用这个接口
-export function getHostValueList(params:any) {
+export function getHostValueList(params: any) {
   const { hostFieldList } = params
   const aggs: Aggs = {}
-  hostFieldList.forEach((field:string) => {
+  hostFieldList.forEach((field: string) => {
     aggs[field] = {
       terms: {
         field: `${field}`,
@@ -157,7 +160,7 @@ export function getTestboxBySearchParams(params: anyObj) {
   Object.keys(params).forEach(paramKey => {
     if (params[paramKey]) {
       const searchKey = paramKey.replace('hw.', '')
-      const matchObj:anyObj = {}
+      const matchObj: anyObj = {}
       matchObj[searchKey] = params[paramKey]
       mustCasees.push({
         match: matchObj

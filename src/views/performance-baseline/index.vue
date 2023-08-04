@@ -50,24 +50,32 @@ const handleTableSearch: BaseLine.TableSearchFun = (searchKey, searchValue) => {
   getAllData(searchParams.value, searchLimitTime.value, searchLimitTotal.value)
 }
 
-function setMustCase(searchParams: BaseLine.SearchParams) {
-  const tempArr: any = []
-  const keys = Object.keys(searchParams) as (keyof BaseLine.SearchParams)[]
-  keys.forEach(paramKey => {
-    if (searchParams[paramKey]) {
-      const matchObj: any = {}
-      matchObj[paramKey] = searchParams[paramKey]
-      if (Array.isArray(searchParams[paramKey])) {
-        searchParams[paramKey].length > 0 && tempArr.push({ terms: matchObj })
-      } else {
-        tempArr.push({ match: matchObj })
+// 计算query中的Must数组
+function setMustCase(
+  searchParams: BaseLine.SearchParams
+): PerformanceApi.MulQueryMust {
+  const tempArr: PerformanceApi.MulQueryMust = []
+
+  ;(Object.keys(searchParams) as (keyof BaseLine.SearchParams)[]).forEach(
+    paramKey => {
+      if (searchParams[paramKey]) {
+        const matchObj: BaseLine.SearchParams = {} as any
+        matchObj[paramKey] = searchParams[paramKey]
+        console.log('matchObj', matchObj)
+        if (Array.isArray(searchParams[paramKey])) {
+          console.log('length', searchParams[paramKey])
+          searchParams[paramKey].length > 0 &&
+            tempArr.push({ terms: matchObj } as PerformanceApi.MulQueryTerms)
+        } else {
+          // 这一行在逻辑上可以删掉, 因为searchParams内每个对象都是字符串数组
+          tempArr.push({ match: matchObj } as any)
+        }
       }
     }
-  })
-  // console.log(tempArr)
+  )
   return tempArr
 }
-
+// eslint-disable-next-line
 function getAllData(
   params: BaseLine.SearchParams,
   searchTime: number,
@@ -85,7 +93,6 @@ function getAllData(
       tableSearchParams.value.searchValue
     matchCases.push({ match: matchObj })
   }
-
   matchCases.push({ match: { job_state: 'finished' } })
   matchCases.push({ range: { time: { gte: `now-${searchTime}d/d` } } })
 
