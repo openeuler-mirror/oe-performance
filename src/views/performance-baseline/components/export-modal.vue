@@ -70,7 +70,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, reactive } from 'vue'
+import { reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Column } from '../config-file'
 import {

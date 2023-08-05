@@ -77,7 +77,7 @@ export function getTestBoxes() {
 interface Aggs {
   [propName: string]: any
 }
-export function getJobValueList(params: any) {
+export function getJobValueList(params: PerformanceApi.JobValueListParams) {
   const { jobFieldList, searchTime = 10, byScene, searchParams } = params
   const aggs: Aggs = {}
   const mustArr = []
@@ -95,18 +95,22 @@ export function getJobValueList(params: any) {
     }
   })
   // 请求时根据目前已选的searchParam值进行过滤
-  Object.keys(searchParams).forEach((param: string) => {
-    if (!searchParams[param]) return
-    if (Array.isArray(searchParams[param]) && searchParams[param].length < 1)
-      return
-    const tempObj = <DataObject>{}
-    if (param === 'osv' && Array.isArray(searchParams[param])) {
-      tempObj[param] = searchParams[param].map((arr: string[]) => arr.join('@'))
-    } else {
-      tempObj[param] = searchParams[param]
+  ;(Object.keys(searchParams) as (keyof BaseLine.SearchParams)[]).forEach(
+    param => {
+      if (!searchParams[param]) return
+      if (Array.isArray(searchParams[param]) && searchParams[param]!.length < 1)
+        return
+      const tempObj = <DataObject>{}
+      if (param === 'osv' && Array.isArray(searchParams[param])) {
+        tempObj[param] = searchParams[param]!.map(item =>
+          (item as string[]).join('@')
+        )
+      } else {
+        tempObj[param] = searchParams[param]
+      }
+      mustArr.push({ terms: tempObj })
     }
-    mustArr.push({ terms: tempObj })
-  })
+  )
   const query = {
     size: 10,
     query: {
@@ -125,6 +129,8 @@ export function getJobValueList(params: any) {
     }
   })
 }
+
+// 这个接口中的类型, 可以参考PerformanceApi命名空间下的类型
 // host表中的几个数据聚合不到,目前没有使用这个接口
 export function getHostValueList(params: any) {
   const { hostFieldList } = params
@@ -154,6 +160,8 @@ export function getHostValueList(params: any) {
 interface anyObj {
   [propName: string]: any
 }
+
+// 这个接口中的类型, 可以参考@/views/performance-baseline/index.vue中的setMustCase函数
 // 目前是直接获取全量host数据，直接在本地过滤的，暂时没有用这个接口
 export function getTestboxBySearchParams(params: anyObj) {
   const mustCasees = <anyObj>[]

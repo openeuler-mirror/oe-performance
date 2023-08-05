@@ -57,21 +57,13 @@ declare namespace Config_li {
 
 declare namespace BaseLine {
   interface SearchParams {
-    group_id: string[]
-    my_account: string[]
-    os_arch: string[]
-    submit_id: string[]
-    suite: string[]
-    tags: string[]
-    testbox: string[]
-  }
-
-  interface TableSearchParams {
-    searchKey: string
-    searchValue: string
-  }
-
-  interface TableSearchFun {
-    (searchKey: string, searchValue: string): void
+    group_id?: string[]
+    my_account?: string[]
+    os_arch?: string[]
+    submit_id?: string[]
+    suite?: string[]
+    tags?: string[]
+    testbox?: string[]
+    osv?: string[] | string[][]
   }
 }

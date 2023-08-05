@@ -86,26 +86,6 @@ const handleSelectionChange = (val: User[]) => {
 }
 
 function judgeLevelColor(type: string) {
-  // type = type.slice(2, -1)
-  // let levelColor = {
-  //   '1': () => {
-  //     return '#43BB57'
-  //   },
-  //   '2': () => {
-  //     return '#FFD581'
-  //   },
-  //   '3': () => {
-  //     return '#FFA634'
-  //   },
-  //   '4': () => {
-  //     return '#F95858'
-  //   },
-  //   default: () => {
-  //     return '#333333'
-  //   }
-  // }
-  // return (levelColor[type] || levelColor['default'])()
-
   switch (type.slice(2, -1)) {
   case '1':
     return '#43BB57'
@@ -121,23 +101,6 @@ function judgeLevelColor(type: string) {
 }
 
 function judgeProgressColor(type: string) {
-  // let progressColor = {
-  //   // '未提交': () => { return '#C9C9C9' },
-  //   待审批: () => {
-  //     return '#002FA7'
-  //   },
-  //   已发布: () => {
-  //     return '#43BB57'
-  //   },
-  //   已驳回: () => {
-  //     return '#F95858'
-  //   },
-  //   default: () => {
-  //     return '#C9C9C9'
-  //   }
-  // }
-  // return (progressColor[type] || progressColor['default'])()
-
   switch (type) {
   case '未提交':
     return '#C9C9C9'

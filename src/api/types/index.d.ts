@@ -64,4 +64,19 @@ declare namespace PerformanceApi {
   interface PerformanceDataParams extends BaseQuery {
     query: SimpleQuery | MulQuery
   }
+
+  interface JobValueListParams {
+    byScene: string[]
+    jobFieldList: string[]
+    searchParams: BaseLine.SearchParams
+    searchTime: number
+    searchTotal: number
+  }
+
+  interface jobFieldListAggsItem {
+    terms: {
+      filed: string
+      size: number
+    }
+  }
 }

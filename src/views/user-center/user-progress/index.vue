@@ -117,13 +117,6 @@ const onSubmit = () => {
 }
 
 function judgeProgress(type: string) {
-  // let progress = {
-  //   // '未提交': () => { return 1 },
-  //   '待审批': () => { return 2 },
-  //   'default': () => { return 3 }
-  // }
-  // return (progress[type] || progress['default'])()
-
   switch (type) {
   case '未提交':
     return 1
@@ -134,9 +127,6 @@ function judgeProgress(type: string) {
   }
 }
 onMounted(() => {
-  // if (route.meta.title === 'applicationProgress') judgePath.value = false
-  // else judgePath.value = true
-
   judgePath.value = route.meta.title === 'applicationProgress' ? false : true
   data.value = { ...route.query } as UserCenter.ApplicationDataItem
   indexNum.value = judgeProgress(data.value.progress)

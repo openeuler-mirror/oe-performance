@@ -10,7 +10,6 @@
       :dataList="data"
       :submitDataLoading="submitDataLoading"
       :jobCount="jobCount"
-      @tableSearch="handleTableSearch"
       @refreash="refreashData"></testment-table>
   </div>
 </template>
@@ -32,21 +31,9 @@ const jobCount = ref<number>(0)
 const searchParams = ref<BaseLine.SearchParams>({} as any)
 const searchLimitTime = ref<number>(10)
 const searchLimitTotal = ref<number>(3000)
-const tableSearchParams = ref<BaseLine.TableSearchParams>({} as any)
 const submitDataLoading = ref<boolean>(false)
 
 const refreashData = () => {
-  getAllData(searchParams.value, searchLimitTime.value, searchLimitTotal.value)
-}
-
-// 这个函数在testmentTable组件里没有看到emit, 很奇怪, 建议删除
-const handleTableSearch: BaseLine.TableSearchFun = (searchKey, searchValue) => {
-  // 表格子搜索
-  tableSearchParams.value = {
-    searchKey,
-    searchValue
-  }
-
   getAllData(searchParams.value, searchLimitTime.value, searchLimitTotal.value)
 }
 
@@ -54,6 +41,7 @@ const handleTableSearch: BaseLine.TableSearchFun = (searchKey, searchValue) => {
 function setMustCase(
   searchParams: BaseLine.SearchParams
 ): PerformanceApi.MulQueryMust {
+  console.log('searchParams', searchParams)
   const tempArr: PerformanceApi.MulQueryMust = []
 
   ;(Object.keys(searchParams) as (keyof BaseLine.SearchParams)[]).forEach(
@@ -61,10 +49,8 @@ function setMustCase(
       if (searchParams[paramKey]) {
         const matchObj: BaseLine.SearchParams = {} as any
         matchObj[paramKey] = searchParams[paramKey]
-        console.log('matchObj', matchObj)
         if (Array.isArray(searchParams[paramKey])) {
-          console.log('length', searchParams[paramKey])
-          searchParams[paramKey].length > 0 &&
+          searchParams[paramKey]!.length > 0 &&
             tempArr.push({ terms: matchObj } as PerformanceApi.MulQueryTerms)
         } else {
           // 这一行在逻辑上可以删掉, 因为searchParams内每个对象都是字符串数组
@@ -75,7 +61,7 @@ function setMustCase(
   )
   return tempArr
 }
-// eslint-disable-next-line
+
 function getAllData(
   params: BaseLine.SearchParams,
   searchTime: number,
@@ -87,12 +73,7 @@ function getAllData(
   submitDataLoading.value = true
 
   const matchCases = setMustCase(params)
-  if (tableSearchParams.value.searchValue) {
-    const matchObj: any = {}
-    matchObj[tableSearchParams.value.searchKey] =
-      tableSearchParams.value.searchValue
-    matchCases.push({ match: matchObj })
-  }
+
   matchCases.push({ match: { job_state: 'finished' } })
   matchCases.push({ range: { time: { gte: `now-${searchTime}d/d` } } })
 

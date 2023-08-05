@@ -6,7 +6,10 @@
           type="primary"
           class="button"
           :disabled="
-            true || selectedTableRows.length < 2 || selectedTableRows.length > 5
+            true ||
+            selectedTableRows.length < 2 ||
+            selectedTableRows.length >
+              5 /*这里有问题, 会一直返回true让按钮不能点击, 我删了true后发现是没有实现好功能 */
           "
           @click="handleComaration"
           >对比</el-button
@@ -185,10 +188,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits<{
-  (event: 'refreash'): void
-  (event: 'tableSearch', searchKey: string, searchValue: string): void
-}>()
+const emit = defineEmits<{ (event: 'refreash'): void }>()
 
 const router = useRouter()
 const route = useRoute()
@@ -197,8 +197,6 @@ const baselineTableInfoStore = useBaselineTableInfoStore()
 const testboxStore = useTestboxStore()
 
 const tableData = ref<TableItem[]>([])
-// let originData: TableItem[] = []
-
 const allColumn = ref([] as Column[])
 const tableColumn = ref([] as Column[])
 const allColumnLabel = ref([] as string[])

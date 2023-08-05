@@ -28,7 +28,10 @@
         </el-input>
       </el-col>
       <span class="right-btn" v-if="route.meta.title === 'applicationList'">
-        <el-button type="primary" size="large" @click="dialogVisible = true"
+        <el-button
+          type="primary"
+          size="large"
+          @click="() => (dialogVisible = true)"
           >新建申请</el-button
         >
       </span>
@@ -38,9 +41,10 @@
       description="上传描述："
       btnText="新建"
       :options="options"
-      :bool="dialogVisible"
-      @cancel="dialogVisible = false"
-      @handleClose="dialogVisible = false"
+      :disabled="dialogVisible"
+      :bool="false"
+      @cancel="() => (dialogVisible = false)"
+      @handleClose="() => (dialogVisible = false)"
       @upload="upload"></re-po-uploader>
     <application-table
       :tableData="propsData.data"
@@ -50,9 +54,10 @@
 
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { getApplicationList } from '@/api/center/index'
 import { Search } from '@element-plus/icons-vue'
-import { useRouter, useRoute, LocationQueryRaw } from 'vue-router'
+import { CascaderOption } from 'element-plus'
 import ApplicationTable from './components/application-table.vue'
 import RePoUploader from '@/components/uploader/RePoUploader.vue'
 
@@ -90,12 +95,11 @@ function changeSelect() {
 
 function intoView(query: UserCenter.ApplicationDataItem) {
   let path = '/userCenter/application/applicationProgress'
-  const queryRaw: LocationQueryRaw = { ...query }
   if (route.meta.title === 'approveList')
     path = '/userCenter/approval/approvalprogress'
   router.push({
     path: path,
-    query: queryRaw
+    query: query
   })
 }
 
@@ -111,7 +115,7 @@ onMounted(() => {
   })
 })
 
-const options = [
+const options: CascaderOption[] = [
   {
     value: '解决方案',
     label: '解决方案',

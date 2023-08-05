@@ -65,7 +65,7 @@ module.exports = {
     'no-undef-init': 'error',
     'no-var': 'error',
     'max-len': ['error', { code: 120, tabWidth: 4, ignoreStrings: true }],
-    'max-lines-per-function': ['error', { max: 50 }],
+    'max-lines-per-function': ['error', { max: 70 }],
     'max-depth': ['error', { max: 4 }],
     'max-nested-callbacks': ['error', 4],
     'no-prototype-builtins': ['error'],

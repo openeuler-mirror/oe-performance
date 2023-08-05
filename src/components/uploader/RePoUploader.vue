@@ -1,143 +1,156 @@
 <template>
-    <el-drawer
+  <el-drawer
     v-model="centerDialogVisible"
     direction="rtl"
     size="50%"
-    :before-close="handleClose"
-    >
-      <template #header>
-        <span class="el-drawer-header">{{ title }}</span>
-      </template>
-      <div class="el-drawer-form">
-        <el-form :model="form">
-          <el-form-item label="测试场景：">
-            <el-cascader
+    :before-close="handleClose">
+    <template #header>
+      <span class="el-drawer-header">{{ title }}</span>
+    </template>
+    <div class="el-drawer-form">
+      <el-form :model="form">
+        <el-form-item label="测试场景：">
+          <el-cascader
             class="my-el-cascader"
-            v-model="form.region" placeholder="请选择测试场景" :options="options" :disabled="disabled"/>
-          </el-form-item>
-          <el-form-item label="上传文件：">
-            <el-upload
-              v-model:file-list="fileList"
-              class="upload-demo"
-              multiple
-              accept=".xlsx"
-              :limit="1"
-              :http-request="handleUpload"
-            >
-              <div class="upload-btn">
-                <el-icon size="16"><Upload /></el-icon>
-                <span class="upload-txt">上传文件</span>
-              </div>
-              <template #tip>
-              <span class="btn-a-margin"><a @click.stop="download">下载模板</a></span>
-                <div class="el-upload__tip">
-                  支持扩展名：.xlsx...
-                </div>
-              </template>
-            </el-upload>
-          </el-form-item>
-          <el-form-item :label="description">
-            <el-input
+            v-model="form.region"
+            placeholder="请选择测试场景"
+            :options="options"
+            :disabled="bool" />
+        </el-form-item>
+        <el-form-item label="上传文件：">
+          <el-upload
+            v-model:file-list="fileList"
+            class="upload-demo"
+            multiple
+            accept=".xlsx"
+            :limit="1"
+            :http-request="(handleUpload as any) /*功能未完善, 需要后端接入 */">
+            <div class="upload-btn">
+              <el-icon size="16"><Upload /></el-icon>
+              <span class="upload-txt">上传文件</span>
+            </div>
+            <template #tip>
+              <span class="btn-a-margin"
+                ><a @click.stop="download">下载模板</a></span
+              >
+              <div class="el-upload__tip">支持扩展名：.xlsx...</div>
+            </template>
+          </el-upload>
+        </el-form-item>
+        <el-form-item :label="description">
+          <el-input
             v-model="form.description"
             type="textarea"
             maxlength="100"
-            placeholder="（可选）请输入描述，不超过100个字符"
-            />
-          </el-form-item>
-        </el-form>
-      </div>
-      <template #footer>   
-        <span class="dialog-footer">
-          <el-button @click="cancel()">取消</el-button>
-          <el-button type="primary" @click="upload(data)">
-            {{ btnText }}
-          </el-button>
-        </span>
-      </template>
-    </el-drawer>
+            placeholder="（可选）请输入描述，不超过100个字符" />
+        </el-form-item>
+      </el-form>
+    </div>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="cancel()">取消</el-button>
+        <el-button type="primary" @click="upload(data)">
+          {{ btnText }}
+        </el-button>
+      </span>
+    </template>
+  </el-drawer>
 </template>
 <script lang="ts" setup>
-import { ref,reactive, defineEmits, toRefs, watchEffect } from 'vue'
-import { UploadUserFile, ElMessage } from 'element-plus'
+import { ref, reactive, defineEmits, toRefs, watchEffect } from 'vue'
+import {
+  UploadUserFile,
+  ElMessage,
+  CascaderOption,
+  UploadRequestOptions
+} from 'element-plus'
 
 const emit = defineEmits<{
-  (e:'cancel'):void,
-  (e:'upload'):void,
-  (e:'handleClose'):void
+  (e: 'cancel'): void
+  (e: 'upload', data: any): void
+  (e: 'handleClose'): void
 }>()
-const props = withDefaults(defineProps<{
-  bool,
-  region,
-  options: Array,
-  title: string,
-  description: string,
-  btnText: string,
-  disabled: boolean // 选择器是否可选
-}>(),
-{
-  bool: ref(false),
-  region: reactive([]),
-  options: () => [
-    {
-      value: '大数据',
-      label: '大数据',
-      children: [
-        {
-          value: 'spark',
-          label: 'spark'
-        }
-      ],
-    }
-  ],
-  title: '新建申请',
-  description: '申请描述：',
-  btnText: '新建',
-  disabled: false
-})
-const { bool, title, description, options, region, btnText, disabled } = toRefs(props)
+const props = withDefaults(
+  defineProps<{
+    /* 这个bool我认为应该是在options查找有没有children,所以在这里先设置为true,应该需要一个函数来设置bool的值 */
+    bool: boolean // 选择器是否可选,
+    options: CascaderOption[]
+    title: string
+    description: string
+    btnText: string
+    disabled: boolean
+  }>(),
+  {
+    bool: false,
+    options: () => [
+      {
+        value: '大数据',
+        label: '大数据',
+        children: [
+          {
+            value: 'spark',
+            label: 'spark'
+          }
+        ]
+      }
+    ],
+    title: '新建申请',
+    description: '申请描述：',
+    btnText: '新建',
+    disabled: false
+  }
+)
+const { bool, title, description, options, btnText, disabled } = toRefs(props)
+
 const centerDialogVisible = ref(false)
 const fileNameBool = ref(false)
-const form = reactive({
-  region: ''
-})
-watchEffect(()=>{
-  centerDialogVisible.value = bool.value
-  form.region = region
+
+const form = reactive<RePoUploader.Form>({
+  region: [],
+  description: ''
 })
 
-const cancel:void = () => {
+watchEffect(() => {
+  centerDialogVisible.value = disabled.value
+})
+
+const cancel = (): void => {
   emit('cancel')
 }
 
-const upload:void = () => {
-  if(fileNameBool.value)
-    emit('upload', data)
+const upload = (data: any): void => {
+  if (fileNameBool.value) emit('upload', data)
   else ElMessage.error('请上传 .xlsx 的文件')
 }
 
-const handleClose:void = () => {
+const handleClose = () => {
   emit('handleClose')
 }
 
 const fileList = ref<UploadUserFile[]>([])
 
-const data = reactive({
+// 这里需要对base64编码进行类型定义
+const data = reactive<any>({
   data: {}
 })
 
-const handleUpload = (uploadFiles) => {
+const handleUpload = (uploadFiles: UploadRequestOptions) => {
   const fileReader = new FileReader()
   fileReader.readAsText(uploadFiles.file)
-  if(uploadFiles.file.name.split('.').pop() === 'xlsx') {
+  if (uploadFiles.file.name.split('.').pop() === 'xlsx') {
     fileNameBool.value = true
-    fileReader.onload = function() {
+    fileReader.onload = function () {
       data.data = {}
-      let content = this.result.toString().split('\r\n').filter(item => item !== '').map(item => item.split('\t'));
-      for(let i = 0; i < content[0].length; i++) {
-        content[1] = content[1]?content[1]:[]
+      let content = this.result!.toString()
+        .split('\r\n')
+        .filter(item => item !== '')
+        .map(item => item.split('\t'))
+      for (let i = 0; i < content[0].length; i++) {
+        content[1] = content[1] ? content[1] : []
         try {
           let dt = content[1][i].replace(/""/g, '"')
-          if(content[1][i][0] === '"') data.data[content[0][i]] = JSON.parse(dt.slice(1,-1))
+          if (content[1][i][0] === '"')
+            data.data[content[0][i]] = JSON.parse(dt.slice(1, -1))
           else data.data[content[0][i]] = JSON.parse(dt)
         } catch (e) {
           data.data[content[0][i]] = content[1][i]
@@ -148,7 +161,7 @@ const handleUpload = (uploadFiles) => {
 }
 function download() {
   // values可以从后端获取数据
-  let values = ['aaa','bbb','ccc','ddd','eee']
+  let values = ['aaa', 'bbb', 'ccc', 'ddd', 'eee']
   // 列标题，逗号隔开，每一个逗号就是隔开一个单元格
   let str = ''
   // 增加\t为了不让表格显示科学计数法或者其他格式
@@ -174,7 +187,7 @@ function download() {
   margin-left: 16px;
 }
 a {
-  color: #002FA7;
+  color: #002fa7;
   cursor: pointer;
 }
 a:active {
@@ -186,7 +199,7 @@ a:active {
   color: #333333;
   font-size: 20px;
   width: 100%;
-  border-bottom: 2px solid #E2E2E2;
+  border-bottom: 2px solid #e2e2e2;
 }
 .el-drawer-form {
   margin-top: 0;
@@ -198,7 +211,7 @@ a:active {
   padding: 6px 12px;
   line-height: 22px;
   border-radius: 4px 4px 4px 4px;
-  border: 1px solid rgba(0,0,0,0.15);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   font-size: 16px;
 }
 .upload-txt {
@@ -207,7 +220,7 @@ a:active {
 </style>
 <style>
 .my-el-cascader {
-  width: 100%!important;
+  width: 100% !important;
 }
 .el-drawer__header {
   margin-bottom: 0px;
