@@ -74,6 +74,11 @@ export function getTestBoxes() {
     }
  */
 
+/**
+ *  应该构造一个函数SearchParamsFilter，传入searchPanel的原始值，返回的是过滤后的值
+ * 过滤内容：
+ * 1. 将osv数组（每一个元素都是字符串数组）中，每一个元素使用join('@')连接
+ */
 interface Aggs {
   [propName: string]: any
 }
@@ -101,13 +106,8 @@ export function getJobValueList(params: PerformanceApi.JobValueListParams) {
       if (Array.isArray(searchParams[param]) && searchParams[param]!.length < 1)
         return
       const tempObj = <DataObject>{}
-      if (param === 'osv' && Array.isArray(searchParams[param])) {
-        tempObj[param] = searchParams[param]!.map(item =>
-          (item as string[]).join('@')
-        )
-      } else {
-        tempObj[param] = searchParams[param]
-      }
+      // 在getSearchParamsByFields以及预处理了
+      tempObj[param] = searchParams[param]
       mustArr.push({ terms: tempObj })
     }
   )
@@ -120,6 +120,7 @@ export function getJobValueList(params: PerformanceApi.JobValueListParams) {
     },
     aggs
   }
+
   return createAxios({
     url: api.requestDataApi,
     method: 'post',

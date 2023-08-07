@@ -41,17 +41,16 @@ const refreashData = () => {
 function setMustCase(
   searchParams: BaseLine.SearchParams
 ): PerformanceApi.MulQueryMust {
-  console.log('searchParams', searchParams)
   const tempArr: PerformanceApi.MulQueryMust = []
 
   ;(Object.keys(searchParams) as (keyof BaseLine.SearchParams)[]).forEach(
     paramKey => {
       if (searchParams[paramKey]) {
         const matchObj: BaseLine.SearchParams = {} as any
-        matchObj[paramKey] = searchParams[paramKey]
+        matchObj[paramKey] = searchParams[paramKey] as string[]
         if (Array.isArray(searchParams[paramKey])) {
-          searchParams[paramKey]!.length > 0 &&
-            tempArr.push({ terms: matchObj } as PerformanceApi.MulQueryTerms)
+          searchParams[paramKey]!.length > 0
+            && tempArr.push({ terms: matchObj } as PerformanceApi.MulQueryTerms)
         } else {
           // 这一行在逻辑上可以删掉, 因为searchParams内每个对象都是字符串数组
           tempArr.push({ match: matchObj } as any)
@@ -62,6 +61,7 @@ function setMustCase(
   return tempArr
 }
 
+// eslint-disable-next-line max-lines-per-function
 function getAllData(
   params: BaseLine.SearchParams,
   searchTime: number,
@@ -96,8 +96,8 @@ function getAllData(
   })
     .then(res => {
       // todo: 数据为空的异常处理
-      const submitList =
-        res?.data?.aggregations?.jobs_terms?.buckets.map((item: any) => {
+      const submitList
+        = res?.data?.aggregations?.jobs_terms?.buckets.map((item: any) => {
           return { submit_id: item.key }
         }) || []
       baselineTableInfoStore.setSubmitList(submitList)
@@ -129,10 +129,10 @@ onMounted(() => {
   if (route.meta.isGoback) {
     if (baselineTableInfoStore.baselineSubmitList?.length > 0) {
       data.value = baselineTableInfoStore.baselineSubmitList
-      searchLimitTime.value =
-        baselineTableInfoStore.searchParamData.searchLimitTime
-      searchLimitTotal.value =
-        baselineTableInfoStore.searchParamData.searchLimitTotal
+      searchLimitTime.value
+        = baselineTableInfoStore.searchParamData.searchLimitTime
+      searchLimitTotal.value
+        = baselineTableInfoStore.searchParamData.searchLimitTotal
       searchParams.value.suite = baselineTableInfoStore.searchParamData.suite
       jobCount.value = baselineTableInfoStore.jobCount
     }

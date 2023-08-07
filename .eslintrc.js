@@ -65,7 +65,7 @@ module.exports = {
     'no-undef-init': 'error',
     'no-var': 'error',
     'max-len': ['error', { code: 120, tabWidth: 4, ignoreStrings: true }],
-    'max-lines-per-function': ['error', { max: 70 }],
+    'max-lines-per-function': ['error', { max: 50 }],
     'max-depth': ['error', { max: 4 }],
     'max-nested-callbacks': ['error', 4],
     'no-prototype-builtins': ['error'],
@@ -84,7 +84,9 @@ module.exports = {
     'no-new-wrappers': 'error',
     'no-proto': 'error',
     'prefer-template': 'error',
-    'prefer-spread': 'error'
+    'prefer-spread': 'error',
+    // 新增
+    'operator-linebreak': [2, 'before']
   },
   globals: {
     window: true,

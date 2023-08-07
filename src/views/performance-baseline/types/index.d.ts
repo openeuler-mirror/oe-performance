@@ -66,4 +66,9 @@ declare namespace BaseLine {
     testbox?: string[]
     osv?: string[] | string[][]
   }
+
+  interface SubMitId {
+    submit_id: string
+  }
+  type SubMitIdList = SubMitId[]
 }

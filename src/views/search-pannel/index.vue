@@ -20,7 +20,9 @@
       <el-col :span="2">
         <span>筛选内容:</span>
         <el-tooltip popper-class="tooltip-popper" placement="bottom-start">
-          <el-icon><QuestionFilled /></el-icon>
+          <el-icon>
+            <QuestionFilled />
+          </el-icon>
           <template #content>
             <ul>
               <li>数据时间：搜索至今N天的数据</li>
@@ -67,7 +69,7 @@
             <el-select
               v-else
               class="field-selection"
-              v-model="searchParams[paramKey]"
+              v-model="searchParams[paramKey as keyof BaseLine.SearchParams]"
               :loading="
                 fieldsConfigForRender[paramKey].origin === 'jobs'
                   ? jobFieldsLoading
@@ -86,7 +88,7 @@
                 v-for="(item, listIndex) in fieldsConfigForRender[paramKey]
                   .fieldSettings.listValues"
                 :label="item.label || item.value"
-                :value="item.value"
+                :value="item.value as CascaderNodeValue"
                 :key="listIndex" />
             </el-select>
           </el-col>
@@ -129,13 +131,18 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { CascaderNodeValue, ElMessage } from 'element-plus'
 import { suiteConfig, fieldsConfiguration } from './config'
-
 import { useTestboxStore } from '@/stores/performanceData'
 import { parseQueryStringTo2dArray } from './utils'
 // api
 import { getJobValueList, getTestBoxes } from '@/api/performance'
+import type { JobModel } from '@/model/types'
+import { SearchPanel } from './types'
+
+interface objectItem {
+  [key: string]: string | string[] | string[][]
+}
 
 const props = defineProps({
   // 是否根据场景区分展示套件, 并将套件的展示通过独立组建展示出来。只在性能基线表格页面中使用
@@ -153,7 +160,6 @@ const props = defineProps({
     default: false
   }
 })
-
 const emit = defineEmits<{
   (
     event: 'search',
@@ -165,16 +171,18 @@ const emit = defineEmits<{
   (event: 'resetSearchValue'): void
 }>()
 
-let fieldsConfig = JSON.parse(JSON.stringify(fieldsConfiguration))
+let fieldsConfig: JobModel.Fields = JSON.parse(
+  JSON.stringify(fieldsConfiguration)
+)
 
 const route = useRoute()
 const router = useRouter()
 const testboxStore = useTestboxStore()
 
-const fieldsConfigForRender = ref({})
-const suiteList = ref([])
+const fieldsConfigForRender = ref<JobModel.Fields>({})
+const suiteList = ref<SearchPanel.SuiteList>([])
 // uite = ref('unixbench')
-const testboxList = ref([] as objectItem[])
+const testboxList = ref([] as DictObject[])
 const filteredTestboxList = ref([] as objectItem[])
 const jobFieldsLoading = ref(false)
 const hostFieldsLoading = ref(false)
@@ -185,12 +193,8 @@ const jobFieldList = [] as any // 中间数据，用来循环job类型的field�
 
 const searchTime = ref(10)
 const searchTotal = ref(3000)
-const searchParams = ref({} as objectItem)
+const searchParams = ref<BaseLine.SearchParams>({})
 const cascaderProps = { multiple: true }
-
-interface objectItem {
-  [key: string]: string | string[] | string[][]
-}
 
 // 页面初始化方法
 const initailizing = () => {
@@ -212,7 +216,7 @@ const initailizefieldsList = () => {
     fieldKeys = fieldKeys.filter(key => key !== 'suite')
   }
   // const len = Math.ceil(fieldKeys.length / 4)
-  const tempObj = {}
+  const tempObj: JobModel.Fields = [] as any
   fieldKeys.forEach(key => {
     tempObj[key] = fieldsConfig[key]
   })
@@ -244,22 +248,26 @@ const setFeildsData = () => {
 // url上查询条件回填至查询项上
 const setFieldSelection = () => {
   const fieldKeys = Object.keys(fieldsConfig)
-  /* eslint-disable */ // 规避scene没有使用的报错
-  const { scene, searchLimitTime, searchLimitTotal, ...fields } = route.query
-  /* eslint-enable */
+  const { searchLimitTime, searchLimitTotal, ...fields } = route.query
+
   Object.keys(fields).forEach(fieldKey => {
-    if (fieldKeys.indexOf(fieldKey) > -1) {
+    if (fieldKeys.includes(fieldKey)) {
       // 只添加当前选择框中存在的field选择
       if (fieldKey === 'osv') {
         searchParams.value[fieldKey] = parseQueryStringTo2dArray(
-          fields[fieldKey]
+          fields[fieldKey] as string
         )
       } else {
-        if (Array.isArray(fields[fieldKey])) {
-          searchParams.value[fieldKey] = fields[fieldKey]
-        } else {
-          searchParams.value[fieldKey] = [fields[fieldKey]]
-        }
+        // if (Array.isArray(fields[fieldKey])) {
+        //   searchParams.value[fieldKey] = fields[fieldKey]
+        // } else {
+        //   searchParams.value[fieldKey] = [fields[fieldKey]]
+        // }
+        searchParams.value[fieldKey as keyof BaseLine.SearchParams] = (
+          Array.isArray(fields[fieldKey])
+            ? fields[fieldKey]
+            : [fields[fieldKey]]
+        ) as string[]
       }
     }
   })
@@ -271,9 +279,9 @@ const setFieldSelection = () => {
 const setSuiteList = () => {
   const { scene } = route.query
   if (!scene) return
-  const matchSenceConfig = suiteConfig[String(scene)]
-  if (!matchSenceConfig) return
-  suiteList.value = matchSenceConfig.suiteList || []
+  const matchSceneConfig = suiteConfig[String(scene)]
+  if (!matchSceneConfig) return
+  suiteList.value = matchSceneConfig.suiteList || []
 }
 // 性能基线页面中:
 // 设置默认选中的suite，如果url中有，则使用url的
@@ -296,7 +304,7 @@ const setDefaultSuite = (forcedUpdateSuite = false) => {
   }
   suite.forEach(suiteItem => {
     if (suiteList.value.find(s => s.suiteName === suiteItem)) {
-      searchParams.value['suite'].push(String(suiteItem))
+      searchParams.value['suite']!.push(String(suiteItem))
     }
   })
 }
@@ -304,14 +312,15 @@ const setDefaultSuite = (forcedUpdateSuite = false) => {
 /* ====================以上为init相关方法======================= */
 
 // 获取并更新搜索条件中每个param的可选项，只有job表中涉及的条件
+// eslint-disable-next-line max-lines-per-function
 function getFieldsOptions() {
   jobFieldsLoading.value = true
   const searchParamObject = JSON.parse(JSON.stringify(searchParams.value))
   // 如果搜索了硬件参数，需根据硬件参数过滤出的testboxList来限制job参数的获取
   if (
-    (!searchParamObject.testbox || searchParamObject.testbox?.length < 1) &&
-    filteredTestboxList.value.length > 0 &&
-    !isSearchParamsEmpty(
+    (!searchParamObject.testbox || searchParamObject.testbox?.length < 1)
+    && filteredTestboxList.value.length > 0
+    && !isSearchParamsEmpty(
       getSearchParamsByFields(searchParams.value, hostFieldList)
     )
   ) {
@@ -319,17 +328,19 @@ function getFieldsOptions() {
       testbox => testbox.testboxId
     )
   }
+
   getJobValueList({
     jobFieldList,
     searchTime: searchTime.value,
     searchTotal: searchTotal.value,
     byScene:
-      (props.suiteByScene && searchParams.value.suite) ||
-      (props.fieldsBySecne.length > 0 && props.fieldsBySecne),
+      (props.suiteByScene && searchParams.value.suite)
+      || ((props.fieldsBySecne.length > 0 && props.fieldsBySecne) as string[]),
     searchParams: getSearchParamsByFields(searchParamObject, jobFieldList)
   })
     .then(res => {
       const aggs = res.data.aggregations || {}
+
       Object.keys(aggs).forEach(field => {
         // 通过请求获取的可选项
         const listValues = aggs[field].buckets.map((item: any) => {
@@ -344,6 +355,7 @@ function getFieldsOptions() {
         fieldsConfig[field].fieldSettings.listValues = originData
         // 获取对应field的listValues引用
         const staticValues = fieldsConfig[field].fieldSettings.listValues || []
+
         if (field === 'osv') {
           const osvOptions = constrcutOsvOptions(listValues)
           addNewOptionValues(staticValues, osvOptions)
@@ -364,7 +376,7 @@ function getFieldsOptions() {
 }
 
 // 工具函数
-const isSearchParamsEmpty = searchParams => {
+const isSearchParamsEmpty = (searchParams: any) => {
   if (Object.keys(searchParams).length < 1) return true
   let isEmpty = true
   Object.keys(searchParams).forEach(field => {
@@ -375,62 +387,58 @@ const isSearchParamsEmpty = searchParams => {
   return isEmpty
 }
 
+// 这个fieldList初始值是hw.memory hw.nr_cpu hw.nr_node, 有点疑惑
 // 工具函数
 const getSearchParamsByFields = (
-  searchParams: objectItem,
-  fieldList: Array<String>
+  searchParams: BaseLine.SearchParams,
+  fieldList: string[]
 ) => {
-  const tempObj = <objectItem>{}
-  Object.keys(searchParams).forEach(field => {
-    if (fieldList.indexOf(field) > -1) {
-      tempObj[field] = searchParams[field]
+  //
+  const tempObj: DictObject = {}
+  ;(Object.keys(searchParams) as Array<keyof BaseLine.SearchParams>).forEach(
+    param => {
+      if (fieldList.includes(param)) {
+        tempObj[param] = searchParams[param]
+      }
+      if (param === 'osv' && Array.isArray(searchParams[param])) {
+        tempObj[param] = (searchParams[param] as string[][])?.map(item =>
+          item.join('@')
+        )
+      }
     }
-  })
+  )
+
   return tempObj
 }
 
 // 工具函数，设置osv数据格式以支持分组选项组件
-const constrcutOsvOptions = osvList => {
-  if (!osvList || osvList.length < 1) return []
-  const osMap = {}
-  const osvListNew = []
-  osvList.forEach((osv: string) => {
-    const osParams = osv?.value.split('@')
-    const os = osParams[0]
-    let osLabel = os
-    const version = osParams[1]
-    let versionLabel = version
-    // 如果有自定义的系统名
-    if (osv.label) {
-      if (version) {
-        const tempLabel = osv.label.split(' ')
-        osLabel = tempLabel.slice(0, tempLabel.length - 1).join(' ')
-        versionLabel = tempLabel[tempLabel.length - 1]
-      } else {
-        osLabel = osv.label
-      }
-    }
-    if (osMap[os]) {
-      const oldChildren = osMap[os].children
-      if (!oldChildren) return
-      if (!oldChildren.find(item => item.value === version)) {
-        oldChildren.push({ value: version, label: versionLabel })
-      }
-    } else {
-      osMap[os] = { value: os, label: osLabel }
-      if (version) {
-        osMap[os].children = [{ value: version, label: versionLabel }]
-      }
-    }
+const constrcutOsvOptions = (osvList: SearchPanel.OSVListValues) => {
+  const osMap = new Map<string, SearchPanel.OSVListValue>()
+  let osvListNew: SearchPanel.OSVListValues = []
+
+  osvList.forEach(osv => {
+    const [os, version] = osv.value.split('@')
+    if (!osMap.has(os)) osMap.set(os, { value: os, label: os, children: [] })
+    osMap.get(os)?.children!.push({
+      label: version,
+      value: version
+    })
   })
-  Object.keys(osMap).forEach(os => {
-    osvListNew.push(osMap[os])
+
+  Array.from(osMap.entries()).map(item => {
+    osvListNew.push({
+      label: item[0],
+      value: item[0],
+      children: item[1].children
+    })
   })
+
+  // 没有实现旧方法中的自定义系统名
   return osvListNew
-  // sourceArr.push(...osvListNew)
 }
 
 // 获取并更新搜索条件中每个param的可选项，只有hosts表中涉及的条件
+// eslint-disable-next-line max-lines-per-function
 function getHostOptions() {
   hostFieldsLoading.value = true
   const fieldList = hostFieldList.map((field: string) =>
@@ -442,7 +450,7 @@ function getHostOptions() {
   )
   getTestBoxes()
     .then(testboxRes => {
-      testboxList.value = testboxRes.data.hits.hits.map(item => {
+      testboxList.value = testboxRes.data.hits.hits.map((item: any) => {
         return {
           testboxId: item._id,
           ...item._source
@@ -472,8 +480,8 @@ function getHostOptions() {
           )
         )
         fieldsConfig[`hw.${field}`].fieldSettings.listValues = originData
-        const staticValues =
-          fieldsConfig[`hw.${field}`].fieldSettings.listValues || []
+        const staticValues
+          = fieldsConfig[`hw.${field}`].fieldSettings.listValues || []
         addNewOptionValues(staticValues, listValues)
       })
     })
@@ -498,9 +506,9 @@ const filteringTestboxBySearchParams = (
 ) => {
   // 如果用户选择了testbox，则直接由testbox过滤
   if (
-    searchParamTestbox &&
-    Array.isArray(searchParamTestbox) &&
-    searchParamTestbox.length > 0
+    searchParamTestbox
+    && Array.isArray(searchParamTestbox)
+    && searchParamTestbox.length > 0
   ) {
     return testboxList.filter(
       testbox => searchParamTestbox.indexOf(testbox.testboxId) > -1
@@ -547,6 +555,7 @@ const handleReset = () => {
 }
 
 // 查询逻辑
+// eslint-disable-next-line max-lines-per-function
 function handleSearch() {
   if (isNaN(searchTime.value) || searchTime.value === null) {
     searchTime.value = 10
@@ -570,8 +579,8 @@ function handleSearch() {
         tempIdList = testboxList.value
           .filter(testbox => {
             return (
-              testbox[fieldKeyInTestbox] &&
-              hostParams[hostFieldKey].indexOf(testbox[fieldKeyInTestbox]) > -1
+              testbox[fieldKeyInTestbox]
+              && hostParams[hostFieldKey].indexOf(testbox[fieldKeyInTestbox]) > -1
             )
           })
           .map(testbox => testbox.testboxId)
@@ -579,9 +588,9 @@ function handleSearch() {
         tempIdList = testboxList.value
           .filter(testbox => {
             return (
-              testbox[fieldKeyInTestbox] &&
-              String(testbox[fieldKeyInTestbox]) ===
-                String(hostParams[hostFieldKey])
+              testbox[fieldKeyInTestbox]
+              && String(testbox[fieldKeyInTestbox])
+                === String(hostParams[hostFieldKey])
             )
           })
           .map(testbox => testbox.testboxId)
@@ -591,8 +600,8 @@ function handleSearch() {
     const searchParamData = { ...jobParams }
     // 当testbox存在时，说明用户指定了testboxId，此时使用硬件的筛选没有意义了
     if (
-      testboxSearchList.length > 0 &&
-      (!searchParamData.testbox || searchParamData.testbox.length < 1)
+      testboxSearchList.length > 0
+      && (!searchParamData.testbox || searchParamData.testbox.length < 1)
     ) {
       searchParamData.testbox = testboxSearchList
     }
@@ -650,8 +659,8 @@ const searchParamForOptionsUpdate = ref({})
 const paramSelected = (isOpen: boolean) => {
   if (isOpen === true) return
   if (
-    JSON.stringify(searchParams.value) ===
-    JSON.stringify(searchParamForOptionsUpdate.value)
+    JSON.stringify(searchParams.value)
+    === JSON.stringify(searchParamForOptionsUpdate.value)
   )
     return
   searchParamForOptionsUpdate.value = JSON.parse(
@@ -707,14 +716,17 @@ onMounted(() => {
   user-select: none;
   cursor: pointer;
 }
+
 .index-btn {
   color: #25b3f2;
   border-color: #25b3f2;
 }
+
 .first-btn {
   border-top-left-radius: 5px;
   border-bottom-left-radius: 5px;
 }
+
 .last-btn {
   border-top-right-radius: 5px;
   border-bottom-right-radius: 5px;
@@ -727,23 +739,28 @@ onMounted(() => {
 .search-field-section {
   z-index: 5;
   margin-bottom: 12px;
+
   &-label {
     line-height: 32px;
   }
+
   .react-row {
     .field-item {
       position: relative;
     }
+
     .fields-label {
       display: inline-block;
       line-height: 24px;
       height: 24px;
     }
+
     .field-selection {
       position: absolute;
       right: 20px;
       width: 60%;
     }
+
     :deep(.el-cascader) {
       position: absolute;
       display: inline-flex;
@@ -752,6 +769,7 @@ onMounted(() => {
       z-index: 1;
     }
   }
+
   .el-tooltip__trigger {
     cursor: pointer;
     vertical-align: top;
@@ -759,8 +777,10 @@ onMounted(() => {
     margin-left: 2px;
   }
 }
+
 .tooltip-popper {
   padding: 4px;
+
   ul {
     margin-left: 11px;
   }
@@ -770,23 +790,29 @@ span {
   font-size: 14px;
   min-width: 60px;
 }
+
 .time-controller {
   display: inline-flex;
   align-items: center;
   height: 32px;
   font-size: 14px;
+
   :deep(.el-input-number) {
     margin: 0 8px;
   }
+
   .update-button {
     margin-left: 12px;
   }
+
   :deep(.loading-icon) {
     width: 12px;
+
     .circular {
       width: 12px;
     }
   }
+
   :deep(.update-tooltip) {
     margin-left: 8px;
     cursor: pointer;

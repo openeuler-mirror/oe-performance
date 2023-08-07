@@ -66,7 +66,7 @@ declare namespace PerformanceApi {
   }
 
   interface JobValueListParams {
-    byScene: string[]
+    byScene?: string[]
     jobFieldList: string[]
     searchParams: BaseLine.SearchParams
     searchTime: number

@@ -252,12 +252,12 @@ const handlecheckAllColumn = (val: CheckboxValueType): void => {
 const handleCheckedTableCloumn = (value: CheckboxValueType[]): void => {
   const checkedCount: number = value.length
   tableColumn.value.forEach(cloumn => {
-    cloumn.show =
-      value.findIndex(item => item === cloumn.label) === -1 ? false : true
+    cloumn.show
+      = value.findIndex(item => item === cloumn.label) === -1 ? false : true
   })
   checkAllColumn.value = checkedCount === allColumn.value.length
-  isIndeterminate.value =
-    checkedCount > 0 && checkedCount < allColumn.value.length
+  isIndeterminate.value
+    = checkedCount > 0 && checkedCount < allColumn.value.length
 }
 
 const handleSelectionChange = (selectedRow: any[]) => {
@@ -265,9 +265,10 @@ const handleSelectionChange = (selectedRow: any[]) => {
 }
 
 // 获取并合并jobs的逻辑
-function getAllJobsData(idList: any[]) {
+// eslint-disable-next-line max-lines-per-function
+function getAllJobsData(idList: BaseLine.SubMitIdList) {
   tableLoading.value = true
-  const tempArr: any[] = reactive(Object.assign([], idList))
+  const tempArr: DictObject = reactive(Object.assign([], idList))
   getPerformanceData({
     index: 'jobs',
     query: {
