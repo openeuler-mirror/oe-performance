@@ -112,7 +112,9 @@ function handleExport(allColumn: Column[], selectedTableRows: any[]) {
   } else {
     if (checkIfSameSuite(selectedTableRows)) {
       // 准备好弹窗内表格的内容
-      const tableInfos: any[] = tableColumnMap[selectedTableRows[0]['suite']]
+      const tableInfos: Config_li.TableInfo = (
+        tableColumnMap as Config_li.tableColumnMap
+      )[selectedTableRows[0]['suite']]
       tableInfos.forEach((tableInfo: any) => {
         // 设置基准选择表格的列
         modal.tableColumns.push({
@@ -133,14 +135,14 @@ function handleExport(allColumn: Column[], selectedTableRows: any[]) {
           if (!record['tableDatas'][tableInfo['tableName']]) {
             return
           }
-          const performanceVal =
-            record['tableDatas'][tableInfo['tableName']][0][
+          const performanceVal
+            = record['tableDatas'][tableInfo['tableName']][0][
               `performanceVal_${tableInfo['tableName']}`
             ]
           rowData[`performanceVal_${tableInfo['tableName']}`] = performanceVal
           tableInfo['column'].forEach((column: any) => {
-            const val =
-              record['tableDatas'][tableInfo['tableName']][0][column['prop']]
+            const val
+              = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
             rowData[`${tableInfo['tableName']}(${column['label']})`] = val
           })
         })

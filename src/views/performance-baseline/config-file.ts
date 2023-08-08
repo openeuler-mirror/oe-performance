@@ -97,12 +97,8 @@ export const sceneConfig = {
   ]
 }
 
-export interface configObject {
-  [key: string]: any
-}
-
 // 可配置不同场景下使用不同的表格配置
-export const config: configObject = {
+export const config = {
   bigData: {
     column: columnConfig
   },

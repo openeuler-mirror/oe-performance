@@ -77,7 +77,9 @@
       </div>
     </div>
     <div class="tips">
-      <el-icon><WarningFilled color="rgb(16,142,233)" /></el-icon>
+      <el-icon>
+        <WarningFilled color="rgb(16,142,233)" />
+      </el-icon>
       <span> 已选择 {{ selectedTableRows.length }}项 </span>
       <el-divider direction="vertical" />
       <span>可以最多勾选5条数据进行导出；导出时可选择基准数据进行对比。</span>
@@ -268,35 +270,13 @@ const handleSelectionChange = (selectedRow: any[]) => {
 // eslint-disable-next-line max-lines-per-function
 function getAllJobsData(idList: BaseLine.SubMitIdList) {
   tableLoading.value = true
-  const tempArr: DictObject = reactive(Object.assign([], idList))
+  const tempArr: DictObject[] = reactive(Object.assign([], idList))
   getPerformanceData({
     index: 'jobs',
     query: {
       size: 10000,
-      _source: [
-        'suite',
-        'id',
-        'submit_id',
-        'group_id',
-        'tags',
-        'os',
-        'os_version',
-        'osv',
-        'arch',
-        'kernel',
-        'testbox',
-        'tbox_group',
-        'pp',
-        'stats',
-        'job_state',
-        'job_stage',
-        'job_health',
-        'time',
-        'start_time',
-        'end_time',
-        'submit_time',
-        'my_account',
-        'group_id'
+      // prettier-ignore
+      _source: [ 'suite', 'id', 'submit_id', 'group_id', 'tags', 'os', 'os_version', 'osv', 'arch', 'kernel', 'testbox', 'tbox_group', 'pp', 'stats', 'job_state', 'job_stage', 'job_health', 'time', 'start_time', 'end_time', 'submit_time', 'my_account', 'group_id'
       ],
       query: {
         constant_score: {

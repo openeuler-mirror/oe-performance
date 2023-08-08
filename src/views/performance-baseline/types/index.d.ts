@@ -11,6 +11,10 @@ declare namespace Config_li {
     kpi: string
   }
 
+  type TableInfoItem = Pick<CommonItem, 'tableName' | 'tableLabel' | 'column'>
+
+  type TableInfo = TableInfoItem[]
+
   type NoNameMapItem =
     | string
     | string[]
@@ -52,6 +56,7 @@ declare namespace Config_li {
     Hbase: NoNameMapItem
     'MySQL-OLTP': NoNameMapItem
     block: Block
+    [key: string]: any
   }
 }
 

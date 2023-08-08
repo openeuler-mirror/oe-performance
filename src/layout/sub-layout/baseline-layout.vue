@@ -61,8 +61,8 @@ const isBack = ref(false)
 const handleMenuClick = (index: string, indexPath: string[]) => {
   // indexPath两项需要特殊处理，只切换scence
   if (
-    indexPath[0] === 'baseline-solution' ||
-    indexPath[0] === 'baseline-basic'
+    indexPath[0] === 'baseline-solution'
+    || indexPath[0] === 'baseline-basic'
   ) {
     router.push({
       path: '/baseline/list',
@@ -111,9 +111,9 @@ onBeforeRouteUpdate(async (to, from) => {
 
   // 记录从详情页返回列表的状态
   if (
-    isBack.value &&
-    to.name === 'baseline-list' &&
-    from.name === 'baseline-detail'
+    isBack.value
+    && to.name === 'baseline-list'
+    && from.name === 'baseline-detail'
   ) {
     to.meta['isGoback'] = true
     isBack.value = false

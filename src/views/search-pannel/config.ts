@@ -1,6 +1,5 @@
 import { jobModel } from '@/model/data-model'
 import type { JobModel } from '@/model/types'
-import type { SearchPanel } from './types'
 
 export interface configObject {
   [key: string]: any

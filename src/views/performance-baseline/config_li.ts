@@ -1,4 +1,4 @@
-export const testParamsMap: Config_li.testParamsMap = {
+export const testParamsMap = {
   stream: ['pp.stream.nr_threads', 'pp.stream.array_size', 'pp.stream.omp'],
   unixbench: ['pp.unixbench.nr_task'],
   lmbench: [
@@ -17,7 +17,7 @@ export const testParamsMap: Config_li.testParamsMap = {
   libmicro: ['pp.libmicro']
 }
 
-export const kpiListMap: Config_li.KpiListMap = {
+export const kpiListMap = {
   stream: [
     'stream.copy_bandwidth_MBps',
     'stream.triad_bandwidth_MBps',
@@ -459,7 +459,7 @@ export const kpiListMap: Config_li.KpiListMap = {
   ]
 }
 
-export const tableMode: Config_li.TableMode = {
+export const tableMode = {
   stream: 'default',
   unixbench: 'unixbench',
   lmbench: 'default',
@@ -470,7 +470,7 @@ export const tableMode: Config_li.TableMode = {
   libmicro: 'libmicro'
 }
 
-export const tableColumnMap: Config_li.tableColumnMap = {
+export const tableColumnMap = {
   stream: [
     {
       tableName: 'Bandwidth_MBps',

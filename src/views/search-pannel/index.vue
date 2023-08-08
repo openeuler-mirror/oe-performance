@@ -138,7 +138,6 @@ import { parseQueryStringTo2dArray } from './utils'
 // api
 import { getJobValueList, getTestBoxes } from '@/api/performance'
 import type { JobModel } from '@/model/types'
-import { SearchPanel } from './types'
 
 interface objectItem {
   [key: string]: string | string[] | string[][]
@@ -182,13 +181,13 @@ const testboxStore = useTestboxStore()
 const fieldsConfigForRender = ref<JobModel.Fields>({})
 const suiteList = ref<SearchPanel.SuiteList>([])
 // uite = ref('unixbench')
-const testboxList = ref([] as DictObject[])
-const filteredTestboxList = ref([] as objectItem[])
+const testboxList = ref<DictObject[]>([])
+const filteredTestboxList = ref<objectItem[]>([])
 const jobFieldsLoading = ref(false)
 const hostFieldsLoading = ref(false)
 
 const fieldOrigin = {} as objectItem // 字典，用来判断某个field字段的origin
-const hostFieldList = [] as any // 中间数据，用来循环host类型的field字段
+const hostFieldList = <string[]>[] // 中间数据，用来循环host类型的field字段
 const jobFieldList = [] as any // 中间数据，用来循环job类型的field字段
 
 const searchTime = ref(10)
@@ -279,7 +278,7 @@ const setFieldSelection = () => {
 const setSuiteList = () => {
   const { scene } = route.query
   if (!scene) return
-  const matchSceneConfig = suiteConfig[String(scene)]
+  const matchSceneConfig = suiteConfig[scene as keyof SearchPanel.SuiteConfig]
   if (!matchSceneConfig) return
   suiteList.value = matchSceneConfig.suiteList || []
 }
@@ -441,9 +440,10 @@ const constrcutOsvOptions = (osvList: SearchPanel.OSVListValues) => {
 // eslint-disable-next-line max-lines-per-function
 function getHostOptions() {
   hostFieldsLoading.value = true
-  const fieldList = hostFieldList.map((field: string) =>
+  const fieldList: string[] = hostFieldList.map((field: string) =>
     field.replace('hw.', '')
   )
+
   const hostSearchParams = getSearchParamsByFields(
     searchParams.value,
     hostFieldList
@@ -460,18 +460,18 @@ function getHostOptions() {
       filteredTestboxList.value = filteringTestboxBySearchParams(
         testboxList.value,
         hostSearchParams,
-        searchParams.value.testbox
+        searchParams.value?.testbox
       )
       fieldList.forEach(field => {
         // 遍历硬件的fieldList，从testBoxList聚合信息。
-        const listValues = []
-        const repeatMap = {}
+        const listValues = <{ value: string }[]>[]
+        const repeatMap = new Map<string, number>()
         filteredTestboxList.value.forEach(testbox => {
-          if (testbox[field] && !repeatMap[testbox[field]]) {
+          if (testbox[field] && !repeatMap.has(testbox[field] as string)) {
             listValues.push({
-              value: testbox[field]
+              value: testbox[field] as string
             })
-            repeatMap[testbox[field]] = 1
+            repeatMap.set(testbox[field] as string, 1)
           }
         })
         const originData = JSON.parse(
@@ -502,7 +502,7 @@ function getHostOptions() {
 const filteringTestboxBySearchParams = (
   testboxList: Array<objectItem>,
   searchParams: objectItem,
-  searchParamTestbox: Array<string>
+  searchParamTestbox: Array<string> | undefined
 ) => {
   // 如果用户选择了testbox，则直接由testbox过滤
   if (
@@ -511,7 +511,7 @@ const filteringTestboxBySearchParams = (
     && searchParamTestbox.length > 0
   ) {
     return testboxList.filter(
-      testbox => searchParamTestbox.indexOf(testbox.testboxId) > -1
+      testbox => searchParamTestbox.indexOf(testbox.testboxId as string) > -1
     )
   }
   const searchParamList = Object.keys(searchParams).filter(
@@ -523,7 +523,9 @@ const filteringTestboxBySearchParams = (
     let isTestboxMatch = false
     searchParamList.forEach(hwField => {
       if (
-        searchParams[hwField].indexOf(testbox[hwField.replace('hw.', '')]) > -1
+        searchParams[hwField].includes(
+          testbox[hwField.replace('hw.', '')] as string & string[]
+        )
       ) {
         isTestboxMatch = true
       }
@@ -568,13 +570,13 @@ function handleSearch() {
   const { hostParams, jobParams } = splitParamsByOrigin(searchParams.value)
   // osv特殊处理
   if (jobParams.osv && Array.isArray(jobParams.osv)) {
-    jobParams.osv = jobParams.osv.map((arr: string[]) => arr.join('@'))
+    jobParams.osv = jobParams.osv.map(arr => (arr as string[]).join('@'))
   }
   if (Object.keys(hostParams).length > 0) {
-    const testboxSearchList = []
+    const testboxSearchList = <string[]>[]
     Object.keys(hostParams).forEach(hostFieldKey => {
       const fieldKeyInTestbox = hostFieldKey.replace('hw.', '')
-      let tempIdList = []
+      let tempIdList = <string[]>[]
       if (Array.isArray(hostParams[hostFieldKey])) {
         tempIdList = testboxList.value
           .filter(testbox => {
@@ -614,17 +616,23 @@ function handleSearch() {
 
 // 工具函数，将筛选条件添加到url中
 const setQueryToUrl = () => {
-  const newQuery = {} as objectItem
-  Object.keys(searchParams.value).forEach(field => {
-    searchParams.value[field] && (newQuery[field] = searchParams.value[field])
+  const newQuery = <DictObject>{}
+  ;(
+    Object.keys(searchParams.value) as Array<keyof BaseLine.SearchParams>
+  ).forEach(field => {
+    if (searchParams.value[field]) {
+      newQuery[field] = searchParams.value[field]
+    }
     // osv值拼接
     if (field === 'osv' && searchParams.value[field]) {
-      newQuery[field] = searchParams.value[field].join('@')
+      newQuery[field] = (searchParams.value[field] as string[]).join('@')
     }
   })
+
   newQuery['scene'] = route.query.scene as string
   newQuery['searchLimitTime'] = String(searchTime.value)
   newQuery['searchLimitTotal'] = String(searchTotal.value)
+
   router.push({
     path: route.path,
     query: { ...newQuery }
