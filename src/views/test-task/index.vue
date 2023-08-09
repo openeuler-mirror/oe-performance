@@ -24,13 +24,15 @@ import TaskTable from './components/task-table.vue'
 
 import { getTaskStatusCounts } from '@/api/center'
 import { getPerformanceData } from '@/api/performance'
+import { BaseLine } from '../performance-baseline/types'
+import { PerformanceApi } from '@/api/types'
 
 const router = useRouter()
 
 const activeName = ref<TabPaneName>('allTask')
-const dataList = ref([])
+const dataList = ref<BaseLine.SubmitIdList>([])
 const dataLoading = ref(false)
-const healthState = ref({})
+const healthState = ref<TestTask.TaskState>({})
 
 const jobStateFilter = ref('')
 
@@ -132,13 +134,14 @@ const getDataList = () => {
 // 获取job的状态枚举值和属性
 const getJobsState = () => {
   getTaskStatusCounts().then(res => {
-    const tempDataList = res.data.aggregations.job_state.buckets
+    const tempDataList = res.data.aggregations.job_state
+      .buckets as TestTask.TaskAmount
     healthState.value = computeJobsHealthAmount(tempDataList)
   })
 }
 
-const computeJobsHealthAmount = dataList => {
-  const dataObj = {}
+const computeJobsHealthAmount = (dataList: TestTask.TaskAmount) => {
+  const dataObj: TestTask.TaskState = {}
   dataList.forEach(healthItem => {
     switch (healthItem.key) {
     case 'finished':
@@ -154,6 +157,7 @@ const computeJobsHealthAmount = dataList => {
     }
   })
   let allState = 0
+
   Object.keys(dataObj).forEach(state => {
     allState += dataObj[state]
   })

@@ -1,28 +1,32 @@
 <template>
-    <el-drawer v-model="drawer" :direction="direction" :before-close="handleClose" width="500">
+  <el-drawer
+    v-model="drawer"
+    :direction="direction"
+    :before-close="handleClose"
+    width="500">
     <template #title>
       <h4>用例列表</h4>
     </template>
     <template #default>
       <div>
         <el-input
-         v-model="searchInput"
-         placeholder="请选择"
-         multiple
-         class="input-with-select">
-            <template #append>
-              <el-button :icon="Search" />
-            </template>
-         </el-input>
+          v-model="searchInput"
+          placeholder="请选择"
+          multiple
+          class="input-with-select">
+          <template #append>
+            <el-button :icon="Search" />
+          </template>
+        </el-input>
       </div>
       <el-tree
         :data="data"
         show-checkbox
         node-key="id"
-        :default-expanded-keys="[1, 1.1,  2, 2.1]"
+        :default-expanded-keys="[1, 1.1, 2, 2.1]"
         :props="defaultProps"
         ref="tree"
-        @check="handleCheckChange"/>
+        @check="handleCheckChange" />
     </template>
     <template #footer>
       <div style="flex: auto">
@@ -33,7 +37,8 @@
   </el-drawer>
 </template>
 <script lang="ts" setup>
-import { ref, toRaw, defineEmits, reactive, computed } from 'vue'
+import { ref, toRaw, defineEmits, computed } from 'vue'
+import type { ElTree } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -45,36 +50,26 @@ const drawer = computed({
   set: () => emit('changeDrawer')
 })
 
-// watch(drawer,(newValue,oldValue)=>{
-//   sendDrawer()
-//   console.log('sum变化了',newValue,oldValue)
-// },{immediate:true})
-
-const direction = ref('rtl')
+const direction = ref<'ltr' | 'rtl' | 'ttb' | 'btt' | undefined>('ltr')
 
 const searchInput = ref('')
 const defaultProps = {
   children: 'children',
-  label: 'label',
+  label: 'label'
 }
-const tree = ref()
+const tree = ref<InstanceType<typeof ElTree>>()
 // 获取选择的数据
-const selected = reactive({
-  selectedExample: []
-})
+const selectedExample = ref<TestTask.CaseDrawerData>()
+
 function handleCheckChange() {
-  const exampleArry = tree.value.getCheckedNodes()
-  
-  for (const key in exampleArry) {
-    exampleArry[key] = toRaw(exampleArry[key])
+  const exampleArr = tree.value!.getCheckedNodes()
+  for (const key in exampleArr) {
+    exampleArr[key] = toRaw(exampleArr[key])
   }
-  selected.selectedExample = exampleArry
-  console.log(selected.selectedExample);
+  selectedExample.value = exampleArr as TestTask.CaseDrawerData
 }
 
-
-
-const data = [
+const data: TestTask.CaseDrawerData = [
   {
     id: 1,
     label: '单核',
@@ -85,15 +80,15 @@ const data = [
         children: [
           {
             id: 1.2,
-            label: 'nr_task=100%,mode=process,ipc=pipe,datasize=100,loop=30000',
+            label: 'nr_task=100%,mode=process,ipc=pipe,datasize=100,loop=30000'
           },
           {
             id: 1.3,
-            label: 'nr_task=50%,mode=process,ipc=pipe,datasize=100,loop=30000',
-          },
-        ],
-      },
-    ],
+            label: 'nr_task=50%,mode=process,ipc=pipe,datasize=100,loop=30000'
+          }
+        ]
+      }
+    ]
   },
   {
     id: 2,
@@ -105,25 +100,22 @@ const data = [
         children: [
           {
             id: 2.2,
-            label: 'test=shell_er_task=l_iterations=30',
+            label: 'test=shell_er_task=l_iterations=30'
           },
           {
             id: 2.3,
-            label: 'test=shell_er_task=l_iterations=40',
-          },
-        ],
-      },
+            label: 'test=shell_er_task=l_iterations=40'
+          }
+        ]
+      }
     ]
   }
 ]
 
-
-
-
 const emit = defineEmits(['changeDrawer', 'selectedExample'])
 function confirmClick() {
   emit('changeDrawer')
-  emit('selectedExample',selected)
+  emit('selectedExample', { selectedExample: selectedExample })
 }
 function cancelClick() {
   emit('changeDrawer')

@@ -50,9 +50,11 @@ import { flattenObj } from '@/utils/utils'
 // store
 import { useTestboxStore } from '@/stores/performanceData'
 // api
-import { getPerformanceData } from '@/api/performance'
+import { DataObject, getPerformanceData } from '@/api/performance'
 // configs
 import { kpiMaps, kpiMapFuncs, addtionalKpiMaps } from './config.js'
+import { BaseLine } from '../performance-baseline/types'
+import { PerformanceApi } from '@/api/types'
 
 const testboxStore = useTestboxStore()
 
@@ -162,12 +164,12 @@ const getTotalData = (
       resetData()
       jobCount.value = res?.data?.hits?.total?.value
       res?.data?.hits?.hits
-        ?.filter(item => {
+        ?.filter((item: DataObject) => {
           return (
             item._source.stats && Object.keys(item._source.stats).length > 0
           )
         })
-        .forEach(item => {
+        .forEach((item: DataObject) => {
           const tempFlattenItem = flattenObj(item._source)
           // jobs转换成ejobs
           tempFlattenItem[

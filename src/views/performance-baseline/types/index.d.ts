@@ -1,3 +1,5 @@
+import { DataObject } from '@/api/performance'
+
 declare namespace Config_li {
   interface ColumnItem {
     label: string
@@ -72,8 +74,15 @@ declare namespace BaseLine {
     osv?: string[] | string[][]
   }
 
-  interface SubMitId {
+  interface SubmitId {
     submit_id: string
   }
-  type SubMitIdList = SubMitId[]
+  type SubmitIdList = SubmitId[]
+
+  type SubmitItem = {
+    submitId: string
+    jobList: DataObject[]
+  }
+
+  type SubmitList = SubmitItem[]
 }

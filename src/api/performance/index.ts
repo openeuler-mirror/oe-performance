@@ -1,4 +1,6 @@
 import createAxios from '@/utils/request/axios'
+import { BaseLine } from '@/views/performance-baseline/types'
+import { PerformanceApi } from '../types'
 
 export interface DataObject {
   [key: string]: any

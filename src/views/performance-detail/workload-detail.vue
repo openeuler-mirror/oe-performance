@@ -3,17 +3,42 @@
     <el-card class="baseline-detail">
       <div class="main-title">
         <h3 class="work-load-title">Workload性能值详情</h3>
-        <h4>测试套：{{ performanceDataStroe?.performanceData[submitId]?.suite }}</h4>
-        <p v-if="performanceDataStroe?.performanceData[submitId]?.suite!=='lmbench'">总体几何平均值：
-          {{ performanceValFormatter({},{},performanceDataStroe?.performanceData[submitId]?.performanceVal) }}
+        <h4>
+          测试套：{{ performanceDataStroe?.performanceData[submitId]?.suite }}
+        </h4>
+        <p
+          v-if="
+            performanceDataStroe?.performanceData[submitId]?.suite !== 'lmbench'
+          ">
+          总体几何平均值：
+          {{
+            performanceValFormatter(
+              {},
+              {},
+              performanceDataStroe?.performanceData[submitId]?.performanceVal
+            )
+          }}
         </p>
         <template v-else>
-          <p>Bandwidth结果几何平均值：
-            {{ performanceValFormatter(
-              {},{},performanceDataStroe?.performanceData[submitId]?.performanceVal_local_bandwidths
-            ) }}
-          </p>Latency结果几何平均值：
-          {{ performanceValFormatter({},{},performanceDataStroe?.performanceData[submitId]?.performanceVal) }}
+          <p>
+            Bandwidth结果几何平均值：
+            {{
+              performanceValFormatter(
+                {},
+                {},
+                performanceDataStroe?.performanceData[submitId]
+                  ?.performanceVal_local_bandwidths
+              )
+            }}
+          </p>
+          Latency结果几何平均值：
+          {{
+            performanceValFormatter(
+              {},
+              {},
+              performanceDataStroe?.performanceData[submitId]?.performanceVal
+            )
+          }}
         </template>
       </div>
       <div class="main-info">
@@ -111,7 +136,7 @@
     </el-card>
   </div>
 </template>
-  
+
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { usePerformanceData } from '@/stores/performanceData'
@@ -121,17 +146,17 @@ import workloadTableSection from './workload-table-section.vue'
 const router = useRouter()
 const performanceDataStroe = usePerformanceData()
 
-const submitId = router.currentRoute.value.params.submit_id
+const submitId = router.currentRoute.value.params.submit_id as string
 
-const performanceValFormatter = (row, column, cellValue) => {
+// 重复
+const performanceValFormatter = (row: any, column: any, cellValue: number) => {
   if (cellValue === undefined || cellValue === invalidNumberSymbol) {
     return '暂无数据'
   }
   return cellValue
 }
-
 </script>
-  
+
 <style lang="scss" scoped>
 .baseline-detail {
   /* 顶部标题 */
@@ -168,10 +193,10 @@ const performanceValFormatter = (row, column, cellValue) => {
       :deep(.el-descriptions__cell) {
         padding: var(--oe-perf-padding);
         background-color: #fff;
-        &:nth-child(2n - 1){
+        &:nth-child(2n - 1) {
           border-left: none;
         }
-        &:nth-child(2n){
+        &:nth-child(2n) {
           border-right: none;
         }
       }
@@ -183,7 +208,7 @@ const performanceValFormatter = (row, column, cellValue) => {
       }
       .sub-title {
         padding: var(--oe-perf-padding);
-        background-color: #F3F3F5;
+        background-color: #f3f3f5;
         font-weight: bold;
         font-size: var(--oe-perf-font-size-display);
       }

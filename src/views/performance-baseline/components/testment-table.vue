@@ -164,12 +164,13 @@ import {
   useBaselineTableInfoStore,
   useTestboxStore
 } from '@/stores/performanceData'
-import { getPerformanceData } from '@/api/performance'
+import { DataObject, getPerformanceData } from '@/api/performance'
 import {
   combineJobs,
   invalidNumberSymbol
 } from '@/views/performance-baseline/utils.js'
 import ExportModal from './export-modal.vue'
+import { BaseLine } from '../types'
 
 export interface TableItem {
   [key: string]: any
@@ -198,11 +199,11 @@ const performanceStore = usePerformanceData()
 const baselineTableInfoStore = useBaselineTableInfoStore()
 const testboxStore = useTestboxStore()
 
-const tableData = ref<TableItem[]>([])
-const allColumn = ref([] as Column[])
-const tableColumn = ref([] as Column[])
-const allColumnLabel = ref([] as string[])
-const cloumnLabel = ref([] as string[])
+const tableData = ref<DataObject[]>([])
+const allColumn = ref<Column[]>([])
+const tableColumn = ref<Column[]>([])
+const allColumnLabel = ref<string[]>([])
+const cloumnLabel = ref<string[]>([])
 const isIndeterminate = ref<boolean>(false)
 const checkAllColumn = ref<boolean>(true)
 
@@ -268,9 +269,9 @@ const handleSelectionChange = (selectedRow: any[]) => {
 
 // 获取并合并jobs的逻辑
 // eslint-disable-next-line max-lines-per-function
-function getAllJobsData(idList: BaseLine.SubMitIdList) {
+function getAllJobsData(idList: BaseLine.SubmitIdList) {
   tableLoading.value = true
-  const tempArr: DictObject[] = reactive(Object.assign([], idList))
+  const tempArr: DataObject[] = reactive(Object.assign([], idList))
   getPerformanceData({
     index: 'jobs',
     query: {
@@ -311,25 +312,28 @@ function getAllJobsData(idList: BaseLine.SubMitIdList) {
   return tempArr
 }
 
-function constructSubmitDataList(jobList: any[]) {
-  const submitList = <any>[]
-  const submitMap = <any>{}
+// 在task-table.vue有个一模一样的
+const constructSubmitDataList = (jobList: DataObject[]) => {
+  const submitList: DataObject[] = []
+  const submitMap = new Map<string, BaseLine.SubmitItem>()
   jobList.forEach(job => {
-    const submitId = job?._source?.submit_id
-    if (submitMap[submitId]) {
-      submitMap[submitId].jobList.push(job)
+    const submitId: string = job?._source?.submit_id
+    if (submitMap.has(submitId)) {
+      const item = submitMap.get(submitId)
+      item!.jobList.push(job)
     } else {
-      submitMap[submitId] = {
-        submitId,
+      submitMap.set(submitId, {
+        submitId: submitId,
         jobList: [job]
-      }
-      submitList.push(submitMap[submitId])
+      })
+      submitList.push(submitMap.get(submitId)!)
     }
   })
+
   return submitList
 }
 
-function setDeviceInfoToObj(resultObj: any) {
+function setDeviceInfoToObj(resultObj: DataObject) {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
   resultObj.device = testbox.device || {}
 }

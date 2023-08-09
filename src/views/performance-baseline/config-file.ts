@@ -7,6 +7,12 @@ export interface Column {
   className?: string
 }
 
+interface ColumnConfig {
+  [key: string]: {
+    column: Column[]
+  }
+}
+
 export const columnConfig: Column[] = [
   {
     label: '测试套',
@@ -98,7 +104,7 @@ export const sceneConfig = {
 }
 
 // 可配置不同场景下使用不同的表格配置
-export const config = {
+export const config: ColumnConfig = {
   bigData: {
     column: columnConfig
   },

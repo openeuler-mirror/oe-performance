@@ -1,3 +1,5 @@
+import { BaseLine } from '@/views/performance-baseline/types'
+
 declare namespace PerformanceApi {
   // 该命名空间中的类型, 前缀***Query为同一个查询组
 

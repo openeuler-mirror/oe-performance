@@ -138,6 +138,7 @@ import { parseQueryStringTo2dArray } from './utils'
 // api
 import { getJobValueList, getTestBoxes } from '@/api/performance'
 import type { JobModel } from '@/model/types'
+import { BaseLine } from '../performance-baseline/types'
 
 interface objectItem {
   [key: string]: string | string[] | string[][]

@@ -1,3 +1,4 @@
+import { Config_li } from '@/views/performance-baseline/types'
 import type { CascaderOption } from 'element-plus'
 
 declare namespace JobModel {
@@ -41,5 +42,20 @@ declare namespace JobModel {
     fields: Fields
     kpis: KPIS
     params: Params
+  }
+
+  interface SuiteTableItemFilters {
+    test?: string
+    nr_task?: string
+    estgroup?: string
+  }
+  interface SuiteTableItem {
+    kpi: string
+    x_param: string
+    filters?: SuiteTableItemFilters
+  }
+
+  interface SuiteTable {
+    [key: keyof Config_li.MapBase]: SuiteTableItem[]
   }
 }
