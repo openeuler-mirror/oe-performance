@@ -39,9 +39,9 @@ declare namespace JobModel {
 
   // Job在把data-model修改为ts文件后是可以适配jobModel的
   interface Job {
-    fields: Fields
     kpis: KPIS
-    params: Params
+    fields?: Fields
+    params?: Params
   }
 
   interface SuiteTableItemFilters {

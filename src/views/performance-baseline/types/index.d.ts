@@ -8,9 +8,9 @@ declare namespace Config_li {
 
   interface CommonItem {
     tableName: string
-    tableLabel: string
     column: ColumnItem[]
-    kpi: string
+    tableLabel?: string
+    kpi?: string
   }
 
   type TableInfoItem = Pick<CommonItem, 'tableName' | 'tableLabel' | 'column'>

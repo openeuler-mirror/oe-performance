@@ -1,6 +1,6 @@
 <template>
   <div class="dev-perf-table">
-    <el-table class="main-table" border :data="tableData">
+    <el-table class="main-table" :data="tableData" border>
       <el-table-column
         v-for="(column, idx) in tableColumns"
         :key="`${column.label}_${idx}`"
@@ -122,6 +122,8 @@ import {
 } from '@/utils/utils'
 import { JobModel } from '@/model/types'
 import { Comparison } from '@/views/result-comparation/types'
+import { Utils } from '@/utils/types'
+import { DataObject } from '@/api/performance'
 
 interface InitialDataByTable {
   kpi: String
@@ -153,7 +155,7 @@ const props = defineProps({
 
 const dataMap: Ref<DictObject> = ref({})
 const jobListDialogVisible = ref(false)
-const jobListData = ref([])
+const jobListData = ref<DataObject[]>([])
 const jobListKpi = ref('')
 
 const tableColumns: Ref<Array<DictObject>> = ref([])
@@ -404,7 +406,7 @@ const isPerfDataExsitUnderTable = (
   return true
 }
 
-const showJobListDialog = (row: DictObject) => {
+const showJobListDialog = (row: Utils.perfPrevCur) => {
   jobListData.value = row.jobs
   jobListKpi.value = row.kpi
   jobListDialogVisible.value = true

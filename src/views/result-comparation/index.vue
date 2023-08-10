@@ -12,7 +12,7 @@
       <dimension-controller
         ref="dimensionControlerRef"
         :options-data="optionsData"
-        :suiteFilter="Array.from(suiteOptions) || []"
+        :suiteFilter="(Array.from(suiteOptions) as string[]) || []"
         @filtering="handleDimensionFiltering"
         @suiteFiltering="handleSuiteFiltering" />
     </template>
@@ -55,6 +55,7 @@ import { DataObject, getPerformanceData } from '@/api/performance'
 import { kpiMaps, kpiMapFuncs, addtionalKpiMaps } from './config.js'
 import { BaseLine } from '../performance-baseline/types'
 import { PerformanceApi } from '@/api/types'
+import { Comparison, ComparisonConfig } from '@/views/result-comparation/types'
 
 const testboxStore = useTestboxStore()
 
@@ -66,31 +67,34 @@ const availableSuites = [
   'libmicro'
 ]
 
+const KPIMapInstance = kpiMaps as ComparisonConfig.KPI
+const KPIMapFuncsInstance = kpiMapFuncs as ComparisonConfig.KpiMapFuncs
+const addtionalKpiMapsInstance
+  = addtionalKpiMaps as ComparisonConfig.AddtionalKpiMap
 // ejobs
-let ejobs = {}
-let ejobsMap = {}
+let ejobs: DataObject = {}
+let ejobsMap: DataObject = {}
 // tjobs
-let tjobs = {}
+let tjobs: DataObject = {}
+let inputData = ref<DataObject>({})
 const jobCount = ref(0)
-
 const tabName = ref('comparationResult')
-
-let inputData = ref({})
-const searchParams = ref({})
+const searchParams = ref<BaseLine.SearchParams>({})
 const searchLoading = ref(false)
 
 const isSearched = ref(false)
 
-const dimensionControlerRef = ref(null)
-const osvOptions = ref(new Set())
-const archOptions = ref(new Set())
-const tboxGroupOptions = ref(new Set())
-const tagsOptions = ref(new Set())
-const suiteOptions = ref(new Set())
-const ppOptions = ref(new Set())
-const ssOptions = ref(new Set())
-const groupOptions = ref(new Set())
-const optionsData = ref({
+// 在vue3使用<script setup>构建组件是不能使用InstanceType获取到在组件内没有expose出来的属性和方法
+const dimensionControlerRef = ref<InstanceType<typeof dimensionController>>()
+const osvOptions = ref(new Set<string>())
+const archOptions = ref(new Set<string>())
+const tboxGroupOptions = ref(new Set<string>())
+const tagsOptions = ref(new Set<string>())
+const suiteOptions = ref(new Set<string>())
+const ppOptions = ref(new Set<string>())
+const ssOptions = ref(new Set<string>())
+const groupOptions = ref(new Set<string>())
+const optionsData = ref<DataObject>({
   osv: osvOptions,
   arch: archOptions,
   tbox_group: tboxGroupOptions,
@@ -101,11 +105,15 @@ const optionsData = ref({
 })
 
 const filterDimension = ref('osv')
-const filterListData = ref({})
+const filterListData = ref<Comparison.FilterList>({})
 const suiteFilterList: Ref<string[]> = ref([])
 
 // 获取jobs数据
-const onSearch = (params, searchTime: number, searchTotal: number) => {
+const onSearch = (
+  params: BaseLine.SearchParams,
+  searchTime: number,
+  searchTotal: number
+) => {
   searchParams.value = params
   getTotalData(params, searchTime, searchTotal)
 }
@@ -116,7 +124,7 @@ const setMustCase = (searchParams: BaseLine.SearchParams) => {
   ;(Object.keys(searchParams) as Array<keyof BaseLine.SearchParams>).forEach(
     paramKey => {
       if (searchParams[paramKey]) {
-        const matchObj: BaseLine.SearchParams = {} as any
+        const matchObj: BaseLine.SearchParams = {}
         matchObj[paramKey] = searchParams[paramKey] as string[]
         if (Array.isArray(searchParams[paramKey])) {
           searchParams[paramKey]!.length > 0
@@ -127,7 +135,6 @@ const setMustCase = (searchParams: BaseLine.SearchParams) => {
       }
     }
   )
-  console.log('tempArr', tempArr)
   return tempArr
 }
 // eslint-disable-next-line max-lines-per-function
@@ -191,18 +198,22 @@ const getTotalData = (
     .finally(() => {
       isSearched.value = true
       searchLoading.value = false
-      nextTick(() => dimensionControlerRef.value.checkedListInit()) // 触发dimensionController组件重置选项
+      nextTick(() => dimensionControlerRef.value!.checkedListInit()) // 触发dimensionController组件重置选项
     })
 }
 
-const addHardwareInfoToJob = job => {
+const addHardwareInfoToJob = (job: DataObject) => {
   const hardwareInfo = testboxStore.testboxMap[job.testbox] || {}
   job['hw.nr_cpu'] = hardwareInfo.nr_cpu
   job['hw.nr_node'] = hardwareInfo.nr_node
   job['hw.memory'] = hardwareInfo.memory
 }
 
-const constructEjobData = (job, ejobs, ejobsMap) => {
+const constructEjobData = (
+  job: DataObject,
+  ejobs: DataObject,
+  ejobsMap: DataObject
+) => {
   const { suite } = job
   if (ejobs[suite]) {
     ejobs[suite].push(job)
@@ -214,15 +225,15 @@ const constructEjobData = (job, ejobs, ejobsMap) => {
   }
 }
 
-const e2tConverter = (ejobs, tjobs) => {
+const e2tConverter = (ejobs: DataObject, tjobs: DataObject) => {
   Object.keys(ejobs).forEach((suiteKey: string) => {
-    ejobs[suiteKey].forEach(ejob => {
+    ejobs[suiteKey].forEach((ejob: DataObject) => {
       const program = ejob.suite
       const tempJob = JSON.parse(JSON.stringify(ejob))
       tempJob[`pp.${program}.testcase`] = ejob[`pp.${program}.test`] || '' // 如果有test，设为默认值
 
       // 如果配置文件kpiMaps中没有映射关系，则直接使用不做转换
-      if (!kpiMaps[suiteKey] && !kpiMapFuncs[suiteKey]) {
+      if (!KPIMapInstance[suiteKey] && !KPIMapFuncsInstance[suiteKey]) {
         const tjob = JSON.parse(JSON.stringify(tempJob))
         if (tjobs[suiteKey]) {
           tjobs[suiteKey].push(tjob)
@@ -232,12 +243,13 @@ const e2tConverter = (ejobs, tjobs) => {
         return
       }
       // 有配置文件的话，进行转换
-      if (kpiMaps[suiteKey]) {
-        Object.keys(kpiMaps[suiteKey]).forEach(kpi => {
+      if (KPIMapInstance[suiteKey]) {
+        Object.keys(KPIMapInstance[suiteKey]).forEach(kpi => {
           // 遍历所有kpi，每个kpi生成一个tjob
           const tjob = JSON.parse(JSON.stringify(tempJob))
-          tjob[`pp.${suiteKey}.testcase`] = kpiMaps[suiteKey][kpi].testcase
-          tjob[`stats.${suiteKey}.${kpiMaps[suiteKey][kpi].kpi}`]
+          tjob[`pp.${suiteKey}.testcase`]
+            = KPIMapInstance[suiteKey][kpi].testcase
+          tjob[`stats.${suiteKey}.${KPIMapInstance[suiteKey][kpi].kpi}`]
             = ejob[`stats.${suiteKey}.${kpi}`]
           if (tjobs[suiteKey]) {
             tjobs[suiteKey].push(tjob)
@@ -245,15 +257,16 @@ const e2tConverter = (ejobs, tjobs) => {
             tjobs[suiteKey] = [tjob]
           }
         })
-      } else if (kpiMapFuncs[suiteKey]) {
+      } else if (KPIMapFuncsInstance[suiteKey]) {
         // 如果kpiMaps中没有匹配，则使用kpiMapFuncs
-        if (!addtionalKpiMaps[suiteKey]) return
-        addtionalKpiMaps[suiteKey].forEach(kpi => {
+        if (!addtionalKpiMapsInstance[suiteKey]) return
+        addtionalKpiMapsInstance[suiteKey].forEach(kpi => {
           const tjob = JSON.parse(JSON.stringify(tempJob))
-          tjob[`pp.${suiteKey}.testcase`] = kpiMapFuncs[suiteKey](kpi).testcase
+          tjob[`pp.${suiteKey}.testcase`]
+            = KPIMapFuncsInstance[suiteKey](kpi).testcase
           tjob[`pp.${suiteKey}.testgroup`]
-            = kpiMapFuncs[suiteKey](kpi).testgroup
-          tjob[`stats.${suiteKey}.${kpiMapFuncs[suiteKey](kpi).kpi}`]
+            = KPIMapFuncsInstance[suiteKey](kpi).testgroup
+          tjob[`stats.${suiteKey}.${KPIMapFuncsInstance[suiteKey](kpi).kpi}`]
             = ejob[`stats.${suiteKey}.${kpi}`]
           if (tjobs[suiteKey]) {
             tjobs[suiteKey].push(tjob)
@@ -282,13 +295,13 @@ const resetData = () => {
 
 const handleDimensionFiltering = (
   dimension: string,
-  checkedListObject: DictObject
+  checkedListObject: Comparison.FilterList
 ) => {
   filterDimension.value = dimension
   filterListData.value = checkedListObject
 }
 
-const handleSuiteFiltering = suiteList => {
+const handleSuiteFiltering = (suiteList: string[]) => {
   suiteFilterList.value = suiteList
 }
 
@@ -296,7 +309,7 @@ const handleSuiteFiltering = suiteList => {
  * 获取job中的信息，记录各个维度的可选项
  * @param flattenJob
  */
-const getFilterOptions = flattenJob => {
+const getFilterOptions = (flattenJob: DataObject) => {
   flattenJob['osv'] && osvOptions.value.add(flattenJob['osv'])
   flattenJob['arch'] && archOptions.value.add(flattenJob['arch'])
   flattenJob['tbox_group']
@@ -304,17 +317,17 @@ const getFilterOptions = flattenJob => {
   flattenJob['tags'] && tagsOptions.value.add(flattenJob['tags'])
   flattenJob['group_id'] && groupOptions.value.add(flattenJob['group_id'])
   flattenJob['suite'] && suiteOptions.value.add(flattenJob['suite'])
-  suiteFilterList.value = Array.from(suiteOptions.value)
+  suiteFilterList.value = Array.from(suiteOptions.value) as string[]
   const ppParamsList = getPpParams(flattenJob) // 获取组合的ppParams
   flattenJob['ppParams'] = ppParamsList.join(',')
-  ppParamsList.length > 0 && addPpParamToOptions(ppParamsList, ppOptions)
+  ppParamsList.length > 0 && addPpParamToOptions(ppParamsList)
   const ssParams = getSsParams(flattenJob)
   flattenJob['ssParams'] = ssParams
   ssParams && ssOptions.value.add(ssParams)
 }
 
-const getPpParams = flattenJob => {
-  const tempArr = []
+const getPpParams = (flattenJob: DataObject) => {
+  const tempArr: string[] = []
   Object.keys(flattenJob)
     .sort()
     .forEach(key => {
@@ -325,7 +338,8 @@ const getPpParams = flattenJob => {
   return tempArr
 }
 
-const addPpParamToOptions = (paramList, ppOptions) => {
+// 原先的ppOptions实际上还是ref定义的ppOptions
+const addPpParamToOptions = (paramList: string[]) => {
   paramList.forEach((paramPair: string) => {
     ppOptions.value.add(paramPair.replace(/^pp./, ''))
   })
@@ -335,8 +349,8 @@ const addPpParamToOptions = (paramList, ppOptions) => {
  * stats数据结构中可能会有写保存信息需要特殊处理。因此处理方法和pp的params的获取一致。
  * @param flattenJob
  */
-const getSsParams = flattenJob => {
-  const tempArr = []
+const getSsParams = (flattenJob: DataObject) => {
+  const tempArr: string[] = []
   Object.keys(flattenJob)
     .sort()
     .forEach(key => {

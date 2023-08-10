@@ -4,7 +4,7 @@
     :direction="direction"
     :before-close="handleClose"
     width="500">
-    <template #title>
+    <template #header>
       <h4>用例列表</h4>
     </template>
     <template #default>

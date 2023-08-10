@@ -176,8 +176,8 @@ export function formatterPercentage(
 }
 
 export function perfSortMethod(
-  prev: Utils.perfSortPrevCur,
-  cur: Utils.perfSortPrevCur,
+  prev: Utils.perfPrevCur,
+  cur: Utils.perfPrevCur,
   cases: string,
   key: string
 ): number {
