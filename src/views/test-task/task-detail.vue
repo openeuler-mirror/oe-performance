@@ -169,7 +169,7 @@ import { onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import TaskDoughnut from './components/task-doughnut.vue'
 
-import { DataObject, getPerformanceData, getTestBoxes } from '@/api/performance'
+import { getPerformanceData, getTestBoxes } from '@/api/performance'
 
 import { useRouter } from 'vue-router'
 import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
@@ -181,7 +181,7 @@ const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
 const testboxStore = useTestboxStore()
 
-const detailData = ref<DataObject>({})
+const detailData = ref<DictObject>({})
 const loading = ref(false)
 
 const getJobData = (submitId: string) => {
@@ -203,7 +203,7 @@ const getJobData = (submitId: string) => {
     }
   })
     .then(res => {
-      const resultObj: DataObject = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
+      const resultObj: DictObject = combineJobs(res.data.hits.hits) // 工具函数，合并job数据为一个submitId数据
       setDeviceInfoToObj(resultObj)
       setPerformanceData(submitId, resultObj) // save submit data to store
       detailData.value = resultObj
@@ -219,7 +219,7 @@ const getJobData = (submitId: string) => {
     })
 }
 
-const setDeviceInfoToObj = (resultObj: DataObject) => {
+const setDeviceInfoToObj = (resultObj: DictObject) => {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
   resultObj.device = testbox.device || {}
 }
@@ -230,7 +230,7 @@ const getDetailData = () => {
     detailData.value = performanceData[taskId]
   } else {
     getTestBoxes().then(testboxRes => {
-      let testboxList: DataObject[] = []
+      let testboxList: DictObject[] = []
       testboxList = testboxRes.data.hits.hits.map((item: any) => {
         return {
           testboxId: item._id,

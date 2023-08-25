@@ -1,5 +1,3 @@
-import { DataObject } from '@/api/performance'
-
 declare namespace Config_li {
   interface ColumnItem {
     label: string
@@ -81,7 +79,7 @@ declare namespace BaseLine {
 
   type SubmitItem = {
     submitId: string
-    jobList: DataObject[]
+    jobList: DictObject[]
   }
 
   type SubmitList = SubmitItem[]

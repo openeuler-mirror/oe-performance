@@ -164,13 +164,12 @@ import {
   useBaselineTableInfoStore,
   useTestboxStore
 } from '@/stores/performanceData'
-import { DataObject, getPerformanceData } from '@/api/performance'
+import { getPerformanceData } from '@/api/performance'
 import {
   combineJobs,
   invalidNumberSymbol
 } from '@/views/performance-baseline/utils.js'
 import ExportModal from './export-modal.vue'
-import { BaseLine } from '../types'
 
 export interface TableItem {
   [key: string]: any
@@ -199,7 +198,7 @@ const performanceStore = usePerformanceData()
 const baselineTableInfoStore = useBaselineTableInfoStore()
 const testboxStore = useTestboxStore()
 
-const tableData = ref<DataObject[]>([])
+const tableData = ref<DictObject[]>([])
 const allColumn = ref<Column[]>([])
 const tableColumn = ref<Column[]>([])
 const allColumnLabel = ref<string[]>([])
@@ -255,12 +254,12 @@ const handlecheckAllColumn = (val: CheckboxValueType): void => {
 const handleCheckedTableCloumn = (value: CheckboxValueType[]): void => {
   const checkedCount: number = value.length
   tableColumn.value.forEach(cloumn => {
-    cloumn.show
-      = value.findIndex(item => item === cloumn.label) === -1 ? false : true
+    cloumn.show 
+    = value.findIndex(item => item === cloumn.label) === -1 ? false : true
   })
   checkAllColumn.value = checkedCount === allColumn.value.length
-  isIndeterminate.value
-    = checkedCount > 0 && checkedCount < allColumn.value.length
+  isIndeterminate.value 
+  = checkedCount > 0 && checkedCount < allColumn.value.length
 }
 
 const handleSelectionChange = (selectedRow: any[]) => {
@@ -271,7 +270,7 @@ const handleSelectionChange = (selectedRow: any[]) => {
 // eslint-disable-next-line max-lines-per-function
 function getAllJobsData(idList: BaseLine.SubmitIdList) {
   tableLoading.value = true
-  const tempArr: DataObject[] = reactive(Object.assign([], idList))
+  const tempArr: DictObject[] = reactive(Object.assign([], idList))
   getPerformanceData({
     index: 'jobs',
     query: {
@@ -313,8 +312,8 @@ function getAllJobsData(idList: BaseLine.SubmitIdList) {
 }
 
 // 在task-table.vue有个一模一样的
-const constructSubmitDataList = (jobList: DataObject[]) => {
-  const submitList: DataObject[] = []
+const constructSubmitDataList = (jobList: DictObject[]) => {
+  const submitList: DictObject[] = []
   const submitMap = new Map<string, BaseLine.SubmitItem>()
   jobList.forEach(job => {
     const submitId: string = job?._source?.submit_id
@@ -333,7 +332,7 @@ const constructSubmitDataList = (jobList: DataObject[]) => {
   return submitList
 }
 
-function setDeviceInfoToObj(resultObj: DataObject) {
+function setDeviceInfoToObj(resultObj: DictObject) {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
   resultObj.device = testbox.device || {}
 }

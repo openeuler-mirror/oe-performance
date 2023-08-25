@@ -1,9 +1,6 @@
-import { DataObject } from '@/api/performance'
-import { Config_li } from '@/views/performance-baseline/types'
-
 declare namespace Comparison {
   interface EJob {
-    [key: keyof Config_li.MapBase]: DataObject[]
+    [key: keyof Config_li.MapBase]: DictObject[]
   }
 
   type TJob = EJob
@@ -30,7 +27,7 @@ declare namespace Comparison {
 
   interface ManipulateData {
     tempColumn: Config_li.ColumnItem[]
-    tempDataMap: DataObject
+    tempDataMap: DictObject
   }
 
   interface ResultTableConfigs {

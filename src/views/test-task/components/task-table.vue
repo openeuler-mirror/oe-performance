@@ -60,7 +60,7 @@
     <el-table
       class="task-table"
       ref="multipleTableRef"
-      :data="tableData as Array<DataObject>"
+      :data="tableData as Array<DictObject>"
       style="width: 100%"
       stripe>
       <el-table-column label="Submit Id" prop="submit_id" fixed min-width="200">
@@ -189,12 +189,11 @@ import { Search } from '@element-plus/icons-vue'
 // store
 import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
 // api
-import { DataObject, getPerformanceData } from '@/api/performance'
+import { getPerformanceData } from '@/api/performance'
 
 // utils
 import { formatDate } from '@/utils/utils'
 import { combineJobs } from '@/views/performance-baseline/utils.js'
-import { BaseLine } from '@/views/performance-baseline/types'
 
 const props = defineProps({
   parentLoading: {
@@ -220,7 +219,7 @@ const performanceStore = usePerformanceData()
 const testboxStore = useTestboxStore()
 
 const idList = ref<BaseLine.SubmitIdList>([])
-const tableData = ref<DataObject>([])
+const tableData = ref<DictObject>([])
 const tableLoading = ref(false)
 
 const stateFilter = ref('')
@@ -303,13 +302,13 @@ const getAllJobsData = (idList: BaseLine.SubmitIdList) => {
   return tempArr
 }
 
-const setDeviceInfoToObj = (resultObj: DataObject) => {
+const setDeviceInfoToObj = (resultObj: DictObject) => {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
   resultObj.device = testbox.device || {}
 }
 
-const constructSubmitDataList = (jobList: DataObject[]) => {
-  const submitList: DataObject[] = []
+const constructSubmitDataList = (jobList: DictObject[]) => {
+  const submitList: DictObject[] = []
   const submitMap = new Map<string, BaseLine.SubmitItem>()
   jobList.forEach(job => {
     const submitId: string = job?._source?.submit_id

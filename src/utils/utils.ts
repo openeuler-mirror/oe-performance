@@ -1,5 +1,3 @@
-import { Utils } from './types'
-
 export const invalidNumberSymbol = -1
 
 type flattenObject<T> = {
@@ -176,8 +174,8 @@ export function formatterPercentage(
 }
 
 export function perfSortMethod(
-  prev: Utils.perfPrevCur,
-  cur: Utils.perfPrevCur,
+  prev: Utils.DevPerfTableRowData,
+  cur: Utils.DevPerfTableRowData,
   cases: string,
   key: string
 ): number {

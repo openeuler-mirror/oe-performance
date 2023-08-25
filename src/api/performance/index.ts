@@ -1,10 +1,5 @@
 import createAxios from '@/utils/request/axios'
-import { BaseLine } from '@/views/performance-baseline/types'
 import { PerformanceApi } from '../types'
-
-export interface DataObject {
-  [key: string]: any
-}
 
 const api = {
   requestDataApi: '/data-api/search'
@@ -107,7 +102,7 @@ export function getJobValueList(params: PerformanceApi.JobValueListParams) {
       if (!searchParams[param]) return
       if (Array.isArray(searchParams[param]) && searchParams[param]!.length < 1)
         return
-      const tempObj = <DataObject>{}
+      const tempObj = <DictObject>{}
       // 在getSearchParamsByFields以及预处理了
       tempObj[param] = searchParams[param]
       mustArr.push({ terms: tempObj })

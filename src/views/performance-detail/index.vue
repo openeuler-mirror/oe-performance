@@ -699,7 +699,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 
 import { usePerformanceData, useTestboxStore } from '@/stores/performanceData'
-import { DataObject, getPerformanceData, getTestBoxes } from '@/api/performance'
+import { getPerformanceData, getTestBoxes } from '@/api/performance'
 
 import {
   combineJobs,
@@ -710,7 +710,7 @@ const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
 const testboxStore = useTestboxStore()
 
-const detailData = ref<DataObject>({})
+const detailData = ref<DictObject>({})
 
 let loading = ref(false)
 let cpuCollpase = ref(true)
@@ -779,8 +779,8 @@ onMounted(() => {
   } else {
     loading.value = true
     getTestBoxes().then(testboxRes => {
-      let testboxList: DataObject[] = []
-      testboxList = testboxRes.data.hits.hits.map((item: DataObject) => {
+      let testboxList: DictObject[] = []
+      testboxList = testboxRes.data.hits.hits.map((item: DictObject) => {
         return {
           testboxId: item._id,
           ...item._source
@@ -793,7 +793,7 @@ onMounted(() => {
 })
 
 // 重复
-const setDeviceInfoToObj = (resultObj: DataObject) => {
+const setDeviceInfoToObj = (resultObj: DictObject) => {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
   resultObj.device = testbox.device || {}
 }

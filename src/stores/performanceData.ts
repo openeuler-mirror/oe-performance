@@ -1,6 +1,5 @@
 import { ref, reactive } from 'vue'
 import { defineStore } from 'pinia'
-import { DataObject } from '@/api/performance'
 
 // submit维度新能数据获取及存储
 const performanceData = reactive(<{ [key: string]: any }>{})
@@ -84,10 +83,10 @@ export const useBaselineTableInfoStore = defineStore(
 )
 
 // 获取主机信息
-const testboxList = ref<DataObject>([])
-const testboxMap = reactive<DataObject>({})
+const testboxList = ref<DictObject>([])
+const testboxMap = reactive<DictObject>({})
 export const useTestboxStore = defineStore('testboxStore', () => {
-  const setTestboxData = (list: DataObject[]) => {
+  const setTestboxData = (list: DictObject[]) => {
     testboxList.value = list
     list.forEach(testboxItem => {
       testboxMap[testboxItem.testboxId] = testboxItem

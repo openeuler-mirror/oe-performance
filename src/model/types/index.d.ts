@@ -1,4 +1,3 @@
-import { Config_li } from '@/views/performance-baseline/types'
 import type { CascaderOption } from 'element-plus'
 
 declare namespace JobModel {

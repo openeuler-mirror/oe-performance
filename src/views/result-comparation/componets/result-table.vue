@@ -85,10 +85,7 @@ import {
   checkTjobDimensionVal,
   getMatchedFilterValList
 } from '../utils/tjobCompute'
-import { DataObject } from '@/api/performance'
 import { JobModel } from '@/model/types'
-import { Config_li } from '@/views/performance-baseline/types'
-import { Comparison } from '../types'
 
 const props = defineProps({
   tjobsAll: {
@@ -115,7 +112,7 @@ const tableConfigs = ref<Comparison.ResultTableConfigs>({})
 const tableDatas: Ref<any> = ref({})
 
 const generateTableConfigsAndData = (
-  tjobs: DataObject,
+  tjobs: DictObject,
   dimension: string,
   filterListData: Object
 ) => {
@@ -140,7 +137,7 @@ const generateTableConfigsAndData = (
       tempConfig['tableName'] = constructTableName(tableConfig, suite)
 
       const tempColumn = [{ label: tableConfig.x_param, prop: 'dimensionId' }]
-      const tempDataMap: DataObject = {} // 当前表格下的数据字典，字典的键是dimensionId。
+      const tempDataMap: DictObject = {} // 当前表格下的数据字典，字典的键是dimensionId。
       // 遍历tjob，找出对应的数据存在dataMap（对应维度的数组中）。同时找出tjob中存在的列名，保存在tempColumn表格配置中
       setTjobValuesToDataMapAndColumn(
         tjobs,
@@ -157,8 +154,8 @@ const generateTableConfigsAndData = (
       Object.keys(tempDataMap).forEach(dimension => {
         const calculatedObj = calculateValues(tempDataMap[dimension]) // 计算平均值
         calculatedObj['dimensionId'] = dimension // 添加数据名称
-        calculatedObj['matchedFilters']
-          = tempDataMap[dimension].matchedFilterValues
+        calculatedObj['matchedFilters'] 
+        = tempDataMap[dimension].matchedFilterValues
         tempTableDataList.push(calculatedObj)
       })
       tableDatas.value[suite][tableIndex] = tempTableDataList
@@ -176,21 +173,21 @@ const constructTableName = (
   tableConfig: JobModel.SuiteTableItem,
   suite: string
 ) => {
-  const filterName
-    = tableConfig.filters
-    && `${Object.keys(tableConfig.filters)[0]}=${
-      tableConfig.filters[
-        (
+  const filterName 
+  = tableConfig.filters 
+  && `${Object.keys(tableConfig.filters)[0]}=${
+    tableConfig.filters[
+      (
           Object.keys(
             tableConfig.filters
           ) as (keyof JobModel.SuiteTableItemFilters)[]
-        )[0]
-      ]
-    }`
-  const labelName
-    = JobModelInstance.kpis[`stats.${suite}.${tableConfig.kpi}`].label
-  const directionName
-    = JobModelInstance.kpis[`stats.${suite}.${tableConfig.kpi}`].direction
+      )[0]
+    ]
+  }`
+  const labelName 
+  = JobModelInstance.kpis[`stats.${suite}.${tableConfig.kpi}`].label
+  const directionName 
+  = JobModelInstance.kpis[`stats.${suite}.${tableConfig.kpi}`].direction
   return `${filterName || ''}${labelName}${
     directionName > 0 ? '（越大越好）' : '（越小越好）'
   }`
@@ -218,7 +215,7 @@ const setTableColConfig = (
 }
 
 const getColNameFromTjob = (
-  tjob: DataObject,
+  tjob: DictObject,
   suite: string,
   tableConfig: JobModel.SuiteTableItem,
   tempColumn: Config_li.ColumnItem[]
@@ -251,7 +248,7 @@ const getColNameFromTjob = (
  * @param manipulateDataObj
  */
 const setTjobValuesToDataMapAndColumn = (
-  tjobs: DataObject,
+  tjobs: DictObject,
   suite: string,
   dimensionFilterConfig: Comparison.DimensionFilterCOnfig,
   tableConfig: JobModel.SuiteTableItem,
@@ -259,8 +256,8 @@ const setTjobValuesToDataMapAndColumn = (
 ) => {
   const { dimension, filterListData } = dimensionFilterConfig
   const { tempColumn, tempDataMap } = manipulateDataObj
-  tjobs[suite]
-    && tjobs[suite].forEach((tjob: DataObject) => {
+  tjobs[suite] 
+    && tjobs[suite].forEach((tjob: DictObject) => {
       // 遍历一个suite下的所有tjob
       // 1、拿到当前tjob的维度值, 并根据选择的list过滤
       const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
@@ -305,11 +302,11 @@ const setTjobValuesToDataMapAndColumn = (
  * @param tempDataObj
  */
 const setValuesFromTjobByCol = (
-  tjob: DataObject,
+  tjob: DictObject,
   suite: string,
   columnName: string,
   tableConfig: JobModel.SuiteTableItem,
-  tempDataObj: DataObject
+  tempDataObj: DictObject
 ) => {
   if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
     return
@@ -326,11 +323,11 @@ const setValuesFromTjobByCol = (
  * 将匹配的过滤参数设置给tempDataObj。
  */
 const setMatchedFilterValue = (
-  tjob: DataObject,
+  tjob: DictObject,
   suite: string,
   tableConfig: JobModel.SuiteTableItem,
   filterListData: Comparison.FilterList,
-  tempDataObj: DataObject
+  tempDataObj: DictObject
 ) => {
   if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
     return
@@ -348,8 +345,8 @@ const setMatchedFilterValue = (
   }
 }
 
-const calculateValues = (obj: DataObject) => {
-  const tempObj: DataObject = {}
+const calculateValues = (obj: DictObject) => {
+  const tempObj: DictObject = {}
   Object.keys(obj).forEach(param => {
     if (param === 'matchedFilterValues') return // 非计算数据
     let count = 0
@@ -370,7 +367,7 @@ const calculateValues = (obj: DataObject) => {
   return tempObj
 }
 
-const isSuiteDataEmpty = (tableDatasUnderSuite: DataObject) => {
+const isSuiteDataEmpty = (tableDatasUnderSuite: DictObject) => {
   console.log('tableDatasUnderSuite', tableDatasUnderSuite)
   let emptyFlag = true
   if (tableDatasUnderSuite.length < 1) return true
@@ -382,7 +379,7 @@ const isSuiteDataEmpty = (tableDatasUnderSuite: DataObject) => {
   return emptyFlag
 }
 
-const checkDataEmpty = (tableDatas: DataObject) => {
+const checkDataEmpty = (tableDatas: DictObject) => {
   let emptyFlag = true
   Object.keys(tableDatas).forEach(suite => {
     if (!isSuiteDataEmpty(tableDatas[suite])) {
@@ -398,9 +395,9 @@ const checkFilterListDataEmpty = (filterListData: Comparison.FilterList) => {
   if (keys.length <= 0) return isEmpty
   keys.forEach((dim: string) => {
     if (
-      filterListData[dim]
-      && Array.isArray(filterListData[dim])
-      && filterListData[dim].length > 0
+      filterListData[dim] 
+        && Array.isArray(filterListData[dim]) 
+        && filterListData[dim].length > 0
     ) {
       isEmpty = false
     }

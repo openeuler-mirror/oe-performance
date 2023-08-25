@@ -1,8 +1,6 @@
-import { DataObject } from '@/api/performance'
-
 declare namespace Utils {
-  interface perfPrevCur {
-    jobs: DataObject[]
+  interface DevPerfTableRowData {
+    jobs: DictObject[]
     kpi: string
     params: string
     [key: string]: any

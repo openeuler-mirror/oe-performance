@@ -40,18 +40,17 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { usePerformanceData } from '@/stores/performanceData'
-import { DataObject, getPerformanceData } from '@/api/performance'
+import { getPerformanceData } from '@/api/performance'
 import { tableColumnMap } from '@/views/performance-baseline/config_li'
 import {
   combineJobs,
   invalidNumberSymbol
 } from '@/views/performance-baseline/utils.js'
-import { Config_li } from '../performance-baseline/types'
 
 const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
 
-const detailData = ref<DataObject>({})
+const detailData = ref<DictObject>({})
 const tableDatas = ref([])
 const loading = ref(false)
 
