@@ -1,6 +1,6 @@
 declare namespace Utils {
   interface DevPerfTableRowData {
-    jobs: DictObject[]
+    jobs: JobObject[]
     kpi: string
     params: string
     [key: string]: any

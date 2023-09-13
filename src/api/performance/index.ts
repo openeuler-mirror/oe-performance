@@ -1,5 +1,4 @@
 import createAxios from '@/utils/request/axios'
-import { PerformanceApi } from '../types'
 
 const api = {
   requestDataApi: '/data-api/search'
@@ -97,7 +96,7 @@ export function getJobValueList(params: PerformanceApi.JobValueListParams) {
     }
   })
   // 请求时根据目前已选的searchParam值进行过滤
-  ;(Object.keys(searchParams) as (keyof BaseLine.SearchParams)[]).forEach(
+  ;(Object.keys(searchParams) as (keyof SearchPanel.SearchParams)[]).forEach(
     param => {
       if (!searchParams[param]) return
       if (Array.isArray(searchParams[param]) && searchParams[param]!.length < 1)

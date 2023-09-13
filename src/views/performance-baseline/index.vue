@@ -28,7 +28,7 @@ const baselineTableInfoStore = useBaselineTableInfoStore()
 
 const data = ref<any[]>([])
 const jobCount = ref<number>(0)
-const searchParams = ref<BaseLine.SearchParams>({} as any)
+const searchParams = ref<SearchPanel.SearchParams>({} as any)
 const searchLimitTime = ref<number>(10)
 const searchLimitTotal = ref<number>(3000)
 const submitDataLoading = ref<boolean>(false)
@@ -39,14 +39,14 @@ const refreashData = () => {
 
 // 计算query中的Must数组
 function setMustCase(
-  searchParams: BaseLine.SearchParams
+  searchParams: SearchPanel.SearchParams
 ): PerformanceApi.MulQueryMust {
   const tempArr: PerformanceApi.MulQueryMust = []
 
-  ;(Object.keys(searchParams) as (keyof BaseLine.SearchParams)[]).forEach(
+  ;(Object.keys(searchParams) as (keyof SearchPanel.SearchParams)[]).forEach(
     paramKey => {
       if (searchParams[paramKey]) {
-        const matchObj: BaseLine.SearchParams = {} as any
+        const matchObj: SearchPanel.SearchParams = {} as any
         matchObj[paramKey] = searchParams[paramKey] as string[]
         if (Array.isArray(searchParams[paramKey])) {
           searchParams[paramKey]!.length > 0
@@ -63,7 +63,7 @@ function setMustCase(
 
 // eslint-disable-next-line max-lines-per-function
 function getAllData(
-  params: BaseLine.SearchParams,
+  params: SearchPanel.SearchParams,
   searchTime: number,
   searchTotal: number
 ) {

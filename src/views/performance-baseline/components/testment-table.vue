@@ -254,12 +254,12 @@ const handlecheckAllColumn = (val: CheckboxValueType): void => {
 const handleCheckedTableCloumn = (value: CheckboxValueType[]): void => {
   const checkedCount: number = value.length
   tableColumn.value.forEach(cloumn => {
-    cloumn.show 
-    = value.findIndex(item => item === cloumn.label) === -1 ? false : true
+    cloumn.show
+      = value.findIndex(item => item === cloumn.label) === -1 ? false : true
   })
   checkAllColumn.value = checkedCount === allColumn.value.length
-  isIndeterminate.value 
-  = checkedCount > 0 && checkedCount < allColumn.value.length
+  isIndeterminate.value
+    = checkedCount > 0 && checkedCount < allColumn.value.length
 }
 
 const handleSelectionChange = (selectedRow: any[]) => {
@@ -268,9 +268,9 @@ const handleSelectionChange = (selectedRow: any[]) => {
 
 // 获取并合并jobs的逻辑
 // eslint-disable-next-line max-lines-per-function
-function getAllJobsData(idList: BaseLine.SubmitIdList) {
+function getAllJobsData(idList: PerformanceBaseline.SubmitIdList) {
   tableLoading.value = true
-  const tempArr: DictObject[] = reactive(Object.assign([], idList))
+  const tempArr: JobObject[] = reactive(Object.assign([], idList))
   getPerformanceData({
     index: 'jobs',
     query: {
@@ -312,9 +312,9 @@ function getAllJobsData(idList: BaseLine.SubmitIdList) {
 }
 
 // 在task-table.vue有个一模一样的
-const constructSubmitDataList = (jobList: DictObject[]) => {
-  const submitList: DictObject[] = []
-  const submitMap = new Map<string, BaseLine.SubmitItem>()
+const constructSubmitDataList = (jobList: JobObject[]) => {
+  const submitList: JobObject[] = []
+  const submitMap = new Map<string, PerformanceBaseline.SubmitItem>()
   jobList.forEach(job => {
     const submitId: string = job?._source?.submit_id
     if (submitMap.has(submitId)) {

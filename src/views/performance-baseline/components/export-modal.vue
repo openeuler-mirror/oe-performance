@@ -112,7 +112,7 @@ function handleExport(allColumn: Column[], selectedTableRows: any[]) {
   } else {
     if (checkIfSameSuite(selectedTableRows)) {
       // 准备好弹窗内表格的内容
-      const tableInfos: Config_li.TableInfo = (
+      const tableInfos: Config_li.CommonItemList = (
         tableColumnMap as Config_li.tableColumnMap
       )[selectedTableRows[0]['suite']]
       tableInfos.forEach((tableInfo: any) => {

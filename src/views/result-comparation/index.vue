@@ -53,7 +53,6 @@ import { useTestboxStore } from '@/stores/performanceData'
 import { getPerformanceData } from '@/api/performance'
 // configs
 import { kpiMaps, kpiMapFuncs, addtionalKpiMaps } from './config.js'
-import { PerformanceApi } from '@/api/types'
 
 const testboxStore = useTestboxStore()
 
@@ -67,17 +66,17 @@ const availableSuites = [
 
 const KPIMapInstance = kpiMaps as ComparisonConfig.KPI
 const KPIMapFuncsInstance = kpiMapFuncs as ComparisonConfig.KpiMapFuncs
-const addtionalKpiMapsInstance 
+const addtionalKpiMapsInstance
   = addtionalKpiMaps as ComparisonConfig.AddtionalKpiMap
 // ejobs
-let ejobs: DictObject = {}
-let ejobsMap: DictObject = {}
+let ejobs: JobObject = {}
+let ejobsMap: JobObject = {}
 // tjobs
-let tjobs: DictObject = {}
-let inputData = ref<DictObject>({})
+let tjobs: JobObject = {}
+let inputData = ref<JobObject>({})
 const jobCount = ref(0)
 const tabName = ref('comparationResult')
-const searchParams = ref<BaseLine.SearchParams>({})
+const searchParams = ref<SearchPanel.SearchParams>({})
 const searchLoading = ref(false)
 
 const isSearched = ref(false)
@@ -108,7 +107,7 @@ const suiteFilterList: Ref<string[]> = ref([])
 
 // 获取jobs数据
 const onSearch = (
-  params: BaseLine.SearchParams,
+  params: SearchPanel.SearchParams,
   searchTime: number,
   searchTotal: number
 ) => {
@@ -117,16 +116,16 @@ const onSearch = (
 }
 
 // 这个函数在@/views/performance-baseline/index内有一摸一样的
-const setMustCase = (searchParams: BaseLine.SearchParams) => {
+const setMustCase = (searchParams: SearchPanel.SearchParams) => {
   const tempArr: PerformanceApi.MulQueryMust = []
-  ;(Object.keys(searchParams) as Array<keyof BaseLine.SearchParams>).forEach(
+  ;(Object.keys(searchParams) as Array<keyof SearchPanel.SearchParams>).forEach(
     paramKey => {
       if (searchParams[paramKey]) {
-        const matchObj: BaseLine.SearchParams = {}
+        const matchObj: SearchPanel.SearchParams = {}
         matchObj[paramKey] = searchParams[paramKey] as string[]
         if (Array.isArray(searchParams[paramKey])) {
-          searchParams[paramKey]!.length > 0 
-          && tempArr.push({ terms: matchObj } as PerformanceApi.MulQueryTerms)
+          searchParams[paramKey]!.length > 0
+            && tempArr.push({ terms: matchObj } as PerformanceApi.MulQueryTerms)
         } else {
           tempArr.push({ match: matchObj } as any)
         }
@@ -137,7 +136,7 @@ const setMustCase = (searchParams: BaseLine.SearchParams) => {
 }
 // eslint-disable-next-line max-lines-per-function
 const getTotalData = (
-  searchParams: BaseLine.SearchParams,
+  searchParams: SearchPanel.SearchParams,
   searchTime: number,
   searchTotal: number
 ) => {
@@ -169,12 +168,12 @@ const getTotalData = (
       resetData()
       jobCount.value = res?.data?.hits?.total?.value
       res?.data?.hits?.hits
-        ?.filter((item: DictObject) => {
+        ?.filter((item: JobObject) => {
           return (
             item._source.stats && Object.keys(item._source.stats).length > 0
           )
         })
-        .forEach((item: DictObject) => {
+        .forEach((item: JobObject) => {
           const tempFlattenItem = flattenObj(item._source)
           // jobs转换成ejobs
           tempFlattenItem[
@@ -208,9 +207,9 @@ const addHardwareInfoToJob = (job: DictObject) => {
 }
 
 const constructEjobData = (
-  job: DictObject,
-  ejobs: DictObject,
-  ejobsMap: DictObject
+  job: JobObject,
+  ejobs: JobObject,
+  ejobsMap: JobObject
 ) => {
   const { suite } = job
   if (ejobs[suite]) {
@@ -223,9 +222,9 @@ const constructEjobData = (
   }
 }
 
-const e2tConverter = (ejobs: DictObject, tjobs: DictObject) => {
+const e2tConverter = (ejobs: JobObject, tjobs: JobObject) => {
   Object.keys(ejobs).forEach((suiteKey: string) => {
-    ejobs[suiteKey].forEach((ejob: DictObject) => {
+    ejobs[suiteKey].forEach((ejob: JobObject) => {
       const program = ejob.suite
       const tempJob = JSON.parse(JSON.stringify(ejob))
       tempJob[`pp.${program}.testcase`] = ejob[`pp.${program}.test`] || '' // 如果有test，设为默认值
@@ -245,10 +244,10 @@ const e2tConverter = (ejobs: DictObject, tjobs: DictObject) => {
         Object.keys(KPIMapInstance[suiteKey]).forEach(kpi => {
           // 遍历所有kpi，每个kpi生成一个tjob
           const tjob = JSON.parse(JSON.stringify(tempJob))
-          tjob[`pp.${suiteKey}.testcase`] 
-          = KPIMapInstance[suiteKey][kpi].testcase
-          tjob[`stats.${suiteKey}.${KPIMapInstance[suiteKey][kpi].kpi}`] 
-          = ejob[`stats.${suiteKey}.${kpi}`]
+          tjob[`pp.${suiteKey}.testcase`]
+            = KPIMapInstance[suiteKey][kpi].testcase
+          tjob[`stats.${suiteKey}.${KPIMapInstance[suiteKey][kpi].kpi}`]
+            = ejob[`stats.${suiteKey}.${kpi}`]
           if (tjobs[suiteKey]) {
             tjobs[suiteKey].push(tjob)
           } else {
@@ -260,12 +259,12 @@ const e2tConverter = (ejobs: DictObject, tjobs: DictObject) => {
         if (!addtionalKpiMapsInstance[suiteKey]) return
         addtionalKpiMapsInstance[suiteKey].forEach(kpi => {
           const tjob = JSON.parse(JSON.stringify(tempJob))
-          tjob[`pp.${suiteKey}.testcase`] 
-          = KPIMapFuncsInstance[suiteKey](kpi).testcase
-          tjob[`pp.${suiteKey}.testgroup`] 
-          = KPIMapFuncsInstance[suiteKey](kpi).testgroup
-          tjob[`stats.${suiteKey}.${KPIMapFuncsInstance[suiteKey](kpi).kpi}`] 
-          = ejob[`stats.${suiteKey}.${kpi}`]
+          tjob[`pp.${suiteKey}.testcase`]
+            = KPIMapFuncsInstance[suiteKey](kpi).testcase
+          tjob[`pp.${suiteKey}.testgroup`]
+            = KPIMapFuncsInstance[suiteKey](kpi).testgroup
+          tjob[`stats.${suiteKey}.${KPIMapFuncsInstance[suiteKey](kpi).kpi}`]
+            = ejob[`stats.${suiteKey}.${kpi}`]
           if (tjobs[suiteKey]) {
             tjobs[suiteKey].push(tjob)
           } else {
@@ -307,11 +306,11 @@ const handleSuiteFiltering = (suiteList: string[]) => {
  * 获取job中的信息，记录各个维度的可选项
  * @param flattenJob
  */
-const getFilterOptions = (flattenJob: DictObject) => {
+const getFilterOptions = (flattenJob: JobObject) => {
   flattenJob['osv'] && osvOptions.value.add(flattenJob['osv'])
   flattenJob['arch'] && archOptions.value.add(flattenJob['arch'])
-  flattenJob['tbox_group'] 
-  && tboxGroupOptions.value.add(flattenJob['tbox_group'])
+  flattenJob['tbox_group']
+    && tboxGroupOptions.value.add(flattenJob['tbox_group'])
   flattenJob['tags'] && tagsOptions.value.add(flattenJob['tags'])
   flattenJob['group_id'] && groupOptions.value.add(flattenJob['group_id'])
   flattenJob['suite'] && suiteOptions.value.add(flattenJob['suite'])
@@ -324,7 +323,7 @@ const getFilterOptions = (flattenJob: DictObject) => {
   ssParams && ssOptions.value.add(ssParams)
 }
 
-const getPpParams = (flattenJob: DictObject) => {
+const getPpParams = (flattenJob: JobObject) => {
   const tempArr: string[] = []
   Object.keys(flattenJob)
     .sort()
@@ -347,7 +346,7 @@ const addPpParamToOptions = (paramList: string[]) => {
  * stats数据结构中可能会有写保存信息需要特殊处理。因此处理方法和pp的params的获取一致。
  * @param flattenJob
  */
-const getSsParams = (flattenJob: DictObject) => {
+const getSsParams = (flattenJob: JobObject) => {
   const tempArr: string[] = []
   Object.keys(flattenJob)
     .sort()

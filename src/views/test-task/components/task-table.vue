@@ -218,7 +218,7 @@ const emit = defineEmits<{
 const performanceStore = usePerformanceData()
 const testboxStore = useTestboxStore()
 
-const idList = ref<BaseLine.SubmitIdList>([])
+const idList = ref<PerformanceBaseline.SubmitIdList>([])
 const tableData = ref<DictObject>([])
 const tableLoading = ref(false)
 
@@ -249,7 +249,7 @@ watchEffect(() => {
   idList.value = props.allData.slice(
     startIndex,
     startIndex + pageSize.value
-  ) as BaseLine.SubmitIdList
+  ) as PerformanceBaseline.SubmitIdList
   total.value = props.allData.length
 })
 
@@ -259,9 +259,11 @@ watch(idList, () => {
   tableData.value = getAllJobsData(idList.value)
 })
 
-const getAllJobsData = (idList: BaseLine.SubmitIdList) => {
+const getAllJobsData = (idList: PerformanceBaseline.SubmitIdList) => {
   tableLoading.value = true
-  const tempArr = reactive<BaseLine.SubmitIdList>(Object.assign([], idList))
+  const tempArr = reactive<PerformanceBaseline.SubmitIdList>(
+    Object.assign([], idList)
+  )
   getPerformanceData({
     index: 'jobs',
     query: {
@@ -302,14 +304,14 @@ const getAllJobsData = (idList: BaseLine.SubmitIdList) => {
   return tempArr
 }
 
-const setDeviceInfoToObj = (resultObj: DictObject) => {
+const setDeviceInfoToObj = (resultObj: JobObject) => {
   const testbox = testboxStore.testboxMap[resultObj.testbox] || {}
   resultObj.device = testbox.device || {}
 }
 
-const constructSubmitDataList = (jobList: DictObject[]) => {
+const constructSubmitDataList = (jobList: JobObject[]) => {
   const submitList: DictObject[] = []
-  const submitMap = new Map<string, BaseLine.SubmitItem>()
+  const submitMap = new Map<string, PerformanceBaseline.SubmitItem>()
   jobList.forEach(job => {
     const submitId: string = job?._source?.submit_id
     if (submitMap.has(submitId)) {

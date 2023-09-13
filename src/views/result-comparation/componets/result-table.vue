@@ -112,7 +112,7 @@ const tableConfigs = ref<Comparison.ResultTableConfigs>({})
 const tableDatas: Ref<any> = ref({})
 
 const generateTableConfigsAndData = (
-  tjobs: DictObject,
+  tjobs: JobObject,
   dimension: string,
   filterListData: Object
 ) => {
@@ -154,8 +154,8 @@ const generateTableConfigsAndData = (
       Object.keys(tempDataMap).forEach(dimension => {
         const calculatedObj = calculateValues(tempDataMap[dimension]) // 计算平均值
         calculatedObj['dimensionId'] = dimension // 添加数据名称
-        calculatedObj['matchedFilters'] 
-        = tempDataMap[dimension].matchedFilterValues
+        calculatedObj['matchedFilters']
+          = tempDataMap[dimension].matchedFilterValues
         tempTableDataList.push(calculatedObj)
       })
       tableDatas.value[suite][tableIndex] = tempTableDataList
@@ -173,21 +173,21 @@ const constructTableName = (
   tableConfig: JobModel.SuiteTableItem,
   suite: string
 ) => {
-  const filterName 
-  = tableConfig.filters 
-  && `${Object.keys(tableConfig.filters)[0]}=${
-    tableConfig.filters[
-      (
+  const filterName
+    = tableConfig.filters
+    && `${Object.keys(tableConfig.filters)[0]}=${
+      tableConfig.filters[
+        (
           Object.keys(
             tableConfig.filters
           ) as (keyof JobModel.SuiteTableItemFilters)[]
-      )[0]
-    ]
-  }`
-  const labelName 
-  = JobModelInstance.kpis[`stats.${suite}.${tableConfig.kpi}`].label
-  const directionName 
-  = JobModelInstance.kpis[`stats.${suite}.${tableConfig.kpi}`].direction
+        )[0]
+      ]
+    }`
+  const labelName
+    = JobModelInstance.kpis[`stats.${suite}.${tableConfig.kpi}`].label
+  const directionName
+    = JobModelInstance.kpis[`stats.${suite}.${tableConfig.kpi}`].direction
   return `${filterName || ''}${labelName}${
     directionName > 0 ? '（越大越好）' : '（越小越好）'
   }`
@@ -215,7 +215,7 @@ const setTableColConfig = (
 }
 
 const getColNameFromTjob = (
-  tjob: DictObject,
+  tjob: JobObject,
   suite: string,
   tableConfig: JobModel.SuiteTableItem,
   tempColumn: Config_li.ColumnItem[]
@@ -248,7 +248,7 @@ const getColNameFromTjob = (
  * @param manipulateDataObj
  */
 const setTjobValuesToDataMapAndColumn = (
-  tjobs: DictObject,
+  tjobs: JobObject,
   suite: string,
   dimensionFilterConfig: Comparison.DimensionFilterCOnfig,
   tableConfig: JobModel.SuiteTableItem,
@@ -256,8 +256,8 @@ const setTjobValuesToDataMapAndColumn = (
 ) => {
   const { dimension, filterListData } = dimensionFilterConfig
   const { tempColumn, tempDataMap } = manipulateDataObj
-  tjobs[suite] 
-    && tjobs[suite].forEach((tjob: DictObject) => {
+  tjobs[suite]
+    && tjobs[suite].forEach((tjob: JobObject) => {
       // 遍历一个suite下的所有tjob
       // 1、拿到当前tjob的维度值, 并根据选择的list过滤
       const dimensionValue = getDimensionValue(tjob, dimension) // tjob[dimension]
@@ -302,11 +302,11 @@ const setTjobValuesToDataMapAndColumn = (
  * @param tempDataObj
  */
 const setValuesFromTjobByCol = (
-  tjob: DictObject,
+  tjob: JobObject,
   suite: string,
   columnName: string,
   tableConfig: JobModel.SuiteTableItem,
-  tempDataObj: DictObject
+  tempDataObj: JobObject
 ) => {
   if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
     return
@@ -323,11 +323,11 @@ const setValuesFromTjobByCol = (
  * 将匹配的过滤参数设置给tempDataObj。
  */
 const setMatchedFilterValue = (
-  tjob: DictObject,
+  tjob: JobObject,
   suite: string,
   tableConfig: JobModel.SuiteTableItem,
   filterListData: Comparison.FilterList,
-  tempDataObj: DictObject
+  tempDataObj: JobObject
 ) => {
   if (!isTjobPassedFilterCheck(tjob, suite, tableConfig)) {
     return
@@ -345,7 +345,7 @@ const setMatchedFilterValue = (
   }
 }
 
-const calculateValues = (obj: DictObject) => {
+const calculateValues = (obj: JobObject) => {
   const tempObj: DictObject = {}
   Object.keys(obj).forEach(param => {
     if (param === 'matchedFilterValues') return // 非计算数据
@@ -395,9 +395,9 @@ const checkFilterListDataEmpty = (filterListData: Comparison.FilterList) => {
   if (keys.length <= 0) return isEmpty
   keys.forEach((dim: string) => {
     if (
-      filterListData[dim] 
-        && Array.isArray(filterListData[dim]) 
-        && filterListData[dim].length > 0
+      filterListData[dim]
+      && Array.isArray(filterListData[dim])
+      && filterListData[dim].length > 0
     ) {
       isEmpty = false
     }

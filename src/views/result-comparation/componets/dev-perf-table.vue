@@ -126,8 +126,8 @@ interface InitialDataByTable {
   kpi: String
   paramsList: Array<string>
   dataRaw: DictObject
-  jobListOfParam: DictObject
-  dataResult: DictObject
+  jobListOfParam: JobObject
+  dataResult: JobObject
 }
 
 const props = defineProps({
@@ -150,53 +150,53 @@ const props = defineProps({
   }
 })
 
-const dataMap: Ref<DictObject> = ref({})
+const dataMap: Ref<JobObject> = ref({})
 const jobListDialogVisible = ref(false)
-const jobListData = ref<DictObject[]>([])
+const jobListData = ref<JobObject[]>([])
 const jobListKpi = ref('')
 
-const tableColumns: Ref<Array<DictObject>> = ref([])
-const tableData: Ref<Array<DictObject>> = ref([])
+const tableColumns: Ref<Array<JobObject>> = ref([])
+const tableData: Ref<Array<JobObject>> = ref([])
 
 const generateTableConfigsAndData = (
   tjobs: Comparison.TJob,
   dimension: string,
-  filterListData: DictObject
+  filterListData: JobObject
 ) => {
   dataMap.value = {}
   filteringSuiteList().forEach(suite => {
     ;(suiteTables as JobModel.SuiteTable)[suite].forEach(
       (tableConfig, tableIndex: number) => {
-        tjobs[suite] 
-        && tjobs[suite].forEach(tjob => {
-          const dimensionValue = getDimensionValue(tjob, dimension)
-          if (!dimensionValue) return
-          if (!checkTjobDimensionVal(tjob, filterListData)) return
-          if (!isTjobBelongToCurrentTable(tjob, suite, tableConfig)) {
-            return
-          }
+        tjobs[suite]
+          && tjobs[suite].forEach(tjob => {
+            const dimensionValue = getDimensionValue(tjob, dimension)
+            if (!dimensionValue) return
+            if (!checkTjobDimensionVal(tjob, filterListData)) return
+            if (!isTjobBelongToCurrentTable(tjob, suite, tableConfig)) {
+              return
+            }
 
-          if (!dataMap.value[dimensionValue])
-            dataMap.value[dimensionValue] = {}
-          const perfDataByTable = getPerfDataByTable(
-            dataMap.value[dimensionValue],
-            suite,
-            tableIndex
-          )
-          const param = `${tjob.ppParams},pp.${suite}.testcase=${
-            tjob[`pp.${suite}.testcase`]
-          }`
-          perfDataByTable.kpi = tableConfig.kpi
-          if (perfDataByTable.paramsList.indexOf(param) < 0) {
-            perfDataByTable.paramsList.push(param)
-            perfDataByTable.dataRaw[param] = []
-            perfDataByTable.jobListOfParam[param] = []
-          }
-          perfDataByTable.dataRaw[param].push(
-            tjob[`stats.${suite}.${tableConfig.kpi}`]
-          )
-          perfDataByTable.jobListOfParam[param].push(tjob)
-        })
+            if (!dataMap.value[dimensionValue])
+              dataMap.value[dimensionValue] = {}
+            const perfDataByTable = getPerfDataByTable(
+              dataMap.value[dimensionValue],
+              suite,
+              tableIndex
+            )
+            const param = `${tjob.ppParams},pp.${suite}.testcase=${
+              tjob[`pp.${suite}.testcase`]
+            }`
+            perfDataByTable.kpi = tableConfig.kpi
+            if (perfDataByTable.paramsList.indexOf(param) < 0) {
+              perfDataByTable.paramsList.push(param)
+              perfDataByTable.dataRaw[param] = []
+              perfDataByTable.jobListOfParam[param] = []
+            }
+            perfDataByTable.dataRaw[param].push(
+              tjob[`stats.${suite}.${tableConfig.kpi}`]
+            )
+            perfDataByTable.jobListOfParam[param].push(tjob)
+          })
         // 遍历完全部tjob后，计算总体数据
         computeAllResultValue(dataMap.value)
       }
@@ -219,7 +219,7 @@ const filteringSuiteList = () => {
  * @param tableIndex
  */
 const getPerfDataByTable = (
-  dataItem: DictObject,
+  dataItem: JobObject,
   suite: string,
   tableIndex: number
 ) => {
@@ -304,22 +304,22 @@ const constructTableData = (dataMap: DictObject) => {
               return
             if (idx === 0) {
               // 记录基线数据，用来计算%change
-              basePerfVal 
-              = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
+              basePerfVal
+                = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
             } else {
-              const currentPerfVal 
-              = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
+              const currentPerfVal
+                = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
               if (basePerfVal) {
                 rowData[`change_${idx}`] = (
-                  (currentPerfVal - basePerfVal) 
+                  (currentPerfVal - basePerfVal)
                   / basePerfVal
                 ).toFixed(3)
               }
             }
-            rowData[`perfVal_${idx}`] 
-            = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
-            rowData[`stddev_${idx}`] 
-            = dataMap[dim].perfData[suite][tableIndex].dataResult[params][1]
+            rowData[`perfVal_${idx}`]
+              = dataMap[dim].perfData[suite][tableIndex].dataResult[params][0]
+            rowData[`stddev_${idx}`]
+              = dataMap[dim].perfData[suite][tableIndex].dataResult[params][1]
             if (rowData.jobs) {
               rowData.jobs.push(
                 ...dataMap[dim].perfData[suite][tableIndex].jobListOfParam[
@@ -327,8 +327,8 @@ const constructTableData = (dataMap: DictObject) => {
                 ]
               )
             } else {
-              rowData.jobs 
-              = dataMap[dim].perfData[suite][tableIndex].jobListOfParam[params]
+              rowData.jobs
+                = dataMap[dim].perfData[suite][tableIndex].jobListOfParam[params]
             }
           })
           tableData.value.push(rowData)

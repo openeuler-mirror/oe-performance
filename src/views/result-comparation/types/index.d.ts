@@ -1,6 +1,6 @@
 declare namespace Comparison {
   interface EJob {
-    [key: keyof Config_li.MapBase]: DictObject[]
+    [key: keyof Config_li.MapBase]: JobObject[]
   }
 
   type TJob = EJob
@@ -27,7 +27,7 @@ declare namespace Comparison {
 
   interface ManipulateData {
     tempColumn: Config_li.ColumnItem[]
-    tempDataMap: DictObject
+    tempDataMap: JobObject
   }
 
   interface ResultTableConfigs {

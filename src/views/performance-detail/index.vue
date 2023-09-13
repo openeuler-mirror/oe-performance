@@ -710,7 +710,7 @@ const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
 const testboxStore = useTestboxStore()
 
-const detailData = ref<DictObject>({})
+const detailData = ref<JobObject>({})
 
 let loading = ref(false)
 let cpuCollpase = ref(true)

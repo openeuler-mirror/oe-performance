@@ -59,7 +59,7 @@ export const useBaselineTableInfoStore = defineStore(
     ) => {
       baselineTableInfo.value = tableInfo
     }
-    const setGeneralSearchParam = (data: DictObject) => {
+    const setGeneralSearchParam = (data: JobObject) => {
       searchParamData.searchLimitTime = data.searchLimitTime.value || 10
       searchParamData.searchLimitTotal = data.searchLimitTotal.value || 3000
       searchParamData.suite = data.suite
@@ -83,10 +83,10 @@ export const useBaselineTableInfoStore = defineStore(
 )
 
 // 获取主机信息
-const testboxList = ref<DictObject>([])
-const testboxMap = reactive<DictObject>({})
+const testboxList = ref<JobObject>([])
+const testboxMap = reactive<JobObject>({})
 export const useTestboxStore = defineStore('testboxStore', () => {
-  const setTestboxData = (list: DictObject[]) => {
+  const setTestboxData = (list: JobObject[]) => {
     testboxList.value = list
     list.forEach(testboxItem => {
       testboxMap[testboxItem.testboxId] = testboxItem

@@ -1,5 +1,3 @@
-import { BaseLine } from '@/views/performance-baseline/types'
-
 declare namespace PerformanceApi {
   // 该命名空间中的类型, 前缀***Query为同一个查询组
 
@@ -22,7 +20,7 @@ declare namespace PerformanceApi {
 
   interface MulQueryTerms {
     terms: {
-      [key in keyof BaseLine.SearchParams]: string[]
+      [key in keyof SearchPanel.SearchParams]: string[]
     }
   }
 
@@ -132,7 +130,7 @@ declare namespace PerformanceApi {
   interface JobValueListParams {
     byScene?: string[]
     jobFieldList: string[]
-    searchParams: BaseLine.SearchParams
+    searchParams: SearchPanel.SearchParams
     searchTime: number
     searchTotal: number
   }

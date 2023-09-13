@@ -69,7 +69,7 @@
             <el-select
               v-else
               class="field-selection"
-              v-model="searchParams[paramKey as keyof BaseLine.SearchParams]"
+              v-model="searchParams[paramKey as keyof SearchPanel.SearchParams]"
               :loading="
                 fieldsConfigForRender[paramKey].origin === 'jobs'
                   ? jobFieldsLoading
@@ -138,7 +138,6 @@ import { parseQueryStringTo2dArray } from './utils'
 // api
 import { getJobValueList, getTestBoxes } from '@/api/performance'
 import type { JobModel } from '@/model/types'
-import { BaseLine } from '../performance-baseline/types'
 
 interface objectItem {
   [key: string]: string | string[] | string[][]
@@ -163,7 +162,7 @@ const props = defineProps({
 const emit = defineEmits<{
   (
     event: 'search',
-    params: BaseLine.SearchParams,
+    params: SearchPanel.SearchParams,
     searchTime: number,
     searchTotal: number
   ): void
@@ -193,7 +192,7 @@ const jobFieldList = [] as any // 中间数据，用来循环job类型的field�
 
 const searchTime = ref(10)
 const searchTotal = ref(3000)
-const searchParams = ref<BaseLine.SearchParams>({})
+const searchParams = ref<SearchPanel.SearchParams>({})
 const cascaderProps = { multiple: true }
 
 // 页面初始化方法
@@ -263,7 +262,7 @@ const setFieldSelection = () => {
         // } else {
         //   searchParams.value[fieldKey] = [fields[fieldKey]]
         // }
-        searchParams.value[fieldKey as keyof BaseLine.SearchParams] = (
+        searchParams.value[fieldKey as keyof SearchPanel.SearchParams] = (
           Array.isArray(fields[fieldKey])
             ? fields[fieldKey]
             : [fields[fieldKey]]
@@ -390,12 +389,12 @@ const isSearchParamsEmpty = (searchParams: any) => {
 // 这个fieldList初始值是hw.memory hw.nr_cpu hw.nr_node, 有点疑惑
 // 工具函数
 const getSearchParamsByFields = (
-  searchParams: BaseLine.SearchParams,
+  searchParams: SearchPanel.SearchParams,
   fieldList: string[]
 ) => {
   //
   const tempObj: DictObject = {}
-  ;(Object.keys(searchParams) as Array<keyof BaseLine.SearchParams>).forEach(
+  ;(Object.keys(searchParams) as Array<keyof SearchPanel.SearchParams>).forEach(
     param => {
       if (fieldList.includes(param)) {
         tempObj[param] = searchParams[param]
@@ -619,7 +618,7 @@ function handleSearch() {
 const setQueryToUrl = () => {
   const newQuery = <DictObject>{}
   ;(
-    Object.keys(searchParams.value) as Array<keyof BaseLine.SearchParams>
+    Object.keys(searchParams.value) as Array<keyof SearchPanel.SearchParams>
   ).forEach(field => {
     if (searchParams.value[field]) {
       newQuery[field] = searchParams.value[field]

@@ -50,7 +50,7 @@ import {
 const router = useRouter()
 const { performanceData, setPerformanceData } = usePerformanceData()
 
-const detailData = ref<DictObject>({})
+const detailData = ref<JobObject>({})
 const tableDatas = ref([])
 const loading = ref(false)
 

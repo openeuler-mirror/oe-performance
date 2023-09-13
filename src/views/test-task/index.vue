@@ -24,13 +24,11 @@ import TaskTable from './components/task-table.vue'
 
 import { getTaskStatusCounts } from '@/api/center'
 import { getPerformanceData } from '@/api/performance'
-import { BaseLine } from '../performance-baseline/types'
-import { PerformanceApi } from '@/api/types'
 
 const router = useRouter()
 
 const activeName = ref<TabPaneName>('allTask')
-const dataList = ref<BaseLine.SubmitIdList>([])
+const dataList = ref<PerformanceBaseline.SubmitIdList>([])
 const dataLoading = ref(false)
 const healthState = ref<TestTask.TaskState>({})
 
