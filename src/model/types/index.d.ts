@@ -55,6 +55,6 @@ declare namespace JobModel {
   }
 
   interface SuiteTable {
-    [key: keyof Config_li.MapBase]: SuiteTableItem[]
+    [key: keyof Config_li.tableColumnMap]: SuiteTableItem[]
   }
 }
