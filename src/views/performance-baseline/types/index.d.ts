@@ -28,7 +28,6 @@ declare namespace Config_li {
   type ColumnBaseKey = 'Spark' | 'Hive' | 'Hbase' | 'MySQL-OLTP'
 
   type testParamsMap = Record<MapBaseKey, CommonMapItem>
-
   type KpiListMap = Record<MapBaseKey, CommonMapItem>
   type tableColumnMap = Record<ColumnBaseKey | MapBaseKey, CommonMapItem> & {
     [key: string]: any

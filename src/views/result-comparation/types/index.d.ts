@@ -1,6 +1,6 @@
 declare namespace Comparison {
   interface EJob {
-    [key: keyof Config_li.MapBase]: JobObject[]
+    [key: keyof Config_li.tableColumnMap]: JobObject[]
   }
 
   type TJob = EJob
