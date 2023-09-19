@@ -6,7 +6,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "test": "jest",
+    "test": "jest src --watch",
     "prepare": "husky install",
     "lint": "eslint --fix",
     "lint-staged": "lint-staged",
