@@ -64,10 +64,9 @@ const availableSuites = [
   'libmicro'
 ]
 
-const KPIMapInstance = kpiMaps as ComparisonConfig.KPI
-const KPIMapFuncsInstance = kpiMapFuncs as ComparisonConfig.KpiMapFuncs
-const addtionalKpiMapsInstance
-  = addtionalKpiMaps as ComparisonConfig.AddtionalKpiMap
+const kpiMapInstance = kpiMaps as ComparisonConfig.KPI
+const kpiMapFuncsInstance = kpiMapFuncs as ComparisonConfig.KpiMapFuncs
+const addtionalKpiMapsInstance = addtionalKpiMaps as ComparisonConfig.AddtionalKpiMap
 // ejobs
 let ejobs: JobObject = {}
 let ejobsMap: JobObject = {}
@@ -230,7 +229,7 @@ const e2tConverter = (ejobs: JobObject, tjobs: JobObject) => {
       tempJob[`pp.${program}.testcase`] = ejob[`pp.${program}.test`] || '' // 如果有test，设为默认值
 
       // 如果配置文件kpiMaps中没有映射关系，则直接使用不做转换
-      if (!KPIMapInstance[suiteKey] && !KPIMapFuncsInstance[suiteKey]) {
+      if (!kpiMapInstance[suiteKey] && !kpiMapFuncsInstance[suiteKey]) {
         const tjob = JSON.parse(JSON.stringify(tempJob))
         if (tjobs[suiteKey]) {
           tjobs[suiteKey].push(tjob)
@@ -240,13 +239,13 @@ const e2tConverter = (ejobs: JobObject, tjobs: JobObject) => {
         return
       }
       // 有配置文件的话，进行转换
-      if (KPIMapInstance[suiteKey]) {
-        Object.keys(KPIMapInstance[suiteKey]).forEach(kpi => {
+      if (kpiMapInstance[suiteKey]) {
+        Object.keys(kpiMapInstance[suiteKey]).forEach(kpi => {
           // 遍历所有kpi，每个kpi生成一个tjob
           const tjob = JSON.parse(JSON.stringify(tempJob))
           tjob[`pp.${suiteKey}.testcase`]
-            = KPIMapInstance[suiteKey][kpi].testcase
-          tjob[`stats.${suiteKey}.${KPIMapInstance[suiteKey][kpi].kpi}`]
+            = kpiMapInstance[suiteKey][kpi].testcase
+          tjob[`stats.${suiteKey}.${kpiMapInstance[suiteKey][kpi].kpi}`]
             = ejob[`stats.${suiteKey}.${kpi}`]
           if (tjobs[suiteKey]) {
             tjobs[suiteKey].push(tjob)
@@ -254,16 +253,16 @@ const e2tConverter = (ejobs: JobObject, tjobs: JobObject) => {
             tjobs[suiteKey] = [tjob]
           }
         })
-      } else if (KPIMapFuncsInstance[suiteKey]) {
+      } else if (kpiMapFuncsInstance[suiteKey]) {
         // 如果kpiMaps中没有匹配，则使用kpiMapFuncs
         if (!addtionalKpiMapsInstance[suiteKey]) return
         addtionalKpiMapsInstance[suiteKey].forEach(kpi => {
           const tjob = JSON.parse(JSON.stringify(tempJob))
           tjob[`pp.${suiteKey}.testcase`]
-            = KPIMapFuncsInstance[suiteKey](kpi).testcase
+            = kpiMapFuncsInstance[suiteKey](kpi).testcase
           tjob[`pp.${suiteKey}.testgroup`]
-            = KPIMapFuncsInstance[suiteKey](kpi).testgroup
-          tjob[`stats.${suiteKey}.${KPIMapFuncsInstance[suiteKey](kpi).kpi}`]
+            = kpiMapFuncsInstance[suiteKey](kpi).testgroup
+          tjob[`stats.${suiteKey}.${kpiMapFuncsInstance[suiteKey](kpi).kpi}`]
             = ejob[`stats.${suiteKey}.${kpi}`]
           if (tjobs[suiteKey]) {
             tjobs[suiteKey].push(tjob)
@@ -309,8 +308,8 @@ const handleSuiteFiltering = (suiteList: string[]) => {
 const getFilterOptions = (flattenJob: JobObject) => {
   flattenJob['osv'] && osvOptions.value.add(flattenJob['osv'])
   flattenJob['arch'] && archOptions.value.add(flattenJob['arch'])
-  flattenJob['tbox_group']
-    && tboxGroupOptions.value.add(flattenJob['tbox_group'])
+  flattenJob['tbox_group'] 
+  && tboxGroupOptions.value.add(flattenJob['tbox_group'])
   flattenJob['tags'] && tagsOptions.value.add(flattenJob['tags'])
   flattenJob['group_id'] && groupOptions.value.add(flattenJob['group_id'])
   flattenJob['suite'] && suiteOptions.value.add(flattenJob['suite'])

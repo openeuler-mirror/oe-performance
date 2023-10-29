@@ -15,7 +15,7 @@
             v-model="form.region"
             placeholder="请选择测试场景"
             :options="options"
-            :disabled="bool" />
+            :disabled="disabled" />
         </el-form-item>
         <el-form-item label="上传文件：">
           <el-upload
@@ -72,8 +72,8 @@ const emit = defineEmits<{
 }>()
 const props = withDefaults(
   defineProps<{
-    /* 这个bool我认为应该是在options查找有没有children,所以在这里先设置为true,应该需要一个函数来设置bool的值 */
-    bool: boolean // 选择器是否可选,
+    bool: boolean
+    region: any
     options: CascaderOption[]
     title: string
     description: string
@@ -82,6 +82,7 @@ const props = withDefaults(
   }>(),
   {
     bool: false,
+    region: ref([]),
     options: () => [
       {
         value: '大数据',
@@ -100,7 +101,8 @@ const props = withDefaults(
     disabled: false
   }
 )
-const { bool, title, description, options, btnText, disabled } = toRefs(props)
+const { bool, title, description, region, options, btnText, disabled }
+  = toRefs(props)
 
 const centerDialogVisible = ref(false)
 const fileNameBool = ref(false)
@@ -111,7 +113,8 @@ const form = reactive<RePoUploader.Form>({
 })
 
 watchEffect(() => {
-  centerDialogVisible.value = disabled.value
+  centerDialogVisible.value = bool.value
+  form.region = region.value
 })
 
 const cancel = (): void => {

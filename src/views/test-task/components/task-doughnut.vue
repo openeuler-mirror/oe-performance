@@ -61,7 +61,6 @@ watch(
       value: stateData.others || 0,
       name: '其他'
     })
-    console.log('stateList', stateList)
     // 当前版本 echarts 的typescript类型并不完善
     option.series[0].data = stateList as any
 

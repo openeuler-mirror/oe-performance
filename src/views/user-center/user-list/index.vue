@@ -41,8 +41,7 @@
       description="上传描述："
       btnText="新建"
       :options="options"
-      :disabled="dialogVisible"
-      :bool="false"
+      :bool="dialogVisible"
       @cancel="() => (dialogVisible = false)"
       @handleClose="() => (dialogVisible = false)"
       @upload="upload"></re-po-uploader>

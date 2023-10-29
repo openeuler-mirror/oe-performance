@@ -367,8 +367,7 @@ const calculateValues = (obj: JobObject) => {
   return tempObj
 }
 
-const isSuiteDataEmpty = (tableDatasUnderSuite: DictObject) => {
-  console.log('tableDatasUnderSuite', tableDatasUnderSuite)
+const isSuiteDataEmpty = (tableDatasUnderSuite: []) => {
   let emptyFlag = true
   if (tableDatasUnderSuite.length < 1) return true
   tableDatasUnderSuite.forEach((tableDataByIdx: string) => {
