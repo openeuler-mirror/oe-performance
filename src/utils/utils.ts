@@ -1,42 +1,58 @@
 export const invalidNumberSymbol = -1
 
-export function flattenObj(ob){
-  let result = {};
+type flattenObject<T> = {
+  [K in keyof T]: T[K] extends object ? flattenObject<T[K]> : T[K]
+}
+
+export function flattenObj<T>(ob: T): flattenObject<T> {
+  const result: any = {}
 
   for (const i in ob) {
-    if ((typeof ob[i]) === 'object' && !Array.isArray(ob[i])) {
-      const temp = flattenObj(ob[i]);
+    if (typeof ob[i] === 'object' && !Array.isArray(ob[i])) {
+      const temp = flattenObj(ob[i])
       for (const j in temp) {
-        result[`${i}.${j}`] = temp[j];
+        result[`${i}.${j}`] = temp[j]
       }
     } else {
-      result[i] = ob[i];
+      result[i] = ob[i]
     }
   }
-  return result;
-};
+  return result as flattenObject<T>
+}
 
-export function formatDate(date, fmt) {
+export function formatDate(
+  date: Date | string | null,
+  fmt = 'yyyy-MM-dd hh:mm:ss'
+): string | null {
   if (typeof date === 'string') {
-    return date;
+    return date
   }
 
-  if (!fmt) fmt = 'yyyy-MM-dd hh:mm:ss';
+  // if (!fmt) fmt = 'yyyy-MM-dd hh:mm:ss'
 
-  if (!date || date === null) return null;
-  let o = {
+  if (!date || date === null) return null
+  const o: { [key: string]: number } = {
     'M+': date.getMonth() + 1, // 月份
     'd+': date.getDate(), // 日
     'h+': date.getHours(), // 小时
     'm+': date.getMinutes(), // 分
     's+': date.getSeconds(), // 秒
     'q+': Math.floor((date.getMonth() + 3) / 3), // 季度
-    'S': date.getMilliseconds() // 毫秒
+    S: date.getMilliseconds() // 毫秒
   }
-  if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (`${date.getFullYear()}`).substr(4 - RegExp.$1.length))
-  for (let k in o) {
-    if (new RegExp(`(${k})`).test(fmt)){
-      fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : ((`00${o[k]}`).substr((`${o[k]}`).length)))
+  if (/(y+)/.test(fmt))
+    fmt = fmt.replace(
+      RegExp.$1,
+      `${date.getFullYear()}`.substr(4 - RegExp.$1.length)
+    )
+  for (const k in o) {
+    if (new RegExp(`(${k})`).test(fmt)) {
+      fmt = fmt.replace(
+        RegExp.$1,
+        RegExp.$1.length === 1
+          ? o[k].toString()
+          : `00${o[k]}`.substr(`${o[k]}`.length)
+      )
     }
   }
   return fmt
@@ -45,12 +61,14 @@ export function formatDate(date, fmt) {
 /**
  * 判断两个array的内容是否一致，只进行第一层的元素对比。对比直接用等号进行判断。
  * 故本方法只适用于元素为基本数据类型的数组。
+ * @param originArr
+ * @param checkedArr
  * @returns 是否一致
  */
-export function isArrayTheSame_l1(originArr, checkedArr) {
+export function isArrayTheSame_l1<T>(originArr: T[], checkedArr: T[]): boolean {
   let sameFlag = true
   if (originArr.length !== checkedArr.length) return false
-  originArr.forEach((item, idx) => {
+  originArr.forEach((item: T, idx) => {
     if (item !== checkedArr[idx]) {
       sameFlag = false
     }
@@ -60,12 +78,13 @@ export function isArrayTheSame_l1(originArr, checkedArr) {
 
 /**
  * 计算平均值
- * @param {*} inputArr 
- * @returns 
+ * @param inputArr
+ * @returns
  */
-export const computeMean = (inputArr) => {
-  let sum = 0
-  let count = 0
+export function computeMean(inputArr: number[]): number {
+  let sum = 0,
+    count = 0
+
   if (!Array.isArray(inputArr)) {
     return invalidNumberSymbol
   }
@@ -80,15 +99,18 @@ export const computeMean = (inputArr) => {
   if (count === 0) {
     return invalidNumberSymbol // 特殊标识
   }
-  return (sum / count).toFixed(3)
+  return +(sum / count).toFixed(3)
 }
+
 /**
  * 计算几何平均值
+ * @param inputArr
+ * @returns
  */
-export const computeGeoMean = (inputArr) =>{
-  let testmentVal = 1
-  let count = 0
-  const tempArr = inputArr.filter(val => val >= 0) // 性能值应为正数
+export function computeGeoMean(inputArr: number[]): number {
+  let testmentVal = 1,
+    count = 0
+  const tempArr: number[] = inputArr.filter(val => +val >= 0) // 性能值应为正数, + 号防止传入字符串数组
   if (tempArr.length < 1) {
     return invalidNumberSymbol // 无数据情况
   }
@@ -96,7 +118,7 @@ export const computeGeoMean = (inputArr) =>{
     testmentVal *= val
     count += 1
   })
-  return Math.pow(testmentVal, 1/count).toFixed(3)
+  return +Math.pow(testmentVal, 1 / count).toFixed(3)
 }
 
 /**
@@ -115,7 +137,13 @@ export const computeGeoMean = (inputArr) =>{
     standard_deviation * 100 / average
   end
  */
-export const computeStddev = (inputArr) => {
+
+/**
+ * 计算标准偏差
+ * @param inputArr
+ * @returns
+ */
+export function computeStddev(inputArr: number[]): number {
   const tempArr = inputArr.filter(val => val >= 0) // 性能值应为正数
   if (tempArr.length < 1) {
     return invalidNumberSymbol // 无数据情况
@@ -126,19 +154,32 @@ export const computeStddev = (inputArr) => {
     sum += Math.pow(num - avg, 2)
   })
   sum = sum / inputArr.length
-  return (Math.sqrt(sum) / avg).toFixed(3)
+  return +(Math.sqrt(sum) / avg).toFixed(3)
 }
 
 /**
- * 
+ *
+ * @param row
+ * @param col
+ * @param val
+ * @returns
  */
-export const formatterPercentage = (row,col,val) => {
+export function formatterPercentage(
+  row: any,
+  col: any,
+  val: number | null
+): string {
   if (!val) return 'N/A'
   return `${(val * 100).toFixed(1)}%`
 }
 
-export const perfSortMethod = (prev, cur, cases, key) => {
-  switch(cases ) {
+export function perfSortMethod(
+  prev: Utils.DevPerfTableRowData,
+  cur: Utils.DevPerfTableRowData,
+  cases: string,
+  key: string
+): number {
+  switch (cases) {
   case 'stddev':
   case 'change':
     if (prev[key] && cur[key]) {
@@ -152,4 +193,5 @@ export const perfSortMethod = (prev, cur, cases, key) => {
     }
   }
 
+  return 0
 }

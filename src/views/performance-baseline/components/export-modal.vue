@@ -1,5 +1,8 @@
 <template>
-  <el-button type="primary" class="button" @click="handleExport(props.allColumn,props.selectedTableRows)">
+  <el-button
+    type="primary"
+    class="button"
+    @click="handleExport(props.allColumn, props.selectedTableRows)">
     导出
   </el-button>
   <div>
@@ -25,18 +28,23 @@
           <template #default="scope">
             <el-radio
               v-model="modal.bindingRadio"
-              :label="scope.row.submit_id"
-            />
+              :label="scope.row.submit_id" />
           </template>
         </el-table-column>
-        <el-table-column fixed prop="submit_id" label="提交编号" width="200" show-overflow-tooltip/>
+        <el-table-column
+          fixed
+          prop="submit_id"
+          label="提交编号"
+          width="200"
+          show-overflow-tooltip />
         <el-table-column
           min-width="100"
           label="性能几何平均值"
-          prop="performanceVal"
-        >
+          prop="performanceVal">
           <template #default="scope">
-            <div class="important-value">{{ perfValformatter(scope.row.performanceVal) }}</div>
+            <div class="important-value">
+              {{ perfValformatter(scope.row.performanceVal) }}
+            </div>
           </template>
         </el-table-column>
         <el-table-column
@@ -45,7 +53,7 @@
           :key="item['prop']"
           min-width="160"
           :formatter="tableCellFormatter"
-          v-for="(item) in modal.tableColumns"/>
+          v-for="item in modal.tableColumns" />
       </el-table>
       <template #footer>
         <span class="dialog-footer">
@@ -62,16 +70,19 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, reactive } from 'vue'
+import { reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Column } from '../config-file'
-import { exportSingle, exportMultiple } from '@/views/performance-baseline/export-data'
-import { tableColumnMap } from '@/views/performance-baseline/config_li.js'
+import {
+  exportSingle,
+  exportMultiple
+} from '@/views/performance-baseline/export-data'
+import { tableColumnMap } from '@/views/performance-baseline/config_li'
 import { invalidNumberSymbol } from '@/views/performance-baseline/utils.js'
 
 interface Props {
-  visible?: boolean,
-  allColumn?: Column[],
+  visible?: boolean
+  allColumn?: Column[]
   selectedTableRows: any[]
 }
 const props = withDefaults(defineProps<Props>(), {
@@ -79,18 +90,17 @@ const props = withDefaults(defineProps<Props>(), {
   allColumn: () => <Column[]>[],
   selectedTableRows: () => <any[]>[]
 })
-const emit = defineEmits(['closeModal','openModal'])
-
+const emit = defineEmits(['closeModal', 'openModal'])
 
 const modal = reactive({
-  currentTableRow:<any>undefined,
-  bindingRadio:'',
-  tableColumns:<any[]>[],
-  tableVals:<any[]>[],
-  exportButtonLoading:false
+  currentTableRow: <any>undefined,
+  bindingRadio: '',
+  tableColumns: <any[]>[],
+  tableVals: <any[]>[],
+  exportButtonLoading: false
 })
 
-const handleExport = (allColumn:Column[], selectedTableRows:any[]) => {
+function handleExport(allColumn: Column[], selectedTableRows: any[]) {
   if (selectedTableRows.length === 0) {
     ElMessage({
       message: '请先选择要导出的数据',
@@ -102,30 +112,37 @@ const handleExport = (allColumn:Column[], selectedTableRows:any[]) => {
   } else {
     if (checkIfSameSuite(selectedTableRows)) {
       // 准备好弹窗内表格的内容
-      const tableInfos:any[] = tableColumnMap[selectedTableRows[0]['suite']]
-      tableInfos.forEach((tableInfo:any) => {  // 设置基准选择表格的列
+      const tableInfos: Config_li.CommonItemList = (
+        tableColumnMap as Config_li.tableColumnMap
+      )[selectedTableRows[0]['suite']]
+      tableInfos.forEach((tableInfo: any) => {
+        // 设置基准选择表格的列
         modal.tableColumns.push({
           prop: `performanceVal_${tableInfo['tableName']}`,
           label: `${tableInfo['tableName']}(性能值)`
         })
-        tableInfo['column'].forEach((column:any) => {
+        tableInfo['column'].forEach((column: any) => {
           modal.tableColumns.push({
             prop: `${tableInfo['tableName']}(${column['label']})`,
             label: `${tableInfo['tableName']}(${column['label']})`
           })
         })
       })
-      selectedTableRows.forEach((record:any) => {
-        let rowData:{ [propName:string]: any } = {}
-        tableInfos.forEach((tableInfo:any) => {
+      selectedTableRows.forEach((record: any) => {
+        let rowData: { [propName: string]: any } = {}
+        tableInfos.forEach((tableInfo: any) => {
           // 有的数据中可能缺少某些表格的数据
-          if (!record['tableDatas'][tableInfo['tableName']]){
+          if (!record['tableDatas'][tableInfo['tableName']]) {
             return
           }
-          const performanceVal = record['tableDatas'][tableInfo['tableName']][0][`performanceVal_${tableInfo['tableName']}`]
+          const performanceVal
+            = record['tableDatas'][tableInfo['tableName']][0][
+              `performanceVal_${tableInfo['tableName']}`
+            ]
           rowData[`performanceVal_${tableInfo['tableName']}`] = performanceVal
-          tableInfo['column'].forEach((column:any) => {
-            const val = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
+          tableInfo['column'].forEach((column: any) => {
+            const val
+              = record['tableDatas'][tableInfo['tableName']][0][column['prop']]
             rowData[`${tableInfo['tableName']}(${column['label']})`] = val
           })
         })
@@ -142,7 +159,12 @@ const handleExport = (allColumn:Column[], selectedTableRows:any[]) => {
 const handleExportMultiple = () => {
   if (modal.currentTableRow) {
     modal.exportButtonLoading = true
-    exportMultiple(props.allColumn,props.selectedTableRows,tableColumnMap,modal.currentTableRow)
+    exportMultiple(
+      props.allColumn,
+      props.selectedTableRows,
+      tableColumnMap,
+      modal.currentTableRow
+    )
     handleDialogClose()
     ElMessage({
       message: '导出成功',
@@ -155,7 +177,7 @@ const handleExportMultiple = () => {
     })
   }
 }
-const checkIfSameSuite = (selectedTableRows:any[]) => {
+const checkIfSameSuite = (selectedTableRows: any[]) => {
   let suites = selectedTableRows.map<string>(record => record['suite'])
   suites = Array.from(new Set(suites))
   if (suites.length > 1) {
@@ -169,8 +191,8 @@ const checkIfSameSuite = (selectedTableRows:any[]) => {
   return true
 }
 // 联动控制基准选择和radio
-const handleCurrentChange = (val:any) => {
-  if(val){
+const handleCurrentChange = (val: any) => {
+  if (val) {
     modal.currentTableRow = val
     modal.bindingRadio = val['submit_id']
   }
@@ -183,7 +205,7 @@ const handleDialogClose = () => {
   modal.exportButtonLoading = false
   emit('closeModal')
 }
-const tableCellFormatter = (row:any, column:any, cellValue:any) => {
+const tableCellFormatter = (row: any, column: any, cellValue: any) => {
   if (cellValue === undefined || cellValue === invalidNumberSymbol) {
     return '暂无数据'
   }

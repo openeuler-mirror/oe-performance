@@ -2,9 +2,9 @@
  * 基于submit_id维度的数据处理
  */
 import { reactive } from 'vue'
-import { flattenObj } from '@/utils/utils'
+import { flattenObj, computeGeoMean} from '@/utils/utils'
 
-import { testParamsMap, kpiListMap, tableMode, tableColumnMap } from '@/views/performance-baseline/config_li.js'
+import { testParamsMap, kpiListMap, tableMode, tableColumnMap } from '@/views/performance-baseline/config_li.ts'
 
 export const invalidNumberSymbol = -1
 
@@ -401,19 +401,21 @@ const computeMean = (inputArr) => {
   return (sum / count).toFixed(3)
 }
 
-const computeGeoMean = (inputArr) =>{
-  let testmentVal = 1
-  let count = 0
-  const tempArr = inputArr.filter(val => val >= 0)
-  if (tempArr.length < 1) {
-    return invalidNumberSymbol // 无数据情况
-  }
-  tempArr.forEach(val => {
-    testmentVal *= val
-    count += 1
-  })
-  return Math.pow(testmentVal, 1/count).toFixed(3)
-}
+
+// 此函数在@/src/utils.ts下已实现
+// const computeGeoMean = (inputArr) =>{
+//   let testmentVal = 1
+//   let count = 0
+//   const tempArr = inputArr.filter(val => val >= 0)
+//   if (tempArr.length < 1) {
+//     return invalidNumberSymbol // 无数据情况
+//   }
+//   tempArr.forEach(val => {
+//     testmentVal *= val
+//     count += 1
+//   })
+//   return Math.pow(testmentVal, 1/count).toFixed(3)
+// }
 
 const addElementArrayToObj = (obj, arrKey, element) => {
   if (!element) {

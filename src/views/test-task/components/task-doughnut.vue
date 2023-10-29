@@ -2,17 +2,17 @@
   <div ref="testTaskDoughnut" style="width: 100%; height: 180px"></div>
 </template>
 <script lang="ts" setup>
-import * as echarts from 'echarts';
+import * as echarts from 'echarts'
 import { onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
   stateData: {
     type: Object,
-    default: ()=>{}
-  },
+    default: () => {}
+  }
 })
 
-let chart:any = null
+let chart: any = null
 
 const testTaskDoughnut = ref<any>(null)
 
@@ -23,7 +23,7 @@ const option = {
     trigger: 'item'
   },
   title: {
-    text: `All Cases \n ${allState.value}`,
+    text: '',
     left: 'center',
     top: 'center'
   },
@@ -41,32 +41,36 @@ const option = {
       data: []
     }
   ]
-};
+}
 
 watch(
-  () => props.stateData, 
-  (stateData) => {
+  () => props.stateData,
+  stateData => {
     allState.value = stateData.all
     option.title.text = `All Cases \n ${allState.value}`
-    const stateList = []
+    const stateList: TestTask.DoughnutStateList = []
     stateList.push({
-      value: stateData.finished || 0, name: '完成'
+      value: stateData.finished || 0,
+      name: '完成'
     })
     stateList.push({
-      value: stateData.failed || 0, name: '失败'
+      value: stateData.failed || 0,
+      name: '失败'
     })
     stateList.push({
-      value: stateData.others || 0, name: '其他'
+      value: stateData.others || 0,
+      name: '其他'
     })
-    option.series[0].data = stateList
+    // 当前版本 echarts 的typescript类型并不完善
+    option.series[0].data = stateList as any
 
     chart.setOption(option, true)
   }
 )
 
 onMounted(() => {
-  chart  = echarts.init(testTaskDoughnut.value as HTMLCanvasElement);
-  option && chart.setOption(option);
+  chart = echarts.init(testTaskDoughnut.value as HTMLCanvasElement)
+  option && chart.setOption(option)
   // window.onresize = function () {
   //   Chart.resize()
   // }

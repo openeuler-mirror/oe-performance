@@ -2,23 +2,29 @@ export interface Column {
   label: string
   prop: string
   show: boolean
-  width: string
-  formatter?: Function,
+  width: number
+  formatter?: Function
   className?: string
 }
 
-export const columnConfig = [
+interface ColumnConfig {
+  [key: string]: {
+    column: Column[]
+  }
+}
+
+export const columnConfig: Column[] = [
   {
     label: '测试套',
     prop: 'suite',
     show: true,
-    width: 120,
+    width: 120
   },
   {
     label: '服务器型号',
     prop: 'testbox',
     show: true,
-    width: 260,
+    width: 260
   },
   {
     label: 'CPU频率',
@@ -40,7 +46,7 @@ export const columnConfig = [
   },
   {
     label: '操作系统',
-    prop: 'osv',  // 需要拼接
+    prop: 'osv', // 需要拼接
     show: true,
     width: 260
   },
@@ -97,12 +103,8 @@ export const sceneConfig = {
   ]
 }
 
-export interface configObject {
-  [key: string]: any
-}
-
 // 可配置不同场景下使用不同的表格配置
-export const config: configObject = {
+export const config: ColumnConfig = {
   bigData: {
     column: columnConfig
   },

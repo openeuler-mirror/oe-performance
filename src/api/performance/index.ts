@@ -1,14 +1,10 @@
-import createAxios from '@/utils/request/axios';
-
-export interface DataObject {
-  [key: string]: any
-}
+import createAxios from '@/utils/request/axios'
 
 const api = {
   requestDataApi: '/data-api/search'
 }
 
-export function getSearchParams(params:any) {
+export function getSearchParams(params: any) {
   return createAxios({
     url: api.requestDataApi,
     method: 'post',
@@ -16,7 +12,9 @@ export function getSearchParams(params:any) {
   })
 }
 
-export function getPerformanceData(params:any) {
+export function getPerformanceData(
+  params: PerformanceApi.PerformanceDataParams
+) {
   return createAxios({
     url: api.requestDataApi,
     method: 'post',
@@ -72,10 +70,15 @@ export function getTestBoxes() {
     }
  */
 
+/**
+ *  应该构造一个函数SearchParamsFilter，传入searchPanel的原始值，返回的是过滤后的值
+ * 过滤内容：
+ * 1. 将osv数组（每一个元素都是字符串数组）中，每一个元素使用join('@')连接
+ */
 interface Aggs {
   [propName: string]: any
 }
-export function getJobValueList(params:any) {
+export function getJobValueList(params: PerformanceApi.JobValueListParams) {
   const { jobFieldList, searchTime = 10, byScene, searchParams } = params
   const aggs: Aggs = {}
   const mustArr = []
@@ -83,7 +86,7 @@ export function getJobValueList(params:any) {
   if (byScene && byScene?.length > 0) {
     mustArr.push({ terms: { suite: byScene } })
   }
-  jobFieldList.forEach((field:string) => {
+  jobFieldList.forEach((field: string) => {
     if (field === 'tags') return // 只要包含tag就会全部返回空
     aggs[field] = {
       terms: {
@@ -93,26 +96,27 @@ export function getJobValueList(params:any) {
     }
   })
   // 请求时根据目前已选的searchParam值进行过滤
-  Object.keys(searchParams).forEach((param: string) => {
-    if (!searchParams[param]) return
-    if (Array.isArray(searchParams[param]) && searchParams[param].length < 1) return
-    const tempObj = <DataObject>{}
-    if (param === 'osv' && Array.isArray(searchParams[param])) {
-      tempObj[param] = searchParams[param].map((arr:string[]) => arr.join('@'))
-    } else {
+  ;(Object.keys(searchParams) as (keyof SearchPanel.SearchParams)[]).forEach(
+    param => {
+      if (!searchParams[param]) return
+      if (Array.isArray(searchParams[param]) && searchParams[param]!.length < 1)
+        return
+      const tempObj = <DictObject>{}
+      // 在getSearchParamsByFields以及预处理了
       tempObj[param] = searchParams[param]
+      mustArr.push({ terms: tempObj })
     }
-    mustArr.push({ terms: tempObj})
-  })
+  )
   const query = {
     size: 10,
     query: {
       bool: {
         must: mustArr
-      } 
+      }
     },
     aggs
   }
+
   return createAxios({
     url: api.requestDataApi,
     method: 'post',
@@ -122,11 +126,13 @@ export function getJobValueList(params:any) {
     }
   })
 }
+
+// 这个接口中的类型, 可以参考PerformanceApi命名空间下的类型
 // host表中的几个数据聚合不到,目前没有使用这个接口
-export function getHostValueList(params:any) {
+export function getHostValueList(params: any) {
   const { hostFieldList } = params
   const aggs: Aggs = {}
-  hostFieldList.forEach((field:string) => {
+  hostFieldList.forEach((field: string) => {
     aggs[field] = {
       terms: {
         field: `${field}`,
@@ -151,13 +157,15 @@ export function getHostValueList(params:any) {
 interface anyObj {
   [propName: string]: any
 }
+
+// 这个接口中的类型, 可以参考@/views/performance-baseline/index.vue中的setMustCase函数
 // 目前是直接获取全量host数据，直接在本地过滤的，暂时没有用这个接口
 export function getTestboxBySearchParams(params: anyObj) {
   const mustCasees = <anyObj>[]
   Object.keys(params).forEach(paramKey => {
     if (params[paramKey]) {
       const searchKey = paramKey.replace('hw.', '')
-      const matchObj:anyObj = {}
+      const matchObj: anyObj = {}
       matchObj[searchKey] = params[paramKey]
       mustCasees.push({
         match: matchObj

@@ -9,53 +9,55 @@
           class="input-with-select"
           :suffix-icon="Search"
           size="large"
-          @input="inputValue"
-        >
+          @input="inputValue">
           <template #prepend>
             <el-select
               v-if="JSON.stringify(tableData.data) !== '{}'"
               v-model="select"
               placeholder="申请单号"
-              style="width: 115px" size="large"
-              @change="changeSelect"  
-            >
+              style="width: 115px"
+              size="large"
+              @change="changeSelect">
               <el-option
                 v-for="item in tableData.data"
                 :key="item.requestCode"
                 :label="item.requestCode"
-                :value="item.requestCode"
-              />
+                :value="item.requestCode" />
             </el-select>
           </template>
         </el-input>
       </el-col>
       <span class="right-btn" v-if="route.meta.title === 'applicationList'">
-        <el-button type="primary" size="large" @click="dialogVisible = true">新建申请</el-button>
+        <el-button
+          type="primary"
+          size="large"
+          @click="() => (dialogVisible = true)"
+          >新建申请</el-button
+        >
       </span>
     </el-row>
     <re-po-uploader
-    title="新建申请"
-    description="上传描述："
-    btnText="新建"
-    :options="options"
-    :bool="dialogVisible"
-    @cancel="dialogVisible = false"
-    @handleClose="dialogVisible = false"
-    @upload="upload"
-    ></re-po-uploader>
+      title="新建申请"
+      description="上传描述："
+      btnText="新建"
+      :options="options"
+      :bool="dialogVisible"
+      @cancel="() => (dialogVisible = false)"
+      @handleClose="() => (dialogVisible = false)"
+      @upload="upload"></re-po-uploader>
     <application-table
       :tableData="propsData.data"
-      @pushView="intoView"
-    ></application-table>
+      @pushView="intoView"></application-table>
   </el-card>
 </template>
 
 <script setup lang="ts">
-import { ref,reactive,onMounted } from 'vue'
-import { getApplicationList } from '@/api/center/index.ts'
-import { Search } from '@element-plus/icons-vue'
+import { ref, reactive, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import  ApplicationTable  from './components/application-table.vue'
+import { getApplicationList } from '@/api/center/index'
+import { Search } from '@element-plus/icons-vue'
+import { CascaderOption } from 'element-plus'
+import ApplicationTable from './components/application-table.vue'
 import RePoUploader from '@/components/uploader/RePoUploader.vue'
 
 const router = useRouter()
@@ -67,20 +69,20 @@ const select = ref('')
 const value = ref('')
 const dialogVisible = ref(false)
 
-const tableData = reactive({
+const tableData: UserCenter.ApplicationState = reactive({
   data: []
 })
-const propsData = reactive({
+const propsData: UserCenter.ApplicationState = reactive({
   data: []
 })
 
 function inputValue() {
   let v = value.value
   select.value = ''
-  if(v) {
+  if (v) {
     propsData.data = []
     for (let [key, val] of hashData) {
-      if(key.indexOf(v) !== -1) {
+      if (key.indexOf(v) !== -1) {
         propsData.data.push(tableData.data[val])
       }
     }
@@ -90,33 +92,29 @@ function changeSelect() {
   propsData.data = [tableData.data[hashData.get(select.value)]]
 }
 
-function intoView(query) {
+function intoView(query: UserCenter.ApplicationDataItem) {
   let path = '/userCenter/application/applicationProgress'
-  if(route.meta.title === 'approveList')
+  if (route.meta.title === 'approveList')
     path = '/userCenter/approval/approvalprogress'
   router.push({
-    path,
-    query
+    path: path,
+    query: query
   })
-
 }
 
-function upload() {
-
-}
+function upload() {}
 
 onMounted(() => {
-  getApplicationList()
-    .then((data) => {
-      tableData.data = data.data.data
-      propsData.data = data.data.data
-      tableData.data.forEach((item, index) => {
-        hashData.set(item.requestCode, index)
-      })
+  getApplicationList().then(data => {
+    tableData.data = data.data.data
+    propsData.data = data.data.data
+    tableData.data.forEach((item, index) => {
+      hashData.set(item.requestCode, index)
     })
+  })
 })
 
-const options = [
+const options: CascaderOption[] = [
   {
     value: '解决方案',
     label: '解决方案',
@@ -125,7 +123,7 @@ const options = [
         value: '解决方案',
         label: '解决方案'
       }
-    ],
+    ]
   },
   {
     value: '基础性能',
@@ -147,14 +145,14 @@ const options = [
         value: '网络',
         label: '网路'
       }
-    ],
-  },
+    ]
+  }
 ]
 </script>
 
 <style scoped lang="scss">
 .input-with-select ::v-deep .el-input-group__prepend {
-  background-color: var(--oe-perf-bg-section)!important;
+  background-color: var(--oe-perf-bg-section) !important;
 }
 .promit-font-style {
   display: flex;
@@ -170,7 +168,7 @@ const options = [
   margin-left: 16px;
 }
 a {
-  color: #002FA7;
+  color: #002fa7;
   cursor: pointer;
 }
 a:active {
@@ -182,7 +180,7 @@ a:active {
   color: #333333;
   font-size: 20px;
   width: 100%;
-  border-bottom: 2px solid #E2E2E2;
+  border-bottom: 2px solid #e2e2e2;
 }
 .el-drawer-form {
   margin-top: 0;
@@ -194,7 +192,7 @@ a:active {
   padding: 6px 12px;
   line-height: 22px;
   border-radius: 4px 4px 4px 4px;
-  border: 1px solid rgba(0,0,0,0.15);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   font-size: 16px;
 }
 .upload-txt {
@@ -203,7 +201,7 @@ a:active {
 </style>
 <style>
 .my-el-cascader {
-  width: 100%!important;
+  width: 100% !important;
 }
 .el-drawer__header {
   margin-bottom: 0px;
