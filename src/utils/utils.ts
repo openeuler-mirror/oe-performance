@@ -1,3 +1,5 @@
+import Decimal from 'decimal.js'
+
 export const invalidNumberSymbol = -1
 
 type flattenObject<T> = {
@@ -76,30 +78,33 @@ export function isArrayTheSame_l1<T>(originArr: T[], checkedArr: T[]): boolean {
   return sameFlag
 }
 
+const limitValues = [
+  Number.MIN_VALUE,
+  Number.MAX_VALUE,
+  Number.POSITIVE_INFINITY,
+  Number.POSITIVE_INFINITY
+]
+
 /**
  * 计算平均值
  * @param inputArr
  * @returns
  */
 export function computeMean(inputArr: number[]): number {
-  let sum = 0,
-    count = 0
+  const filterArr: number[] = inputArr.filter(val => !isNaN(val))
 
-  if (!Array.isArray(inputArr)) {
-    return invalidNumberSymbol
-  }
-  inputArr.forEach(val => {
-    if (isNaN(val)) {
-      return
-    }
-    sum += Number(val)
-    count += 1
-  })
-  // 无数据情况
-  if (count === 0) {
+  if (filterArr.length < 1) {
     return invalidNumberSymbol // 特殊标识
   }
-  return +(sum / count).toFixed(3)
+
+  const valueArr: Decimal[] = filterArr.map(item => new Decimal(item))
+  const sum = valueArr.reduce((acc, val) => acc.plus(val))
+
+  const result = sum.dividedBy(valueArr.length).toNumber()
+
+  return limitValues.includes(result)
+    ? limitValues.find(item => item === result)!
+    : +result.toFixed(3)
 }
 
 /**
@@ -108,17 +113,16 @@ export function computeMean(inputArr: number[]): number {
  * @returns
  */
 export function computeGeoMean(inputArr: number[]): number {
-  let testmentVal = 1,
-    count = 0
-  const tempArr: number[] = inputArr.filter(val => +val >= 0) // 性能值应为正数, + 号防止传入字符串数组
-  if (tempArr.length < 1) {
-    return invalidNumberSymbol // 无数据情况
-  }
-  tempArr.forEach(val => {
-    testmentVal *= val
-    count += 1
-  })
-  return +Math.pow(testmentVal, 1 / count).toFixed(3)
+  const filterArr = inputArr.filter(val => +val >= 0) // 性能值应为正数, + 号防止传入字符串数组
+  if (filterArr.length < 1) return invalidNumberSymbol // 无数据情况
+
+  const valueArr: Decimal[] = filterArr.map(item => new Decimal(item))
+  const product = valueArr.reduce((acc, val) => acc.times(val))
+  const result = product.pow(1 / valueArr.length).toNumber()
+
+  return limitValues.includes(result)
+    ? limitValues.find(item => item === result)!
+    : +result.toFixed(3)
 }
 
 /**
@@ -139,22 +143,43 @@ export function computeGeoMean(inputArr: number[]): number {
  */
 
 /**
- * 计算标准偏差
+ * // 计算标准偏差 (standard division)
+ * @param inputArr
+ * @returns
+ */
+
+export function computeStDiv(inputArr: number[]) {
+  const filterArr = inputArr.filter(val => val >= 0)
+
+  if (filterArr.length < 1) return invalidNumberSymbol
+  const avg = new Decimal(computeMean(inputArr))
+
+  const valueArr: Decimal[] = filterArr.map(item => new Decimal(item))
+
+  const sum = valueArr
+    .reduce((acc, val) => acc.plus(val.minus(avg).pow(2)), new Decimal(0))
+    .dividedBy(inputArr.length)
+    .toNumber()
+
+  return limitValues.includes(sum)
+    ? limitValues.find(item => item === sum)!
+    : +Math.sqrt(sum).toFixed(3)
+}
+
+/**
+ * 计算相对标准偏差
+ * 计算方法: https://gitee.com/compass-ci/lkp-tests/blob/master/lib/statistics.rb#L39 && 上方注释
  * @param inputArr
  * @returns
  */
 export function computeStddev(inputArr: number[]): number {
-  const tempArr = inputArr.filter(val => val >= 0) // 性能值应为正数
-  if (tempArr.length < 1) {
-    return invalidNumberSymbol // 无数据情况
-  }
-  const avg = computeMean(inputArr)
-  let sum = 0
-  inputArr.forEach(num => {
-    sum += Math.pow(num - avg, 2)
-  })
-  sum = sum / inputArr.length
-  return +(Math.sqrt(sum) / avg).toFixed(3)
+  const filterArr = inputArr.filter(val => val >= 0)
+
+  if (filterArr.length < 1) return invalidNumberSymbol
+
+  const stDiv = new Decimal(computeStDiv(inputArr))
+
+  return +stDiv.dividedBy(inputArr.length).toFixed(3)
 }
 
 /**
