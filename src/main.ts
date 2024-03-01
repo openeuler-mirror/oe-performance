@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from './router'
 import pinia from './stores'
 import ElementPlus from 'element-plus'
-import elementZhCNLocale from 'element-plus/lib/locale/lang/zh-cn'
+import elementZhCNLocale from 'element-plus/es/locale/lang/zh-cn'
 
 import './mock'
 
